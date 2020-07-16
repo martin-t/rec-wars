@@ -22,8 +22,13 @@ use std::fs;
 // [ ] FFA, TW, CTC
 // [ ] bot AI
 // [ ] network - UDP tunneling?
+//      [ ] master server hosting
 // nice to have:
-// [ ] map editor
+// [ ] analytics - e.g. https://simpleanalytics.com/sandspiel.club
+// [ ] map editor - sharing maps, voting, recommended mode / number of bots
+// [ ] chat
+//      [ ] bots say hi/gg/sry/n1
+// [ ] log of past games (to show activity even if nobody currently online)
 
 #[derive(Debug, Clone)]
 struct Texture {
