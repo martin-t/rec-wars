@@ -1,9 +1,11 @@
-Recreational Warfare .rs
-========================
+Rec Wars
+========
+
+*Recreational Warfare .rs*
 
 A top-down vehicle shooter based on an old Windows game called RecWar.
 
-TODO screenshot
+TODO screenshot - clicking opens game?
 TODO github description, tags
 
 The Original Game
