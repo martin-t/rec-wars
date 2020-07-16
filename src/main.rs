@@ -1,5 +1,29 @@
 use std::fs;
 
+// TODO MVP:
+// [x] get simple.wasm working
+// [ ] compile rust to WASM, load that
+// [x] canvas
+// [ ] render background
+// [ ] move around, check perf
+//      https://github.com/mrdoob/stats.js/
+// [x] image fails to draw the first time after opening browser
+//      bug in python server maybe? - doesn't happen with rhino
+// [ ] server framerate when minimized - https://developer.mozilla.org/en-US/docs/Web/API/Window/setImmediate#Notes
+//      postMessage / MessageChannel / https://github.com/YuzuJS/setImmediate polyfill
+// [ ] extract assets from RecWar
+//      [ ] images: weapon icons, tank skins, cow - maybe just screenshot?
+//      [ ] sounds: weapons, explosions, cow, engine noise
+// [ ] render tank, explosions
+// [ ] movement, collision detection, physics
+// [ ] weapons
+// [ ] UI to select mode, map, bots, start game
+// [ ] FFA, TW, CTC
+// [ ] bot AI
+// [ ] network - UDP tunneling?
+// nice to have:
+// [ ] map editor
+
 #[derive(Debug, Clone)]
 struct Texture {
     name: String,

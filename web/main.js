@@ -156,17 +156,3 @@ document.addEventListener('visibilitychange', function () {
 window.requestAnimationFrame(draw_frame);
 window.setTimeout(draw_frame_timeout, draw_delay);
 window.setInterval(draw_frame_interval, draw_delay);
-
-// TODO MVP
-// [x] get simple.wasm working
-// [ ] compile rust to WASM, load that
-// [x] canvas
-// [ ] render background
-// [ ] move around, check perf
-// [x] image fails to draw the first time after opening browser
-//      bug in python server maybe? - doesn't happen with rhino
-// [ ] assets dir
-// [ ] server framerate when minimized - https://developer.mozilla.org/en-US/docs/Web/API/Window/setImmediate#Notes
-//      postMessage / MessageChannel / https://github.com/YuzuJS/setImmediate polyfill
-
-// https://github.com/mrdoob/stats.js/
