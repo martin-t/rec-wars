@@ -14,6 +14,7 @@ use std::fs;
 // [ ] extract assets from RecWar
 //      [ ] images: weapon icons, tank skins, cow - maybe just screenshot?
 //      [ ] sounds: weapons, explosions, cow, engine noise
+// [ ] CI - GH actions / travis, mirror to GL???
 // [ ] render tank, explosions
 // [ ] movement, collision detection, physics
 // [ ] weapons
