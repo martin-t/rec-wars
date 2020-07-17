@@ -20,7 +20,7 @@ let img_g3 = new Image();
 img_g3.src = "../assets/tiles/g3.bmp";
 
 let img_explosion = new Image();
-img_explosion.src = "../assets/Explosion.bmp"
+img_explosion.src = "../assets/Explosion.png"
 
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
@@ -35,9 +35,6 @@ const fps_period_ms = 500;
 
 class Fps {
     constructor(x, y) {
-        this.x = x;
-        this.y = y;
-
         this.frame_times = [];
 
         this.cur_cnt = 0;
@@ -50,19 +47,13 @@ class Fps {
     }
 
     /** Several different methods of counting FPS. */
-    draw() {
-        ctx.fillStyle = "red";
-
-        // time since page load (rounded to whole ms)
-        const ms = performance.now();
-        ctx.fillText("time: " + ms, this.x, this.y);
-
+    draw(x, y, ms) {
         // frames in a given period
         this.frame_times.push(ms);
         while (this.frame_times.length > 0 && this.frame_times[0] <= ms - fps_period_ms) {
             this.frame_times.shift();
         }
-        ctx.fillText("last " + fps_period_ms + " ms: " + this.frame_times.length, this.x, this.y + 10);
+        ctx.fillText("last " + fps_period_ms + " ms: " + this.frame_times.length, x, y);
 
         // average frame delay over the recorded period
         let fps_exact_rounded = 0;
@@ -71,7 +62,7 @@ class Fps {
             const ms_per_frame = (ms - oldest) / (this.frame_times.length - 1);
             const fps = (1 / ms_per_frame) * 1000;
             fps_exact_rounded = Math.round(fps * 10) / 10;
-            ctx.fillText("fps: " + fps_exact_rounded, this.x, this.y + 20);
+            ctx.fillText("fps: " + fps_exact_rounded, x, y + 10);
         }
 
         // frames in the previous whole second
@@ -83,14 +74,15 @@ class Fps {
             this.prev_cnt = this.cur_cnt;
             this.cur_cnt = 1;
         }
-        ctx.fillText("prev second: " + this.prev_cnt, this.x, this.y + 30);
+        ctx.fillText("prev second: " + this.prev_cnt, x, y + 20);
 
-        // delay between frames (rounded)
+        // delay between frames
         const delta_ms = ms - this.prev_ms;
-        ctx.fillText("ms/frame: " + delta_ms, this.x, this.y + 40);
+        const delta_ms_rounded = Math.round(delta_ms * 10) / 10;
+        ctx.fillText("ms/frame: " + delta_ms_rounded, x, y + 30);
         this.prev_ms = ms;
 
-        // fps using average of the (rounded) delays - similar to what sandspiel does
+        // fps using average of the delays - similar to what sandspiel does
         this.frame_delays.push(delta_ms);
         if (this.frame_delays.length > 30) {
             this.frame_delays.shift();
@@ -102,42 +94,70 @@ class Fps {
         const delays_mean = delays_sum / this.frame_delays.length;
         const fps = (1 / delays_mean) * 1000;
         const fps_rounded = Math.round(fps * 10) / 10;
-        ctx.fillText("fps: " + fps_rounded, this.x, this.y + 50);
+        ctx.fillText("fps: " + fps_rounded, x, y + 40);
 
         if (log_frames) {
             console.log("time: " + ms
                 + "\t last " + fps_period_ms + " ms: " + this.frame_times.length
                 + "\t fps: " + fps_exact_rounded
                 + "\t prev second: " + this.prev_cnt
-                + "\t ms/frame: " + delta_ms
+                + "\t ms/frame: " + delta_ms_rounded
                 + "\t fps: " + fps_rounded);
         }
     }
 }
 
-const fps_anim_frame = new Fps(20, 20);
+const fps_anim_frame = new Fps(20, 30);
 
-const explosions = []
+// It looks like the original animation is made for 30 fps.
+// When stepping through frames of a recording, some images take 3 frames,
+// might be a bug in mplayer though.
+const explosions_fast = [];
+const explosions_slow = [];
 
-function draw_frame() {
+let offset_x = 0;
+let offset_y = 0;
+
+let t_frame_prev = 0;
+function draw_frame(t_frame) {
+    // t has 2 decimals
+    // performance.now() is rounded to whole ms
+    const t_start = performance.now();
+
+    //const t_diff = t_frame - t_frame_prev;
+    //t_frame_prev = t_frame;
+
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    for (let x = 0; x < canvas.width; x += 64) {
-        for (let y = 0; y < canvas.height; y += 64) {
+    for (let x = offset_x - 64; x < canvas.width; x += 64) {
+        for (let y = offset_y - 64; y < canvas.height; y += 64) {
             ctx.drawImage(img_base, x, y);
         }
     }
+    //const change = t_diff / 16;
+    //offset_x = (offset_x + 2 * change) % 64;
+    //offset_y = (offset_y + 1 * change) % 64;
+    offset_x = (offset_x + 2) % 64;
+    offset_y = (offset_y + 1) % 64;
 
     for (let i = 0; i < 2; i++) {
-        let x = Math.random() * canvas.width;
-        let y = Math.random() * canvas.height;
-        explosions.push({ x: x, y: y, frame: 0 });
-        while (explosions.length > 0 && explosions[0].frame >= 13) {
-            explosions.shift();
+        let x = canvas.width / 2 + Math.random() * (canvas.width / 2);
+        let y = Math.random() * (canvas.height / 2);
+        explosions_fast.push({ x: x, y: y, frame: 0 });
+        while (explosions_fast.length > 0 && explosions_fast[0].frame >= 13) {
+            explosions_fast.shift();
+        }
+    }
+    for (let i = 0; i < 1; i++) {
+        let x = canvas.width / 2 + Math.random() * (canvas.width / 2);
+        let y = canvas.height / 2 + Math.random() * (canvas.height / 2);
+        explosions_slow.push({ x: x, y: y, frame: 0 });
+        while (explosions_slow.length > 0 && explosions_slow[0].frame >= 26) {
+            explosions_slow.shift();
         }
     }
 
-    explosions.forEach(explosion => {
+    explosions_fast.forEach(explosion => {
         const offset = explosion.frame * 100;
         ctx.drawImage(
             img_explosion,
@@ -145,13 +165,30 @@ function draw_frame() {
             explosion.x, explosion.y, 100, 100);
         explosion.frame++;
     });
+    explosions_slow.forEach(explosion => {
+        const frame = Math.round(explosion.frame / 2);
+        const offset = frame * 100;
+        ctx.drawImage(
+            img_explosion,
+            offset, 0, 100, 100,
+            explosion.x, explosion.y, 100, 100);
+        explosion.frame++;
+    });
 
-    fps_anim_frame.draw();
+    const t_end = performance.now();
+    const diff = t_end - t_start;
+
+    ctx.fillStyle = "red";
+    ctx.fillText("t_frame: " + t_frame, 20, 20);
+    ctx.fillText("t_start: " + t_start, 20, 30);
+    ctx.fillText("t_end: " + t_end, 20, 40);
+    ctx.fillText("diff: " + diff, 20, 50);
+    fps_anim_frame.draw(20, 60, t_frame);
 
     // TODO at the end for testing so any error stops the animation
     window.requestAnimationFrame(draw_frame);
 }
-window.requestAnimationFrame(draw_frame);
+window.requestAnimationFrame(draw_frame); // FIXME try other options
 
 /*const fps_timeout = new Fps(220, 20);
 const fps_interval = new Fps(420, 20);
