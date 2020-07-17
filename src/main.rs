@@ -11,7 +11,7 @@ use std::fs;
 //      bug in python server maybe? - doesn't happen with rhino
 // [ ] server framerate when minimized - https://developer.mozilla.org/en-US/docs/Web/API/Window/setImmediate#Notes
 //      postMessage / MessageChannel / https://github.com/YuzuJS/setImmediate polyfill
-// [ ] extract assets from RecWar
+// [ ] extract assets from RecWar or find alternatives
 //      [ ] images: weapon icons, tank skins, cow - maybe just screenshot?
 //      [ ] sounds: weapons, explosions, cow, engine noise
 // [ ] CI - GH actions / travis, mirror to GL???
@@ -19,8 +19,10 @@ use std::fs;
 // [ ] movement, collision detection, physics
 // [ ] weapons
 // [ ] UI to select mode, map, bots, start game
+// [ ] fullscreen?
 // [ ] FFA, TW, CTC
 // [ ] bot AI
+// [ ] hosting - GH pages? domain? SSL?
 // [ ] network - UDP tunneling?
 //      [ ] master server hosting
 // nice to have:

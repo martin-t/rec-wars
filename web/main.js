@@ -13,35 +13,25 @@ WebAssembly.instantiateStreaming(fetch('handwritten.wasm'), importObject)
         console.log(results.instance.exports.exp_add(5, 6));
     });
 
+let img_base = new Image();
+img_base.src = "../assets/tiles/Base.bmp";
+
+let img_g3 = new Image();
+img_g3.src = "../assets/tiles/g3.bmp";
+
+let img_explosion = new Image();
+img_explosion.src = "../assets/Explosion.bmp"
+
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 
-ctx.fillStyle = "green";
-ctx.fillRect(50, 100, 50, 60);
-
-const img_base = document.getElementById("img-base");
-img_base.addEventListener("load", draw_base);
-
-function draw_base(event) {
-    console.log("draw " + event + " " + img_base.complete, " ", img_base.naturalWidth);
-    ctx.drawImage(img_base, 100, 100);
-}
-
-const img_rhino = document.getElementById("img-rhino");
-img_rhino.addEventListener("load", draw_rhino);
-
-function draw_rhino(event) {
-    console.log("draw rhino");
-    ctx.drawImage(img_rhino, 164, 100);
-}
-
 let log_frames = false;
 
-function btn_click() {
+function btn_fps_log_click() {
     log_frames = !log_frames;
 }
 
-const fps_period_ms = 1000;
+const fps_period_ms = 500;
 
 class Fps {
     constructor(x, y) {
@@ -61,26 +51,27 @@ class Fps {
 
     /** Several different methods of counting FPS. */
     draw() {
-        ctx.clearRect(this.x - 10, this.y - 10, 200, 100);
+        ctx.fillStyle = "red";
 
         // time since page load (rounded to whole ms)
         const ms = performance.now();
-        ctx.fillText("time: " + ms.toString(), this.x, this.y);
+        ctx.fillText("time: " + ms, this.x, this.y);
 
         // frames in a given period
         this.frame_times.push(ms);
         while (this.frame_times.length > 0 && this.frame_times[0] <= ms - fps_period_ms) {
             this.frame_times.shift();
         }
-        ctx.fillText("last " + fps_period_ms + " ms: " + this.frame_times.length + " frames", this.x, this.y + 10);
+        ctx.fillText("last " + fps_period_ms + " ms: " + this.frame_times.length, this.x, this.y + 10);
 
         // average frame delay over the recorded period
+        let fps_exact_rounded = 0;
         if (this.frame_times.length > 0) {
             const oldest = this.frame_times[0];
             const ms_per_frame = (ms - oldest) / (this.frame_times.length - 1);
             const fps = (1 / ms_per_frame) * 1000;
-            const fps_rounded = Math.round(fps * 10) / 10;
-            ctx.fillText("fps: " + fps_rounded, this.x, this.y + 20);
+            fps_exact_rounded = Math.round(fps * 10) / 10;
+            ctx.fillText("fps: " + fps_exact_rounded, this.x, this.y + 20);
         }
 
         // frames in the previous whole second
@@ -92,7 +83,7 @@ class Fps {
             this.prev_cnt = this.cur_cnt;
             this.cur_cnt = 1;
         }
-        ctx.fillText("prev second: " + this.prev_cnt + " frames", this.x, this.y + 30);
+        ctx.fillText("prev second: " + this.prev_cnt, this.x, this.y + 30);
 
         // delay between frames (rounded)
         const delta_ms = ms - this.prev_ms;
@@ -114,26 +105,47 @@ class Fps {
         ctx.fillText("fps: " + fps_rounded, this.x, this.y + 50);
 
         if (log_frames) {
-            console.log("time: " + ms.toString()
-                + " last " + fps_period_ms
-                + " ms: " + this.frame_times.length
-                + " ms/frame: " + delta_ms
-                + " fps: " + delays_mean);
+            console.log("time: " + ms
+                + "\t last " + fps_period_ms + " ms: " + this.frame_times.length
+                + "\t fps: " + fps_exact_rounded
+                + "\t prev second: " + this.prev_cnt
+                + "\t ms/frame: " + delta_ms
+                + "\t fps: " + fps_rounded);
         }
     }
 }
 
 const fps_anim_frame = new Fps(20, 20);
-const fps_timeout = new Fps(220, 20);
+
+function draw_frame() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    for (let x = 0; x < canvas.width; x += 64) {
+        for (let y = 0; y < canvas.height; y += 64) {
+            ctx.drawImage(img_base, x, y);
+        }
+    }
+
+    for (let i = 0; i < 100; i++) {
+        let x = Math.random() * canvas.width;
+        let y = Math.random() * canvas.height;
+        ctx.drawImage(
+            img_explosion,
+            0, 0, 100, 100,
+            x, y, 100, 100);
+    }
+
+    fps_anim_frame.draw();
+
+    // TODO at the end for testing so any error stops the animation
+    window.requestAnimationFrame(draw_frame);
+}
+window.requestAnimationFrame(draw_frame);
+
+/*const fps_timeout = new Fps(220, 20);
 const fps_interval = new Fps(420, 20);
 
 const draw_delay = 1000 / 120;
-
-function draw_frame() {
-    window.requestAnimationFrame(draw_frame);
-
-    fps_anim_frame.draw();
-}
 
 function draw_frame_timeout() {
     window.setTimeout(draw_frame_timeout, draw_delay);
@@ -145,14 +157,13 @@ function draw_frame_interval() {
     fps_interval.draw();
 }
 
-document.addEventListener('visibilitychange', function () {
+window.setTimeout(draw_frame_timeout, draw_delay);
+window.setInterval(draw_frame_interval, draw_delay);*/
+
+/*document.addEventListener('visibilitychange', function () {
     if (document.hidden) {
         console.log("hidden");
     } else {
         console.log("visible");
     }
-});
-
-window.requestAnimationFrame(draw_frame);
-window.setTimeout(draw_frame_timeout, draw_delay);
-window.setInterval(draw_frame_interval, draw_delay);
+});*/
