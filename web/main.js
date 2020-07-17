@@ -117,6 +117,8 @@ class Fps {
 
 const fps_anim_frame = new Fps(20, 20);
 
+const explosions = []
+
 function draw_frame() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -126,14 +128,23 @@ function draw_frame() {
         }
     }
 
-    for (let i = 0; i < 100; i++) {
+    for (let i = 0; i < 2; i++) {
         let x = Math.random() * canvas.width;
         let y = Math.random() * canvas.height;
+        explosions.push({ x: x, y: y, frame: 0 });
+        while (explosions.length > 0 && explosions[0].frame >= 13) {
+            explosions.shift();
+        }
+    }
+
+    explosions.forEach(explosion => {
+        const offset = explosion.frame * 100;
         ctx.drawImage(
             img_explosion,
-            0, 0, 100, 100,
-            x, y, 100, 100);
-    }
+            offset, 0, 100, 100,
+            explosion.x, explosion.y, 100, 100);
+        explosion.frame++;
+    });
 
     fps_anim_frame.draw();
 

@@ -4,7 +4,7 @@ use std::fs;
 // [x] get simple.wasm working
 // [ ] compile rust to WASM, load that
 // [x] canvas
-// [ ] render background
+// [x] render background
 // [ ] move around, check perf
 //      https://github.com/mrdoob/stats.js/
 // [x] image fails to draw the first time after opening browser
@@ -22,11 +22,14 @@ use std::fs;
 // [ ] fullscreen?
 // [ ] FFA, TW, CTC
 // [ ] bot AI
+//      [ ] roles / commands
 // [ ] hosting - GH pages? domain? SSL?
 // [ ] network - UDP tunneling?
 //      [ ] master server hosting
-// nice to have:
+// [ ] cvars
+//      [ ] voting
 // [ ] analytics - e.g. https://simpleanalytics.com/sandspiel.club
+// nice to have:
 // [ ] map editor - sharing maps, voting, recommended mode / number of bots
 // [ ] chat
 //      [ ] bots say hi/gg/sry/n1
