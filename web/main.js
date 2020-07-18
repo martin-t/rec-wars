@@ -22,16 +22,21 @@ img_g3.src = "../assets/tiles/g3.bmp";
 let img_explosion = new Image();
 img_explosion.src = "../assets/Explosion.png"
 
+const FPS_PERIOD_MS = 500;
+let fps_log = false;
+
+const ANIM_FRAME = 0;
+const SET_TIMEOUT = 1;
+const SET_INTERVAL = 2;
+let anim_method = ANIM_FRAME;
+let anim_handle = null;
+
+const draw_delay = 1000 / 60;
+
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 
-let log_frames = false;
-
-function btn_fps_log_click() {
-    log_frames = !log_frames;
-}
-
-const fps_period_ms = 500;
+anim_handle = window.requestAnimationFrame(draw_frame_animation);
 
 class Fps {
     constructor(x, y) {
@@ -50,10 +55,10 @@ class Fps {
     draw(x, y, ms) {
         // frames in a given period
         this.frame_times.push(ms);
-        while (this.frame_times.length > 0 && this.frame_times[0] <= ms - fps_period_ms) {
+        while (this.frame_times.length > 0 && this.frame_times[0] <= ms - FPS_PERIOD_MS) {
             this.frame_times.shift();
         }
-        ctx.fillText("last " + fps_period_ms + " ms: " + this.frame_times.length, x, y);
+        ctx.fillText("last " + FPS_PERIOD_MS + " ms: " + this.frame_times.length, x, y);
 
         // average frame delay over the recorded period
         let fps_exact_rounded = 0;
@@ -96,9 +101,9 @@ class Fps {
         const fps_rounded = Math.round(fps * 10) / 10;
         ctx.fillText("fps: " + fps_rounded, x, y + 40);
 
-        if (log_frames) {
+        if (fps_log) {
             console.log("time: " + ms
-                + "\t last " + fps_period_ms + " ms: " + this.frame_times.length
+                + "\t last " + FPS_PERIOD_MS + " ms: " + this.frame_times.length
                 + "\t fps: " + fps_exact_rounded
                 + "\t prev second: " + this.prev_cnt
                 + "\t ms/frame: " + delta_ms_rounded
@@ -120,8 +125,6 @@ let offset_y = 0;
 
 let t_frame_prev = 0;
 function draw_frame(t_frame) {
-    // t has 2 decimals
-    // performance.now() is rounded to whole ms
     const t_start = performance.now();
 
     //const t_diff = t_frame - t_frame_prev;
@@ -184,29 +187,56 @@ function draw_frame(t_frame) {
     ctx.fillText("t_end: " + t_end, 20, 40);
     ctx.fillText("diff: " + diff, 20, 50);
     fps_anim_frame.draw(20, 60, t_frame);
-
-    // TODO at the end for testing so any error stops the animation
-    window.requestAnimationFrame(draw_frame);
 }
-window.requestAnimationFrame(draw_frame); // FIXME try other options
 
-/*const fps_timeout = new Fps(220, 20);
-const fps_interval = new Fps(420, 20);
-
-const draw_delay = 1000 / 120;
+function draw_frame_animation(t) {
+    // t has 2 decimals
+    // performance.now() is rounded to whole ms
+    anim_handle = window.requestAnimationFrame(draw_frame_animation);
+    draw_frame(t);
+}
 
 function draw_frame_timeout() {
-    window.setTimeout(draw_frame_timeout, draw_delay);
-
-    fps_timeout.draw();
+    anim_handle = window.setTimeout(draw_frame_timeout, draw_delay);
+    draw_frame(performance.now());
 }
 
 function draw_frame_interval() {
-    fps_interval.draw();
+    draw_frame(performance.now());
 }
 
-window.setTimeout(draw_frame_timeout, draw_delay);
-window.setInterval(draw_frame_interval, draw_delay);*/
+function btn_fps_log_click() {
+    let btn = document.getElementById("btn_fps_log");
+    if (fps_log) {
+        fps_log = false;
+        btn.innerHTML = "FPS log: off";
+    } else {
+        fps_log = true;
+        btn.innerHTML = "FPS log: on";
+    }
+}
+
+function btn_anim_method_click() {
+    if (anim_handle === null) return;
+
+    let btn = document.getElementById("btn_anim_method");
+    if (anim_method === ANIM_FRAME) {
+        anim_method = SET_TIMEOUT;
+        window.cancelAnimationFrame(anim_handle);
+        anim_handle = window.setTimeout(draw_frame_timeout, draw_delay);
+        btn.innerHTML = "Anim method: setTimeout";
+    } else if (anim_method === SET_TIMEOUT) {
+        anim_method = SET_INTERVAL;
+        window.clearInterval(anim_handle)
+        anim_handle = window.setInterval(draw_frame_interval, draw_delay);
+        btn.innerHTML = "Anim method: setInterval";
+    } else {
+        anim_method = ANIM_FRAME;
+        window.clearTimeout(anim_handle);
+        anim_handle = window.requestAnimationFrame(draw_frame_animation);
+        btn.innerHTML = "Anim method: requestAnimationFrame";
+    }
+}
 
 /*document.addEventListener('visibilitychange', function () {
     if (document.hidden) {

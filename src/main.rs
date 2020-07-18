@@ -7,11 +7,13 @@ use std::fs;
 // [x] render background
 // [ ] move around, check perf
 //      https://github.com/mrdoob/stats.js/
+//      [ ] make explosion sprite smaller
 // [ ] engine? rendering crate? nice if native and WASM backends
 //      https://crates.io/crates/ggez - WASM in progress
 //      https://crates.io/crates/luminance - no mention os WASM
 //      https://crates.io/crates/piston
 //      https://crates.io/crates/quicksilver - all 3 OSes + WASM supported
+//      miniquad, macroquad, godot
 // [x] image fails to draw the first time after opening browser
 //      bug in python server maybe? - doesn't happen with rhino
 // [ ] server framerate when minimized - https://developer.mozilla.org/en-US/docs/Web/API/Window/setImmediate#Notes
@@ -27,6 +29,8 @@ use std::fs;
 // [ ] fullscreen?
 // [ ] FFA, TW, CTC
 // [ ] bot AI
+//      [ ] pathfinding - custom / from soko solver / crate?
+//          https://old.reddit.com/r/rust_gamedev/comments/hr7m3j/which_lib_do_you_use_for_pathfinding_in_you_games/
 //      [ ] roles / commands
 // [ ] hosting - GH pages? domain? SSL?
 // [ ] network - UDP tunneling?
