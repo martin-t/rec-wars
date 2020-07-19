@@ -1,6 +1,5 @@
 "use strict";
 
-//var importObject = { imports: { alert: s => alert(s) } };
 var importObject = { imports: { imported_func: arg => console.log(arg) } };
 
 WebAssembly.instantiateStreaming(fetch('simple.wasm'), importObject)
@@ -34,7 +33,7 @@ let anim_handle = null;
 const draw_delay = 1000 / 60;
 
 const canvas = document.getElementById("canvas");
-const ctx = canvas.getContext("2d");
+const ctx = canvas.getContext("2d", { alpha: false });
 
 anim_handle = window.requestAnimationFrame(draw_frame_animation);
 

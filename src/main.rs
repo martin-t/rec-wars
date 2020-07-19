@@ -8,6 +8,10 @@ use std::fs;
 // [ ] move around, check perf
 //      https://github.com/mrdoob/stats.js/
 //      [ ] make explosion sprite smaller
+//      https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Tutorial/Optimizing_canvas
+//          [ ] round to whole pixels (orig RW does it)
+//          [ ] layer canvases - background vs entities
+//          [ ] webgl
 // [ ] engine? rendering crate? nice if native and WASM backends
 //      https://crates.io/crates/ggez - WASM in progress
 //      https://crates.io/crates/luminance - no mention os WASM
@@ -38,7 +42,9 @@ use std::fs;
 //      [ ] master server hosting
 // [ ] cvars
 //      [ ] voting
-// [ ] analytics - e.g. https://simpleanalytics.com/sandspiel.club
+// [ ] analytics
+//      https://simpleanalytics.com/sandspiel.club - paid only
+// [ ] FAQ - stuttering/tearing due to compositor - Alt+Shift+f12 - somehow this doesn't work anymore
 // nice to have:
 // [ ] map editor - sharing maps, voting, recommended mode / number of bots
 // [ ] chat
