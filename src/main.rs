@@ -40,6 +40,9 @@ use std::fs;
 // [ ] network - UDP tunneling?
 //      https://arewegameyet.rs/ecosystem/networking/ or custom?
 //      [ ] master server hosting
+//      [ ] prediction / reconciliation
+//          braid / jonathan blow - fps independent
+//          https://github.com/pond3r/ggpo/tree/master/doc
 // [ ] cvars
 //      [ ] voting
 // [ ] analytics
