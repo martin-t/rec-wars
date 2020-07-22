@@ -8,6 +8,8 @@ A top-down vehicle shooter based on an old Windows game called RecWar.
 TODO screenshot - clicking opens game?
 TODO github description, tags
 
+note to self: https://stackoverflow.com/questions/16151018/npm-throws-error-without-sudo/24404451#24404451
+
 The Original Game
 -----------------
 
