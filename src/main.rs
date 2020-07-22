@@ -29,6 +29,8 @@ use std::fs;
 // [ ] render tank, explosions
 // [ ] movement, collision detection, physics
 // [ ] weapons
+// [ ] mines
+//      [ ] not within radius of base/cow
 // [ ] UI to select mode, map, bots, start game
 // [ ] fullscreen?
 // [ ] FFA, TW, CTC
