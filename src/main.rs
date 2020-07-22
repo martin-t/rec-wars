@@ -5,11 +5,11 @@ use std::fs;
 // [ ] compile rust to WASM, load that
 // [x] canvas
 // [x] render background
-// [ ] move around, check perf
+// [x] move around, check perf
 //      https://github.com/mrdoob/stats.js/
 //      [ ] make explosion sprite smaller
 //      https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Tutorial/Optimizing_canvas
-//          [ ] round to whole pixels (orig RW does it)
+//          [x] round to whole pixels (orig RW does it)
 //          [ ] layer canvases - background vs entities
 //          [ ] webgl
 // [ ] engine? rendering crate? nice if native and WASM backends
@@ -36,7 +36,10 @@ use std::fs;
 //      [ ] pathfinding - custom / from soko solver / crate?
 //          https://old.reddit.com/r/rust_gamedev/comments/hr7m3j/which_lib_do_you_use_for_pathfinding_in_you_games/
 //      [ ] roles / commands
-// [ ] hosting - GH pages? domain? SSL?
+// [ ] hosting
+//      GH pages? - needs public repo first
+//      domain? SSL?
+//      [ ] GH Social preview
 // [ ] network - UDP tunneling?
 //      https://arewegameyet.rs/ecosystem/networking/ or custom?
 //      [ ] master server hosting

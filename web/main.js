@@ -30,6 +30,8 @@ const SET_INTERVAL = 2;
 let anim_method = ANIM_FRAME;
 let anim_handle = null;
 
+let align_to_pixels = true;
+
 const draw_delay = 1000 / 60;
 
 const canvas = document.getElementById("canvas");
@@ -121,26 +123,23 @@ const explosions_slow = [];
 
 let offset_x = 0;
 let offset_y = 0;
+let speed_x = 0;
+let speed_y = 0;
 
-let t_frame_prev = 0;
 function draw_frame(t_frame) {
     const t_start = performance.now();
 
-    //const t_diff = t_frame - t_frame_prev;
-    //t_frame_prev = t_frame;
-
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    for (let x = offset_x - 64; x < canvas.width; x += 64) {
-        for (let y = offset_y - 64; y < canvas.height; y += 64) {
+    const draw_offset_x = align_to_pixels ? Math.round(offset_x) : offset_x;
+    const draw_offset_y = align_to_pixels ? Math.round(offset_y) : offset_y;
+    for (let x = draw_offset_x - 64; x < canvas.width; x += 64) {
+        for (let y = draw_offset_y - 64; y < canvas.height; y += 64) {
             ctx.drawImage(img_base, x, y);
         }
     }
-    //const change = t_diff / 16;
-    //offset_x = (offset_x + 2 * change) % 64;
-    //offset_y = (offset_y + 1 * change) % 64;
-    offset_x = (offset_x + 2) % 64;
-    offset_y = (offset_y + 1) % 64;
+    offset_x = (offset_x + 64 + speed_x) % 64;
+    offset_y = (offset_y + 64 + speed_y) % 64;
 
     for (let i = 0; i < 2; i++) {
         let x = canvas.width / 2 + Math.random() * (canvas.width / 2);
@@ -236,6 +235,30 @@ function btn_anim_method_click() {
         btn.innerHTML = "Anim method: requestAnimationFrame";
     }
 }
+
+function btn_align_click() {
+    let btn = document.getElementById("btn_align");
+    if (align_to_pixels) {
+        align_to_pixels = false;
+        btn.innerHTML = "Align movement to whole pixels: off";
+    } else {
+        align_to_pixels = true;
+        btn.innerHTML = "Align movement to whole pixels: on";
+    }
+}
+
+document.addEventListener('keydown', event => {
+    //console.log(event.timeStamp, event.key);
+    if (event.key === "ArrowLeft") {
+        speed_x += 0.1;
+    } else if (event.key === "ArrowRight") {
+        speed_x -= 0.1;
+    } else if (event.key === "ArrowUp") {
+        speed_y += 0.1;
+    } else if (event.key === "ArrowDown") {
+        speed_y -= 0.1;
+    }
+});
 
 /*document.addEventListener('visibilitychange', function () {
     if (document.hidden) {
