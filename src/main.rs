@@ -2,7 +2,7 @@ use std::fs;
 
 // TODO MVP:
 // [x] get simple.wasm working
-// [ ] compile rust to WASM, load that
+// [x] compile rust to WASM, load that
 // [x] canvas
 // [x] render background
 // [x] move around, check perf
@@ -58,6 +58,8 @@ use std::fs;
 // [ ] chat
 //      [ ] bots say hi/gg/sry/n1
 // [ ] log of past games (to show activity even if nobody currently online)
+// [ ] splitscreen
+// [ ] figure out what webpack is and how to create a static site
 
 #[derive(Debug, Clone)]
 struct Texture {
