@@ -9,8 +9,10 @@ TODO screenshot - clicking opens game?
 TODO github description, tags
 
 note to self:
-    - https://stackoverflow.com/questions/16151018/npm-throws-error-without-sudo/24404451#24404451
-    - prefix path or it uses old debian npm which breaks everything
+    - fix npm
+        - https://stackoverflow.com/questions/16151018/npm-throws-error-without-sudo/24404451#24404451
+        - prefix path or it uses old debian npm which breaks everything
+    - build with `wasm-pack build --target web` or it gives a mime type error
 
 The Original Game
 -----------------
