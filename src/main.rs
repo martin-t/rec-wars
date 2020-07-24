@@ -12,9 +12,10 @@ use std::fs;
 //          [x] round to whole pixels (orig RW does it)
 //          [ ] layer canvases - background vs entities
 //          [ ] webgl
+// [x] pick a math lib, don't overthink it
 // [ ] engine? rendering crate? nice if native and WASM backends
 //      https://crates.io/crates/ggez - WASM in progress
-//      https://crates.io/crates/luminance - no mention os WASM
+//      https://crates.io/crates/luminance - mentions webgl/canvas
 //      https://crates.io/crates/piston
 //      https://crates.io/crates/quicksilver - all 3 OSes + WASM supported
 //      miniquad, macroquad, godot
@@ -26,6 +27,7 @@ use std::fs;
 //      [ ] images: weapon icons, tank skins, cow - maybe just screenshot?
 //      [ ] sounds: weapons, explosions, cow, engine noise
 // [ ] CI - GH actions / travis, mirror to GL???
+// [ ] load maps
 // [ ] render tank, explosions
 // [ ] movement, collision detection, physics
 // [ ] weapons
@@ -87,6 +89,7 @@ fn main() {
 fn load_map(path: &str) -> Vec<Vec<usize>> {
     let text = fs::read_to_string(path).unwrap();
     dbg!(&text);
+    // TODO handle both CRLF and LF properly
     text.split_terminator("\r\n")
         .map(|line| line.split(" ").map(|tile| tile.parse().unwrap()).collect())
         .collect()

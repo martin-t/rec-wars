@@ -1,22 +1,5 @@
-"use strict";
-
-var importObject = { imports: { imported_func: arg => console.log(arg) } };
-
-WebAssembly.instantiateStreaming(fetch('simple.wasm'), importObject)
-    .then(results => {
-        results.instance.exports.exported_func();
-    });
-
-WebAssembly.instantiateStreaming(fetch('handwritten.wasm'), importObject)
-    .then(results => {
-        console.log(results.instance.exports.exp_add(5, 6));
-    });
-
 let img_base = new Image();
 img_base.src = "../assets/tiles/Base.bmp";
-
-let img_g3 = new Image();
-img_g3.src = "../assets/tiles/g3.bmp";
 
 let img_explosion = new Image();
 img_explosion.src = "../assets/Explosion.png"
@@ -34,10 +17,10 @@ let align_to_pixels = true;
 
 const draw_delay = 1000 / 60;
 
-//const canvas = document.getElementById("canvas");
-//const ctx = canvas.getContext("2d", { alpha: false });
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d", { alpha: false });
 
-//anim_handle = window.requestAnimationFrame(draw_frame_animation);
+anim_handle = window.requestAnimationFrame(draw_frame_animation);
 
 class Fps {
     constructor(x, y) {
@@ -128,8 +111,6 @@ let speed_y = 0;
 
 function draw_frame(t_frame) {
     const t_start = performance.now();
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     const draw_offset_x = align_to_pixels ? Math.round(offset_x) : offset_x;
     const draw_offset_y = align_to_pixels ? Math.round(offset_y) : offset_y;

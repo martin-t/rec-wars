@@ -1,47 +1,81 @@
 // TODO lints
 
+use vek::Vec2;
+
 use wasm_bindgen::prelude::*;
 
-use web_sys::CanvasRenderingContext2d;
+use web_sys::{CanvasRenderingContext2d, HtmlImageElement};
+
+type Vec2f = Vec2<f64>;
+
+type Map = Vec<Vec<usize>>;
 
 #[wasm_bindgen]
-pub struct World {}
+pub struct World {
+    context: CanvasRenderingContext2d,
+    canvas_size: Vec2f,
+    map: Map,
+    pos: Vec2f,
+    vel: Vec2f,
+    prev_update: f64,
+}
 
 #[wasm_bindgen]
 impl World {
     #[wasm_bindgen(constructor)]
-    pub fn new() -> Self {
-        Self {}
+    pub fn new(context: CanvasRenderingContext2d, width: f64, height: f64) -> Self {
+        let mut map = vec![vec![0; 15]; 15];
+        map[0][0] = 1;
+        map[14][14] = 1;
+        Self {
+            context,
+            canvas_size: Vec2f::new(width, height),
+            map: vec![vec![0; 15]; 15],
+            pos: Vec2f::new(640.0, 640.0),
+            vel: Vec2f::new(0.02, 0.01),
+            prev_update: 0.0,
+        }
     }
 
-    pub fn draw(&self, context: CanvasRenderingContext2d) {
-        use std::f64;
+    pub fn input(&mut self, left: f64, right: f64, up: f64, down: f64) {
+        self.vel.x -= left * 0.007;
+        self.vel.x += right * 0.007;
+        self.vel.y -= up * 0.007;
+        self.vel.y += down * 0.007;
+    }
 
-        context.set_stroke_style(&"red".into());
+    pub fn update(&mut self, t: f64) {
+        let dt = t - self.prev_update;
 
-        context.begin_path();
+        self.pos += self.vel * dt;
 
-        // Draw the outer circle.
-        context
-            .arc(75.0, 75.0, 50.0, 0.0, f64::consts::PI * 2.0)
-            .unwrap();
+        self.prev_update = t;
+    }
 
-        // Draw the mouth.
-        context.move_to(110.0, 75.0);
-        context.arc(75.0, 75.0, 35.0, 0.0, f64::consts::PI).unwrap();
+    pub fn draw(
+        &self,
+        img_base: &HtmlImageElement,
+        img_explosion: &HtmlImageElement,
+    ) -> Result<(), JsValue> {
+        //TODO let center = self.size / 2.0;
 
-        // Draw the left eye.
-        context.move_to(65.0, 65.0);
-        context
-            .arc(60.0, 65.0, 5.0, 0.0, f64::consts::PI * 2.0)
-            .unwrap();
+        let pos_in_tile = self.pos % 64.0;
+        let pos_tile = (self.pos / 64.0).floor();
+        let r = pos_tile.x as usize;
+        let c = pos_tile.y as usize;
 
-        // Draw the right eye.
-        context.move_to(95.0, 65.0);
-        context
-            .arc(90.0, 65.0, 5.0, 0.0, f64::consts::PI * 2.0)
-            .unwrap();
+        // only works properly with positive numbers
+        let mut x = -pos_in_tile.x;
+        while x < self.canvas_size.x {
+            let mut y = -pos_in_tile.y;
+            while y < self.canvas_size.y {
+                self.context
+                    .draw_image_with_html_image_element(img_base, x, y)?;
+                y += 64.0;
+            }
+            x += 64.0;
+        }
 
-        context.stroke();
+        Ok(())
     }
 }

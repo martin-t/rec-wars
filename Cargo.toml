@@ -8,6 +8,7 @@ edition = "2018"
 crate-type = ["cdylib"]
 
 [dependencies]
+vek = "0.11.2"
 wasm-bindgen = "0.2.65"
 
 [dependencies.web-sys]
@@ -15,4 +16,5 @@ version = "0.3.4"
 features = [
   'CanvasRenderingContext2d',
   'console',
+  'HtmlImageElement',
 ]
