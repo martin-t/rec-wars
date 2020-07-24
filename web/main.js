@@ -34,10 +34,10 @@ let align_to_pixels = true;
 
 const draw_delay = 1000 / 60;
 
-const canvas = document.getElementById("canvas");
-const ctx = canvas.getContext("2d", { alpha: false });
+//const canvas = document.getElementById("canvas");
+//const ctx = canvas.getContext("2d", { alpha: false });
 
-anim_handle = window.requestAnimationFrame(draw_frame_animation);
+//anim_handle = window.requestAnimationFrame(draw_frame_animation);
 
 class Fps {
     constructor(x, y) {

@@ -42,6 +42,8 @@ use std::fs;
 //      GH pages? - needs public repo first
 //      domain? SSL?
 //      [ ] GH Social preview
+//      master server? cloudflare, heroku, google app engine?
+//          needs to be stateful
 // [ ] network - UDP tunneling?
 //      https://arewegameyet.rs/ecosystem/networking/ or custom?
 //      [ ] master server hosting
