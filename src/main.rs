@@ -23,9 +23,18 @@ use std::fs;
 //      bug in python server maybe? - doesn't happen with rhino
 // [ ] server framerate when minimized - https://developer.mozilla.org/en-US/docs/Web/API/Window/setImmediate#Notes
 //      postMessage / MessageChannel / https://github.com/YuzuJS/setImmediate polyfill
-// [ ] extract assets from RecWar or find alternatives
-//      [ ] images: weapon icons, tank skins, cow - maybe just screenshot?
-//      [ ] sounds: weapons, explosions, cow, engine noise
+// [ ] extract/screenshot/record assets from RecWar or find alternatives
+//      [ ] images
+//          [ ] weapon icons
+//          [ ] weapons
+//          [ ] vehicles + skins
+//          [ ] cow, stolen effects
+//          [ ] wrecks
+//      [ ] sounds
+//          [ ] weapons, explosions, self destruct
+//          [ ] cow
+//          [ ] engine noise
+//              [ ] how does it change with speed?
 // [ ] CI - GH actions / travis, mirror to GL???
 // [ ] load maps
 // [ ] render tank, explosions
@@ -33,6 +42,8 @@ use std::fs;
 // [ ] weapons
 // [ ] mines
 //      [ ] not within radius of base/cow
+// [ ] shadows
+// [ ] self destruct - bigger exposion, countdown, sounds
 // [ ] UI to select mode, map, bots, start game
 // [ ] fullscreen?
 // [ ] FFA, TW, CTC

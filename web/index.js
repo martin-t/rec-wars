@@ -39,9 +39,9 @@ async function run() {
     // And afterwards we can use all the functionality defined in wasm.
 
     let img_base = new Image();
-    img_base.src = "../assets/tiles/Base.bmp";
+    img_base.src = "../assets/tiles/base.bmp";
     let img_explosion = new Image();
-    img_explosion.src = "../assets/Explosion.png"
+    img_explosion.src = "../assets/explosion.png"
     // https://stackoverflow.com/questions/46399223/async-await-in-image-loading
     // https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/createImageBitmap
 
