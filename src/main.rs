@@ -64,6 +64,7 @@ use std::fs;
 // [ ] log of past games (to show activity even if nobody currently online)
 // [ ] splitscreen
 // [ ] figure out what webpack is and how to create a static site
+//      probably best template: https://github.com/rustwasm/rust-webpack-template
 
 #[derive(Debug, Clone)]
 struct Texture {
