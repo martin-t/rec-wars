@@ -51,25 +51,25 @@ async function run() {
     let left = 0, right = 0, up = 0, down = 0;
 
     document.addEventListener('keydown', event => {
-        if (event.key === "ArrowLeft") {
+        if (event.key === "ArrowLeft" || event.key === "a") {
             left = 1;
-        } else if (event.key === "ArrowRight") {
+        } else if (event.key === "ArrowRight" || event.key === "d") {
             right = 1;
-        } else if (event.key === "ArrowUp") {
+        } else if (event.key === "ArrowUp" || event.key === "w") {
             up = 1;
-        } else if (event.key === "ArrowDown") {
+        } else if (event.key === "ArrowDown" || event.key === "s") {
             down = 1;
         }
     });
 
     document.addEventListener('keyup', event => {
-        if (event.key === "ArrowLeft") {
+        if (event.key === "ArrowLeft" || event.key === "a") {
             left = 0;
-        } else if (event.key === "ArrowRight") {
+        } else if (event.key === "ArrowRight" || event.key === "d") {
             right = 0;
-        } else if (event.key === "ArrowUp") {
+        } else if (event.key === "ArrowUp" || event.key === "w") {
             up = 0;
-        } else if (event.key === "ArrowDown") {
+        } else if (event.key === "ArrowDown" || event.key === "s") {
             down = 0;
         }
     });
