@@ -48,6 +48,24 @@ impl World {
         let dt = t - self.prev_update;
 
         self.pos += self.vel * dt;
+        if self.pos.x <= 0.0 {
+            self.pos.x = 0.0;
+            self.vel.x = 0.0;
+        }
+        if self.pos.y <= 0.0 {
+            self.pos.y = 0.0;
+            self.vel.y = 0.0;
+        }
+        let max_x = self.map.len() as f64 * 64.0;
+        if self.pos.x >= max_x {
+            self.pos.x = max_x;
+            self.vel.x = 0.0;
+        }
+        let max_y = self.map[0].len() as f64 * 64.0;
+        if self.pos.y >= max_y {
+            self.pos.y = max_y;
+            self.vel.y = 0.0;
+        }
 
         self.prev_update = t;
     }
