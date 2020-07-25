@@ -21,7 +21,7 @@ impl Texture {
 }
 
 pub fn load_textures(text: &str) -> Vec<Texture> {
-    // TODO handle both CRLF and LF properly
+    // TODO handle both CRLF and LF properly OR use cvars instead
     text.split_terminator("\r\n")
         .map(|line| {
             dbg!(line);

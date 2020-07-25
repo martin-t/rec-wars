@@ -38,12 +38,17 @@ async function run() {
 
     // And afterwards we can use all the functionality defined in wasm.
 
+    let img_g1 = new Image();
+    img_g1.src = "../assets/tiles/g1.bmp";
     let img_base = new Image();
     img_base.src = "../assets/tiles/base.bmp";
     let img_explosion = new Image();
-    img_explosion.src = "../assets/explosion.png"
+    img_explosion.src = "../assets/explosion.png";
+    let img_guided_missile = new Image();
+    img_guided_missile.src = "../assets/weapons/guided_missile.png";
     // https://stackoverflow.com/questions/46399223/async-await-in-image-loading
     // https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/createImageBitmap
+    // or better yet, fiugure out how webpack works
 
     const canvas = document.getElementById("canvas");
     const ctx = canvas.getContext("2d", { alpha: false });
@@ -79,7 +84,7 @@ async function run() {
     const frame = (t) => {
         world.input(left, right, up, down);
         world.update(t);
-        world.draw(img_base, img_explosion);
+        world.draw(img_g1, img_base, img_explosion, img_guided_missile);
         window.requestAnimationFrame(frame);
     };
     window.requestAnimationFrame(frame);
