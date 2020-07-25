@@ -6,6 +6,8 @@ use wasm_bindgen::prelude::*;
 
 use web_sys::{CanvasRenderingContext2d, HtmlImageElement};
 
+mod data;
+
 type Vec2f = Vec2<f64>;
 
 type Map = Vec<Vec<usize>>;
