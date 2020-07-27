@@ -56,6 +56,7 @@
 //      [ ] GH Social preview
 //      master server? cloudflare, heroku, google app engine?
 //          needs to be stateful
+//      if dedicated servers, need at least 2 - EU and US
 // [ ] network - UDP tunneling?
 //      https://arewegameyet.rs/ecosystem/networking/ or custom?
 //      [ ] master server hosting
