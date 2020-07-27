@@ -99,10 +99,7 @@ impl World {
         let camera_min = self.canvas_size / 2.0;
         let map_size = self.map_size();
         let camera_max = map_size - camera_min;
-        let camera_pos = Vec2f::new(
-            self.pos.x.clamped(camera_min.x, camera_max.x),
-            self.pos.y.clamped(camera_min.y, camera_max.y),
-        );
+        let camera_pos = self.pos.clamped(camera_min, camera_max);
 
         // Draw background
         // This only works properly with positive numbers but it's ok since top left of the map is (0.0, 0.0).
