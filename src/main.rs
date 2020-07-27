@@ -17,6 +17,7 @@
 //      https://crates.io/crates/piston
 //      https://crates.io/crates/quicksilver - all 3 OSes + WASM supported
 //      miniquad, macroquad, godot
+// [ ] solve tearing - maybe only align to pixels at high speeds?
 // [x] image fails to draw the first time after opening browser
 //      bug in python server maybe? - doesn't happen with rhino
 // [ ] server framerate when minimized - https://developer.mozilla.org/en-US/docs/Web/API/Window/setImmediate#Notes

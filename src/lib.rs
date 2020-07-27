@@ -87,6 +87,7 @@ impl World {
         &self,
         img_explosion: &HtmlImageElement,
         img_guided_missile: &HtmlImageElement,
+        align_to_pixels: bool,
     ) -> Result<(), JsValue> {
         // Don't put the camera so close to the edge that it would render area outside the map.
         // TODO handle maps smaller than canvas (currently crashes on unreachable)
@@ -106,7 +107,10 @@ impl World {
         // This only works properly with positive numbers but it's ok since top left of the map is (0.0, 0.0).
         let top_left = camera_pos - camera_min;
         let top_left_tile = (top_left / TILE_SIZE).floor();
-        let offset_in_tile = top_left % TILE_SIZE;
+        let mut offset_in_tile = top_left % TILE_SIZE;
+        if align_to_pixels {
+            offset_in_tile = offset_in_tile.floor();
+        }
 
         let mut c = top_left_tile.x as usize;
         let mut x = -offset_in_tile.x;
