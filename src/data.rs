@@ -1,3 +1,5 @@
+/// The value / 4 is index into texture_list.txt.
+/// The value % 4 is the rotation TODO
 pub fn load_map(text: &str) -> Vec<Vec<usize>> {
     // TODO handle both CRLF and LF properly
     text.split_terminator("\r\n")
@@ -22,6 +24,7 @@ impl Texture {
 
 pub fn load_textures(text: &str) -> Vec<Texture> {
     // TODO handle both CRLF and LF properly OR use cvars instead
+    // if using cvars, update load_map docs
     text.split_terminator("\r\n")
         .map(|line| {
             dbg!(line);

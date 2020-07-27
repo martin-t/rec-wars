@@ -1,5 +1,7 @@
 // TODO lints
 
+use std::f64::consts::PI;
+
 use vek::ops::Clamp;
 use vek::Vec2;
 
@@ -102,12 +104,12 @@ impl World {
             self.pos.y.clamped(camera_min.y, camera_max.y),
         );
 
-        // TODO whole pixels
         // Draw background
         // This only works properly with positive numbers but it's ok since top left of the map is (0.0, 0.0).
         let top_left = camera_pos - camera_min;
         let top_left_tile = (top_left / TILE_SIZE).floor();
         let mut offset_in_tile = top_left % TILE_SIZE;
+        // TODO align player? other?
         if align_to_pixels {
             offset_in_tile = offset_in_tile.floor();
         }
@@ -118,9 +120,21 @@ impl World {
             let mut r = top_left_tile.y as usize;
             let mut y = -offset_in_tile.y;
             while y < self.canvas_size.y {
-                let idx = self.map[r][c] / 4;
-                let img = &self.tiles[idx];
-                self.context.draw_image_with_html_image_element(img, x, y)?;
+                let index = self.map[r][c] / 4;
+                let img = &self.tiles[index];
+                let rotation = self.map[r][c] % 4;
+
+                // rotate counterclockwise around tile center
+                self.context
+                    .translate(x + TILE_SIZE / 2.0, y + TILE_SIZE / 2.0)?;
+                self.context.rotate(rotation as f64 * -PI / 2.0)?;
+                self.context.translate(-TILE_SIZE / 2.0, -TILE_SIZE / 2.0)?;
+
+                self.context
+                    .draw_image_with_html_image_element(img, 0.0, 0.0)?;
+
+                self.context.reset_transform()?;
+
                 r += 1;
                 y += TILE_SIZE;
             }
@@ -135,6 +149,24 @@ impl World {
             player_scr_pos.x - 10.0,
             player_scr_pos.y - 2.0,
         )?;
+
+        /*self.context.save();
+        //self.context.translate(50.0, 50.0)?;
+        self.context
+            .draw_image_with_html_image_element(&self.tiles[4], 0.0, 0.0)?;
+        self.context.translate(100.0, 0.0)?;
+        self.context.rotate(0.1)?;
+        self.context
+            .draw_image_with_html_image_element(&self.tiles[4], 0.0, 0.0)?;
+        self.context.translate(100.0, 0.0)?;
+        self.context.rotate(0.1)?;
+        self.context
+            .draw_image_with_html_image_element(&self.tiles[4], 0.0, 0.0)?;
+        self.context.translate(100.0, 0.0)?;
+        self.context.rotate(0.1)?;
+        self.context
+            .draw_image_with_html_image_element(&self.tiles[4], 0.0, 0.0)?;
+        self.context.restore();*/
 
         // Draw debug text
         // TODO generalize
