@@ -28,6 +28,7 @@ pub struct World {
     pos: Vec2f,
     vel: Vec2f,
     prev_update: f64,
+    debug_texts: Vec<String>,
 }
 
 #[wasm_bindgen]
@@ -50,6 +51,7 @@ impl World {
             pos: Vec2f::new(640.0, 640.0),
             vel: Vec2f::new(0.02, 0.01),
             prev_update: 0.0,
+            debug_texts: Vec::new(),
         }
     }
 
@@ -86,7 +88,7 @@ impl World {
     }
 
     pub fn draw(
-        &self,
+        &mut self,
         img_explosion: &HtmlImageElement,
         img_guided_missile: &HtmlImageElement,
         align_to_pixels: bool,
@@ -110,6 +112,10 @@ impl World {
         if align_to_pixels {
             offset_in_tile = offset_in_tile.floor();
         }
+
+        // TODO https://github.com/yoanlcq/vek/issues/57
+        self.debug_text(format!("player left: {:.2}", self.pos));
+        self.debug_text(format!("player left: {:.2?}", self.pos));
 
         let mut c = top_left_tile.x as usize;
         let mut x = -offset_in_tile.x;
@@ -148,26 +154,20 @@ impl World {
         )?;
 
         // Draw debug text
-        // TODO generalize
-        self.context.set_fill_style(&"red".into());
         // TODO make vek respect decimals formatting
-        self.context.fill_text(
-            &format!("top left: {:.2}, {:.2}", top_left.x, top_left.y),
-            20.0,
-            30.0,
-        )?;
-        self.context.fill_text(
-            &format!("player pos: {:.2}, {:.2}", self.pos.x, self.pos.y),
-            20.0,
-            40.0,
-        )?;
-        self.context.fill_text(
-            &format!("camera pos: {:.2}, {:.2}", camera_pos.x, camera_pos.y),
-            20.0,
-            50.0,
-        )?;
+        self.context.set_fill_style(&"red".into());
+        let mut y = 20.0;
+        for line in &self.debug_texts {
+            self.context.fill_text(line, 20.0, y)?;
+            y += 10.0;
+        }
+        self.debug_texts.clear();
 
         Ok(())
+    }
+
+    fn debug_text<S: Into<String>>(&mut self, s: S) {
+        self.debug_texts.push(s.into());
     }
 
     fn map_size(&self) -> Vec2f {
