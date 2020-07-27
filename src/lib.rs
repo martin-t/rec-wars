@@ -54,10 +54,10 @@ impl World {
     }
 
     pub fn input(&mut self, left: f64, right: f64, up: f64, down: f64) {
-        self.vel.x -= left * 0.007;
-        self.vel.x += right * 0.007;
-        self.vel.y -= up * 0.007;
-        self.vel.y += down * 0.007;
+        self.vel.x -= left * 0.01;
+        self.vel.x += right * 0.01;
+        self.vel.y -= up * 0.01;
+        self.vel.y += down * 0.01;
     }
 
     pub fn update(&mut self, t: f64) {
