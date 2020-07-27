@@ -7,18 +7,37 @@ pub fn load_map(text: &str) -> Vec<Vec<usize>> {
         .collect()
 }
 
+/// Reverse engineered by modifying TextureList.txt and seeing what happens.
+#[derive(Debug, Clone)]
+enum Kind {
+    Normal = 0,
+    Spawn = 1,
+    Wall = 2,
+    /// Vehicles on it spawn particles on their sides
+    Water = 3,
+    /// I don't see any effect
+    Snow = 4,
+    Base = 5,
+}
+
 #[derive(Debug, Clone)]
 pub struct Texture {
     name: String,
-    // TODO what do these mean?
-    a: i32,
-    b: f32,
-    c: f32,
+    kind: i32,
+    /// Seems to affect both turning and accellaration
+    friction: f32,
+    /// Maybe a multiplier for speed
+    speed: f32,
 }
 
 impl Texture {
-    fn new(name: String, a: i32, b: f32, c: f32) -> Self {
-        Self { name, a, b, c }
+    fn new(name: String, kind: i32, friction: f32, speed: f32) -> Self {
+        Self {
+            name,
+            kind,
+            friction,
+            speed,
+        }
     }
 }
 
@@ -30,10 +49,10 @@ pub fn load_textures(text: &str) -> Vec<Texture> {
             dbg!(line);
             let mut parts = line.split(" ");
             let name = parts.next().unwrap();
-            let a = parts.next().unwrap().parse().unwrap();
-            let b = parts.next().unwrap().parse().unwrap();
-            let c = parts.next().unwrap().parse().unwrap();
-            Texture::new(name.to_owned(), a, b, c)
+            let kind = parts.next().unwrap().parse().unwrap();
+            let friction = parts.next().unwrap().parse().unwrap();
+            let speed = parts.next().unwrap().parse().unwrap();
+            Texture::new(name.to_owned(), kind, friction, speed)
         })
         .collect()
 }
