@@ -150,24 +150,6 @@ impl World {
             player_scr_pos.y - 2.0,
         )?;
 
-        /*self.context.save();
-        //self.context.translate(50.0, 50.0)?;
-        self.context
-            .draw_image_with_html_image_element(&self.tiles[4], 0.0, 0.0)?;
-        self.context.translate(100.0, 0.0)?;
-        self.context.rotate(0.1)?;
-        self.context
-            .draw_image_with_html_image_element(&self.tiles[4], 0.0, 0.0)?;
-        self.context.translate(100.0, 0.0)?;
-        self.context.rotate(0.1)?;
-        self.context
-            .draw_image_with_html_image_element(&self.tiles[4], 0.0, 0.0)?;
-        self.context.translate(100.0, 0.0)?;
-        self.context.rotate(0.1)?;
-        self.context
-            .draw_image_with_html_image_element(&self.tiles[4], 0.0, 0.0)?;
-        self.context.restore();*/
-
         // Draw debug text
         // TODO generalize
         self.context.set_fill_style(&"red".into());
