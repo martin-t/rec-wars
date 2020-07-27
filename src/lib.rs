@@ -108,19 +108,19 @@ impl World {
         let top_left_tile = (top_left / TILE_SIZE).floor();
         let offset_in_tile = top_left % TILE_SIZE;
 
-        let mut r = top_left_tile.x as usize;
+        let mut c = top_left_tile.x as usize;
         let mut x = -offset_in_tile.x;
         while x < self.canvas_size.x {
-            let mut c = top_left_tile.y as usize;
+            let mut r = top_left_tile.y as usize;
             let mut y = -offset_in_tile.y;
             while y < self.canvas_size.y {
                 let idx = self.map[r][c] / 4;
                 let img = &self.tiles[idx];
                 self.context.draw_image_with_html_image_element(img, x, y)?;
-                c += 1;
+                r += 1;
                 y += TILE_SIZE;
             }
-            r += 1;
+            c += 1;
             x += TILE_SIZE;
         }
 
