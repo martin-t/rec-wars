@@ -1,5 +1,3 @@
-use std::fs;
-
 // TODO MVP:
 // [x] get simple.wasm working
 // [x] compile rust to WASM, load that

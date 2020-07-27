@@ -81,6 +81,7 @@ dependencies = [
 name = "rec-wars"
 version = "0.1.0"
 dependencies = [
+ "js-sys 0.3.42 (registry+https://github.com/rust-lang/crates.io-index)",
  "vek 0.11.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "wasm-bindgen 0.2.65 (registry+https://github.com/rust-lang/crates.io-index)",
  "web-sys 0.3.42 (registry+https://github.com/rust-lang/crates.io-index)",

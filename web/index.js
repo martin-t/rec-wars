@@ -1,3 +1,6 @@
+// Load the webassembly and some assets,
+// do a couple more things that are easier on the JS side like reading input.
+
 // Use ES module import syntax to import functionality from the module
 // that we have compiled.
 //
@@ -38,17 +41,42 @@ async function run() {
 
     // And afterwards we can use all the functionality defined in wasm.
 
-    let img_g1 = new Image();
-    img_g1.src = "../assets/tiles/g1.bmp";
-    let img_base = new Image();
-    img_base.src = "../assets/tiles/base.bmp";
+    let tiles = [
+        "../assets/tiles/g1.bmp",
+        "../assets/tiles/g2.bmp",
+        "../assets/tiles/g3.bmp",
+        "../assets/tiles/g_stripes.bmp",
+        "../assets/tiles/bunker1.bmp",
+        "../assets/tiles/ice1.bmp",
+        "../assets/tiles/ice.bmp",
+        "../assets/tiles/ice_side.bmp",
+        "../assets/tiles/ice_corner.bmp",
+        "../assets/tiles/g_spawn.bmp",
+        "../assets/tiles/road.bmp",
+        "../assets/tiles/water.bmp",
+        "../assets/tiles/snow.bmp",
+        "../assets/tiles/snow2.bmp",
+        "../assets/tiles/bunker2.bmp",
+        "../assets/tiles/base.bmp",
+        "../assets/tiles/water_side.bmp",
+        "../assets/tiles/water_corner.bmp",
+        "../assets/tiles/desert.bmp",
+        "../assets/tiles/d_rock.bmp",
+        "../assets/tiles/g2d.bmp",
+        "../assets/tiles/water_middle.bmp",
+    ].map((tile) => {
+        let img = new Image();
+        img.src = tile;
+        return img;
+    });
+
     let img_explosion = new Image();
     img_explosion.src = "../assets/explosion.png";
     let img_guided_missile = new Image();
     img_guided_missile.src = "../assets/weapons/guided_missile.png";
     // https://stackoverflow.com/questions/46399223/async-await-in-image-loading
     // https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/createImageBitmap
-    // or better yet, fiugure out how webpack works
+    // or better yet, figure out how webpack works
 
     const canvas = document.getElementById("canvas");
     const ctx = canvas.getContext("2d", { alpha: false });
@@ -79,15 +107,25 @@ async function run() {
         }
     });
 
-    const world = new World(ctx, canvas.width, canvas.height);
+    let request = new XMLHttpRequest();
+    request.open("GET", "../maps/Atrium.map");
+    request.onloadend = () => {
+        if (request.status !== 200) {
+            console.log("Failed to load map: ", request);
+            return;
+        }
 
-    const frame = (t) => {
-        world.input(left, right, up, down);
-        world.update(t);
-        world.draw(img_g1, img_base, img_explosion, img_guided_missile);
+        const world = new World(ctx, canvas.width, canvas.height, tiles, request.responseText);
+
+        const frame = (t) => {
+            world.input(left, right, up, down);
+            world.update(t);
+            world.draw(img_explosion, img_guided_missile);
+            window.requestAnimationFrame(frame);
+        };
         window.requestAnimationFrame(frame);
-    };
-    window.requestAnimationFrame(frame);
+    }
+    request.send();
 }
 
 run();

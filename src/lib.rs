@@ -3,7 +3,10 @@
 use vek::ops::Clamp;
 use vek::Vec2;
 
+use js_sys::Array;
+
 use wasm_bindgen::prelude::*;
+use wasm_bindgen::JsCast;
 
 use web_sys::{CanvasRenderingContext2d, HtmlImageElement};
 
@@ -18,6 +21,7 @@ const TILE_SIZE: f64 = 64.0;
 pub struct World {
     context: CanvasRenderingContext2d,
     canvas_size: Vec2f,
+    tiles: Vec<HtmlImageElement>,
     map: Map,
     pos: Vec2f,
     vel: Vec2f,
@@ -27,13 +31,19 @@ pub struct World {
 #[wasm_bindgen]
 impl World {
     #[wasm_bindgen(constructor)]
-    pub fn new(context: CanvasRenderingContext2d, width: f64, height: f64) -> Self {
-        let mut map = vec![vec![0; 25]; 25];
-        map[0][0] = 1;
-        map[24][24] = 1;
+    pub fn new(
+        context: CanvasRenderingContext2d,
+        width: f64,
+        height: f64,
+        tiles: Array,
+        map_text: &str,
+    ) -> Self {
+        let tiles = tiles.iter().map(|tile| tile.dyn_into().unwrap()).collect();
+        let map = data::load_map(map_text);
         Self {
             context,
             canvas_size: Vec2f::new(width, height),
+            tiles,
             map,
             pos: Vec2f::new(640.0, 640.0),
             vel: Vec2f::new(0.02, 0.01),
@@ -75,8 +85,6 @@ impl World {
 
     pub fn draw(
         &self,
-        img_g1: &HtmlImageElement,
-        img_base: &HtmlImageElement,
         img_explosion: &HtmlImageElement,
         img_guided_missile: &HtmlImageElement,
     ) -> Result<(), JsValue> {
@@ -93,6 +101,7 @@ impl World {
             self.pos.y.clamped(camera_min.y, camera_max.y),
         );
 
+        // TODO whole pixels
         // Draw background
         // This only works properly with positive numbers but it's ok since top left of the map is (0.0, 0.0).
         let top_left = camera_pos - camera_min;
@@ -105,11 +114,8 @@ impl World {
             let mut c = top_left_tile.y as usize;
             let mut y = -offset_in_tile.y;
             while y < self.canvas_size.y {
-                let img = if self.map[r][c] == 0 {
-                    img_g1
-                } else {
-                    img_base
-                };
+                let idx = self.map[r][c] / 4;
+                let img = &self.tiles[idx];
                 self.context.draw_image_with_html_image_element(img, x, y)?;
                 c += 1;
                 y += TILE_SIZE;
@@ -127,6 +133,7 @@ impl World {
         )?;
 
         // Draw debug text
+        // TODO generalize
         self.context.set_fill_style(&"red".into());
         // TODO make vek respect decimals formatting
         self.context.fill_text(
