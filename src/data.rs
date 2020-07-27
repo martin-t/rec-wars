@@ -1,5 +1,5 @@
 /// The value / 4 is index into texture_list.txt.
-/// The value % 4 is the rotation TODO
+/// The value % 4 is the rotation counterclockwise.
 pub fn load_map(text: &str) -> Vec<Vec<usize>> {
     // TODO handle both CRLF and LF properly
     text.split_terminator("\r\n")
