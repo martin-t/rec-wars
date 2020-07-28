@@ -113,10 +113,6 @@ impl World {
             offset_in_tile = offset_in_tile.floor();
         }
 
-        // TODO https://github.com/yoanlcq/vek/issues/57
-        self.debug_text(format!("player left: {:.2}", self.pos));
-        self.debug_text(format!("player left: {:.2?}", self.pos));
-
         let mut c = top_left_tile.x as usize;
         let mut x = -offset_in_tile.x;
         while x < self.canvas_size.x {
