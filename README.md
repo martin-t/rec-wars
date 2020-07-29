@@ -5,6 +5,7 @@ Rec Wars
 
 A top-down vehicle shooter based on an old Windows game called RecWar.
 
+TODO badges (flat like https://github.com/dtolnay/enumn ?)
 TODO screenshot - clicking opens game?
 TODO github description, tags
 
