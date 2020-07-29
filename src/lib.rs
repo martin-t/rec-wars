@@ -161,6 +161,7 @@ impl World {
         Ok(())
     }
 
+    #[allow(unused)]
     fn debug_text<S: Into<String>>(&mut self, s: S) {
         self.debug_texts.push(s.into());
     }
