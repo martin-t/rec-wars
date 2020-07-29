@@ -1,5 +1,7 @@
 // TODO lints
 
+mod data;
+
 use std::f64::consts::PI;
 
 use vek::ops::Clamp;
@@ -12,7 +14,7 @@ use wasm_bindgen::JsCast;
 
 use web_sys::{CanvasRenderingContext2d, HtmlImageElement};
 
-mod data;
+use data::Texture;
 
 // TODO newtypes with Derefs? tile vs world pos vs screen pos
 type Vec2f = Vec2<f64>;
@@ -27,6 +29,7 @@ pub struct World {
     context: CanvasRenderingContext2d,
     canvas_size: Vec2f,
     tiles: Vec<HtmlImageElement>,
+    textures: Vec<Texture>,
     map: Map,
     prev_update: f64,
     pos: Vec2f,
@@ -43,16 +46,19 @@ impl World {
         width: f64,
         height: f64,
         tiles: Array,
+        textures_text: &str,
         map_text: &str,
     ) -> Self {
         console_error_panic_hook::set_once();
 
         let tiles = tiles.iter().map(|tile| tile.dyn_into().unwrap()).collect();
+        let textures = data::load_textures(textures_text);
         let map = data::load_map(map_text);
         Self {
             context,
             canvas_size: Vec2f::new(width, height),
             tiles,
+            textures,
             map,
             prev_update: 0.0,
             pos: Vec2f::new(640.0, 640.0),
@@ -93,11 +99,19 @@ impl World {
         }
 
         let tile_pos = Self::to_tile(self.pos);
-        let texture = self.map[tile_pos.x][tile_pos.y] / 4;
+        let tile = self.map[tile_pos.x][tile_pos.y];
+        let tex_index = tile / 4;
+        let tex = self.textures[tex_index].clone();
 
         // FIXME
-        self.debug_text(format!("tex {}", texture));
-        if texture == 4 || texture == 14 {
+        self.debug_text(format!(
+            "{} tile {} tex index {} tex {:?}",
+            tile_pos, tile, tex_index, tex
+        ));
+        for r in 0..self.map.len() {
+            self.debug_text(format!("{:?}", self.map[r]));
+        }
+        if tex_index == 4 || tex_index == 14 {
             self.explosions.push((self.pos, 0));
             self.pos = Vec2f::new(640.0, 640.0);
         }

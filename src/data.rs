@@ -8,8 +8,8 @@ pub fn load_map(text: &str) -> Vec<Vec<usize>> {
 }
 
 /// Reverse engineered by modifying TextureList.txt and seeing what happens.
-#[derive(Debug, Clone)]
-enum Kind {
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Kind {
     Normal = 0,
     Spawn = 1,
     Wall = 2,
@@ -20,10 +20,24 @@ enum Kind {
     Base = 5,
 }
 
+impl Kind {
+    pub fn new(n: i32) -> Option<Self> {
+        match n {
+            0 => Some(Kind::Normal),
+            1 => Some(Kind::Spawn),
+            2 => Some(Kind::Wall),
+            3 => Some(Kind::Water),
+            4 => Some(Kind::Snow),
+            5 => Some(Kind::Base),
+            _ => None,
+        }
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct Texture {
     name: String,
-    kind: i32,
+    kind: Kind,
     /// Seems to affect both turning and accellaration
     friction: f32,
     /// Maybe a multiplier for speed
@@ -31,7 +45,7 @@ pub struct Texture {
 }
 
 impl Texture {
-    fn new(name: String, kind: i32, friction: f32, speed: f32) -> Self {
+    fn new(name: String, kind: Kind, friction: f32, speed: f32) -> Self {
         Self {
             name,
             kind,
@@ -49,9 +63,11 @@ pub fn load_textures(text: &str) -> Vec<Texture> {
             dbg!(line);
             let mut parts = line.split(" ");
             let name = parts.next().unwrap();
-            let kind = parts.next().unwrap().parse().unwrap();
+            let kind_num = parts.next().unwrap().parse().unwrap();
             let friction = parts.next().unwrap().parse().unwrap();
             let speed = parts.next().unwrap().parse().unwrap();
+
+            let kind = Kind::new(kind_num).unwrap();
             Texture::new(name.to_owned(), kind, friction, speed)
         })
         .collect()

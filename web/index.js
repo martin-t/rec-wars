@@ -107,15 +107,36 @@ async function run() {
         }
     });
 
-    let request = new XMLHttpRequest();
-    request.open("GET", "../maps/Atrium.map");
-    request.onloadend = () => {
-        if (request.status !== 200) {
-            console.log("Failed to load map: ", request);
-            return;
-        }
+    let load_textures = () => {
+        let request = new XMLHttpRequest();
+        request.open("GET", "../assets/texture_list.txt");
+        request.onloadend = () => {
+            if (request.status !== 200) {
+                console.log("Failed to load textures: ", request);
+                return;
+            }
 
-        const world = new World(ctx, canvas.width, canvas.height, tiles, request.responseText);
+            load_map(request.responseText);
+        }
+        request.send();
+    }
+
+    let load_map = (textures) => {
+        let request = new XMLHttpRequest();
+        request.open("GET", "../maps/Atrium.map");
+        request.onloadend = () => {
+            if (request.status !== 200) {
+                console.log("Failed to load map: ", request);
+                return;
+            }
+
+            play(textures, request.responseText);
+        }
+        request.send();
+    }
+
+    let play = (textures, map) => {
+        const world = new World(ctx, canvas.width, canvas.height, tiles, textures, map);
 
         const frame = (t) => {
             // Apparently it's best practice to call requestAnimationFrame at the start of the frame.
@@ -137,7 +158,9 @@ async function run() {
         };
         window.requestAnimationFrame(frame);
     }
-    request.send();
+
+    // TODO there's gotta be a way to avoid this retarded chain
+    load_textures();
 }
 
 run();
