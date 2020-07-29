@@ -71,6 +71,7 @@ impl World {
 
     pub fn update_pre(&mut self, t: f64) {
         let dt = t - self.prev_update;
+        // TODO this is broken when minimized (collision detection, etc.)
 
         self.pos += self.vel * dt;
         if self.pos.x <= 0.0 {
@@ -106,8 +107,7 @@ impl World {
 
     fn to_tile(pos: Vec2f) -> Vec2u {
         // FIXME clamp to bounds?
-        let tmp = pos / TILE_SIZE;
-        Vec2u::new(tmp.x as usize, tmp.y as usize)
+        (pos / TILE_SIZE).as_()
     }
 
     pub fn draw(
