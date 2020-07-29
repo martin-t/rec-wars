@@ -118,11 +118,22 @@ async function run() {
         const world = new World(ctx, canvas.width, canvas.height, tiles, request.responseText);
 
         const frame = (t) => {
-            world.input(left, right, up, down);
-            world.update_pre(t);
-            world.draw(img_explosion, img_guided_missile, true);
-            world.update_post();
-            window.requestAnimationFrame(frame);
+            // Apparently it's best practice to call requestAnimationFrame at the start of the frame.
+            // However if something throws an exception, it'll likely happen every frame and
+            // spam the console, making firefox painfully slow. In that case, cancel the next frame.
+            // Note that rust panics seem to throw exceptions but ALSO abort the program after the catch runs.
+            const handle = window.requestAnimationFrame(frame);
+
+            try {
+                world.input(left, right, up, down);
+                world.update_pre(t);
+                world.draw(img_explosion, img_guided_missile, true);
+                world.update_post();
+            } catch (e) {
+                console.log("exception - aborting next frame");
+                window.cancelAnimationFrame(handle);
+                throw e;
+            }
         };
         window.requestAnimationFrame(frame);
     }
