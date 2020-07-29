@@ -150,7 +150,6 @@ impl World {
         )?;
 
         // Draw debug text
-        // TODO make vek respect decimals formatting
         self.context.set_fill_style(&"red".into());
         let mut y = 20.0;
         for line in &self.debug_texts {
