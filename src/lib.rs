@@ -14,7 +14,10 @@ use web_sys::{CanvasRenderingContext2d, HtmlImageElement};
 
 mod data;
 
+// TODO newtypes with Derefs? tile vs world pos vs screen pos
 type Vec2f = Vec2<f64>;
+type Vec2u = Vec2<usize>;
+
 type Map = Vec<Vec<usize>>;
 
 const TILE_SIZE: f64 = 64.0;
@@ -25,9 +28,10 @@ pub struct World {
     canvas_size: Vec2f,
     tiles: Vec<HtmlImageElement>,
     map: Map,
+    prev_update: f64,
     pos: Vec2f,
     vel: Vec2f,
-    prev_update: f64,
+    explosions: Vec<(Vec2f, i32)>,
     debug_texts: Vec<String>,
 }
 
@@ -48,9 +52,10 @@ impl World {
             canvas_size: Vec2f::new(width, height),
             tiles,
             map,
+            prev_update: 0.0,
             pos: Vec2f::new(640.0, 640.0),
             vel: Vec2f::new(0.02, 0.01),
-            prev_update: 0.0,
+            explosions: Vec::new(),
             debug_texts: Vec::new(),
         }
     }
@@ -62,7 +67,7 @@ impl World {
         self.vel.y += down * 0.01;
     }
 
-    pub fn update(&mut self, t: f64) {
+    pub fn update_pre(&mut self, t: f64) {
         let dt = t - self.prev_update;
 
         self.pos += self.vel * dt;
@@ -84,7 +89,23 @@ impl World {
             self.vel.y = 0.0;
         }
 
+        let tile_pos = Self::to_tile(self.pos);
+        let texture = self.map[tile_pos.x][tile_pos.y] / 4;
+
+        // FIXME
+        self.debug_text(format!("tex {}", texture));
+        if texture == 4 || texture == 14 {
+            self.explosions.push((self.pos, 0));
+            self.pos = Vec2f::new(640.0, 640.0);
+        }
+
         self.prev_update = t;
+    }
+
+    fn to_tile(pos: Vec2f) -> Vec2u {
+        // FIXME clamp to bounds?
+        let tmp = pos / TILE_SIZE;
+        Vec2u::new(tmp.x as usize, tmp.y as usize)
     }
 
     pub fn draw(
@@ -106,17 +127,17 @@ impl World {
         // Draw background
         // This only works properly with positive numbers but it's ok since top left of the map is (0.0, 0.0).
         let top_left = camera_pos - camera_min;
-        let top_left_tile = (top_left / TILE_SIZE).floor();
+        let top_left_tile = Self::to_tile(top_left);
         let mut offset_in_tile = top_left % TILE_SIZE;
         // TODO align player? other?
         if align_to_pixels {
             offset_in_tile = offset_in_tile.floor();
         }
 
-        let mut c = top_left_tile.x as usize;
+        let mut c = top_left_tile.x;
         let mut x = -offset_in_tile.x;
         while x < self.canvas_size.x {
-            let mut r = top_left_tile.y as usize;
+            let mut r = top_left_tile.y;
             let mut y = -offset_in_tile.y;
             while y < self.canvas_size.y {
                 let index = self.map[r][c] / 4;
@@ -149,6 +170,27 @@ impl World {
             player_scr_pos.y - 2.0,
         )?;
 
+        // Draw explosions
+        // TODO do CB explosions on walls happen, just invisible or not at all?
+        for &(pos, frame) in &self.explosions {
+            // TODO frame rate independence
+            let real_frame = frame / 2; // the sprite is made for 30 fps
+            let offset = real_frame as f64 * 100.0;
+            let scr_pos = pos - top_left;
+            self.context
+                .draw_image_with_html_image_element_and_sw_and_sh_and_dx_and_dy_and_dw_and_dh(
+                    img_explosion,
+                    offset,
+                    0.0,
+                    100.0,
+                    100.0,
+                    scr_pos.x - 50.0,
+                    scr_pos.y - 50.0,
+                    100.0,
+                    100.0,
+                )?;
+        }
+
         // Draw debug text
         self.context.set_fill_style(&"red".into());
         let mut y = 20.0;
@@ -159,6 +201,13 @@ impl World {
         self.debug_texts.clear();
 
         Ok(())
+    }
+
+    pub fn update_post(&mut self, t: f64) {
+        for explosion in &mut self.explosions {
+            explosion.1 += 1;
+        }
+        self.explosions.retain(|expl| expl.1 < 26);
     }
 
     #[allow(unused)]

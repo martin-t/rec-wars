@@ -119,8 +119,9 @@ async function run() {
 
         const frame = (t) => {
             world.input(left, right, up, down);
-            world.update(t);
+            world.update_pre(t);
             world.draw(img_explosion, img_guided_missile, true);
+            world.update_post();
             window.requestAnimationFrame(frame);
         };
         window.requestAnimationFrame(frame);
