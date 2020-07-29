@@ -45,6 +45,8 @@ impl World {
         tiles: Array,
         map_text: &str,
     ) -> Self {
+        console_error_panic_hook::set_once();
+
         let tiles = tiles.iter().map(|tile| tile.dyn_into().unwrap()).collect();
         let map = data::load_map(map_text);
         Self {
