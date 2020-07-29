@@ -218,7 +218,7 @@ impl World {
         Ok(())
     }
 
-    pub fn update_post(&mut self, t: f64) {
+    pub fn update_post(&mut self) {
         for explosion in &mut self.explosions {
             explosion.1 += 1;
         }
