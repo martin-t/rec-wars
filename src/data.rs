@@ -35,7 +35,7 @@ impl Kind {
 }
 
 #[derive(Debug, Clone)]
-pub struct Texture {
+pub struct Tile {
     name: String,
     kind: Kind,
     /// Seems to affect both turning and accellaration
@@ -44,7 +44,7 @@ pub struct Texture {
     speed: f32,
 }
 
-impl Texture {
+impl Tile {
     fn new(name: String, kind: Kind, friction: f32, speed: f32) -> Self {
         Self {
             name,
@@ -55,7 +55,7 @@ impl Texture {
     }
 }
 
-pub fn load_textures(text: &str) -> Vec<Texture> {
+pub fn load_textures(text: &str) -> Vec<Tile> {
     // TODO handle both CRLF and LF properly OR use cvars instead
     // if using cvars, update load_map docs
     text.split_terminator("\r\n")
@@ -68,7 +68,7 @@ pub fn load_textures(text: &str) -> Vec<Texture> {
             let speed = parts.next().unwrap().parse().unwrap();
 
             let kind = Kind::new(kind_num).unwrap();
-            Texture::new(name.to_owned(), kind, friction, speed)
+            Tile::new(name.to_owned(), kind, friction, speed)
         })
         .collect()
 }
@@ -94,8 +94,9 @@ mod tests {
     }
 
     #[test]
-    fn test_loading_textures() {
-        let textures = fs::read_to_string("assets/texture_list.txt").unwrap();
+    fn test_loading_texture_list() {
+        let text = fs::read_to_string("assets/texture_list.txt").unwrap();
+        let textures = load_textures(&text);
         assert_ne!(textures.len(), 0);
     }
 }

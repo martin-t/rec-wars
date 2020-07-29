@@ -41,7 +41,7 @@ async function run() {
 
     // And afterwards we can use all the functionality defined in wasm.
 
-    let tiles = [
+    let imgs_textures = [
         "../assets/tiles/g1.bmp",
         "../assets/tiles/g2.bmp",
         "../assets/tiles/g3.bmp",
@@ -107,12 +107,12 @@ async function run() {
         }
     });
 
-    let load_textures = () => {
+    let load_tex_list = () => {
         let request = new XMLHttpRequest();
         request.open("GET", "../assets/texture_list.txt");
         request.onloadend = () => {
             if (request.status !== 200) {
-                console.log("Failed to load textures: ", request);
+                console.log("Failed to load texture_list: ", request);
                 return;
             }
 
@@ -121,7 +121,7 @@ async function run() {
         request.send();
     }
 
-    let load_map = (textures) => {
+    let load_map = (tex_list_text) => {
         let request = new XMLHttpRequest();
         request.open("GET", "../maps/Atrium.map");
         request.onloadend = () => {
@@ -130,13 +130,13 @@ async function run() {
                 return;
             }
 
-            play(textures, request.responseText);
+            play(tex_list_text, request.responseText);
         }
         request.send();
     }
 
-    let play = (textures, map) => {
-        const world = new World(ctx, canvas.width, canvas.height, tiles, textures, map);
+    let play = (tex_list_text, map_text) => {
+        const world = new World(ctx, canvas.width, canvas.height, imgs_textures, img_explosion, tex_list_text, map_text);
 
         const frame = (t) => {
             // Apparently it's best practice to call requestAnimationFrame at the start of the frame.
@@ -148,7 +148,7 @@ async function run() {
             try {
                 world.input(left, right, up, down);
                 world.update_pre(t);
-                world.draw(img_explosion, img_guided_missile, true);
+                world.draw(img_guided_missile, true);
                 world.update_post();
             } catch (e) {
                 console.log("exception - aborting next frame");
@@ -160,7 +160,7 @@ async function run() {
     }
 
     // TODO there's gotta be a way to avoid this retarded chain
-    load_textures();
+    load_tex_list();
 }
 
 run();

@@ -14,7 +14,7 @@ use wasm_bindgen::JsCast;
 
 use web_sys::{CanvasRenderingContext2d, HtmlImageElement};
 
-use data::Texture;
+use data::Tile;
 
 // TODO newtypes with Derefs? tile vs world pos vs screen pos
 type Vec2f = Vec2<f64>;
@@ -28,8 +28,9 @@ const TILE_SIZE: f64 = 64.0;
 pub struct World {
     context: CanvasRenderingContext2d,
     canvas_size: Vec2f,
-    tiles: Vec<HtmlImageElement>,
-    textures: Vec<Texture>,
+    imgs_textures: Vec<HtmlImageElement>,
+    img_explosion: HtmlImageElement,
+    tiles: Vec<Tile>,
     map: Map,
     prev_update: f64,
     pos: Vec2f,
@@ -45,20 +46,22 @@ impl World {
         context: CanvasRenderingContext2d,
         width: f64,
         height: f64,
-        tiles: Array,
+        textures: Array,
+        img_explosion: HtmlImageElement,
         textures_text: &str,
         map_text: &str,
     ) -> Self {
         console_error_panic_hook::set_once();
 
-        let tiles = tiles.iter().map(|tile| tile.dyn_into().unwrap()).collect();
-        let textures = data::load_textures(textures_text);
+        let imgs_textures = textures.iter().map(|tile| tile.dyn_into().unwrap()).collect();
+        let tiles = data::load_textures(textures_text);
         let map = data::load_map(map_text);
         Self {
             context,
             canvas_size: Vec2f::new(width, height),
+            imgs_textures,
+            img_explosion,
             tiles,
-            textures,
             map,
             prev_update: 0.0,
             pos: Vec2f::new(640.0, 640.0),
@@ -101,7 +104,7 @@ impl World {
         let tile_pos = Self::to_tile(self.pos);
         let tile = self.map[tile_pos.x][tile_pos.y];
         let tex_index = tile / 4;
-        let tex = self.textures[tex_index].clone();
+        let tex = self.tiles[tex_index].clone();
 
         // FIXME
         self.debug_text(format!(
@@ -126,7 +129,6 @@ impl World {
 
     pub fn draw(
         &mut self,
-        img_explosion: &HtmlImageElement,
         img_guided_missile: &HtmlImageElement,
         align_to_pixels: bool,
     ) -> Result<(), JsValue> {
@@ -156,7 +158,7 @@ impl World {
             let mut y = -offset_in_tile.y;
             while y < self.canvas_size.y {
                 let index = self.map[r][c] / 4;
-                let img = &self.tiles[index];
+                let img = &self.imgs_textures[index];
                 let rotation = self.map[r][c] % 4;
 
                 // rotate counterclockwise around tile center
@@ -194,7 +196,7 @@ impl World {
             let scr_pos = pos - top_left;
             self.context
                 .draw_image_with_html_image_element_and_sw_and_sh_and_dx_and_dy_and_dw_and_dh(
-                    img_explosion,
+                    &self.img_explosion,
                     offset,
                     0.0,
                     100.0,
