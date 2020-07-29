@@ -120,7 +120,6 @@ impl World {
         // TODO handle maps smaller than canvas (currently crashes on unreachable)
         assert!(self.map.len() >= 20);
         assert!(self.map[0].len() >= 20);
-        // TODO print trace on unreachable?
         let camera_min = self.canvas_size / 2.0;
         let map_size = self.map_size();
         let camera_max = map_size - camera_min;
