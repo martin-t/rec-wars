@@ -171,7 +171,7 @@ impl World {
         )?;
 
         // Draw explosions
-        // TODO do CB explosions on walls happen, just invisible or not at all?
+        // TODO CB explosions happen on walls, just invisible
         for &(pos, frame) in &self.explosions {
             // TODO frame rate independence
             let real_frame = frame / 2; // the sprite is made for 30 fps
