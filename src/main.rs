@@ -68,6 +68,11 @@
 // [ ] analytics
 //      https://simpleanalytics.com/sandspiel.club - paid only
 // [ ] FAQ - stuttering/tearing due to compositor - Alt+Shift+f12 - somehow this doesn't work anymore
+// [ ] easter eggs
+//      BFG can shoot through walls touching on the corner (well, somewhat)
+//          detect when doing multiple times and print a message
+//              private?
+//              server say? (lol no collision detection?)
 // nice to have:
 // [ ] map editor - sharing maps, voting, recommended mode / number of bots
 // [ ] chat
