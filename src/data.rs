@@ -71,6 +71,9 @@ impl Map {
         &self[Vec2::new(c, r)]
     }
 
+    /// Converts world coords into tile position and offset within it.
+    ///
+    /// The returned index will always be within bounds.
     pub fn tile_pos(&self, pos: Vec2f) -> TilePos {
         let epsilon = self.maxs() * Vec2f::default_epsilon();
         let pos = pos.clamped(self.mins(), self.maxs() - epsilon);
