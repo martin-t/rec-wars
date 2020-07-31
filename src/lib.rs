@@ -205,6 +205,7 @@ impl World {
         self.explosions.retain(|expl| expl.1 < 26);
     }
 
+    // TODO worth it?
     /*fn draw_img(&self, img: &HtmlImageElement, world_pos: Vec2f, rot: f64) -> Result<(), JsValue> {
         Ok(())
     }
