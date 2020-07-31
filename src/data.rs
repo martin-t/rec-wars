@@ -1,10 +1,99 @@
-/// The value / 4 is index into texture_list.txt.
-/// The value % 4 is the rotation counterclockwise.
-pub fn load_map(text: &str) -> Vec<Vec<usize>> {
+use std::ops::Index;
+
+use vek::Vec2;
+
+pub type Vec2f = Vec2<f64>;
+pub type Vec2u = Vec2<usize>;
+
+pub const TILE_SIZE: f64 = 64.0;
+
+pub fn load_map(text: &str) -> Map {
     // TODO handle both CRLF and LF properly
-    text.split_terminator("\r\n")
-        .map(|line| line.split(" ").map(|tile| tile.parse().unwrap()).collect())
-        .collect()
+    let tiles = text
+        .split_terminator("\r\n")
+        .map(|line| {
+            line.split(" ")
+                .map(|tile| {
+                    let val: usize = tile.parse().unwrap();
+                    // TODO to rad
+                    Tile {
+                        surface: val / 4,
+                        rotation: (val % 4) as f64,
+                    }
+                })
+                .collect()
+        })
+        .collect();
+    Map::new(tiles)
+}
+
+#[derive(Debug, Clone)]
+pub struct Map {
+    tiles: Vec<Vec<Tile>>,
+}
+
+impl Map {
+    fn new(tiles: Vec<Vec<Tile>>) -> Self {
+        Map { tiles }
+    }
+
+    pub fn height(&self) -> usize {
+        self.tiles.len()
+    }
+
+    pub fn width(&self) -> usize {
+        self.tiles[0].len()
+    }
+
+    pub fn size(&self) -> Vec2u {
+        Vec2u::new(self.width(), self.height())
+    }
+
+    /// Col is x, row is y
+    pub fn col_row(&self, c: usize, r: usize) -> &Tile {
+        &self[Vec2::new(c, r)]
+    }
+
+    /// Highest possible coordinates / bottom right
+    pub fn maxs(&self) -> Vec2f {
+        self.size().as_() * TILE_SIZE
+    }
+}
+
+impl Index<Vec2u> for Map {
+    type Output = Tile;
+    fn index(&self, index: Vec2u) -> &Self::Output {
+        &self.tiles[index.y][index.x]
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct Tile {
+    /// Index into texture_list.txt
+    pub surface: usize,
+    /// Rotation counterclockwise
+    pub rotation: f64,
+}
+
+#[derive(Debug, Clone)]
+pub struct Surface {
+    name: String,
+    kind: Kind,
+    /// Seems to affect both turning and accellaration
+    friction: f32,
+    /// Maybe a multiplier for speed
+    speed: f32,
+}
+
+impl Surface {
+    fn new(name: String, kind: Kind, friction: f32, speed: f32) -> Self {
+        Self {
+            name,
+            kind,
+            friction,
+            speed,
+        }
+    }
 }
 
 /// Reverse engineered by modifying TextureList.txt and seeing what happens.
@@ -34,28 +123,7 @@ impl Kind {
     }
 }
 
-#[derive(Debug, Clone)]
-pub struct Tile {
-    name: String,
-    kind: Kind,
-    /// Seems to affect both turning and accellaration
-    friction: f32,
-    /// Maybe a multiplier for speed
-    speed: f32,
-}
-
-impl Tile {
-    fn new(name: String, kind: Kind, friction: f32, speed: f32) -> Self {
-        Self {
-            name,
-            kind,
-            friction,
-            speed,
-        }
-    }
-}
-
-pub fn load_textures(text: &str) -> Vec<Tile> {
+pub fn load_textures(text: &str) -> Vec<Surface> {
     // TODO handle both CRLF and LF properly OR use cvars instead
     // if using cvars, update load_map docs
     text.split_terminator("\r\n")
@@ -68,7 +136,7 @@ pub fn load_textures(text: &str) -> Vec<Tile> {
             let speed = parts.next().unwrap().parse().unwrap();
 
             let kind = Kind::new(kind_num).unwrap();
-            Tile::new(name.to_owned(), kind, friction, speed)
+            Surface::new(name.to_owned(), kind, friction, speed)
         })
         .collect()
 }
@@ -86,8 +154,8 @@ mod tests {
             let entry = entry.unwrap();
             let text = fs::read_to_string(entry.path()).unwrap();
             let map = load_map(&text);
-            assert_ne!(map.len(), 0);
-            assert_ne!(map[0].len(), 0);
+            assert_ne!(map.width(), 0);
+            assert_ne!(map.height(), 0);
             cnt += 1;
         }
         assert_ne!(cnt, 0);

@@ -4,25 +4,16 @@ mod data;
 
 use std::f64::consts::PI;
 
-use vek::ops::Clamp;
-use vek::Vec2;
-
 use js_sys::Array;
+
+use vek::ops::Clamp;
 
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 
 use web_sys::{CanvasRenderingContext2d, HtmlImageElement};
 
-use data::Tile;
-
-// TODO newtypes with Derefs? tile vs world pos vs screen pos
-type Vec2f = Vec2<f64>;
-type Vec2u = Vec2<usize>;
-
-type Map = Vec<Vec<usize>>;
-
-const TILE_SIZE: f64 = 64.0;
+use data::{Map, Surface, Vec2f, Vec2u, TILE_SIZE};
 
 #[wasm_bindgen]
 pub struct World {
@@ -30,7 +21,7 @@ pub struct World {
     canvas_size: Vec2f,
     imgs_textures: Vec<HtmlImageElement>,
     img_explosion: HtmlImageElement,
-    tiles: Vec<Tile>,
+    tiles: Vec<Surface>,
     map: Map,
     prev_update: f64,
     pos: Vec2f,
@@ -53,7 +44,10 @@ impl World {
     ) -> Self {
         console_error_panic_hook::set_once();
 
-        let imgs_textures = textures.iter().map(|tile| tile.dyn_into().unwrap()).collect();
+        let imgs_textures = textures
+            .iter()
+            .map(|tile| tile.dyn_into().unwrap())
+            .collect();
         let tiles = data::load_textures(textures_text);
         let map = data::load_map(map_text);
         Self {
@@ -91,7 +85,7 @@ impl World {
             self.pos.y = 0.0;
             self.vel.y = 0.0;
         }
-        let map_size = self.map_size();
+        let map_size = self.map.maxs();
         if self.pos.x >= map_size.x {
             self.pos.x = map_size.x;
             self.vel.x = 0.0;
@@ -101,28 +95,27 @@ impl World {
             self.vel.y = 0.0;
         }
 
-        let tile_pos = Self::to_tile(self.pos);
-        let tile = self.map[tile_pos.x][tile_pos.y];
-        let tex_index = tile / 4;
-        let tex = self.tiles[tex_index].clone();
+        let tile_pos = Self::to_tile_pos(self.pos);
+        let surface = self.map[tile_pos].surface;
+        let tex = self.tiles[surface].clone();
 
         // FIXME
-        self.debug_text(format!(
+        /*self.debug_text(format!(
             "{} tile {} tex index {} tex {:?}",
             tile_pos, tile, tex_index, tex
-        ));
-        for r in 0..self.map.len() {
+        ));*/
+        /*for r in 0..self.map.height() {
             self.debug_text(format!("{:?}", self.map[r]));
         }
         if tex_index == 4 || tex_index == 14 {
             self.explosions.push((self.pos, 0));
             self.pos = Vec2f::new(640.0, 640.0);
-        }
+        }*/
 
         self.prev_update = t;
     }
 
-    fn to_tile(pos: Vec2f) -> Vec2u {
+    fn to_tile_pos(pos: Vec2f) -> Vec2u {
         // FIXME clamp to bounds?
         (pos / TILE_SIZE).as_()
     }
@@ -134,17 +127,17 @@ impl World {
     ) -> Result<(), JsValue> {
         // Don't put the camera so close to the edge that it would render area outside the map.
         // TODO handle maps smaller than canvas (currently crashes on unreachable)
-        assert!(self.map.len() >= 20);
-        assert!(self.map[0].len() >= 20);
+        //assert!(self.map.len() >= 20);
+        //assert!(self.map[0].len() >= 20);
         let camera_min = self.canvas_size / 2.0;
-        let map_size = self.map_size();
+        let map_size = self.map.maxs();
         let camera_max = map_size - camera_min;
         let camera_pos = self.pos.clamped(camera_min, camera_max);
 
         // Draw background
         // This only works properly with positive numbers but it's ok since top left of the map is (0.0, 0.0).
         let top_left = camera_pos - camera_min;
-        let top_left_tile = Self::to_tile(top_left);
+        let top_left_tile = Self::to_tile_pos(top_left);
         let mut offset_in_tile = top_left % TILE_SIZE;
         // TODO align player? other?
         if align_to_pixels {
@@ -157,14 +150,13 @@ impl World {
             let mut r = top_left_tile.y;
             let mut y = -offset_in_tile.y;
             while y < self.canvas_size.y {
-                let index = self.map[r][c] / 4;
-                let img = &self.imgs_textures[index];
-                let rotation = self.map[r][c] % 4;
+                let tile = self.map.col_row(c, r);
+                let img = &self.imgs_textures[tile.surface];
 
                 // rotate counterclockwise around tile center
                 self.context
                     .translate(x + TILE_SIZE / 2.0, y + TILE_SIZE / 2.0)?;
-                self.context.rotate(rotation as f64 * -PI / 2.0)?;
+                self.context.rotate(tile.rotation * -PI / 2.0)?;
                 self.context.translate(-TILE_SIZE / 2.0, -TILE_SIZE / 2.0)?;
 
                 self.context
@@ -230,12 +222,5 @@ impl World {
     #[allow(unused)]
     fn debug_text<S: Into<String>>(&mut self, s: S) {
         self.debug_texts.push(s.into());
-    }
-
-    fn map_size(&self) -> Vec2f {
-        Vec2f::new(
-            self.map.len() as f64 * TILE_SIZE,
-            self.map[0].len() as f64 * TILE_SIZE,
-        )
     }
 }
