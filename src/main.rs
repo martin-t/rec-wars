@@ -82,5 +82,7 @@
 // [ ] splitscreen
 // [ ] figure out what webpack is and how to create a static site
 //      probably best template: https://github.com/rustwasm/rust-webpack-template
+// [ ] native binary
+//      [ ] make parsing return errors instead of crashing
 
 fn main() {}
