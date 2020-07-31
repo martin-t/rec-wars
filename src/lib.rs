@@ -130,19 +130,20 @@ impl World {
         // Draw background
         // This only works properly with positive numbers but it's ok since top left of the map is (0.0, 0.0).
         let top_left = camera_pos - camera_min;
-        // FIXME
-        let top_left_tile = self.map.tile_pos(top_left).index;
-        let mut offset_in_tile = top_left % TILE_SIZE;
+        let top_left_tp = self.map.tile_pos(top_left);
+        let top_left_index = top_left_tp.index;
+        let offset = if align_to_pixels {
+            top_left_tp.offset.floor()
+        } else {
+            top_left_tp.offset
+        };
         // TODO align player? other?
-        if align_to_pixels {
-            offset_in_tile = offset_in_tile.floor();
-        }
 
-        let mut r = top_left_tile.y;
-        let mut y = -offset_in_tile.y;
+        let mut r = top_left_index.y;
+        let mut y = -offset.y;
         while y < self.canvas_size.y {
-            let mut c = top_left_tile.x;
-            let mut x = -offset_in_tile.x;
+            let mut c = top_left_index.x;
+            let mut x = -offset.x;
             while x < self.canvas_size.x {
                 let tile = self.map.col_row(c, r);
                 let img = &self.imgs_textures[tile.surface];
