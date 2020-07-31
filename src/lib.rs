@@ -142,12 +142,12 @@ impl World {
             offset_in_tile = offset_in_tile.floor();
         }
 
-        let mut c = top_left_tile.x;
-        let mut x = -offset_in_tile.x;
-        while x < self.canvas_size.x {
-            let mut r = top_left_tile.y;
-            let mut y = -offset_in_tile.y;
-            while y < self.canvas_size.y {
+        let mut r = top_left_tile.y;
+        let mut y = -offset_in_tile.y;
+        while y < self.canvas_size.y {
+            let mut c = top_left_tile.x;
+            let mut x = -offset_in_tile.x;
+            while x < self.canvas_size.x {
                 let tile = self.map.col_row(c, r);
                 let img = &self.imgs_textures[tile.surface];
 
@@ -162,11 +162,11 @@ impl World {
 
                 self.context.reset_transform()?;
 
-                r += 1;
-                y += TILE_SIZE;
+                c += 1;
+                x += TILE_SIZE;
             }
-            c += 1;
-            x += TILE_SIZE;
+            r += 1;
+            y += TILE_SIZE;
         }
 
         // Draw player
