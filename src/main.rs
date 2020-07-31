@@ -8,7 +8,6 @@
 //      [ ] make explosion sprite smaller
 //      https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Tutorial/Optimizing_canvas
 //          [x] round to whole pixels (orig RW does it)
-//          [ ] layer canvases - background vs entities
 //          [ ] webgl
 // [x] pick a math lib, don't overthink it
 // [ ] engine? rendering crate? nice if native and WASM backends
@@ -35,9 +34,19 @@
 //          [ ] engine noise
 //              [ ] how does it change with speed?
 // [ ] CI - GH actions / travis, mirror to GL???
-// [ ] load maps
-// [ ] render tank, explosions
-// [ ] movement, collision detection, physics
+// [x] load maps
+// [ ] cvars
+// [ ] render tank
+// [x] explosions
+//      [ ] sizes
+// [ ] movement
+//      [ ] reverse steering
+// [ ] collision detection with proper traces
+//      [ ] walls
+//      [ ] vehicles
+// [ ] physics
+//      [ ] surfaces
+//      [ ] pushing wrecks
 // [ ] weapons
 // [ ] mines
 //      [ ] not within radius of base/cow
@@ -45,7 +54,10 @@
 // [ ] self destruct - bigger exposion, countdown, sounds
 // [ ] UI to select mode, map, bots, start game
 // [ ] fullscreen?
-// [ ] FFA, TW, CTC
+// [ ] FFA
+// [ ] TW
+// [ ] CTC
+//      [ ] cow movement
 // [ ] bot AI
 //      [ ] pathfinding - custom / from soko solver / crate?
 //          https://old.reddit.com/r/rust_gamedev/comments/hr7m3j/which_lib_do_you_use_for_pathfinding_in_you_games/
@@ -64,8 +76,11 @@
 //      [ ] prediction / reconciliation
 //          braid / jonathan blow - fps independent
 //          https://github.com/pond3r/ggpo/tree/master/doc
-// [ ] cvars
-//      [ ] voting
+// [ ] chat
+// [ ] voting
+//      [ ] mode
+//      [ ] map
+//      [ ] cvars
 // [ ] analytics
 //      https://simpleanalytics.com/sandspiel.club - paid only
 // [ ] FAQ - stuttering/tearing due to compositor - Alt+Shift+f12 - somehow this doesn't work anymore
@@ -76,7 +91,6 @@
 //              server say? (lol no collision detection?)
 // nice to have:
 // [ ] map editor - sharing maps, voting, recommended mode / number of bots
-// [ ] chat
 //      [ ] bots say hi/gg/sry/n1
 // [ ] log of past games (to show activity even if nobody currently online)
 // [ ] splitscreen

@@ -1,3 +1,4 @@
+// TODO nuke this, maybe keep fps
 let img_base = new Image();
 img_base.src = "../assets/tiles/Base.bmp";
 
