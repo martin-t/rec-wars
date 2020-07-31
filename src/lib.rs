@@ -59,7 +59,7 @@ impl World {
             map,
             prev_update: 0.0,
             pos: Vec2f::new(640.0, 640.0),
-            vel: Vec2f::new(0.02, 0.01),
+            vel: Vec2f::new(0.3, 0.2),
             explosions: Vec::new(),
             debug_texts: Vec::new(),
         }
@@ -73,7 +73,7 @@ impl World {
 
         let accell = 1.0 + up * 0.05 - down * 0.05;
         self.vel *= accell;
-        let angle: f64 = right * 1.5 - left * 1.5;
+        let angle: f64 = right * 2.5 - left * 2.5;
         self.vel.rotate_z(angle.to_radians());
     }
 
@@ -164,11 +164,14 @@ impl World {
 
         // Draw player
         let player_scr_pos = self.pos - top_left;
-        self.context.draw_image_with_html_image_element(
-            img_guided_missile,
-            player_scr_pos.x - 10.0,
-            player_scr_pos.y - 2.0,
-        )?;
+        self.context
+            .translate(player_scr_pos.x + 10.0, player_scr_pos.y + 2.0)?;
+        let angle = self.vel.y.atan2(self.vel.x) - PI;
+        self.context.rotate(angle)?;
+        self.context.translate(-10.0, -2.0)?;
+        self.context
+            .draw_image_with_html_image_element(img_guided_missile, 0.0, 0.0)?;
+        self.context.reset_transform()?;
 
         // Draw explosions
         // TODO CB explosions happen on walls, just partially obscured
