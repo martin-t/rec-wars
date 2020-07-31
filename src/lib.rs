@@ -127,8 +127,6 @@ impl World {
     ) -> Result<(), JsValue> {
         // Don't put the camera so close to the edge that it would render area outside the map.
         // TODO handle maps smaller than canvas (currently crashes on unreachable)
-        //assert!(self.map.len() >= 20);
-        //assert!(self.map[0].len() >= 20);
         let camera_min = self.canvas_size / 2.0;
         let map_size = self.map.maxs();
         let camera_max = map_size - camera_min;
