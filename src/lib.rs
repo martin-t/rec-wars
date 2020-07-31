@@ -71,9 +71,9 @@ impl World {
         // self.vel.y -= up * 0.01;
         // self.vel.y += down * 0.01;
 
-        let accell = 1.0 + up * 0.01 - down * 0.01;
+        let accell = 1.0 + up * 0.05 - down * 0.05;
         self.vel *= accell;
-        let angle: f64 = right * 5.0 - left * 5.0;
+        let angle: f64 = right * 1.5 - left * 1.5;
         self.vel.rotate_z(angle.to_radians());
     }
 
