@@ -108,12 +108,12 @@ pub struct Tile {
 
 #[derive(Debug, Clone)]
 pub struct Surface {
-    name: String,
-    kind: Kind,
+    pub name: String,
+    pub kind: Kind,
     /// Seems to affect both turning and accellaration
-    friction: f32,
+    pub friction: f32,
     /// Maybe a multiplier for speed
-    speed: f32,
+    pub speed: f32,
 }
 
 impl Surface {

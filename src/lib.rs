@@ -13,7 +13,7 @@ use wasm_bindgen::JsCast;
 
 use web_sys::{CanvasRenderingContext2d, HtmlImageElement};
 
-use data::{Map, Surface, Vec2f, Vec2u, TILE_SIZE};
+use data::{Kind, Map, Surface, Vec2f, Vec2u, TILE_SIZE};
 
 #[wasm_bindgen]
 pub struct World {
@@ -21,7 +21,7 @@ pub struct World {
     canvas_size: Vec2f,
     imgs_textures: Vec<HtmlImageElement>,
     img_explosion: HtmlImageElement,
-    tiles: Vec<Surface>,
+    surfaces: Vec<Surface>,
     map: Map,
     prev_update: f64,
     pos: Vec2f,
@@ -48,14 +48,14 @@ impl World {
             .iter()
             .map(|tile| tile.dyn_into().unwrap())
             .collect();
-        let tiles = data::load_textures(textures_text);
+        let surfaces = data::load_textures(textures_text);
         let map = data::load_map(map_text);
         Self {
             context,
             canvas_size: Vec2f::new(width, height),
             imgs_textures,
             img_explosion,
-            tiles,
+            surfaces,
             map,
             prev_update: 0.0,
             pos: Vec2f::new(640.0, 640.0),
@@ -97,7 +97,11 @@ impl World {
 
         let tile_pos = self.map.tile_pos(self.pos);
         let surface = self.map[tile_pos.index].surface;
-        let tex = self.tiles[surface].clone();
+        let kind = self.surfaces[surface].kind;
+        if kind == Kind::Wall {
+            self.explosions.push((self.pos, 0));
+            self.pos = Vec2f::new(640.0, 640.0);
+        }
 
         // FIXME
         /*self.debug_text(format!(
@@ -213,6 +217,21 @@ impl World {
         }
         self.explosions.retain(|expl| expl.1 < 26);
     }
+
+    /*fn draw_img(&self, img: &HtmlImageElement, world_pos: Vec2f, rot: f64) -> Result<(), JsValue> {
+        Ok(())
+    }
+
+    fn draw_sprite(
+        &self,
+        img: &HtmlImageElement,
+        world_pos: Vec2f,
+        rot: f64,
+        source_pos: Vec2f,
+        source_size: Vec2f,
+    ) -> Result<(), JsValue> {
+        Ok(())
+    }*/
 
     #[allow(unused)]
     fn debug_text<S: Into<String>>(&mut self, s: S) {
