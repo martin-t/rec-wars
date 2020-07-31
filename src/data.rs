@@ -50,14 +50,21 @@ impl Map {
         Vec2u::new(self.width(), self.height())
     }
 
+    /// Highest possible coordinates / bottom right
+    pub fn maxs(&self) -> Vec2f {
+        self.size().as_() * TILE_SIZE
+    }
+
     /// Col is x, row is y
     pub fn col_row(&self, c: usize, r: usize) -> &Tile {
         &self[Vec2::new(c, r)]
     }
 
-    /// Highest possible coordinates / bottom right
-    pub fn maxs(&self) -> Vec2f {
-        self.size().as_() * TILE_SIZE
+    pub fn tile_pos(&self, pos: Vec2f) -> TilePos {
+        // FIXME clamp to bounds?
+        let index = (pos / TILE_SIZE).as_();
+        let offset = pos % TILE_SIZE;
+        TilePos { index, offset }
     }
 }
 
@@ -66,6 +73,14 @@ impl Index<Vec2u> for Map {
     fn index(&self, index: Vec2u) -> &Self::Output {
         &self.tiles[index.y][index.x]
     }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct TilePos {
+    /// Position of the tile in the map
+    pub index: Vec2u,
+    /// Offset inside the tile
+    pub offset: Vec2f,
 }
 
 #[derive(Debug, Clone, Copy)]

@@ -95,8 +95,8 @@ impl World {
             self.vel.y = 0.0;
         }
 
-        let tile_pos = Self::to_tile_pos(self.pos);
-        let surface = self.map[tile_pos].surface;
+        let tile_pos = self.map.tile_pos(self.pos);
+        let surface = self.map[tile_pos.index].surface;
         let tex = self.tiles[surface].clone();
 
         // FIXME
@@ -115,11 +115,6 @@ impl World {
         self.prev_update = t;
     }
 
-    fn to_tile_pos(pos: Vec2f) -> Vec2u {
-        // FIXME clamp to bounds?
-        (pos / TILE_SIZE).as_()
-    }
-
     pub fn draw(
         &mut self,
         img_guided_missile: &HtmlImageElement,
@@ -135,7 +130,8 @@ impl World {
         // Draw background
         // This only works properly with positive numbers but it's ok since top left of the map is (0.0, 0.0).
         let top_left = camera_pos - camera_min;
-        let top_left_tile = Self::to_tile_pos(top_left);
+        // FIXME
+        let top_left_tile = self.map.tile_pos(top_left).index;
         let mut offset_in_tile = top_left % TILE_SIZE;
         // TODO align player? other?
         if align_to_pixels {
