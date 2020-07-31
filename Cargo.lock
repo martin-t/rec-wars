@@ -90,6 +90,7 @@ dependencies = [
 name = "rec-wars"
 version = "0.1.0"
 dependencies = [
+ "approx 0.3.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "console_error_panic_hook 0.1.6 (registry+https://github.com/rust-lang/crates.io-index)",
  "js-sys 0.3.42 (registry+https://github.com/rust-lang/crates.io-index)",
  "vek 0.11.2 (registry+https://github.com/rust-lang/crates.io-index)",

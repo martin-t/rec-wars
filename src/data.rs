@@ -1,5 +1,8 @@
 use std::ops::Index;
 
+use approx::AbsDiffEq;
+
+use vek::Clamp;
 use vek::Vec2;
 
 pub type Vec2f = Vec2<f64>;
@@ -50,6 +53,14 @@ impl Map {
         Vec2u::new(self.width(), self.height())
     }
 
+    /// Lowest possible coordinates / top left
+    ///
+    /// Currently for simplicity always 0,0.
+    /// Might change in the future e.g. if symmetry is easier with 0,0 in the center.
+    pub fn mins(&self) -> Vec2f {
+        Vec2::new(0.0, 0.0)
+    }
+
     /// Highest possible coordinates / bottom right
     pub fn maxs(&self) -> Vec2f {
         self.size().as_() * TILE_SIZE
@@ -61,7 +72,8 @@ impl Map {
     }
 
     pub fn tile_pos(&self, pos: Vec2f) -> TilePos {
-        // FIXME clamp to bounds?
+        let epsilon = self.maxs() * Vec2f::default_epsilon();
+        let pos = pos.clamped(self.mins(), self.maxs() - epsilon);
         let index = (pos / TILE_SIZE).as_();
         let offset = pos % TILE_SIZE;
         TilePos { index, offset }
