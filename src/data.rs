@@ -45,6 +45,7 @@ impl Map {
         self.tiles[0].len()
     }
 
+    /// Width, height / cols, rows / x, y
     pub fn size(&self) -> Vec2u {
         Vec2u::new(self.width(), self.height())
     }
