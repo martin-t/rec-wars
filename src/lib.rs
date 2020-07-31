@@ -13,7 +13,7 @@ use wasm_bindgen::JsCast;
 
 use web_sys::{CanvasRenderingContext2d, HtmlImageElement};
 
-use data::{Kind, Map, Surface, Vec2f, Vec2u, TILE_SIZE};
+use data::{Kind, Map, Surface, Vec2f, TILE_SIZE};
 
 #[wasm_bindgen]
 pub struct World {
@@ -102,19 +102,6 @@ impl World {
             self.explosions.push((self.pos, 0));
             self.pos = Vec2f::new(640.0, 640.0);
         }
-
-        // FIXME
-        /*self.debug_text(format!(
-            "{} tile {} tex index {} tex {:?}",
-            tile_pos, tile, tex_index, tex
-        ));*/
-        /*for r in 0..self.map.height() {
-            self.debug_text(format!("{:?}", self.map[r]));
-        }
-        if tex_index == 4 || tex_index == 14 {
-            self.explosions.push((self.pos, 0));
-            self.pos = Vec2f::new(640.0, 640.0);
-        }*/
 
         self.prev_update = t;
     }
