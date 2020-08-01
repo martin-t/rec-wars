@@ -124,7 +124,6 @@ impl World {
         let camera_max = map_size - camera_min;
         let camera_pos = self.pos.clamped(camera_min, camera_max);
 
-        // Draw background
         // This only works properly with positive numbers but it's ok since top left of the map is (0.0, 0.0).
         let top_left = camera_pos - camera_min;
         let top_left_tp = self.map.tile_pos(top_left);
@@ -136,6 +135,7 @@ impl World {
         };
         // TODO align player? other?
 
+        // Draw non-walls
         let mut r = top_left_index.y;
         let mut y = -offset.y;
         while y < self.canvas_size.y {
@@ -143,9 +143,11 @@ impl World {
             let mut x = -offset.x;
             while x < self.canvas_size.x {
                 let tile = self.map.col_row(c, r);
-                let img = &self.imgs_textures[tile.surface];
 
-                self.draw_img(img, Vec2::new(x, y), tile.rotation)?;
+                if self.surfaces[tile.surface].kind != Kind::Wall {
+                    let img = &self.imgs_textures[tile.surface];
+                    self.draw_img(img, Vec2::new(x, y), tile.rotation)?;
+                }
 
                 c += 1;
                 x += TILE_SIZE;
@@ -178,6 +180,27 @@ impl World {
                     100.0,
                     100.0,
                 )?;
+        }
+
+        // Draw walls
+        let mut r = top_left_index.y;
+        let mut y = -offset.y;
+        while y < self.canvas_size.y {
+            let mut c = top_left_index.x;
+            let mut x = -offset.x;
+            while x < self.canvas_size.x {
+                let tile = self.map.col_row(c, r);
+
+                if self.surfaces[tile.surface].kind == Kind::Wall {
+                    let img = &self.imgs_textures[tile.surface];
+                    self.draw_img(img, Vec2::new(x, y), tile.rotation)?;
+                }
+
+                c += 1;
+                x += TILE_SIZE;
+            }
+            r += 1;
+            y += TILE_SIZE;
         }
 
         // Draw debug text
