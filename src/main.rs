@@ -35,7 +35,9 @@
 //              [ ] how does it change with speed?
 // [ ] CI - GH actions / travis, mirror to GL???
 // [x] load maps
-// [ ] cvars
+// [x] cvars
+//      https://crates.io/crates/cvar
+//      https://crates.io/crates/amethyst-console
 // [ ] render tank
 // [x] explosions
 //      [ ] sizes

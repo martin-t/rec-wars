@@ -1,5 +1,6 @@
 // TODO lints
 
+mod cvars;
 mod data;
 
 use std::f64::consts::PI;
@@ -14,6 +15,7 @@ use wasm_bindgen::JsCast;
 
 use web_sys::{CanvasRenderingContext2d, HtmlImageElement};
 
+use cvars::Cvars;
 use data::{Kind, Map, Surface, Vec2f, TILE_SIZE};
 
 #[wasm_bindgen]
@@ -73,15 +75,12 @@ impl World {
         format!("{:#?}", self)
     }
 
-    pub fn input(&mut self, left: f64, right: f64, up: f64, down: f64) {
-        // self.vel.x -= left * 0.01;
-        // self.vel.x += right * 0.01;
-        // self.vel.y -= up * 0.01;
-        // self.vel.y += down * 0.01;
-
+    pub fn input(&mut self, cvars: &Cvars, left: f64, right: f64, up: f64, down: f64) {
         let accell = 1.0 + up * 0.05 - down * 0.05;
         self.vel *= accell;
-        let angle: f64 = right * 2.5 - left * 2.5;
+
+        let tr = cvars.g_guided_missile_turn_rate;
+        let angle: f64 = right * tr - left * tr;
         self.vel.rotate_z(angle.to_radians());
     }
 

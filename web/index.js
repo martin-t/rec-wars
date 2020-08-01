@@ -8,7 +8,7 @@
 // will "boot" the module and make it ready to use. Currently browsers
 // don't support natively imported WebAssembly as an ES module, but
 // eventually the manual initialization won't be required!
-import init, { World } from '../pkg/rec_wars.js';
+import init, { World, Cvars } from '../pkg/rec_wars.js';
 
 async function run() {
     // First up we need to actually load the wasm file, so we use the
@@ -137,7 +137,17 @@ async function run() {
 
     let play = (tex_list_text, map_text) => {
         const world = new World(ctx, canvas.width, canvas.height, imgs_textures, img_explosion, tex_list_text, map_text);
-        window.world = world; // useful for debugging
+        // For now, cvars need to live on the JS heap and be passed into each function that needs them.
+        // I couldn't find a better way to make them mutable in JS and readable in Rust:
+        // - can't return references from Rust into JS
+        // - can't have a reference in World
+        // - owned pub cvars in World need to be copy -> can't be changed from JS (changing will have no effect)
+        // - TODO try returning Rc/Arc
+        const cvars = new Cvars();
+
+        // Make some game objects available on window for easier debugging.
+        window.world = world;
+        window.cvars = cvars;
 
         const frame = (t) => {
             // Apparently it's best practice to call requestAnimationFrame at the start of the frame.
@@ -147,7 +157,7 @@ async function run() {
             const handle = window.requestAnimationFrame(frame);
 
             try {
-                world.input(left, right, up, down);
+                world.input(cvars, left, right, up, down);
                 world.update_pre(t);
                 world.draw(img_guided_missile, true);
                 world.update_post();
