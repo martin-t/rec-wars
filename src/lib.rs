@@ -127,7 +127,7 @@ impl World {
         let top_left = camera_pos - camera_min;
         let top_left_tp = self.map.tile_pos(top_left);
         let top_left_index = top_left_tp.index;
-        let offset = if align_to_pixels {
+        let bg_offset = if align_to_pixels {
             top_left_tp.offset.floor()
         } else {
             top_left_tp.offset
@@ -136,10 +136,10 @@ impl World {
 
         // Draw non-walls
         let mut r = top_left_index.y;
-        let mut y = -offset.y;
+        let mut y = -bg_offset.y;
         while y < self.canvas_size.y {
             let mut c = top_left_index.x;
-            let mut x = -offset.x;
+            let mut x = -bg_offset.x;
             while x < self.canvas_size.x {
                 let tile = self.map.col_row(c, r);
 
@@ -183,10 +183,10 @@ impl World {
 
         // Draw walls
         let mut r = top_left_index.y;
-        let mut y = -offset.y;
+        let mut y = -bg_offset.y;
         while y < self.canvas_size.y {
             let mut c = top_left_index.x;
-            let mut x = -offset.x;
+            let mut x = -bg_offset.x;
             while x < self.canvas_size.x {
                 let tile = self.map.col_row(c, r);
 
