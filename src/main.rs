@@ -48,6 +48,15 @@
 //      [ ] surfaces
 //      [ ] pushing wrecks
 // [ ] weapons
+//      [ ] MG - more on hovercraft
+//      [ ] rail - from chassis on hummer
+//      [ ] CB
+//          [ ] explosions happen on walls, just partially obscured
+//          [ ] reflect off map edge
+//      [ ] rockets - do they accell?
+//      [ ] homing missile
+//      [ ] guided missile
+//      [ ] BFG - delay? speed change? range? random dir when dead? explosion range (through wall)?
 // [ ] mines
 //      [ ] not within radius of base/cow
 // [ ] shadows
