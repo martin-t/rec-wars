@@ -7,6 +7,7 @@ use std::f64::consts::PI;
 use js_sys::Array;
 
 use vek::ops::Clamp;
+use vek::Vec2;
 
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
@@ -144,16 +145,17 @@ impl World {
                 let tile = self.map.col_row(c, r);
                 let img = &self.imgs_textures[tile.surface];
 
-                // rotate counterclockwise around tile center
-                self.context
-                    .translate(x + TILE_SIZE / 2.0, y + TILE_SIZE / 2.0)?;
-                self.context.rotate(tile.rotation * -PI / 2.0)?;
-                self.context.translate(-TILE_SIZE / 2.0, -TILE_SIZE / 2.0)?;
+                // // rotate counterclockwise around tile center
+                // self.context
+                //     .translate(x + img.natural_width() as f64 / 2.0, y + TILE_SIZE / 2.0)?;
+                // self.context.rotate(tile.rotation * -PI / 2.0)?;
+                // self.context.translate(-TILE_SIZE / 2.0, -TILE_SIZE / 2.0)?;
 
-                self.context
-                    .draw_image_with_html_image_element(img, 0.0, 0.0)?;
+                // self.context
+                //     .draw_image_with_html_image_element(img, 0.0, 0.0)?;
 
-                self.context.reset_transform()?;
+                // self.context.reset_transform()?;
+                self.draw_img(img, Vec2::new(x, y), tile.rotation)?;
 
                 c += 1;
                 x += TILE_SIZE;
@@ -213,21 +215,32 @@ impl World {
         self.explosions.retain(|expl| expl.1 < 26);
     }
 
-    // TODO worth it?
-    /*fn draw_img(&self, img: &HtmlImageElement, world_pos: Vec2f, rot: f64) -> Result<(), JsValue> {
+    fn draw_img(&self, img: &HtmlImageElement, screen_pos: Vec2f, rot: f64) -> Result<(), JsValue> {
+        // rotate counterclockwise around tile center
+        let size = Vec2::new(img.natural_width(), img.natural_height()).as_() / 2.0;
+        self.context
+            .translate(screen_pos.x + size.x, screen_pos.y + size.y)?;
+        self.context.rotate(rot * -PI / 2.0)?; // FIXME
+
+        //self.context.translate(-TILE_SIZE / 2.0, -TILE_SIZE / 2.0)?;
+
+        self.context
+            .draw_image_with_html_image_element(img, -size.x, -size.y)?;
+
+        self.context.reset_transform()?;
         Ok(())
     }
 
-    fn draw_sprite(
-        &self,
-        img: &HtmlImageElement,
-        world_pos: Vec2f,
-        rot: f64,
-        source_pos: Vec2f,
-        source_size: Vec2f,
-    ) -> Result<(), JsValue> {
-        Ok(())
-    }*/
+    // fn draw_sprite(
+    //     &self,
+    //     img: &HtmlImageElement,
+    //     world_pos: Vec2f,
+    //     rot: f64,
+    //     source_pos: Vec2f,
+    //     source_size: Vec2f,
+    // ) -> Result<(), JsValue> {
+    //     Ok(())
+    // }
 
     #[allow(unused)]
     fn debug_text<S: Into<String>>(&mut self, s: S) {
