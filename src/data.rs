@@ -1,4 +1,5 @@
 use std::ops::Index;
+use std::f64::consts::PI;
 
 use approx::AbsDiffEq;
 
@@ -21,7 +22,7 @@ pub fn load_map(text: &str) -> Map {
                     // TODO to rad
                     Tile {
                         surface: val / 4,
-                        rotation: (val % 4) as f64,
+                        rotation: (val % 4) as f64 * -PI / 2.0,
                     }
                 })
                 .collect()
@@ -102,7 +103,7 @@ pub struct TilePos {
 pub struct Tile {
     /// Index into texture_list.txt
     pub surface: usize,
-    /// Rotation counterclockwise
+    /// Rotation counterclockwise in radians
     pub rotation: f64,
 }
 

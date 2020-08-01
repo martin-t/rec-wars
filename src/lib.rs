@@ -154,8 +154,9 @@ impl World {
             y += TILE_SIZE;
         }
 
-        // Draw player
+        // Draw missile
         let player_scr_pos = self.pos - top_left;
+        //self.draw_img(img_guided_missile, player_scr_pos, rot)
         self.context
             .translate(player_scr_pos.x + 10.0, player_scr_pos.y + 2.0)?;
         let angle = self.vel.y.atan2(self.vel.x) - PI;
@@ -210,7 +211,7 @@ impl World {
         let half_size = Vec2::new(img.natural_width(), img.natural_height()).as_() / 2.0;
         self.context
             .translate(screen_pos.x + half_size.x, screen_pos.y + half_size.y)?;
-        self.context.rotate(rot * -PI / 2.0)?; // FIXME
+        self.context.rotate(rot)?;
 
         // Now back off to the img's corner and draw it.
         // This can be done either by translating -half_size, then drawing at 0,0
