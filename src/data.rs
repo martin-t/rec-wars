@@ -1,5 +1,5 @@
-use std::ops::Index;
 use std::f64::consts::PI;
+use std::ops::Index;
 
 use approx::AbsDiffEq;
 
@@ -11,7 +11,7 @@ pub type Vec2u = Vec2<usize>;
 
 pub const TILE_SIZE: f64 = 64.0;
 
-pub fn load_map(text: &str) -> Map {
+pub fn load_map(text: &str, surfaces: &[Surface]) -> Map {
     // TODO handle both CRLF and LF properly
     let tiles = text
         .split_terminator("\r\n")
@@ -28,17 +28,35 @@ pub fn load_map(text: &str) -> Map {
                 .collect()
         })
         .collect();
-    Map::new(tiles)
+    Map::new(tiles, surfaces)
 }
 
 #[derive(Debug, Clone)]
 pub struct Map {
     tiles: Vec<Vec<Tile>>,
+    spawns: Vec<Vec2u>,
+    bases: Vec<Vec2u>,
 }
 
 impl Map {
-    fn new(tiles: Vec<Vec<Tile>>) -> Self {
-        Map { tiles }
+    fn new(tiles: Vec<Vec<Tile>>, surfaces: &[Surface]) -> Self {
+        let mut spawns = Vec::new();
+        let mut bases = Vec::new();
+        for (r, row) in tiles.iter().enumerate() {
+            for (c, tile) in row.iter().enumerate() {
+                let kind = surfaces[tile.surface].kind;
+                if kind == Kind::Spawn {
+                    spawns.push(Vec2u::new(c, r));
+                } else if kind == Kind::Base {
+                    bases.push(Vec2u::new(c, r));
+                }
+            }
+        }
+        Map {
+            tiles,
+            spawns,
+            bases,
+        }
     }
 
     pub fn height(&self) -> usize {
@@ -183,12 +201,22 @@ mod tests {
     use std::fs;
 
     #[test]
+    fn test_loading_texture_list() {
+        let text = fs::read_to_string("assets/texture_list.txt").unwrap();
+        let textures = load_textures(&text);
+        assert_ne!(textures.len(), 0);
+    }
+
+    #[test]
     fn test_loading_maps() {
         let mut cnt = 0;
+
+        let textures_text = fs::read_to_string("assets/texture_list.txt").unwrap();
+        let textures = load_textures(&textures_text);
         for entry in fs::read_dir("maps").unwrap() {
             let entry = entry.unwrap();
-            let text = fs::read_to_string(entry.path()).unwrap();
-            let map = load_map(&text);
+            let map_text = fs::read_to_string(entry.path()).unwrap();
+            let map = load_map(&map_text, &textures);
             assert_ne!(map.width(), 0);
             assert_ne!(map.height(), 0);
             cnt += 1;
@@ -197,9 +225,17 @@ mod tests {
     }
 
     #[test]
-    fn test_loading_texture_list() {
-        let text = fs::read_to_string("assets/texture_list.txt").unwrap();
-        let textures = load_textures(&text);
-        assert_ne!(textures.len(), 0);
+    fn test_map_a_simple_plan() {
+        let textures_text = fs::read_to_string("assets/texture_list.txt").unwrap();
+        let textures = load_textures(&textures_text);
+        let map_text = fs::read_to_string("maps/A simple plan (2).map").unwrap();
+        let map = load_map(&map_text, &textures);
+        assert_eq!(map.width(), 55);
+        assert_eq!(map.height(), 23);
+        assert_eq!(map.size(), Vec2u::new(55, 23));
+        assert_eq!(map.mins(), Vec2f::new(0.0, 0.0));
+        assert_eq!(map.maxs(), Vec2f::new(55.0 * 64.0, 23.0 * 64.0));
+        assert_eq!(map.spawns.len(), 24);
+        assert_eq!(map.bases.len(), 2);
     }
 }

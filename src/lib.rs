@@ -50,7 +50,7 @@ impl World {
             .map(|tile| tile.dyn_into().unwrap())
             .collect();
         let surfaces = data::load_textures(textures_text);
-        let map = data::load_map(map_text);
+        let map = data::load_map(map_text, &surfaces);
         Self {
             context,
             canvas_size: Vec2f::new(width, height),
@@ -166,7 +166,6 @@ impl World {
         self.draw_img(img_guided_missile, player_scr_pos, angle)?;
 
         // Draw explosions
-        // TODO CB explosions happen on walls, just partially obscured
         for &(pos, frame) in &self.explosions {
             // TODO frame rate independence
             let real_frame = frame / 2; // the sprite is made for 30 fps
