@@ -145,16 +145,6 @@ impl World {
                 let tile = self.map.col_row(c, r);
                 let img = &self.imgs_textures[tile.surface];
 
-                // // rotate counterclockwise around tile center
-                // self.context
-                //     .translate(x + img.natural_width() as f64 / 2.0, y + TILE_SIZE / 2.0)?;
-                // self.context.rotate(tile.rotation * -PI / 2.0)?;
-                // self.context.translate(-TILE_SIZE / 2.0, -TILE_SIZE / 2.0)?;
-
-                // self.context
-                //     .draw_image_with_html_image_element(img, 0.0, 0.0)?;
-
-                // self.context.reset_transform()?;
                 self.draw_img(img, Vec2::new(x, y), tile.rotation)?;
 
                 c += 1;
@@ -216,16 +206,17 @@ impl World {
     }
 
     fn draw_img(&self, img: &HtmlImageElement, screen_pos: Vec2f, rot: f64) -> Result<(), JsValue> {
-        // rotate counterclockwise around tile center
-        let size = Vec2::new(img.natural_width(), img.natural_height()).as_() / 2.0;
+        // Rotate counterclockwise around img center.
+        let half_size = Vec2::new(img.natural_width(), img.natural_height()).as_() / 2.0;
         self.context
-            .translate(screen_pos.x + size.x, screen_pos.y + size.y)?;
+            .translate(screen_pos.x + half_size.x, screen_pos.y + half_size.y)?;
         self.context.rotate(rot * -PI / 2.0)?; // FIXME
 
-        //self.context.translate(-TILE_SIZE / 2.0, -TILE_SIZE / 2.0)?;
-
+        // Now back off to the img's corner and draw it.
+        // This can be done either by translating -half_size, then drawing at 0,0
+        // or at once by drawing at -half_size which his perhaps marginally more efficient.
         self.context
-            .draw_image_with_html_image_element(img, -size.x, -size.y)?;
+            .draw_image_with_html_image_element(img, -half_size.x, -half_size.y)?;
 
         self.context.reset_transform()?;
         Ok(())
