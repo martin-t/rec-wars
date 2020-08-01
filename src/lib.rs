@@ -156,15 +156,8 @@ impl World {
 
         // Draw missile
         let player_scr_pos = self.pos - top_left;
-        //self.draw_img(img_guided_missile, player_scr_pos, rot)
-        self.context
-            .translate(player_scr_pos.x + 10.0, player_scr_pos.y + 2.0)?;
         let angle = self.vel.y.atan2(self.vel.x) - PI;
-        self.context.rotate(angle)?;
-        self.context.translate(-10.0, -2.0)?;
-        self.context
-            .draw_image_with_html_image_element(img_guided_missile, 0.0, 0.0)?;
-        self.context.reset_transform()?;
+        self.draw_img(img_guided_missile, player_scr_pos, angle)?;
 
         // Draw explosions
         // TODO CB explosions happen on walls, just partially obscured
