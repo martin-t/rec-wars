@@ -124,7 +124,6 @@ impl World {
         let camera_max = map_size - camera_min;
         let camera_pos = self.pos.clamped(camera_min, camera_max);
 
-        // This only works properly with positive numbers but it's ok since top left of the map is (0.0, 0.0).
         let top_left = camera_pos - camera_min;
         let top_left_tp = self.map.tile_pos(top_left);
         let top_left_index = top_left_tp.index;

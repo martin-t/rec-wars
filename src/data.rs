@@ -59,6 +59,7 @@ impl Map {
     /// Currently for simplicity always 0,0.
     /// Might change in the future e.g. if symmetry is easier with 0,0 in the center.
     pub fn mins(&self) -> Vec2f {
+        // NOTE: if changing mins to be negative, check all uses of the modulo operator
         Vec2::new(0.0, 0.0)
     }
 
@@ -79,6 +80,8 @@ impl Map {
         let epsilon = self.maxs() * Vec2f::default_epsilon();
         let pos = pos.clamped(self.mins(), self.maxs() - epsilon);
         let index = (pos / TILE_SIZE).as_();
+        // This only works properly with positive numbers but it's ok
+        // as long as top left of the map is (0.0, 0.0).
         let offset = pos % TILE_SIZE;
         TilePos { index, offset }
     }
