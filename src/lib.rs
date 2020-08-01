@@ -117,6 +117,10 @@ impl World {
         img_guided_missile: &HtmlImageElement,
         align_to_pixels: bool,
     ) -> Result<(), JsValue> {
+        // Nicer rockets (more like original RW)
+        // TODO how does it interact with aligning?
+        self.context.set_image_smoothing_enabled(false);
+
         // Don't put the camera so close to the edge that it would render area outside the map.
         // TODO handle maps smaller than canvas (currently crashes on unreachable)
         let camera_min = self.canvas_size / 2.0;
