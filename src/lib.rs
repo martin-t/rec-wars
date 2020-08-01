@@ -157,6 +157,7 @@ impl World {
 
         // Draw missile
         let player_scr_pos = self.pos - top_left;
+        // -PI because the img points left
         let angle = self.vel.y.atan2(self.vel.x) - PI;
         self.draw_img(img_guided_missile, player_scr_pos, angle)?;
 
