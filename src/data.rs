@@ -176,7 +176,7 @@ impl Kind {
     }
 }
 
-pub fn load_textures(text: &str) -> Vec<Surface> {
+pub fn load_tex_list(text: &str) -> Vec<Surface> {
     // TODO handle both CRLF and LF properly OR use cvars instead
     // if using cvars, update load_map docs
     text.split_terminator("\r\n")
@@ -201,22 +201,22 @@ mod tests {
     use std::fs;
 
     #[test]
-    fn test_loading_texture_list() {
+    fn test_loading_tex_list() {
         let text = fs::read_to_string("assets/texture_list.txt").unwrap();
-        let textures = load_textures(&text);
-        assert_ne!(textures.len(), 0);
+        let surfaces = load_tex_list(&text);
+        assert_ne!(surfaces.len(), 0);
     }
 
     #[test]
     fn test_loading_maps() {
         let mut cnt = 0;
 
-        let textures_text = fs::read_to_string("assets/texture_list.txt").unwrap();
-        let textures = load_textures(&textures_text);
+        let tex_list_text = fs::read_to_string("assets/texture_list.txt").unwrap();
+        let surfaces = load_tex_list(&tex_list_text);
         for entry in fs::read_dir("maps").unwrap() {
             let entry = entry.unwrap();
             let map_text = fs::read_to_string(entry.path()).unwrap();
-            let map = load_map(&map_text, &textures);
+            let map = load_map(&map_text, &surfaces);
             assert_ne!(map.width(), 0);
             assert_ne!(map.height(), 0);
             cnt += 1;
@@ -226,10 +226,10 @@ mod tests {
 
     #[test]
     fn test_map_a_simple_plan() {
-        let textures_text = fs::read_to_string("assets/texture_list.txt").unwrap();
-        let textures = load_textures(&textures_text);
+        let tex_list_text = fs::read_to_string("assets/texture_list.txt").unwrap();
+        let surfaces = load_tex_list(&tex_list_text);
         let map_text = fs::read_to_string("maps/A simple plan (2).map").unwrap();
-        let map = load_map(&map_text, &textures);
+        let map = load_map(&map_text, &surfaces);
         assert_eq!(map.width(), 55);
         assert_eq!(map.height(), 23);
         assert_eq!(map.size(), Vec2u::new(55, 23));

@@ -40,7 +40,7 @@ impl World {
         height: f64,
         textures: Array,
         img_explosion: HtmlImageElement,
-        textures_text: &str,
+        tex_list_text: &str,
         map_text: &str,
     ) -> Self {
         console_error_panic_hook::set_once();
@@ -49,7 +49,7 @@ impl World {
             .iter()
             .map(|tile| tile.dyn_into().unwrap())
             .collect();
-        let surfaces = data::load_textures(textures_text);
+        let surfaces = data::load_tex_list(tex_list_text);
         let map = data::load_map(map_text, &surfaces);
         Self {
             context,
