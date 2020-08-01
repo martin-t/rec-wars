@@ -46,10 +46,12 @@ impl World {
     ) -> Self {
         console_error_panic_hook::set_once();
 
+        // TODO try https://rustwasm.github.io/docs/wasm-bindgen/reference/types/boxed-jsvalue-slice.html
         let imgs_textures = textures
             .iter()
             .map(|tile| tile.dyn_into().unwrap())
             .collect();
+
         let surfaces = data::load_tex_list(tex_list_text);
         let map = data::load_map(map_text, &surfaces);
         Self {
