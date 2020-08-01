@@ -17,6 +17,7 @@ use web_sys::{CanvasRenderingContext2d, HtmlImageElement};
 use data::{Kind, Map, Surface, Vec2f, TILE_SIZE};
 
 #[wasm_bindgen]
+#[derive(Debug, Clone)]
 pub struct World {
     context: CanvasRenderingContext2d,
     canvas_size: Vec2f,
@@ -64,6 +65,10 @@ impl World {
             explosions: Vec::new(),
             debug_texts: Vec::new(),
         }
+    }
+
+    pub fn to_debug_string(&self) -> String {
+        format!("{:#?}", self)
     }
 
     pub fn input(&mut self, left: f64, right: f64, up: f64, down: f64) {
@@ -241,17 +246,6 @@ impl World {
         self.context.reset_transform()?;
         Ok(())
     }
-
-    // fn draw_sprite(
-    //     &self,
-    //     img: &HtmlImageElement,
-    //     world_pos: Vec2f,
-    //     rot: f64,
-    //     source_pos: Vec2f,
-    //     source_size: Vec2f,
-    // ) -> Result<(), JsValue> {
-    //     Ok(())
-    // }
 
     #[allow(unused)]
     fn debug_text<S: Into<String>>(&mut self, s: S) {

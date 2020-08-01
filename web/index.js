@@ -137,6 +137,7 @@ async function run() {
 
     let play = (tex_list_text, map_text) => {
         const world = new World(ctx, canvas.width, canvas.height, imgs_textures, img_explosion, tex_list_text, map_text);
+        window.world = world; // useful for debugging
 
         const frame = (t) => {
             // Apparently it's best practice to call requestAnimationFrame at the start of the frame.
