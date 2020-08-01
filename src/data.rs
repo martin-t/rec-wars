@@ -11,26 +11,6 @@ pub type Vec2u = Vec2<usize>;
 
 pub const TILE_SIZE: f64 = 64.0;
 
-pub fn load_map(text: &str, surfaces: &[Surface]) -> Map {
-    // TODO handle both CRLF and LF properly
-    let tiles = text
-        .split_terminator("\r\n")
-        .map(|line| {
-            line.split(" ")
-                .map(|tile| {
-                    let val: usize = tile.parse().unwrap();
-                    // TODO to rad
-                    Tile {
-                        surface: val / 4,
-                        rotation: (val % 4) as f64 * -PI / 2.0,
-                    }
-                })
-                .collect()
-        })
-        .collect();
-    Map::new(tiles, surfaces)
-}
-
 #[derive(Debug, Clone)]
 pub struct Map {
     tiles: Vec<Vec<Tile>>,
@@ -174,6 +154,26 @@ impl Kind {
             _ => None,
         }
     }
+}
+
+pub fn load_map(text: &str, surfaces: &[Surface]) -> Map {
+    // TODO handle both CRLF and LF properly
+    let tiles = text
+        .split_terminator("\r\n")
+        .map(|line| {
+            line.split(" ")
+                .map(|tile| {
+                    let val: usize = tile.parse().unwrap();
+                    // TODO to rad
+                    Tile {
+                        surface: val / 4,
+                        rotation: (val % 4) as f64 * -PI / 2.0,
+                    }
+                })
+                .collect()
+        })
+        .collect();
+    Map::new(tiles, surfaces)
 }
 
 pub fn load_tex_list(text: &str) -> Vec<Surface> {
