@@ -5,13 +5,18 @@ Rec Wars
 
 A top-down vehicle shooter based on an old Windows game called RecWar.
 
+TODO screenshot - clicking opens game?
+TODO Key Features
+
 Rec Wars aims to have similar gameplay as the original RecWar but not identical since it would be impossible to replicate exactly without decompiling the binary.
 
 Additionally I suspect RecWar was balanced for playing against bots and might result in annoying strats when people start [playing to win](http://www.sirlin.net/articles/playing-to-win). E.g. with enough mines, the cow can be made completely inaccessible, especially to less maneuverable vehicles like the hovercraft. Experience from other poorly designed games also shows large areas will be dominated by instant-hit weapons (here the Railgun) and there might simply be no way to get across the map without getting hit.
 
 TODO badges (flat like https://github.com/dtolnay/enumn ?)
-TODO screenshot - clicking opens game?
 TODO github description, tags
+
+TODO describe impl basics - ecs, net, AI
+TODO contributing
 
 note to self:
     - fix npm
