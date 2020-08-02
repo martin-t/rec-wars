@@ -16,7 +16,9 @@ TODO badges (flat like https://github.com/dtolnay/enumn ?)
 TODO github description, tags (same as topics?)
 
 TODO describe impl basics - ecs, net, AI
-TODO contributing
+
+TODO Installation / Compiling
+TODO Contributing
 
 note to self:
     - fix npm
