@@ -147,13 +147,17 @@ impl Surface {
 /// Reverse engineered by modifying TextureList.txt and seeing what happens.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Kind {
+    /// No special behavior beyond the normal surface properties
     Normal = 0,
+    /// Vehicles spawn on it
     Spawn = 1,
+    /// Solid - can't move through it, most weapons can't shoot through it
     Wall = 2,
     /// Vehicles on it spawn particles on their sides
     Water = 3,
     /// I don't see any effect
     Snow = 4,
+    /// Base for Capture the Cow
     Base = 5,
 }
 
