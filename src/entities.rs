@@ -11,6 +11,7 @@ pub struct GuidedMissile {
     pub turn_rate: f64,
 }
 
+#[must_use]
 pub fn spawn_guided_missile(rng: &mut SmallRng, map: &Map) -> GuidedMissile {
     // example of GM pasing through wall:
     // pos: Vec2f::new(640.0, 640.0),
