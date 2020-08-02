@@ -24,7 +24,8 @@ impl Cvars {
 impl Default for Cvars {
     fn default() -> Self {
         Self {
-            g_guided_missile_speed: 50.0,
+            // TODO this is all per-frame for now
+            g_guided_missile_speed: 0.5,
             g_guided_missile_turn_rate_increase: 2.5,
             g_guided_missile_turn_rate_decrease: 0.3,
             g_guided_missile_turn_rate_max: 2.5,
