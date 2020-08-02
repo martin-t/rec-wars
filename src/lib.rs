@@ -2,6 +2,7 @@
 
 mod cvars;
 mod data;
+mod entities;
 
 use std::f64::consts::PI;
 
@@ -17,6 +18,7 @@ use web_sys::{CanvasRenderingContext2d, HtmlImageElement};
 
 use cvars::Cvars;
 use data::{Kind, Map, Surface, Vec2f, TILE_SIZE};
+use entities::GuidedMissile;
 
 #[wasm_bindgen]
 #[derive(Debug, Clone)]
@@ -28,8 +30,7 @@ pub struct World {
     surfaces: Vec<Surface>,
     map: Map,
     prev_update: f64,
-    pos: Vec2f,
-    vel: Vec2f,
+    guided_missile: GuidedMissile,
     explosions: Vec<(Vec2f, i32)>,
     debug_texts: Vec<String>,
 }
@@ -56,6 +57,7 @@ impl World {
 
         let surfaces = data::load_tex_list(tex_list_text);
         let map = data::load_map(map_text, &surfaces);
+        let guided_missile = entities::spawn_guided_missile(&map);
         Self {
             context,
             canvas_size: Vec2f::new(width, height),
@@ -64,8 +66,7 @@ impl World {
             surfaces,
             map,
             prev_update: 0.0,
-            pos: Vec2f::new(640.0, 640.0),
-            vel: Vec2f::new(0.3, 0.2),
+            guided_missile,
             explosions: Vec::new(),
             debug_texts: Vec::new(),
         }
@@ -77,45 +78,45 @@ impl World {
 
     pub fn input(&mut self, cvars: &Cvars, left: f64, right: f64, up: f64, down: f64) {
         let accell = 1.0 + up * 0.05 - down * 0.05;
-        self.vel *= accell;
+        self.guided_missile.vel *= accell;
 
-        let tr = cvars.g_guided_missile_turn_rate;
-        let angle: f64 = right * tr - left * tr;
-        self.vel.rotate_z(angle.to_radians());
+        let tri = cvars.g_guided_missile_turn_rate_increase;
+        let angle: f64 = right * tri - left * tri;
+        self.guided_missile.vel.rotate_z(angle.to_radians());
     }
 
     pub fn update_pre(&mut self, t: f64) {
         let dt = t - self.prev_update;
         // TODO this is broken when minimized (collision detection, etc.)
 
-        self.pos += self.vel * dt;
-        if self.pos.x <= 0.0 {
-            self.pos.x = 0.0;
-            self.vel.x = 0.0;
+        self.guided_missile.pos += self.guided_missile.vel * dt;
+        if self.guided_missile.pos.x <= 0.0 {
+            self.impact();
         }
-        if self.pos.y <= 0.0 {
-            self.pos.y = 0.0;
-            self.vel.y = 0.0;
+        if self.guided_missile.pos.y <= 0.0 {
+            self.impact();
         }
         let map_size = self.map.maxs();
-        if self.pos.x >= map_size.x {
-            self.pos.x = map_size.x;
-            self.vel.x = 0.0;
+        if self.guided_missile.pos.x >= map_size.x {
+            self.impact();
         }
-        if self.pos.y >= map_size.y {
-            self.pos.y = map_size.y;
-            self.vel.y = 0.0;
+        if self.guided_missile.pos.y >= map_size.y {
+            self.impact();
         }
 
-        let tile_pos = self.map.tile_pos(self.pos);
+        let tile_pos = self.map.tile_pos(self.guided_missile.pos);
         let surface = self.map[tile_pos.index].surface;
         let kind = self.surfaces[surface].kind;
         if kind == Kind::Wall {
-            self.explosions.push((self.pos, 0));
-            self.pos = Vec2f::new(640.0, 640.0);
+            self.impact();
         }
 
         self.prev_update = t;
+    }
+
+    fn impact(&mut self) {
+        self.explosions.push((self.guided_missile.pos, 0));
+        self.guided_missile = entities::spawn_guided_missile(&self.map);
     }
 
     pub fn draw(
@@ -132,7 +133,7 @@ impl World {
         let camera_min = self.canvas_size / 2.0;
         let map_size = self.map.maxs();
         let camera_max = map_size - camera_min;
-        let camera_pos = self.pos.clamped(camera_min, camera_max);
+        let camera_pos = self.guided_missile.pos.clamped(camera_min, camera_max);
 
         let top_left = camera_pos - camera_min;
         let top_left_tp = self.map.tile_pos(top_left);
@@ -166,9 +167,9 @@ impl World {
         }
 
         // Draw missile
-        let player_scr_pos = self.pos - top_left;
+        let player_scr_pos = self.guided_missile.pos - top_left;
         // -PI because the img points left
-        let angle = self.vel.y.atan2(self.vel.x) - PI;
+        let angle = self.guided_missile.vel.y.atan2(self.guided_missile.vel.x) - PI;
         self.draw_img(img_guided_missile, player_scr_pos, angle)?;
 
         // Draw explosions

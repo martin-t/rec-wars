@@ -8,7 +8,9 @@ use wasm_bindgen::prelude::*;
 #[derive(Debug, Clone)]
 pub struct Cvars {
     pub g_guided_missile_speed: f64,
-    pub g_guided_missile_turn_rate: f64,
+    pub g_guided_missile_turn_rate_increase: f64,
+    pub g_guided_missile_turn_rate_decrease: f64,
+    pub g_guided_missile_turn_rate_max: f64,
 }
 
 #[wasm_bindgen]
@@ -23,7 +25,9 @@ impl Default for Cvars {
     fn default() -> Self {
         Self {
             g_guided_missile_speed: 50.0,
-            g_guided_missile_turn_rate: 2.5,
+            g_guided_missile_turn_rate_increase: 2.5,
+            g_guided_missile_turn_rate_decrease: 0.3,
+            g_guided_missile_turn_rate_max: 2.5,
         }
     }
 }
