@@ -14,8 +14,6 @@ pub fn spawn_guided_missile(map: &Map) -> GuidedMissile {
     // pos: Vec2f::new(640.0, 640.0),
     // vel: Vec2f::new(0.3, 0.2),
 
-    //self.pos = Vec2f::new(640.0, 640.0);
-
     GuidedMissile {
         pos: Vec2f::new(640.0, 640.0),
         vel: Vec2f::new(0.3, 0.2),
