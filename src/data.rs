@@ -83,6 +83,18 @@ impl Map {
         let offset = pos % TILE_SIZE;
         TilePos { index, offset }
     }
+
+    pub fn tile_center(&self, tile_index: Vec2u) -> Vec2f {
+        tile_index.as_() * TILE_SIZE + TILE_SIZE / 2.0
+    }
+
+    pub fn spawns(&self) -> &Vec<Vec2u> {
+        &self.spawns
+    }
+
+    pub fn bases(&self) -> &Vec<Vec2u> {
+        &self.bases
+    }
 }
 
 impl Index<Vec2u> for Map {
@@ -235,7 +247,14 @@ mod tests {
         assert_eq!(map.size(), Vec2u::new(55, 23));
         assert_eq!(map.mins(), Vec2f::new(0.0, 0.0));
         assert_eq!(map.maxs(), Vec2f::new(55.0 * 64.0, 23.0 * 64.0));
-        assert_eq!(map.spawns.len(), 24);
-        assert_eq!(map.bases.len(), 2);
+
+        assert_eq!(map.tile_center(Vec2u::new(0, 0)), Vec2f::new(32.0, 32.0));
+        assert_eq!(map.tile_center(Vec2u::new(1, 0)), Vec2f::new(96.0, 32.0));
+        assert_eq!(map.tile_center(Vec2u::new(0, 1)), Vec2f::new(32.0, 96.0));
+
+        assert_eq!(map.spawns().len(), 24);
+        assert_eq!(map.spawns()[0], Vec2u::new(9, 3));
+        assert_eq!(map.bases().len(), 2);
+        assert_eq!(map.bases()[0], Vec2u::new(10, 11));
     }
 }
