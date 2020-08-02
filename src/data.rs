@@ -6,7 +6,10 @@ use approx::AbsDiffEq;
 use vek::Clamp;
 use vek::Vec2;
 
+/// Position in world or screen space
 pub type Vec2f = Vec2<f64>;
+/// Position of a tile in the map. To avoid confusion with world positions,
+/// it's sometimes referred to as tile index since it's a pair of indices.
 pub type Vec2u = Vec2<usize>;
 
 pub const TILE_SIZE: f64 = 64.0;
