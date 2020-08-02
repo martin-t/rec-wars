@@ -95,6 +95,7 @@ impl Map {
         &self.spawns
     }
 
+    #[allow(unused)] // TODO remove after CTC works
     pub fn bases(&self) -> &Vec<Vec2u> {
         &self.bases
     }
