@@ -109,5 +109,6 @@
 //      probably best template: https://github.com/rustwasm/rust-webpack-template
 // [ ] native binary
 //      [ ] make parsing return errors instead of crashing
+// [ ] pause, slowmo
 
 fn main() {}
