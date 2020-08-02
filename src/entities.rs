@@ -11,12 +11,14 @@ pub struct GuidedMissile {
     pub turn_rate: f64,
 }
 
-pub fn spawn_guided_missile(map: &Map) -> GuidedMissile {
+pub fn spawn_guided_missile(rng: &mut SmallRng, map: &Map) -> GuidedMissile {
     // example of GM pasing through wall:
     // pos: Vec2f::new(640.0, 640.0),
     // vel: Vec2f::new(0.3, 0.2),
 
-    let spawn_index = map.spawns()[0];
+    //let r: usize = random();
+    let r = rng.gen_range(0, map.spawns().len());
+    let spawn_index = map.spawns()[r];
     let spawn_pos = map.tile_center(spawn_index);
     let spawn_angle = map[spawn_index].rotation;
 

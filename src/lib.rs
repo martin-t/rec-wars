@@ -8,6 +8,8 @@ use std::f64::consts::PI;
 
 use js_sys::Array;
 
+use rand::prelude::*;
+
 use vek::ops::Clamp;
 use vek::Vec2;
 
@@ -23,6 +25,7 @@ use entities::GuidedMissile;
 #[wasm_bindgen]
 #[derive(Debug, Clone)]
 pub struct World {
+    rng: SmallRng,
     context: CanvasRenderingContext2d,
     canvas_size: Vec2f,
     imgs_textures: Vec<HtmlImageElement>,
@@ -49,6 +52,8 @@ impl World {
     ) -> Self {
         console_error_panic_hook::set_once();
 
+        let mut rng = SmallRng::seed_from_u64(5);
+
         // TODO try https://rustwasm.github.io/docs/wasm-bindgen/reference/types/boxed-jsvalue-slice.html
         let imgs_textures = textures
             .iter()
@@ -57,8 +62,9 @@ impl World {
 
         let surfaces = data::load_tex_list(tex_list_text);
         let map = data::load_map(map_text, &surfaces);
-        let guided_missile = entities::spawn_guided_missile(&map);
+        let guided_missile = entities::spawn_guided_missile(&mut rng, &map);
         Self {
+            rng,
             context,
             canvas_size: Vec2f::new(width, height),
             imgs_textures,
@@ -116,7 +122,7 @@ impl World {
 
     fn impact(&mut self) {
         self.explosions.push((self.guided_missile.pos, 0));
-        self.guided_missile = entities::spawn_guided_missile(&self.map);
+        self.guided_missile = entities::spawn_guided_missile(&mut self.rng, &self.map);
     }
 
     pub fn draw(

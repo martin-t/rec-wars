@@ -11,9 +11,12 @@ crate-type = ["cdylib"]
 approx = "0.3.2"
 console_error_panic_hook = "0.1.6"
 js-sys = "0.3.42"
-rand = "0.7.3"
 vek = "0.11.2"
 wasm-bindgen = "0.2.65"
+
+[dependencies.rand]
+version = "0.7.3"
+features = ["small_rng"]
 
 [dependencies.web-sys]
 version = "0.3.4"
