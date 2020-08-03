@@ -106,6 +106,7 @@ impl World {
 
         // Without input, turn rate should gradually decrease towards 0
         // but not to turn in the other dir.
+        // TODO this doesn't feel like flying a missile - probably needs to carry some sideways momentum
         let tr_old = self.guided_missile.turn_rate;
         let tr = if tr_input == 0.0 {
             if tr_old > 0.0 {
