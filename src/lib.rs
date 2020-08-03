@@ -276,12 +276,12 @@ impl World {
         &self,
         img: &HtmlImageElement,
         screen_pos: Vec2f,
-        rot: f64,
+        angle: f64,
     ) -> Result<(), JsValue> {
         let half_size = Vec2::new(img.natural_width(), img.natural_height()).as_() / 2.0;
         self.context
             .translate(screen_pos.x + half_size.x, screen_pos.y + half_size.y)?;
-        self.context.rotate(rot)?;
+        self.context.rotate(angle)?;
 
         // Now back off to the img's corner and draw it.
         // This can be done either by translating -half_size, then drawing at 0,0
@@ -299,11 +299,11 @@ impl World {
         &self,
         img: &HtmlImageElement,
         screen_pos: Vec2f,
-        rot: f64,
+        angle: f64,
     ) -> Result<(), JsValue> {
         let half_size = Vec2::new(img.natural_width(), img.natural_height()).as_() / 2.0;
         self.context.translate(screen_pos.x, screen_pos.y)?;
-        self.context.rotate(rot)?;
+        self.context.rotate(angle)?;
 
         // Now back off to the img's corner and draw it.
         // This can be done either by translating -half_size, then drawing at 0,0
