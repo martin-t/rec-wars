@@ -160,7 +160,7 @@ async function run() {
             try {
                 world.input(cvars, left, right, up, down);
                 world.update_pre(cvars, t);
-                world.draw(img_guided_missile, true);
+                world.draw(cvars, img_guided_missile, true);
                 world.update_post();
             } catch (e) {
                 console.log("exception - aborting next frame");

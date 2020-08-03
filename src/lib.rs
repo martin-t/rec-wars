@@ -159,8 +159,8 @@ impl World {
 
     pub fn draw(
         &mut self,
+        cvars: &Cvars,
         img_guided_missile: &HtmlImageElement,
-        align_to_pixels: bool,
     ) -> Result<(), JsValue> {
         // Nicer rockets (more like original RW)
         // TODO how does it interact with aligning?
@@ -176,7 +176,7 @@ impl World {
         let top_left = camera_pos - camera_min;
         let top_left_tp = self.map.tile_pos(top_left);
         let top_left_index = top_left_tp.index;
-        let bg_offset = if align_to_pixels {
+        let bg_offset = if cvars.r_align_to_pixels_background {
             top_left_tp.offset.floor()
         } else {
             top_left_tp.offset
