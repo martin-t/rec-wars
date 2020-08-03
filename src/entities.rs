@@ -1,6 +1,7 @@
 use rand::prelude::*;
 
 use crate::data::{Map, Vec2f};
+use crate::log;
 
 #[derive(Debug, Clone)]
 pub struct GuidedMissile {
@@ -19,6 +20,8 @@ pub fn spawn_guided_missile(rng: &mut SmallRng, map: &Map) -> GuidedMissile {
     let spawn_index = map.spawns()[r];
     let spawn_pos = map.tile_center(spawn_index);
     let spawn_angle = map[spawn_index].rotation;
+
+    log!("spawn: {}", spawn_index);
 
     GuidedMissile {
         pos: spawn_pos,

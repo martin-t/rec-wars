@@ -3,6 +3,7 @@
 mod cvars;
 mod data;
 mod entities;
+mod logging;
 
 use std::f64::consts::PI;
 
