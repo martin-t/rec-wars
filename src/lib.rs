@@ -195,7 +195,7 @@ impl World {
 
                 if self.surfaces[tile.surface].kind != Kind::Wall {
                     let img = &self.imgs_textures[tile.surface];
-                    self.draw_img_top_left(img, Vec2::new(x, y), tile.rotation)?;
+                    self.draw_img_top_left(img, Vec2::new(x, y), tile.angle)?;
                 }
 
                 c += 1;
@@ -242,7 +242,7 @@ impl World {
 
                 if self.surfaces[tile.surface].kind == Kind::Wall {
                     let img = &self.imgs_textures[tile.surface];
-                    self.draw_img_top_left(img, Vec2::new(x, y), tile.rotation)?;
+                    self.draw_img_top_left(img, Vec2::new(x, y), tile.angle)?;
                 }
 
                 c += 1;

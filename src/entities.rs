@@ -19,7 +19,7 @@ pub fn spawn_guided_missile(cvars: &Cvars, rng: &mut SmallRng, map: &Map) -> Gui
     let r = rng.gen_range(0, map.spawns().len());
     let spawn_index = map.spawns()[r];
     let spawn_pos = map.tile_center(spawn_index);
-    let spawn_angle = map[spawn_index].rotation;
+    let spawn_angle = map[spawn_index].angle;
 
     GuidedMissile {
         pos: spawn_pos,

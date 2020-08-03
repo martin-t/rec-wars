@@ -121,7 +121,7 @@ pub struct Tile {
     /// Index into texture_list.txt
     pub surface: usize,
     /// Rotation counterclockwise in radians
-    pub rotation: f64,
+    pub angle: f64,
 }
 
 #[derive(Debug, Clone)]
@@ -189,7 +189,7 @@ pub fn load_map(text: &str, surfaces: &[Surface]) -> Map {
                     // TODO to rad
                     Tile {
                         surface: val / 4,
-                        rotation: (val % 4) as f64 * -PI / 2.0,
+                        angle: (val % 4) as f64 * -PI / 2.0,
                     }
                 })
                 .collect()
