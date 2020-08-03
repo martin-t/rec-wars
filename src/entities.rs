@@ -2,7 +2,6 @@ use rand::prelude::*;
 
 use crate::cvars::Cvars;
 use crate::data::{Map, Vec2f};
-use crate::log;
 
 #[derive(Debug, Clone)]
 pub struct GuidedMissile {
