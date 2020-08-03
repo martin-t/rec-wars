@@ -12,7 +12,7 @@ pub struct GuidedMissile {
 }
 
 #[must_use]
-pub fn spawn_guided_missile(rng: &mut SmallRng, cvars: &Cvars, map: &Map) -> GuidedMissile {
+pub fn spawn_guided_missile(cvars: &Cvars, rng: &mut SmallRng, map: &Map) -> GuidedMissile {
     // example of GM pasing through wall:
     // pos: Vec2f::new(640.0, 640.0),
     // vel: Vec2f::new(0.3, 0.2),

@@ -64,7 +64,7 @@ impl World {
 
         let surfaces = data::load_tex_list(tex_list_text);
         let map = data::load_map(map_text, &surfaces);
-        let guided_missile = entities::spawn_guided_missile(&mut rng, cvars, &map);
+        let guided_missile = entities::spawn_guided_missile(cvars, &mut rng, &map);
         Self {
             rng,
             context,
@@ -154,7 +154,7 @@ impl World {
 
     fn impact(&mut self, cvars: &Cvars) {
         self.explosions.push((self.guided_missile.pos, 0));
-        self.guided_missile = entities::spawn_guided_missile(&mut self.rng, cvars, &self.map);
+        self.guided_missile = entities::spawn_guided_missile(cvars, &mut self.rng, &self.map);
     }
 
     pub fn draw(
