@@ -30,6 +30,7 @@ pub struct World {
     context: CanvasRenderingContext2d,
     canvas_size: Vec2f,
     imgs_textures: Vec<HtmlImageElement>,
+    img_guided_missile: HtmlImageElement,
     img_explosion: HtmlImageElement,
     surfaces: Vec<Surface>,
     map: Map,
@@ -48,6 +49,7 @@ impl World {
         width: f64,
         height: f64,
         textures: Array,
+        img_guided_missile: HtmlImageElement,
         img_explosion: HtmlImageElement,
         tex_list_text: &str,
         map_text: &str,
@@ -70,6 +72,7 @@ impl World {
             context,
             canvas_size: Vec2f::new(width, height),
             imgs_textures,
+            img_guided_missile,
             img_explosion,
             surfaces,
             map,
@@ -157,11 +160,7 @@ impl World {
         self.guided_missile = entities::spawn_guided_missile(cvars, &mut self.rng, &self.map);
     }
 
-    pub fn draw(
-        &mut self,
-        cvars: &Cvars,
-        img_guided_missile: &HtmlImageElement,
-    ) -> Result<(), JsValue> {
+    pub fn draw(&mut self, cvars: &Cvars) -> Result<(), JsValue> {
         // Nicer rockets (more like original RW).
         // This also means everything is aligned to pixels.
         // TODO revisit when drawing tanks - maybe make configurable per drawn object
@@ -209,7 +208,7 @@ impl World {
         let player_scr_pos = self.guided_missile.pos - top_left;
         // -PI because the img points left
         let angle = self.guided_missile.vel.y.atan2(self.guided_missile.vel.x) - PI;
-        self.draw_img(img_guided_missile, player_scr_pos, angle)?;
+        self.draw_img(&self.img_guided_missile, player_scr_pos, angle)?;
 
         // Draw explosions
         for &(pos, frame) in &self.explosions {
@@ -272,6 +271,8 @@ impl World {
     }
 
     fn draw_img(&self, img: &HtmlImageElement, screen_pos: Vec2f, rot: f64) -> Result<(), JsValue> {
+        self.context.fill_rect(screen_pos.x, screen_pos.y, 1.0, 1.0);
+
         // Rotate counterclockwise around img center.
         let half_size = Vec2::new(img.natural_width(), img.natural_height()).as_() / 2.0;
         self.context
@@ -285,8 +286,25 @@ impl World {
             .draw_image_with_html_image_element(img, -half_size.x, -half_size.y)?;
 
         self.context.reset_transform()?;
+
+        /*self.context.save();
+        let x = screen_pos.x;
+        let y = screen_pos.y;
+        let
+        self.context.translate(screen_pos.x+img.natural_width()/2, screen_pos.)
+        self.context.restore();*/
+
         Ok(())
     }
+
+    /*function drawImage(ctx, image, x, y, w, h, degrees){
+      ctx.save();
+      ctx.translate(x+w/2, y+h/2);
+      ctx.rotate(degrees*Math.PI/180.0);
+      ctx.translate(-x-w/2, -y-h/2);
+      ctx.drawImage(image, x, y, w, h);
+      ctx.restore();
+    }*/
 
     #[allow(unused)]
     fn debug_text<S: Into<String>>(&mut self, s: S) {

@@ -144,7 +144,9 @@ async function run() {
         // - owned pub cvars in World need to be copy -> can't be changed from JS (changing will have no effect)
         // - TODO try returning Rc/Arc
         const cvars = new Cvars();
-        const world = new World(cvars, ctx, canvas.width, canvas.height, imgs_textures, img_explosion, tex_list_text, map_text);
+        const world = new World(cvars, ctx, canvas.width, canvas.height,
+            imgs_textures, img_guided_missile, img_explosion,
+            tex_list_text, map_text);
 
         // Make some game objects available on window for easier debugging.
         window.cvars = cvars;
@@ -160,7 +162,7 @@ async function run() {
             try {
                 world.input(cvars, left, right, up, down);
                 world.update_pre(cvars, t);
-                world.draw(cvars, img_guided_missile, true);
+                world.draw(cvars, true);
                 world.update_post();
             } catch (e) {
                 console.log("exception - aborting next frame");
