@@ -38,8 +38,8 @@ impl Default for Cvars {
             g_guided_missile_speed_max: 0.5,
             g_guided_missile_speed_min: 0.3,
             g_guided_missile_turn_rate_increase: 0.0035,
-            g_guided_missile_turn_rate_decrease: 0.003,
-            g_guided_missile_turn_rate_max: 0.05,
+            g_guided_missile_turn_rate_decrease: 0.0025,
+            g_guided_missile_turn_rate_max: 0.0525,
             r_align_to_pixels_background: true,
             r_smoothing: false,
         }
