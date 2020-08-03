@@ -18,6 +18,7 @@ pub struct Cvars {
     pub g_guided_missile_turn_rate_decrease: f64,
     pub g_guided_missile_turn_rate_max: f64,
     pub r_align_to_pixels_background: bool,
+    pub r_smoothing: bool,
 }
 
 #[wasm_bindgen]
@@ -40,6 +41,7 @@ impl Default for Cvars {
             g_guided_missile_turn_rate_decrease: 0.003,
             g_guided_missile_turn_rate_max: 0.05,
             r_align_to_pixels_background: true,
+            r_smoothing: false,
         }
     }
 }
