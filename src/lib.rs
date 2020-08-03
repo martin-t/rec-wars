@@ -43,6 +43,7 @@ pub struct World {
 impl World {
     #[wasm_bindgen(constructor)]
     pub fn new(
+        cvars: &Cvars,
         context: CanvasRenderingContext2d,
         width: f64,
         height: f64,
@@ -63,7 +64,7 @@ impl World {
 
         let surfaces = data::load_tex_list(tex_list_text);
         let map = data::load_map(map_text, &surfaces);
-        let guided_missile = entities::spawn_guided_missile(&mut rng, &map);
+        let guided_missile = entities::spawn_guided_missile(&mut rng, cvars, &map);
         Self {
             rng,
             context,
@@ -84,46 +85,76 @@ impl World {
     }
 
     pub fn input(&mut self, cvars: &Cvars, left: f64, right: f64, up: f64, down: f64) {
-        let accell = 1.0 + up * 0.05 - down * 0.05;
-        self.guided_missile.vel *= accell;
+        // Accel / decel
+        let accel =
+            up * cvars.g_guided_missile_speed_change - down * cvars.g_guided_missile_speed_change;
+        let dir = self.guided_missile.vel.normalized();
+        let speed_old = self.guided_missile.vel.magnitude();
+        let speed_new = (speed_old + accel).clamped(
+            cvars.g_guided_missile_speed_min,
+            cvars.g_guided_missile_speed_max,
+        );
+        self.guided_missile.vel = speed_new * dir;
+        self.debug_text(format!("speed {}", speed_new));
 
-        let tri = cvars.g_guided_missile_turn_rate_increase;
-        let angle: f64 = right * tri - left * tri;
-        self.guided_missile.vel.rotate_z(angle.to_radians());
+        // Turning
+        let tr_input: f64 = right * cvars.g_guided_missile_turn_rate_increase
+            - left * cvars.g_guided_missile_turn_rate_increase;
+
+        // Without input, turn rate should gradually decrease towards 0
+        // but not to turn in the other dir.
+        let tr_old = self.guided_missile.turn_rate;
+        let tr = if tr_input == 0.0 {
+            if tr_old > 0.0 {
+                (tr_old - cvars.g_guided_missile_turn_rate_decrease).max(0.0)
+            } else {
+                (tr_old + cvars.g_guided_missile_turn_rate_decrease).min(0.0)
+            }
+        } else {
+            (tr_old + tr_input).clamped(
+                -cvars.g_guided_missile_turn_rate_max,
+                cvars.g_guided_missile_turn_rate_max,
+            )
+        };
+
+        self.debug_text(format!("tr {}", tr));
+
+        self.guided_missile.vel.rotate_z(tr);
+        self.guided_missile.turn_rate = tr;
     }
 
-    pub fn update_pre(&mut self, t: f64) {
+    pub fn update_pre(&mut self, cvars: &Cvars, t: f64) {
         let dt = t - self.prev_update;
         // TODO this is broken when minimized (collision detection, etc.)
 
         self.guided_missile.pos += self.guided_missile.vel * dt;
         if self.guided_missile.pos.x <= 0.0 {
-            self.impact();
+            self.impact(cvars);
         }
         if self.guided_missile.pos.y <= 0.0 {
-            self.impact();
+            self.impact(cvars);
         }
         let map_size = self.map.maxs();
         if self.guided_missile.pos.x >= map_size.x {
-            self.impact();
+            self.impact(cvars);
         }
         if self.guided_missile.pos.y >= map_size.y {
-            self.impact();
+            self.impact(cvars);
         }
 
         let tile_pos = self.map.tile_pos(self.guided_missile.pos);
         let surface = self.map[tile_pos.index].surface;
         let kind = self.surfaces[surface].kind;
         if kind == Kind::Wall {
-            self.impact();
+            self.impact(cvars);
         }
 
         self.prev_update = t;
     }
 
-    fn impact(&mut self) {
+    fn impact(&mut self, cvars: &Cvars) {
         self.explosions.push((self.guided_missile.pos, 0));
-        self.guided_missile = entities::spawn_guided_missile(&mut self.rng, &self.map);
+        self.guided_missile = entities::spawn_guided_missile(&mut self.rng, cvars, &self.map);
     }
 
     pub fn draw(

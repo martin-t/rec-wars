@@ -136,7 +136,7 @@ async function run() {
     }
 
     let play = (tex_list_text, map_text) => {
-        const world = new World(ctx, canvas.width, canvas.height, imgs_textures, img_explosion, tex_list_text, map_text);
+        
         // For now, cvars need to live on the JS heap and be passed into each function that needs them.
         // I couldn't find a better way to make them mutable in JS and readable in Rust:
         // - can't return references from Rust into JS
@@ -144,10 +144,11 @@ async function run() {
         // - owned pub cvars in World need to be copy -> can't be changed from JS (changing will have no effect)
         // - TODO try returning Rc/Arc
         const cvars = new Cvars();
+        const world = new World(cvars, ctx, canvas.width, canvas.height, imgs_textures, img_explosion, tex_list_text, map_text);
 
         // Make some game objects available on window for easier debugging.
-        window.world = world;
         window.cvars = cvars;
+        window.world = world;
 
         const frame = (t) => {
             // Apparently it's best practice to call requestAnimationFrame at the start of the frame.
@@ -158,7 +159,7 @@ async function run() {
 
             try {
                 world.input(cvars, left, right, up, down);
-                world.update_pre(t);
+                world.update_pre(cvars, t);
                 world.draw(img_guided_missile, true);
                 world.update_post();
             } catch (e) {

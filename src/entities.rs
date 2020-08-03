@@ -1,5 +1,6 @@
 use rand::prelude::*;
 
+use crate::cvars::Cvars;
 use crate::data::{Map, Vec2f};
 use crate::log;
 
@@ -11,7 +12,7 @@ pub struct GuidedMissile {
 }
 
 #[must_use]
-pub fn spawn_guided_missile(rng: &mut SmallRng, map: &Map) -> GuidedMissile {
+pub fn spawn_guided_missile(rng: &mut SmallRng, cvars: &Cvars, map: &Map) -> GuidedMissile {
     // example of GM pasing through wall:
     // pos: Vec2f::new(640.0, 640.0),
     // vel: Vec2f::new(0.3, 0.2),
@@ -21,11 +22,9 @@ pub fn spawn_guided_missile(rng: &mut SmallRng, map: &Map) -> GuidedMissile {
     let spawn_pos = map.tile_center(spawn_index);
     let spawn_angle = map[spawn_index].rotation;
 
-    log!("spawn: {}", spawn_index);
-
     GuidedMissile {
         pos: spawn_pos,
-        vel: Vec2f::new(1.0, 0.0).rotated_z(spawn_angle),
+        vel: Vec2f::new(cvars.g_guided_missile_speed_initial, 0.0).rotated_z(spawn_angle),
         turn_rate: 0.0,
     }
 }
