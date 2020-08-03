@@ -195,7 +195,7 @@ impl World {
 
                 if self.surfaces[tile.surface].kind != Kind::Wall {
                     let img = &self.imgs_textures[tile.surface];
-                    self.draw_img(img, Vec2::new(x, y), tile.rotation)?;
+                    self.draw_img_top_left(img, Vec2::new(x, y), tile.rotation)?;
                 }
 
                 c += 1;
@@ -209,7 +209,7 @@ impl World {
         let player_scr_pos = self.guided_missile.pos - top_left;
         // -PI because the img points left
         let angle = self.guided_missile.vel.y.atan2(self.guided_missile.vel.x) - PI;
-        self.draw_img(&self.img_guided_missile, player_scr_pos, angle)?;
+        self.draw_img_center(&self.img_guided_missile, player_scr_pos, angle)?;
 
         // Draw explosions
         for &(pos, frame) in &self.explosions {
@@ -242,7 +242,7 @@ impl World {
 
                 if self.surfaces[tile.surface].kind == Kind::Wall {
                     let img = &self.imgs_textures[tile.surface];
-                    self.draw_img(img, Vec2::new(x, y), tile.rotation)?;
+                    self.draw_img_top_left(img, Vec2::new(x, y), tile.rotation)?;
                 }
 
                 c += 1;
@@ -271,10 +271,13 @@ impl World {
         self.explosions.retain(|expl| expl.1 < 26);
     }
 
-    fn draw_img(&self, img: &HtmlImageElement, screen_pos: Vec2f, rot: f64) -> Result<(), JsValue> {
-        self.context.fill_rect(screen_pos.x, screen_pos.y, 1.0, 1.0);
-
-        // Rotate counterclockwise around img center.
+    /// Rotate counterclockwise around the image's top left corner.
+    fn draw_img_top_left(
+        &self,
+        img: &HtmlImageElement,
+        screen_pos: Vec2f,
+        rot: f64,
+    ) -> Result<(), JsValue> {
         let half_size = Vec2::new(img.natural_width(), img.natural_height()).as_() / 2.0;
         self.context
             .translate(screen_pos.x + half_size.x, screen_pos.y + half_size.y)?;
@@ -288,24 +291,32 @@ impl World {
 
         self.context.reset_transform()?;
 
-        /*self.context.save();
-        let x = screen_pos.x;
-        let y = screen_pos.y;
-        let
-        self.context.translate(screen_pos.x+img.natural_width()/2, screen_pos.)
-        self.context.restore();*/
-
         Ok(())
     }
 
-    /*function drawImage(ctx, image, x, y, w, h, degrees){
-      ctx.save();
-      ctx.translate(x+w/2, y+h/2);
-      ctx.rotate(degrees*Math.PI/180.0);
-      ctx.translate(-x-w/2, -y-h/2);
-      ctx.drawImage(image, x, y, w, h);
-      ctx.restore();
-    }*/
+    /// Rotate counterclockwise around the image's center.
+    fn draw_img_center(
+        &self,
+        img: &HtmlImageElement,
+        screen_pos: Vec2f,
+        rot: f64,
+    ) -> Result<(), JsValue> {
+        let half_size = Vec2::new(img.natural_width(), img.natural_height()).as_() / 2.0;
+        self.context.translate(screen_pos.x, screen_pos.y)?;
+        self.context.rotate(rot)?;
+
+        // Now back off to the img's corner and draw it.
+        // This can be done either by translating -half_size, then drawing at 0,0
+        // or at once by drawing at -half_size which his perhaps marginally more efficient.
+        self.context
+            .draw_image_with_html_image_element(img, -half_size.x, -half_size.y)?;
+
+        self.context.reset_transform()?;
+
+        self.context.fill_rect(screen_pos.x, screen_pos.y, 1.0, 1.0); // TODO remove
+
+        Ok(())
+    }
 
     #[allow(unused)]
     fn debug_text<S: Into<String>>(&mut self, s: S) {
