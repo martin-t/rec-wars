@@ -1,6 +1,7 @@
 // Load the webassembly and some assets,
 // do a couple more things that are easier on the JS side like reading input.
-// This could be done in rust but would be more verbose.
+// This could be done in rust but would be more verbose (like
+// https://github.com/bzar/wasm-pong-rs/blob/master/src/lib.rs).
 
 // Based on https://rustwasm.github.io/docs/wasm-bindgen/examples/without-a-bundler.html
 
