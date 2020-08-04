@@ -152,10 +152,9 @@ impl World {
             )
         };
 
-        self.debug_text(format!("GM turn rate {:.3}", tr));
-
         self.guided_missile.vel.rotate_z(tr * dt);
         self.guided_missile.turn_rate = tr;
+        self.debug_text(format!("GM turn rate {:.3}", tr));
 
         // TODO this is broken when minimized (collision detection, etc.)
         self.guided_missile.pos += self.guided_missile.vel * dt;
