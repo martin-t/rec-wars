@@ -136,8 +136,8 @@ async function run() {
     }
 
     let play = (tex_list_text, map_text) => {
-        
-        // For now, cvars need to live on the JS heap and be passed into each function that needs them.
+        // Cvars can be changed through the browser's console.
+        // For now, they need to live on the JS heap and be passed into each function that needs them.
         // I couldn't find a better way to make them mutable in JS and readable in Rust:
         // - can't return references from Rust into JS
         // - can't have a reference in World
