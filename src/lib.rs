@@ -119,8 +119,8 @@ impl World {
         let dt = self.frame_time - self.frame_time_prev;
 
         // Accel / decel
-        let accel = self.input.up * cvars.g_guided_missile_speed_change
-            - self.input.down * cvars.g_guided_missile_speed_change;
+        let accel = self.input.up * cvars.g_guided_missile_speed_change * dt
+            - self.input.down * cvars.g_guided_missile_speed_change * dt;
         let dir = self.guided_missile.vel.normalized();
         let speed_old = self.guided_missile.vel.magnitude();
         let speed_new = (speed_old + accel).clamped(
@@ -131,8 +131,8 @@ impl World {
         self.debug_text(format!("GM speed {:.3}", speed_new));
 
         // Turning
-        let tr_input: f64 = self.input.right * cvars.g_guided_missile_turn_rate_increase
-            - self.input.left * cvars.g_guided_missile_turn_rate_increase;
+        let tr_input: f64 = self.input.right * cvars.g_guided_missile_turn_rate_increase * dt
+            - self.input.left * cvars.g_guided_missile_turn_rate_increase * dt;
 
         // Without input, turn rate should gradually decrease towards 0
         // but not to turn in the other dir.
@@ -141,9 +141,9 @@ impl World {
         let tr_old = self.guided_missile.turn_rate;
         let tr = if tr_input == 0.0 {
             if tr_old > 0.0 {
-                (tr_old - cvars.g_guided_missile_turn_rate_decrease).max(0.0)
+                (tr_old - cvars.g_guided_missile_turn_rate_decrease * dt).max(0.0)
             } else {
-                (tr_old + cvars.g_guided_missile_turn_rate_decrease).min(0.0)
+                (tr_old + cvars.g_guided_missile_turn_rate_decrease * dt).min(0.0)
             }
         } else {
             (tr_old + tr_input).clamped(

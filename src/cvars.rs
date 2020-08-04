@@ -33,12 +33,12 @@ impl Default for Cvars {
     fn default() -> Self {
         Self {
             // TODO this is all per-frame for now
-            g_guided_missile_speed_change: 10.0,
+            g_guided_missile_speed_change: 600.0,
             g_guided_missile_speed_initial: 360.0,
             g_guided_missile_speed_max: 500.0,
             g_guided_missile_speed_min: 300.0,
-            g_guided_missile_turn_rate_increase: 0.21,
-            g_guided_missile_turn_rate_decrease: 0.15,
+            g_guided_missile_turn_rate_increase: 12.6,
+            g_guided_missile_turn_rate_decrease: 9.0,
             g_guided_missile_turn_rate_max: 3.15,
             r_align_to_pixels_background: true,
             r_smoothing: false,
