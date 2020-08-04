@@ -1,10 +1,3 @@
-// TODO nuke this, maybe keep fps
-let img_base = new Image();
-img_base.src = "../assets/tiles/Base.bmp";
-
-let img_explosion = new Image();
-img_explosion.src = "../assets/Explosion.png"
-
 const FPS_PERIOD_MS = 500;
 let fps_log = false;
 
@@ -99,64 +92,10 @@ class Fps {
 
 const fps_anim_frame = new Fps(20, 30);
 
-// It looks like the original animation is made for 30 fps.
-// When stepping through frames of a recording, some images take 3 frames,
-// might be a bug in mplayer though.
-const explosions_fast = [];
-const explosions_slow = [];
-
-let offset_x = 0;
-let offset_y = 0;
-let speed_x = 0;
-let speed_y = 0;
-
 function draw_frame(t_frame) {
     const t_start = performance.now();
 
-    const draw_offset_x = align_to_pixels ? Math.round(offset_x) : offset_x;
-    const draw_offset_y = align_to_pixels ? Math.round(offset_y) : offset_y;
-    for (let x = draw_offset_x - 64; x < canvas.width; x += 64) {
-        for (let y = draw_offset_y - 64; y < canvas.height; y += 64) {
-            ctx.drawImage(img_base, x, y);
-        }
-    }
-    offset_x = (offset_x + 64 + speed_x) % 64;
-    offset_y = (offset_y + 64 + speed_y) % 64;
-
-    for (let i = 0; i < 2; i++) {
-        let x = canvas.width / 2 + Math.random() * (canvas.width / 2);
-        let y = Math.random() * (canvas.height / 2);
-        explosions_fast.push({ x: x, y: y, frame: 0 });
-        while (explosions_fast.length > 0 && explosions_fast[0].frame >= 13) {
-            explosions_fast.shift();
-        }
-    }
-    for (let i = 0; i < 1; i++) {
-        let x = canvas.width / 2 + Math.random() * (canvas.width / 2);
-        let y = canvas.height / 2 + Math.random() * (canvas.height / 2);
-        explosions_slow.push({ x: x, y: y, frame: 0 });
-        while (explosions_slow.length > 0 && explosions_slow[0].frame >= 26) {
-            explosions_slow.shift();
-        }
-    }
-
-    explosions_fast.forEach(explosion => {
-        const offset = explosion.frame * 100;
-        ctx.drawImage(
-            img_explosion,
-            offset, 0, 100, 100,
-            explosion.x, explosion.y, 100, 100);
-        explosion.frame++;
-    });
-    explosions_slow.forEach(explosion => {
-        const frame = Math.round(explosion.frame / 2);
-        const offset = frame * 100;
-        ctx.drawImage(
-            img_explosion,
-            offset, 0, 100, 100,
-            explosion.x, explosion.y, 100, 100);
-        explosion.frame++;
-    });
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     const t_end = performance.now();
     const diff = t_end - t_start;
@@ -217,35 +156,3 @@ function btn_anim_method_click() {
         btn.innerHTML = "Anim method: requestAnimationFrame";
     }
 }
-
-function btn_align_click() {
-    let btn = document.getElementById("btn_align");
-    if (align_to_pixels) {
-        align_to_pixels = false;
-        btn.innerHTML = "Align movement to whole pixels: off";
-    } else {
-        align_to_pixels = true;
-        btn.innerHTML = "Align movement to whole pixels: on";
-    }
-}
-
-document.addEventListener('keydown', event => {
-    //console.log(event.timeStamp, event.key);
-    if (event.key === "ArrowLeft") {
-        speed_x += 0.1;
-    } else if (event.key === "ArrowRight") {
-        speed_x -= 0.1;
-    } else if (event.key === "ArrowUp") {
-        speed_y += 0.1;
-    } else if (event.key === "ArrowDown") {
-        speed_y -= 0.1;
-    }
-});
-
-/*document.addEventListener('visibilitychange', function () {
-    if (document.hidden) {
-        console.log("hidden");
-    } else {
-        console.log("visible");
-    }
-});*/
