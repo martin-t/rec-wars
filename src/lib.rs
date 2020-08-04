@@ -105,16 +105,10 @@ impl World {
 
     pub fn update_pre(&mut self, cvars: &Cvars) {
         let dt = self.frame_time - self.frame_time_prev;
-        let Input {
-            left,
-            right,
-            up,
-            down,
-        } = self.input;
 
         // Accel / decel
-        let accel =
-            up * cvars.g_guided_missile_speed_change - down * cvars.g_guided_missile_speed_change;
+        let accel = self.input.up * cvars.g_guided_missile_speed_change
+            - self.input.down * cvars.g_guided_missile_speed_change;
         let dir = self.guided_missile.vel.normalized();
         let speed_old = self.guided_missile.vel.magnitude();
         let speed_new = (speed_old + accel).clamped(
@@ -125,8 +119,8 @@ impl World {
         self.debug_text(format!("GM speed {:.3}", speed_new));
 
         // Turning
-        let tr_input: f64 = right * cvars.g_guided_missile_turn_rate_increase
-            - left * cvars.g_guided_missile_turn_rate_increase;
+        let tr_input: f64 = self.input.right * cvars.g_guided_missile_turn_rate_increase
+            - self.input.left * cvars.g_guided_missile_turn_rate_increase;
 
         // Without input, turn rate should gradually decrease towards 0
         // but not to turn in the other dir.
