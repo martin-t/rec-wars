@@ -152,10 +152,12 @@ async function run() {
             imgs_textures, img_guided_missile, img_explosion,
             tex_list_text, map_text);
 
-        // Make some game objects available on window for easier debugging.
+        // Make some things available on window for easier debugging.
         window.cvars = cvars;
         window.world = world;
+        window.min_frame_delay = 0;
 
+        let last_t = 0;
         const frame = (t) => {
             // Apparently it's best practice to call requestAnimationFrame at the start of the frame.
             // However if something throws an exception, it'll likely happen every frame and
@@ -164,6 +166,12 @@ async function run() {
             const handle = window.requestAnimationFrame(frame);
 
             try {
+                if (t - last_t < window.min_frame_delay) {
+                    return;
+                } else {
+                    last_t = t;
+                }
+
                 world.start_frame(t);
                 world.input(cvars, left, right, up, down);
                 world.update_pre(cvars);
