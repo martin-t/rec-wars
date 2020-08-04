@@ -166,7 +166,7 @@ async function run() {
                 world.start_frame(t);
                 world.input(cvars, left, right, up, down);
                 world.update_pre(cvars);
-                world.draw(cvars, true);
+                world.draw(cvars);
                 world.update_post();
             } catch (e) {
                 console.log("exception - aborting next frame");
