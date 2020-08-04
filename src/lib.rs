@@ -36,7 +36,7 @@ pub struct World {
     frame_time: f64,
     /// Previous frame's time in seconds
     frame_time_prev: f64,
-    /// Saved frame times over some period of time to measure FPS
+    /// Saved frame times in seconds over some period of time to measure FPS
     frame_times: Vec<f64>,
     input: Input,
     guided_missile: GuidedMissile,
@@ -94,7 +94,7 @@ impl World {
         format!("{:#?}", self)
     }
 
-    /// Update time (in seconds)
+    /// Update time tracking variables (in seconds)
     pub fn start_frame(&mut self, t: f64) {
         // These two always exist while the vector can get almost empty.
         self.frame_time_prev = self.frame_time;
