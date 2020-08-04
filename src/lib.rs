@@ -5,8 +5,6 @@ mod data;
 mod entities;
 mod logging;
 
-use std::f64::consts::PI;
-
 use js_sys::Array;
 
 use rand::prelude::*;
