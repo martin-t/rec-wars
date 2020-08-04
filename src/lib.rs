@@ -34,6 +34,7 @@ pub struct World {
     map: Map,
     frame_time: f64,
     frame_time_prev: f64,
+    frame_times: Vec<f64>,
     input: Input,
     guided_missile: GuidedMissile,
     explosions: Vec<(Vec2f, i32)>,
@@ -78,6 +79,7 @@ impl World {
             map,
             frame_time: 0.0,
             frame_time_prev: 0.0,
+            frame_times: Vec::new(),
             input: Input::default(),
             guided_missile,
             explosions: Vec::new(),
@@ -90,8 +92,14 @@ impl World {
     }
 
     pub fn start_frame(&mut self, t: f64) {
+        // These two always exist while the vector can get almost empty.
         self.frame_time_prev = self.frame_time;
         self.frame_time = t;
+
+        self.frame_times.push(t);
+        while !self.frame_times.is_empty() && self.frame_times[0] + 1000.0 < t {
+            self.frame_times.remove(0);
+        }
     }
 
     pub fn input(&mut self, cvars: &Cvars, left: f64, right: f64, up: f64, down: f64) {
@@ -267,6 +275,21 @@ impl World {
             r += 1;
             y += TILE_SIZE;
         }
+
+        // Draw FPS
+        let fps = if self.frame_times.is_empty() {
+            0.0
+        } else {
+            let diff_ms = self.frame_times.last().unwrap() - self.frame_times.first().unwrap();
+            let diff_frames = self.frame_times.len() - 1;
+            let per_ms = diff_frames as f64 / diff_ms;
+            per_ms * 1000.0
+        };
+        self.context.fill_text(
+            &format!("FPS: {:.1}", fps),
+            self.canvas_size.x - 60.0,
+            self.canvas_size.y - 15.0,
+        )?;
 
         // Draw debug text
         self.context.set_fill_style(&"red".into());
