@@ -101,7 +101,7 @@ impl World {
         self.frame_time = t;
 
         self.frame_times.push(t);
-        while !self.frame_times.is_empty() && self.frame_times[0] + 1000.0 < t {
+        while !self.frame_times.is_empty() && self.frame_times[0] + 1.0 < t {
             self.frame_times.remove(0);
         }
     }
