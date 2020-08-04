@@ -32,7 +32,8 @@ pub struct World {
     img_explosion: HtmlImageElement,
     surfaces: Vec<Surface>,
     map: Map,
-    prev_update: f64,
+    frame_time: f64,
+    frame_time_prev: f64,
     guided_missile: GuidedMissile,
     explosions: Vec<(Vec2f, i32)>,
     debug_texts: Vec<String>,
@@ -74,7 +75,8 @@ impl World {
             img_explosion,
             surfaces,
             map,
-            prev_update: 0.0,
+            frame_time: 0.0,
+            frame_time_prev: 0.0,
             guided_missile,
             explosions: Vec::new(),
             debug_texts: Vec::new(),
@@ -83,6 +85,11 @@ impl World {
 
     pub fn to_debug_string(&self) -> String {
         format!("{:#?}", self)
+    }
+
+    pub fn start_frame(&mut self, t: f64) {
+        self.frame_time_prev = self.frame_time;
+        self.frame_time = t;
     }
 
     pub fn input(&mut self, cvars: &Cvars, left: f64, right: f64, up: f64, down: f64) {
@@ -125,8 +132,9 @@ impl World {
         self.guided_missile.turn_rate = tr;
     }
 
-    pub fn update_pre(&mut self, cvars: &Cvars, t: f64) {
-        let dt = t - self.prev_update;
+    pub fn update_pre(&mut self, cvars: &Cvars) {
+        let dt = self.frame_time - self.frame_time_prev;
+
         // TODO this is broken when minimized (collision detection, etc.)
 
         self.guided_missile.pos += self.guided_missile.vel * dt;
@@ -150,8 +158,6 @@ impl World {
         if kind == Kind::Wall {
             self.impact(cvars);
         }
-
-        self.prev_update = t;
     }
 
     fn impact(&mut self, cvars: &Cvars) {

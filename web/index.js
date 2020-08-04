@@ -160,8 +160,9 @@ async function run() {
             const handle = window.requestAnimationFrame(frame);
 
             try {
+                world.start_frame(t);
                 world.input(cvars, left, right, up, down);
-                world.update_pre(cvars, t);
+                world.update_pre(cvars);
                 world.draw(cvars, true);
                 world.update_post();
             } catch (e) {
