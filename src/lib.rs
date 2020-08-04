@@ -32,8 +32,11 @@ pub struct World {
     img_explosion: HtmlImageElement,
     surfaces: Vec<Surface>,
     map: Map,
+    /// Current frame's time in seconds
     frame_time: f64,
+    /// Previous frame's time in seconds
     frame_time_prev: f64,
+    /// Saved frame times over some period of time to measure FPS
     frame_times: Vec<f64>,
     input: Input,
     guided_missile: GuidedMissile,
@@ -91,6 +94,7 @@ impl World {
         format!("{:#?}", self)
     }
 
+    /// Update time (in seconds)
     pub fn start_frame(&mut self, t: f64) {
         // These two always exist while the vector can get almost empty.
         self.frame_time_prev = self.frame_time;
@@ -280,10 +284,9 @@ impl World {
         let fps = if self.frame_times.is_empty() {
             0.0
         } else {
-            let diff_ms = self.frame_times.last().unwrap() - self.frame_times.first().unwrap();
+            let diff_time = self.frame_times.last().unwrap() - self.frame_times.first().unwrap();
             let diff_frames = self.frame_times.len() - 1;
-            let per_ms = diff_frames as f64 / diff_ms;
-            per_ms * 1000.0
+            diff_frames as f64 / diff_time
         };
         self.context.fill_text(
             &format!("FPS: {:.1}", fps),

@@ -159,6 +159,9 @@ async function run() {
 
         let last_t = 0;
         const frame = (t) => {
+            // Seconds just make more sense, plus I keep assuming they're seconds and causing bugs.
+            t = t / 1000.0;
+
             // Apparently it's best practice to call requestAnimationFrame at the start of the frame.
             // However if something throws an exception, it'll likely happen every frame and
             // spam the console, making firefox painfully slow. In that case, cancel the next frame.
