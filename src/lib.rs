@@ -122,7 +122,7 @@ impl World {
             cvars.g_guided_missile_speed_max,
         );
         self.guided_missile.vel = speed_new * dir;
-        self.debug_text(format!("speed {}", speed_new));
+        self.debug_text(format!("GM speed {:.3}", speed_new));
 
         // Turning
         let tr_input: f64 = right * cvars.g_guided_missile_turn_rate_increase
@@ -130,6 +130,7 @@ impl World {
 
         // Without input, turn rate should gradually decrease towards 0
         // but not to turn in the other dir.
+        // TODO try a multiplier instead of subtraction
         // TODO this doesn't feel like flying a missile - probably needs to carry some sideways momentum
         let tr_old = self.guided_missile.turn_rate;
         let tr = if tr_input == 0.0 {
@@ -145,7 +146,7 @@ impl World {
             )
         };
 
-        self.debug_text(format!("tr {}", tr));
+        self.debug_text(format!("GM turn rate {:.3}", tr));
 
         self.guided_missile.vel.rotate_z(tr);
         self.guided_missile.turn_rate = tr;
