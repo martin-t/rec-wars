@@ -34,6 +34,7 @@ pub struct World {
     map: Map,
     frame_time: f64,
     frame_time_prev: f64,
+    input: Input,
     guided_missile: GuidedMissile,
     explosions: Vec<(Vec2f, i32)>,
     debug_texts: Vec<String>,
@@ -77,6 +78,7 @@ impl World {
             map,
             frame_time: 0.0,
             frame_time_prev: 0.0,
+            input: Input::default(),
             guided_missile,
             explosions: Vec::new(),
             debug_texts: Vec::new(),
@@ -93,6 +95,23 @@ impl World {
     }
 
     pub fn input(&mut self, cvars: &Cvars, left: f64, right: f64, up: f64, down: f64) {
+        self.input = Input {
+            left,
+            right,
+            up,
+            down,
+        };
+    }
+
+    pub fn update_pre(&mut self, cvars: &Cvars) {
+        let dt = self.frame_time - self.frame_time_prev;
+        let Input {
+            left,
+            right,
+            up,
+            down,
+        } = self.input;
+
         // Accel / decel
         let accel =
             up * cvars.g_guided_missile_speed_change - down * cvars.g_guided_missile_speed_change;
@@ -130,10 +149,6 @@ impl World {
 
         self.guided_missile.vel.rotate_z(tr);
         self.guided_missile.turn_rate = tr;
-    }
-
-    pub fn update_pre(&mut self, cvars: &Cvars) {
-        let dt = self.frame_time - self.frame_time_prev;
 
         // TODO this is broken when minimized (collision detection, etc.)
 
@@ -325,4 +340,12 @@ impl World {
     fn debug_text<S: Into<String>>(&mut self, s: S) {
         self.debug_texts.push(s.into());
     }
+}
+
+#[derive(Debug, Clone, Default)]
+struct Input {
+    left: f64,
+    right: f64,
+    up: f64,
+    down: f64,
 }
