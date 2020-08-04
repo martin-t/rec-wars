@@ -227,7 +227,10 @@ impl World {
         // Draw explosions
         for &(pos, frame) in &self.explosions {
             // TODO frame rate independence
-            let real_frame = frame / 2; // the sprite is made for 30 fps
+            // It looks like the original animation is made for 30 fps.
+            // When stepping through frames of a recording, some images take 3 frames,
+            // might be a bug in mplayer though.
+            let real_frame = frame / 2;
             let offset = real_frame as f64 * 100.0;
             let scr_pos = pos - top_left;
             self.context
