@@ -37,7 +37,8 @@
 // [x] load maps
 // [x] cvars
 //      https://crates.io/crates/cvar
-//      https://crates.io/crates/amethyst-console
+//          no tab completion in js console
+//          https://crates.io/crates/amethyst-console - uses cvar and imgui
 // [ ] render tank
 // [x] explosions
 //      [ ] sizes
