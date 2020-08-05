@@ -86,6 +86,7 @@ async function run() {
     const ctx = canvas.getContext("2d", { alpha: false });
 
     let left = 0, right = 0, up = 0, down = 0;
+    let paused = false;
 
     document.addEventListener('keydown', event => {
         if (event.key === "ArrowLeft" || event.key === "a") {
@@ -96,6 +97,8 @@ async function run() {
             up = 1;
         } else if (event.key === "ArrowDown" || event.key === "s") {
             down = 1;
+        } else if (event.key === "p") {
+            paused = !paused;
         }
     });
 
@@ -157,7 +160,11 @@ async function run() {
         window.world = world;
         window.min_frame_delay = 0;
 
-        let last_t = 0;
+        let last_frame_t = 0; // hack to test lower FPS
+
+        let paused_time = 0; // first paused frame
+        let paused_offset = 0; // total time spent paused
+
         const frame = (t) => {
             // Seconds just make more sense, plus I keep assuming they're seconds and causing bugs.
             t = t / 1000.0;
@@ -169,11 +176,26 @@ async function run() {
             const handle = window.requestAnimationFrame(frame);
 
             try {
-                if (t - last_t < window.min_frame_delay) {
+                if (t - last_frame_t < window.min_frame_delay) {
                     return;
                 } else {
-                    last_t = t;
+                    last_frame_t = t;
                 }
+
+                if (paused) {
+                    if (paused_time === 0) {
+                        // start pause
+                        paused_time = t;
+                        console.log(`paused at ${t}`);
+                    }
+                    return;
+                } else if (!paused && paused_time !== 0) {
+                    // end pause
+                    paused_offset += t - paused_time;
+                    paused_time = 0;
+                    console.log(`unpaused at ${t}, paused offset is ${paused_offset}`);
+                }
+                t -= paused_offset;
 
                 world.start_frame(t);
                 world.input(cvars, left, right, up, down);
