@@ -99,6 +99,7 @@ impl World {
         // These two always exist while the vector can get almost empty.
         self.frame_time_prev = self.frame_time;
         self.frame_time = t;
+        assert!(self.frame_time >= self.frame_time_prev);
 
         self.frame_times.push(t);
         while !self.frame_times.is_empty() && self.frame_times[0] + 1.0 < t {
