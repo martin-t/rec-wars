@@ -104,6 +104,7 @@
 //              server say? (lol no collision detection?)
 //      BFG does a tiny bit of dmg when hitting a wall with a tank on the other side
 //          probably BFG briefly enters wall before collision is detected and does proximity dmg
+//      server say for 0 deaths
 // nice to have:
 // [ ] map editor - sharing maps, voting, recommended mode / number of bots
 //      [ ] bots say hi/gg/sry/n1
