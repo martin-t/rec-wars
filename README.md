@@ -5,6 +5,7 @@ Rec Wars
 
 A top-down vehicle shooter based on an old Windows game called RecWar.
 
+TODO logo? use in-game entities to spell out Rec Wars?
 TODO screenshot - clicking opens game?
 TODO Key Features
 
