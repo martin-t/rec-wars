@@ -198,7 +198,7 @@ async function run() {
                 t -= paused_offset;
 
                 world.start_frame(t);
-                world.input(cvars, left, right, up, down);
+                world.input(left, right, up, down);
                 world.update_pre(cvars);
                 world.draw(cvars);
                 world.update_post();
