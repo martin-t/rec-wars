@@ -88,7 +88,7 @@ async function run() {
     let left = 0, right = 0, up = 0, down = 0;
     let paused = false;
 
-    document.addEventListener('keydown', event => {
+    document.addEventListener("keydown", event => {
         if (event.key === "ArrowLeft" || event.key === "a") {
             left = 1;
         } else if (event.key === "ArrowRight" || event.key === "d") {
@@ -102,7 +102,7 @@ async function run() {
         }
     });
 
-    document.addEventListener('keyup', event => {
+    document.addEventListener("keyup", event => {
         if (event.key === "ArrowLeft" || event.key === "a") {
             left = 0;
         } else if (event.key === "ArrowRight" || event.key === "d") {
