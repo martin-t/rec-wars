@@ -132,20 +132,34 @@ impl World {
         self.debug_text(format!("GM speed {:.3}", speed_new));
 
         // Turning
+        // TODO this doesn't feel like flying a missile - probably needs to carry some sideways momentum
         let tr_input: f64 = self.input.right * cvars.g_guided_missile_turn_rate_increase * dt
             - self.input.left * cvars.g_guided_missile_turn_rate_increase * dt;
 
-        // Without input, turn rate should gradually decrease towards 0
-        // but not to turn in the other dir.
-        // TODO try a multiplier instead of subtraction
-        // TODO this doesn't feel like flying a missile - probably needs to carry some sideways momentum
+        // Without input, turn rate should gradually decrease towards 0.
         let tr_old = self.guided_missile.turn_rate;
         let tr = if tr_input == 0.0 {
-            if tr_old > 0.0 {
-                (tr_old - cvars.g_guided_missile_turn_rate_decrease * dt).max(0.0)
+            // With a fixed timestep, this would multiply tr_old each frame.
+            let tr_after_friction = tr_old * cvars.g_guided_missile_turn_rate_decay.powf(dt);
+            let exponential = (tr_old - tr_after_friction).abs();
+            // With a fixed timestep, this would subtract from tr_old each frame.
+            let linear = cvars.g_guided_missile_turn_rate_decrease * dt;
+            // Don't auto-decay faster than turning in the other dir would.
+            let max_change = cvars.g_guided_missile_turn_rate_increase * dt;
+            let decrease = (exponential + linear).min(max_change);
+            // Don't cross 0 and start turning in the other dir
+            let tr_new = if tr_old > 0.0 {
+                (tr_old - decrease).max(0.0)
             } else {
-                (tr_old + cvars.g_guided_missile_turn_rate_decrease * dt).min(0.0)
+                (tr_old + decrease).min(0.0)
+            };
+
+            if tr_old != 0.0 {
+                //logd!(tr_old, exponential, linear, max_change, decrease, tr_new);
+                self.debug_text(format!("tr_old {}", tr_old));
             }
+
+            tr_new
         } else {
             (tr_old + tr_input).clamped(
                 -cvars.g_guided_missile_turn_rate_max,
