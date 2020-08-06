@@ -140,7 +140,7 @@ impl World {
         let tr_old = self.guided_missile.turn_rate;
         let tr = if tr_input == 0.0 {
             // With a fixed timestep, this would multiply tr_old each frame.
-            let tr_after_friction = tr_old * cvars.g_guided_missile_turn_rate_decrease_fraction.powf(dt);
+            let tr_after_friction = tr_old * cvars.g_guided_missile_turn_rate_friction.powf(dt);
             let exponential = (tr_old - tr_after_friction).abs();
             // With a fixed timestep, this would subtract from tr_old each frame.
             let linear = cvars.g_guided_missile_turn_rate_decrease * dt;
