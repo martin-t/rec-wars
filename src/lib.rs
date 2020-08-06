@@ -154,11 +154,6 @@ impl World {
                 (tr_old + decrease).min(0.0)
             };
 
-            if tr_old != 0.0 {
-                //logd!(tr_old, exponential, linear, max_change, decrease, tr_new);
-                self.debug_text(format!("tr_old {}", tr_old));
-            }
-
             tr_new
         } else {
             (tr_old + tr_input).clamped(
