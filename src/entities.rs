@@ -7,6 +7,8 @@ use crate::data::{Map, Vec2f};
 pub struct GuidedMissile {
     pub pos: Vec2f,
     pub vel: Vec2f,
+    /// Kinda like angular momentum, except more special-casey.
+    /// TODO Might wanna revisit when i have proper physics.
     pub turn_rate: f64,
 }
 
