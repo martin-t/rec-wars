@@ -114,6 +114,12 @@ async function run() {
         }
     });
 
+    const slowmo_slider = document.getElementById("slowmo-slider");
+    const slowmo_value = document.getElementById("slowmo-value");
+    document.addEventListener("input", event => {
+        slowmo_value.innerHTML = slowmo_slider.value;
+    });
+
     let load_tex_list = () => {
         let request = new XMLHttpRequest();
         request.open("GET", "../assets/texture_list.txt");
@@ -160,14 +166,15 @@ async function run() {
         window.world = world;
         window.min_frame_delay = 0;
 
-        let last_frame_t = 0; // hack to test lower FPS
+        let last_frame_t_real = 0;
+        let last_frame_t_scaled = 0;
 
         let paused_time = 0; // first paused frame
         let paused_offset = 0; // total time spent paused
 
         const frame = (t) => {
             // Seconds just make more sense, plus I keep assuming they're seconds and causing bugs.
-            t = t / 1000.0;
+            const t_real = t / 1000.0;
 
             // Apparently it's best practice to call requestAnimationFrame at the start of the frame.
             // However if something throws an exception, it'll likely happen every frame and
@@ -176,28 +183,23 @@ async function run() {
             const handle = window.requestAnimationFrame(frame);
 
             try {
-                if (t - last_frame_t < window.min_frame_delay) {
+                // Hack to test lower FPS - skip some frames as if they never happened.
+                // TODO remove when physics/gamelogic have a separate framerate
+                if (t_real - last_frame_t_real < window.min_frame_delay) {
                     return;
-                } else {
-                    last_frame_t = t;
                 }
+                const diff_real = t_real - last_frame_t_real;
+                last_frame_t_real = t_real;
 
                 if (paused) {
-                    if (paused_time === 0) {
-                        // start pause
-                        paused_time = t;
-                        console.log(`paused at ${t}`);
-                    }
                     return;
-                } else if (!paused && paused_time !== 0) {
-                    // end pause
-                    paused_offset += t - paused_time;
-                    paused_time = 0;
-                    console.log(`unpaused at ${t}, paused offset is ${paused_offset}`);
                 }
-                t -= paused_offset;
 
-                world.start_frame(t);
+                const diff_scaled = diff_real * slowmo_slider.value;
+                const t_scaled = last_frame_t_scaled + diff_scaled;
+                last_frame_t_scaled = t_scaled;
+
+                world.start_frame(t_scaled);
                 world.input(left, right, up, down);
                 world.update_pre(cvars);
                 world.draw(cvars);
