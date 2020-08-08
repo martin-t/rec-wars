@@ -199,6 +199,10 @@ async function run() {
                 const t_scaled = last_frame_t_scaled + diff_scaled;
                 last_frame_t_scaled = t_scaled;
 
+                // In case it was updated using console.
+                // Does not trigger `change` event.
+                slowmo_slider.value = cvars.slowmo;
+
                 world.start_frame(t_scaled);
                 world.input(left, right, up, down);
                 world.update_pre(cvars);
