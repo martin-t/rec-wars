@@ -116,13 +116,29 @@ async function run() {
 
     const slowmo_slider = document.getElementById("slowmo-slider");
     const slowmo_value = document.getElementById("slowmo-value");
-    slowmo_slider.addEventListener("change", () => {
+    slowmo_slider.addEventListener("input", () => {
+        // This fires every time the selected value changes while dragging.
+        console.log("input");
         cvars.slowmo = slowmo_slider.value;
         slowmo_value.innerHTML = slowmo_slider.value;
+    });
+    slowmo_slider.addEventListener("change", () => {
+        // This fires once dragging is complete.
+        console.log("change");
+
         // Unfocus so that arrows don't move the slider when using them to play.
         // Needs to be the `change` event, not input.
         slowmo_slider.blur();
     });
+
+    // listen to all events
+    /*Object.keys(window).forEach(key => {
+        if (/^on/.test(key)) {
+            window.addEventListener(key.slice(2), event => {
+                console.log(event);
+            });
+        }
+    });*/
 
     let load_tex_list = () => {
         let request = new XMLHttpRequest();
@@ -201,8 +217,11 @@ async function run() {
                 last_frame_t_scaled = t_scaled;
 
                 // In case it was updated using console.
-                // Does not trigger the `change` event.
-                if (slowmo_slider.value != cvars.slowmo) {
+                // Does not trigger the `input` / `change` events.
+                // Check the label instead of the actual value to avoid floating point comparisons
+                // and the related issues with rounding.
+                if (slowmo_value.innerHTML !== cvars.slowmo.toString()) {
+                    console.log("slowmo cvar updated");
                     slowmo_slider.value = cvars.slowmo;
                     slowmo_value.innerHTML = cvars.slowmo;
                 }
