@@ -22,6 +22,8 @@ pub struct Cvars {
     pub g_guided_missile_turn_rate_max: f64,
     pub r_align_to_pixels_background: bool,
     pub r_smoothing: bool,
+    /// Change speed of everything in the game
+    pub slowmo: f64,
 }
 
 #[wasm_bindgen]
@@ -46,6 +48,7 @@ impl Default for Cvars {
             g_guided_missile_turn_rate_max: 3.15,
             r_align_to_pixels_background: true,
             r_smoothing: false,
+            slowmo: 1.0,
         }
     }
 }

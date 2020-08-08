@@ -117,6 +117,7 @@ async function run() {
     const slowmo_slider = document.getElementById("slowmo-slider");
     const slowmo_value = document.getElementById("slowmo-value");
     slowmo_slider.addEventListener("change", () => {
+        cvars.slowmo = slowmo_slider.value;
         slowmo_value.innerHTML = slowmo_slider.value;
         // unfocus so that arrows don't move the slider when using them to play
         slowmo_slider.blur();
@@ -194,7 +195,7 @@ async function run() {
                     return;
                 }
 
-                const diff_scaled = diff_real * slowmo_slider.value;
+                const diff_scaled = diff_real * cvars.slowmo;
                 const t_scaled = last_frame_t_scaled + diff_scaled;
                 last_frame_t_scaled = t_scaled;
 
