@@ -116,7 +116,7 @@ async function run() {
 
     const slowmo_slider = document.getElementById("slowmo-slider");
     const slowmo_value = document.getElementById("slowmo-value");
-    slowmo_slider.addEventListener("change", event => {
+    slowmo_slider.addEventListener("change", () => {
         slowmo_value.innerHTML = slowmo_slider.value;
         // unfocus so that arrows don't move the slider when using them to play
         slowmo_slider.blur();
@@ -170,9 +170,6 @@ async function run() {
 
         let last_frame_t_real = 0;
         let last_frame_t_scaled = 0;
-
-        let paused_time = 0; // first paused frame
-        let paused_offset = 0; // total time spent paused
 
         const frame = (t) => {
             // Seconds just make more sense, plus I keep assuming they're seconds and causing bugs.
