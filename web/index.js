@@ -116,8 +116,10 @@ async function run() {
 
     const slowmo_slider = document.getElementById("slowmo-slider");
     const slowmo_value = document.getElementById("slowmo-value");
-    document.addEventListener("input", event => {
+    slowmo_slider.addEventListener("change", event => {
         slowmo_value.innerHTML = slowmo_slider.value;
+        // unfocus so that arrows don't move the slider when using them to play
+        slowmo_slider.blur();
     });
 
     let load_tex_list = () => {
