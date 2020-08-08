@@ -3,6 +3,7 @@ use std::default::Default;
 use wasm_bindgen::prelude::*;
 
 /// Prefix meanings:
+/// d_ is debug
 /// g_ is gameplay
 /// r_ is rendering
 #[wasm_bindgen]
