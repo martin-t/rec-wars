@@ -119,7 +119,8 @@ async function run() {
     slowmo_slider.addEventListener("change", () => {
         cvars.slowmo = slowmo_slider.value;
         slowmo_value.innerHTML = slowmo_slider.value;
-        // unfocus so that arrows don't move the slider when using them to play
+        // Unfocus so that arrows don't move the slider when using them to play.
+        // Needs to be the `change` event, not input.
         slowmo_slider.blur();
     });
 
@@ -200,8 +201,11 @@ async function run() {
                 last_frame_t_scaled = t_scaled;
 
                 // In case it was updated using console.
-                // Does not trigger `change` event.
-                slowmo_slider.value = cvars.slowmo;
+                // Does not trigger the `change` event.
+                if (slowmo_slider.value != cvars.slowmo) {
+                    slowmo_slider.value = cvars.slowmo;
+                    slowmo_value.innerHTML = cvars.slowmo;
+                }
 
                 world.start_frame(t_scaled);
                 world.input(left, right, up, down);
