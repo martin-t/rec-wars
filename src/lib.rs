@@ -3,6 +3,7 @@
 mod cvars;
 mod data;
 mod entities;
+mod game_state;
 mod logging;
 
 use js_sys::Array;
@@ -20,6 +21,7 @@ use web_sys::{CanvasRenderingContext2d, HtmlImageElement};
 use cvars::Cvars;
 use data::{Kind, Map, Surface, Vec2f, TILE_SIZE};
 use entities::GuidedMissile;
+use game_state::GameState;
 
 #[wasm_bindgen]
 #[derive(Debug, Clone)]
@@ -39,8 +41,7 @@ pub struct World {
     /// Saved frame times in seconds over some period of time to measure FPS
     frame_times: Vec<f64>,
     input: Input,
-    guided_missile: GuidedMissile,
-    explosions: Vec<(Vec2f, i32)>,
+    gs: GameState,
     debug_texts: Vec<String>,
 }
 
@@ -71,6 +72,12 @@ impl World {
         let surfaces = data::load_tex_list(tex_list_text);
         let map = data::load_map(map_text, &surfaces);
         let guided_missile = entities::spawn_guided_missile(cvars, &mut rng, &map);
+
+        let gs = GameState {
+            guided_missile,
+            explosions: Vec::new(),
+        };
+
         Self {
             rng,
             context,
@@ -84,8 +91,7 @@ impl World {
             frame_time_prev: 0.0,
             frame_times: Vec::new(),
             input: Input::default(),
-            guided_missile,
-            explosions: Vec::new(),
+            gs,
             debug_texts: Vec::new(),
         }
     }
@@ -122,13 +128,13 @@ impl World {
         // Accel / decel
         let accel = self.input.up * cvars.g_guided_missile_speed_change * dt
             - self.input.down * cvars.g_guided_missile_speed_change * dt;
-        let dir = self.guided_missile.vel.normalized();
-        let speed_old = self.guided_missile.vel.magnitude();
+        let dir = self.gs.guided_missile.vel.normalized();
+        let speed_old = self.gs.guided_missile.vel.magnitude();
         let speed_new = (speed_old + accel).clamped(
             cvars.g_guided_missile_speed_min,
             cvars.g_guided_missile_speed_max,
         );
-        self.guided_missile.vel = speed_new * dir;
+        self.gs.guided_missile.vel = speed_new * dir;
         self.debug_text(format!("GM speed {:.3}", speed_new));
 
         // Turning
@@ -137,7 +143,7 @@ impl World {
             - self.input.left * cvars.g_guided_missile_turn_rate_increase * dt;
 
         // Without input, turn rate should gradually decrease towards 0.
-        let tr_old = self.guided_missile.turn_rate;
+        let tr_old = self.gs.guided_missile.turn_rate;
         let tr = if tr_input == 0.0 {
             // With a fixed timestep, this would multiply tr_old each frame.
             let tr_after_friction = tr_old * cvars.g_guided_missile_turn_rate_friction.powf(dt);
@@ -162,27 +168,27 @@ impl World {
             )
         };
 
-        self.guided_missile.vel.rotate_z(tr * dt);
-        self.guided_missile.turn_rate = tr;
+        self.gs.guided_missile.vel.rotate_z(tr * dt);
+        self.gs.guided_missile.turn_rate = tr;
         self.debug_text(format!("GM turn rate {:.3}", tr));
 
         // TODO this is broken when minimized (collision detection, etc.)
-        self.guided_missile.pos += self.guided_missile.vel * dt;
-        if self.guided_missile.pos.x <= 0.0 {
+        self.gs.guided_missile.pos += self.gs.guided_missile.vel * dt;
+        if self.gs.guided_missile.pos.x <= 0.0 {
             self.impact(cvars);
         }
-        if self.guided_missile.pos.y <= 0.0 {
+        if self.gs.guided_missile.pos.y <= 0.0 {
             self.impact(cvars);
         }
         let map_size = self.map.maxs();
-        if self.guided_missile.pos.x >= map_size.x {
+        if self.gs.guided_missile.pos.x >= map_size.x {
             self.impact(cvars);
         }
-        if self.guided_missile.pos.y >= map_size.y {
+        if self.gs.guided_missile.pos.y >= map_size.y {
             self.impact(cvars);
         }
 
-        let tile_pos = self.map.tile_pos(self.guided_missile.pos);
+        let tile_pos = self.map.tile_pos(self.gs.guided_missile.pos);
         let surface = self.map[tile_pos.index].surface;
         let kind = self.surfaces[surface].kind;
         if kind == Kind::Wall {
@@ -191,8 +197,8 @@ impl World {
     }
 
     fn impact(&mut self, cvars: &Cvars) {
-        self.explosions.push((self.guided_missile.pos, 0));
-        self.guided_missile = entities::spawn_guided_missile(cvars, &mut self.rng, &self.map);
+        self.gs.explosions.push((self.gs.guided_missile.pos, 0));
+        self.gs.guided_missile = entities::spawn_guided_missile(cvars, &mut self.rng, &self.map);
     }
 
     pub fn draw(&mut self, cvars: &Cvars) -> Result<(), JsValue> {
@@ -206,7 +212,7 @@ impl World {
         let camera_min = self.canvas_size / 2.0;
         let map_size = self.map.maxs();
         let camera_max = map_size - camera_min;
-        let camera_pos = self.guided_missile.pos.clamped(camera_min, camera_max);
+        let camera_pos = self.gs.guided_missile.pos.clamped(camera_min, camera_max);
 
         let top_left = camera_pos - camera_min;
         let top_left_tp = self.map.tile_pos(top_left);
@@ -240,12 +246,12 @@ impl World {
         }
 
         // Draw missile
-        let player_scr_pos = self.guided_missile.pos - top_left;
-        let angle = self.guided_missile.vel.y.atan2(self.guided_missile.vel.x);
+        let player_scr_pos = self.gs.guided_missile.pos - top_left;
+        let angle = self.gs.guided_missile.vel.y.atan2(self.gs.guided_missile.vel.x);
         self.draw_img_center(&self.img_guided_missile, player_scr_pos, angle)?;
 
         // Draw explosions
-        for &(pos, frame) in &self.explosions {
+        for &(pos, frame) in &self.gs.explosions {
             // TODO frame rate independence
             // It looks like the original animation is made for 30 fps.
             // When stepping through frames of a recording, some images take 3 frames,
@@ -315,10 +321,10 @@ impl World {
     }
 
     pub fn update_post(&mut self) {
-        for explosion in &mut self.explosions {
+        for explosion in &mut self.gs.explosions {
             explosion.1 += 1;
         }
-        self.explosions.retain(|expl| expl.1 < 26);
+        self.gs.explosions.retain(|expl| expl.1 < 26);
     }
 
     /// Rotate counterclockwise around the image's top left corner.
