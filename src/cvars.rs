@@ -8,6 +8,8 @@ use wasm_bindgen::prelude::*;
 #[wasm_bindgen]
 #[derive(Debug, Clone)]
 pub struct Cvars {
+    /// Change speed of everything in the game
+    pub d_speed: f64,
     // Would be nice to keep alphabetically.
     // Long-term this needs some kind of better system to reduce duplication / manual work.
     pub g_guided_missile_speed_change: f64,
@@ -22,8 +24,6 @@ pub struct Cvars {
     pub g_guided_missile_turn_rate_max: f64,
     pub r_align_to_pixels_background: bool,
     pub r_smoothing: bool,
-    /// Change speed of everything in the game
-    pub slowmo: f64,
 }
 
 #[wasm_bindgen]
@@ -38,6 +38,7 @@ impl Default for Cvars {
     fn default() -> Self {
         Self {
             // TODO this is all per-frame for now
+            d_speed: 1.0,
             g_guided_missile_speed_change: 600.0,
             g_guided_missile_speed_initial: 360.0,
             g_guided_missile_speed_max: 500.0,
@@ -48,7 +49,6 @@ impl Default for Cvars {
             g_guided_missile_turn_rate_max: 3.15,
             r_align_to_pixels_background: true,
             r_smoothing: false,
-            slowmo: 1.0,
         }
     }
 }

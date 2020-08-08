@@ -114,21 +114,21 @@ async function run() {
         }
     });
 
-    const slowmo_slider = document.getElementById("slowmo-slider");
-    const slowmo_value = document.getElementById("slowmo-value");
-    slowmo_slider.addEventListener("input", () => {
+    const speed_slider = document.getElementById("speed-slider");
+    const speed_value = document.getElementById("speed-value");
+    speed_slider.addEventListener("input", () => {
         // This fires every time the selected value changes while dragging.
         console.log("input");
-        cvars.slowmo = slowmo_slider.value;
-        slowmo_value.innerHTML = slowmo_slider.value;
+        cvars.d_speed = speed_slider.value;
+        speed_value.innerHTML = speed_slider.value;
     });
-    slowmo_slider.addEventListener("change", () => {
+    speed_slider.addEventListener("change", () => {
         // This fires once dragging is complete.
         console.log("change");
 
         // Unfocus so that arrows don't move the slider when using them to play.
         // Needs to be the `change` event, not input.
-        slowmo_slider.blur();
+        speed_slider.blur();
     });
 
     // listen to all events
@@ -212,7 +212,7 @@ async function run() {
                     return;
                 }
 
-                const diff_scaled = diff_real * cvars.slowmo;
+                const diff_scaled = diff_real * cvars.d_speed;
                 const t_scaled = last_frame_t_scaled + diff_scaled;
                 last_frame_t_scaled = t_scaled;
 
@@ -220,10 +220,10 @@ async function run() {
                 // Does not trigger the `input` / `change` events.
                 // Check the label instead of the actual value to avoid floating point comparisons
                 // and the related issues with rounding.
-                if (slowmo_value.innerHTML !== cvars.slowmo.toString()) {
-                    console.log("slowmo cvar updated");
-                    slowmo_slider.value = cvars.slowmo;
-                    slowmo_value.innerHTML = cvars.slowmo;
+                if (speed_value.innerHTML !== cvars.d_speed.toString()) {
+                    console.log("speed cvar updated");
+                    speed_slider.value = cvars.d_speed;
+                    speed_value.innerHTML = cvars.d_speed;
                 }
 
                 world.start_frame(t_scaled);
