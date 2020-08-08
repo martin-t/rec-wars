@@ -246,8 +246,9 @@ impl World {
         }
 
         // Draw missile
-        let player_scr_pos = self.gs.guided_missile.pos - top_left;
-        let angle = self.gs.guided_missile.vel.y.atan2(self.gs.guided_missile.vel.x);
+        let gm = &self.gs.guided_missile;
+        let player_scr_pos = gm.pos - top_left;
+        let angle = gm.vel.y.atan2(gm.vel.x);
         self.draw_img_center(&self.img_guided_missile, player_scr_pos, angle)?;
 
         // Draw explosions
