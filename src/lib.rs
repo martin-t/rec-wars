@@ -20,7 +20,6 @@ use web_sys::{CanvasRenderingContext2d, HtmlImageElement};
 
 use cvars::Cvars;
 use data::{Kind, Map, Surface, Vec2f, TILE_SIZE};
-use entities::GuidedMissile;
 use game_state::GameState;
 
 #[wasm_bindgen]
