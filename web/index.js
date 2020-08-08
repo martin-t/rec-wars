@@ -127,7 +127,7 @@ async function run() {
         console.log("change");
 
         // Unfocus so that arrows don't move the slider when using them to play.
-        // Needs to be the `change` event, not input.
+        // Needs to be the `change` event, not `input`.
         speed_slider.blur();
     });
 
