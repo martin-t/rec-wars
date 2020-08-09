@@ -46,7 +46,7 @@ pub fn spawn_tank(pos: Vec2f, angle: f64) -> Tank {
     Tank {
         pos,
         vel: Vec2f::zero(),
-        angle: 0.0,
+        angle,
         angular_momentum: 0.0,
     }
 }
