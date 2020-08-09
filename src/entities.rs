@@ -42,6 +42,7 @@ pub struct Tank {
     pub angular_momentum: f64,
 }
 
+#[must_use]
 pub fn spawn_tank(pos: Vec2f, angle: f64) -> Tank {
     Tank {
         pos,
