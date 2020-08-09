@@ -7,11 +7,12 @@ use crate::entities::{GuidedMissile, Tank};
 pub struct GameState {
     pub gm: GuidedMissile,
     pub tank: Tank,
+    pub pe: PlayerEntity,
     pub explosions: Vec<(Vec2f, i32)>,
 }
 
 #[derive(Debug, Clone)]
 pub enum PlayerEntity {
-    GuidedMissile(GuidedMissile),
-    Tank(Tank),
+    GuidedMissile,
+    Tank,
 }

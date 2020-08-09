@@ -21,7 +21,7 @@ use web_sys::{CanvasRenderingContext2d, HtmlImageElement};
 use cvars::Cvars;
 use data::{Kind, Map, Surface, Vec2f, TILE_SIZE};
 use entities::{GuidedMissile, Tank};
-use game_state::GameState;
+use game_state::{GameState, PlayerEntity};
 
 #[wasm_bindgen]
 #[derive(Debug, Clone)]
@@ -74,13 +74,15 @@ impl World {
         let surfaces = data::load_tex_list(tex_list_text);
         let map = data::load_map(map_text, &surfaces);
         let (pos, angle) = entities::random_spawn_pos(&mut rng, &map);
-        let gm = GuidedMissile::spawn(cvars, pos, angle);
 
+        let gm = GuidedMissile::spawn(cvars, pos, angle);
         let tank = Tank::spawn(pos, angle);
-        //let pe = PlayerEntity::Tank(tank)
+        let pe = PlayerEntity::Tank;
+
         let gs = GameState {
             gm,
             tank,
+            pe,
             explosions: Vec::new(),
         };
 
@@ -150,12 +152,17 @@ impl World {
         // TODO revisit when drawing tanks - maybe make configurable per drawn object
         self.context.set_image_smoothing_enabled(cvars.r_smoothing);
 
+        let pe_pos = match self.gs.pe {
+            PlayerEntity::Tank => self.gs.tank.pos,
+            PlayerEntity::GuidedMissile => self.gs.gm.pos,
+        };
+
         // Don't put the camera so close to the edge that it would render area outside the map.
         // TODO handle maps smaller than canvas (currently crashes on unreachable)
         let camera_min = self.canvas_size / 2.0;
         let map_size = self.map.maxs();
         let camera_max = map_size - camera_min;
-        let camera_pos = self.gs.gm.pos.clamped(camera_min, camera_max);
+        let camera_pos = pe_pos.clamped(camera_min, camera_max);
 
         let top_left = camera_pos - camera_min;
         let top_left_tp = self.map.tile_pos(top_left);
