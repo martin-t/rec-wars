@@ -70,8 +70,8 @@ impl World {
 
         let surfaces = data::load_tex_list(tex_list_text);
         let map = data::load_map(map_text, &surfaces);
-        let (spawn_pos, spawn_angle) = entities::random_spawn_pos(&mut rng, &map);
-        let guided_missile = entities::spawn_guided_missile(cvars, spawn_pos, spawn_angle);
+        let (pos, angle) = entities::random_spawn_pos(&mut rng, &map);
+        let guided_missile = entities::spawn_guided_missile(cvars, pos, angle);
 
         let gs = GameState {
             guided_missile,
@@ -198,8 +198,8 @@ impl World {
 
     fn impact(&mut self, cvars: &Cvars) {
         self.gs.explosions.push((self.gs.guided_missile.pos, 0));
-        let (spawn_pos, spawn_angle) = entities::random_spawn_pos(&mut self.rng, &self.map);
-        self.gs.guided_missile = entities::spawn_guided_missile(cvars, spawn_pos, spawn_angle);
+        let (pos, angle) = entities::random_spawn_pos(&mut self.rng, &self.map);
+        self.gs.guided_missile = entities::spawn_guided_missile(cvars, pos, angle);
     }
 
     pub fn draw(&mut self, cvars: &Cvars) -> Result<(), JsValue> {
