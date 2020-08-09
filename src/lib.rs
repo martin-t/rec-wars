@@ -30,7 +30,7 @@ pub struct World {
     context: CanvasRenderingContext2d,
     canvas_size: Vec2f,
     imgs_textures: Vec<HtmlImageElement>,
-    img_guided_missile: HtmlImageElement,
+    img_gm: HtmlImageElement,
     img_explosion: HtmlImageElement,
     surfaces: Vec<Surface>,
     map: Map,
@@ -54,7 +54,7 @@ impl World {
         width: f64,
         height: f64,
         textures: Array,
-        img_guided_missile: HtmlImageElement,
+        img_gm: HtmlImageElement,
         img_explosion: HtmlImageElement,
         tex_list_text: &str,
         map_text: &str,
@@ -72,12 +72,12 @@ impl World {
         let surfaces = data::load_tex_list(tex_list_text);
         let map = data::load_map(map_text, &surfaces);
         let (pos, angle) = entities::random_spawn_pos(&mut rng, &map);
-        let guided_missile = GuidedMissile::spawn(cvars, pos, angle);
+        let gm = GuidedMissile::spawn(cvars, pos, angle);
 
         let tank = Tank::spawn(pos, angle);
         //let pe = PlayerEntity::Tank(tank)
         let gs = GameState {
-            guided_missile,
+            gm,
             tank,
             explosions: Vec::new(),
         };
@@ -87,7 +87,7 @@ impl World {
             context,
             canvas_size: Vec2f::new(width, height),
             imgs_textures,
-            img_guided_missile,
+            img_gm,
             img_explosion,
             surfaces,
             map,
@@ -129,20 +129,16 @@ impl World {
     pub fn update_pre(&mut self, cvars: &Cvars) {
         let dt = self.frame_time - self.frame_time_prev;
 
-        self.gs.guided_missile.input(cvars, dt, &self.input);
-        if self
-            .gs
-            .guided_missile
-            .physics(dt, &self.map, &self.surfaces)
-        {
+        self.gs.gm.input(cvars, dt, &self.input);
+        if self.gs.gm.physics(dt, &self.map, &self.surfaces) {
             self.impact(cvars);
         }
     }
 
     fn impact(&mut self, cvars: &Cvars) {
-        self.gs.explosions.push((self.gs.guided_missile.pos, 0));
+        self.gs.explosions.push((self.gs.gm.pos, 0));
         let (pos, angle) = entities::random_spawn_pos(&mut self.rng, &self.map);
-        self.gs.guided_missile = GuidedMissile::spawn(cvars, pos, angle);
+        self.gs.gm = GuidedMissile::spawn(cvars, pos, angle);
     }
 
     pub fn draw(&mut self, cvars: &Cvars) -> Result<(), JsValue> {
@@ -156,7 +152,7 @@ impl World {
         let camera_min = self.canvas_size / 2.0;
         let map_size = self.map.maxs();
         let camera_max = map_size - camera_min;
-        let camera_pos = self.gs.guided_missile.pos.clamped(camera_min, camera_max);
+        let camera_pos = self.gs.gm.pos.clamped(camera_min, camera_max);
 
         let top_left = camera_pos - camera_min;
         let top_left_tp = self.map.tile_pos(top_left);
@@ -190,10 +186,10 @@ impl World {
         }
 
         // Draw missile
-        let gm = &self.gs.guided_missile;
+        let gm = &self.gs.gm;
         let player_scr_pos = gm.pos - top_left;
         let angle = gm.vel.y.atan2(gm.vel.x);
-        self.draw_img_center(&self.img_guided_missile, player_scr_pos, angle)?;
+        self.draw_img_center(&self.img_gm, player_scr_pos, angle)?;
 
         // Draw explosions
         for &(pos, frame) in &self.gs.explosions {

@@ -5,7 +5,7 @@ use crate::entities::{GuidedMissile, Tank};
 /// and might need to be taken back during frame interpolation / reconciliation.
 #[derive(Debug, Clone)]
 pub struct GameState {
-    pub guided_missile: GuidedMissile,
+    pub gm: GuidedMissile,
     pub tank: Tank,
     pub explosions: Vec<(Vec2f, i32)>,
 }
