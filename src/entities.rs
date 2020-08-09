@@ -1,7 +1,12 @@
 use rand::prelude::*;
 
+use vek::Clamp;
+
 use crate::cvars::Cvars;
-use crate::data::{Map, Vec2f};
+use crate::{
+    data::{Map, Vec2f},
+    Input,
+};
 
 /// Returns (pos, angle).
 pub fn random_spawn_pos(rng: &mut SmallRng, map: &Map) -> (Vec2f, f64) {
@@ -33,6 +38,53 @@ impl GuidedMissile {
             vel: Vec2f::new(cvars.g_guided_missile_speed_initial, 0.0).rotated_z(angle),
             turn_rate: 0.0,
         }
+    }
+
+    pub fn input(&mut self, cvars: &Cvars, dt: f64, input: &Input) {
+        // Accel / decel
+        let accel = input.up * cvars.g_guided_missile_speed_change * dt
+            - input.down * cvars.g_guided_missile_speed_change * dt;
+        let dir = self.vel.normalized();
+        let speed_old = self.vel.magnitude();
+        let speed_new = (speed_old + accel).clamped(
+            cvars.g_guided_missile_speed_min,
+            cvars.g_guided_missile_speed_max,
+        );
+        self.vel = speed_new * dir;
+
+        // Turning
+        // TODO this doesn't feel like flying a missile - probably needs to carry some sideways momentum
+        let tr_input: f64 = input.right * cvars.g_guided_missile_turn_rate_increase * dt
+            - input.left * cvars.g_guided_missile_turn_rate_increase * dt;
+
+        // Without input, turn rate should gradually decrease towards 0.
+        let tr_old = self.turn_rate;
+        let tr = if tr_input == 0.0 {
+            // With a fixed timestep, this would multiply tr_old each frame.
+            let tr_after_friction = tr_old * cvars.g_guided_missile_turn_rate_friction.powf(dt);
+            let exponential = (tr_old - tr_after_friction).abs();
+            // With a fixed timestep, this would subtract from tr_old each frame.
+            let linear = cvars.g_guided_missile_turn_rate_decrease * dt;
+            // Don't auto-decay faster than turning in the other dir would.
+            let max_change = cvars.g_guided_missile_turn_rate_increase * dt;
+            let decrease = (exponential + linear).min(max_change);
+            // Don't cross 0 and start turning in the other dir
+            let tr_new = if tr_old > 0.0 {
+                (tr_old - decrease).max(0.0)
+            } else {
+                (tr_old + decrease).min(0.0)
+            };
+
+            tr_new
+        } else {
+            (tr_old + tr_input).clamped(
+                -cvars.g_guided_missile_turn_rate_max,
+                cvars.g_guided_missile_turn_rate_max,
+            )
+        };
+
+        self.vel.rotate_z(tr * dt);
+        self.turn_rate = tr;
     }
 }
 

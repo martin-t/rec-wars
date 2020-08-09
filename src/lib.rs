@@ -129,52 +129,11 @@ impl World {
     pub fn update_pre(&mut self, cvars: &Cvars) {
         let dt = self.frame_time - self.frame_time_prev;
 
-        // Accel / decel
-        let accel = self.input.up * cvars.g_guided_missile_speed_change * dt
-            - self.input.down * cvars.g_guided_missile_speed_change * dt;
-        let dir = self.gs.guided_missile.vel.normalized();
-        let speed_old = self.gs.guided_missile.vel.magnitude();
-        let speed_new = (speed_old + accel).clamped(
-            cvars.g_guided_missile_speed_min,
-            cvars.g_guided_missile_speed_max,
-        );
-        self.gs.guided_missile.vel = speed_new * dir;
-        self.debug_text(format!("GM speed {:.3}", speed_new));
+        self.gs.guided_missile.input(cvars, dt, &self.input);
 
-        // Turning
-        // TODO this doesn't feel like flying a missile - probably needs to carry some sideways momentum
-        let tr_input: f64 = self.input.right * cvars.g_guided_missile_turn_rate_increase * dt
-            - self.input.left * cvars.g_guided_missile_turn_rate_increase * dt;
-
-        // Without input, turn rate should gradually decrease towards 0.
-        let tr_old = self.gs.guided_missile.turn_rate;
-        let tr = if tr_input == 0.0 {
-            // With a fixed timestep, this would multiply tr_old each frame.
-            let tr_after_friction = tr_old * cvars.g_guided_missile_turn_rate_friction.powf(dt);
-            let exponential = (tr_old - tr_after_friction).abs();
-            // With a fixed timestep, this would subtract from tr_old each frame.
-            let linear = cvars.g_guided_missile_turn_rate_decrease * dt;
-            // Don't auto-decay faster than turning in the other dir would.
-            let max_change = cvars.g_guided_missile_turn_rate_increase * dt;
-            let decrease = (exponential + linear).min(max_change);
-            // Don't cross 0 and start turning in the other dir
-            let tr_new = if tr_old > 0.0 {
-                (tr_old - decrease).max(0.0)
-            } else {
-                (tr_old + decrease).min(0.0)
-            };
-
-            tr_new
-        } else {
-            (tr_old + tr_input).clamped(
-                -cvars.g_guided_missile_turn_rate_max,
-                cvars.g_guided_missile_turn_rate_max,
-            )
-        };
-
-        self.gs.guided_missile.vel.rotate_z(tr * dt);
-        self.gs.guided_missile.turn_rate = tr;
-        self.debug_text(format!("GM turn rate {:.3}", tr));
+        // TODO remove
+        //self.debug_text(format!("GM speed {:.3}", speed_new));
+        //self.debug_text(format!("GM turn rate {:.3}", tr));
 
         // TODO this is broken when minimized (collision detection, etc.)
         self.gs.guided_missile.pos += self.gs.guided_missile.vel * dt;
@@ -388,7 +347,7 @@ impl World {
 }
 
 #[derive(Debug, Clone, Default)]
-struct Input {
+pub struct Input {
     left: f64,
     right: f64,
     up: f64,
