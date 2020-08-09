@@ -4,7 +4,7 @@ use vek::Clamp;
 
 use crate::cvars::Cvars;
 use crate::{
-    data::{Map, Vec2f},
+    data::{Kind, Map, Surface, Vec2f},
     Input,
 };
 
@@ -85,6 +85,34 @@ impl GuidedMissile {
 
         self.vel.rotate_z(tr * dt);
         self.turn_rate = tr;
+    }
+
+    /// Returns if it hit something.
+    pub fn physics(&mut self, cvars: &Cvars, dt: f64, map: &Map, surfaces: &Vec<Surface>) -> bool {
+        // TODO this is broken when minimized (collision detection, etc.)
+        self.pos += self.vel * dt;
+        if self.pos.x <= 0.0 {
+            return true;
+        }
+        if self.pos.y <= 0.0 {
+            return true;
+        }
+        let map_size = map.maxs();
+        if self.pos.x >= map_size.x {
+            return true;
+        }
+        if self.pos.y >= map_size.y {
+            return true;
+        }
+
+        let tile_pos = map.tile_pos(self.pos);
+        let surface = map[tile_pos.index].surface;
+        let kind = surfaces[surface].kind;
+        if kind == Kind::Wall {
+            return true;
+        }
+
+        false
     }
 }
 

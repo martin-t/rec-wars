@@ -20,7 +20,7 @@ use web_sys::{CanvasRenderingContext2d, HtmlImageElement};
 
 use cvars::Cvars;
 use data::{Kind, Map, Surface, Vec2f, TILE_SIZE};
-use entities::{Tank, GuidedMissile};
+use entities::{GuidedMissile, Tank};
 use game_state::GameState;
 
 #[wasm_bindgen]
@@ -130,27 +130,7 @@ impl World {
         let dt = self.frame_time - self.frame_time_prev;
 
         self.gs.guided_missile.input(cvars, dt, &self.input);
-
-        // TODO this is broken when minimized (collision detection, etc.)
-        self.gs.guided_missile.pos += self.gs.guided_missile.vel * dt;
-        if self.gs.guided_missile.pos.x <= 0.0 {
-            self.impact(cvars);
-        }
-        if self.gs.guided_missile.pos.y <= 0.0 {
-            self.impact(cvars);
-        }
-        let map_size = self.map.maxs();
-        if self.gs.guided_missile.pos.x >= map_size.x {
-            self.impact(cvars);
-        }
-        if self.gs.guided_missile.pos.y >= map_size.y {
-            self.impact(cvars);
-        }
-
-        let tile_pos = self.map.tile_pos(self.gs.guided_missile.pos);
-        let surface = self.map[tile_pos.index].surface;
-        let kind = self.surfaces[surface].kind;
-        if kind == Kind::Wall {
+        if self.gs.guided_missile.physics(cvars, dt, &self.map, &self.surfaces) {
             self.impact(cvars);
         }
     }
