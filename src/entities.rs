@@ -21,16 +21,18 @@ pub struct GuidedMissile {
     pub turn_rate: f64,
 }
 
-#[must_use]
-pub fn spawn_guided_missile(cvars: &Cvars, pos: Vec2f, angle: f64) -> GuidedMissile {
-    // example of GM pasing through wall:
-    // pos: Vec2f::new(640.0, 640.0),
-    // vel: Vec2f::new(0.3, 0.2),
+impl GuidedMissile {
+    #[must_use]
+    pub fn spawn(cvars: &Cvars, pos: Vec2f, angle: f64) -> GuidedMissile {
+        // example of GM pasing through wall:
+        // pos: Vec2f::new(640.0, 640.0),
+        // vel: Vec2f::new(0.3, 0.2),
 
-    GuidedMissile {
-        pos,
-        vel: Vec2f::new(cvars.g_guided_missile_speed_initial, 0.0).rotated_z(angle),
-        turn_rate: 0.0,
+        GuidedMissile {
+            pos,
+            vel: Vec2f::new(cvars.g_guided_missile_speed_initial, 0.0).rotated_z(angle),
+            turn_rate: 0.0,
+        }
     }
 }
 
@@ -42,12 +44,14 @@ pub struct Tank {
     pub angular_momentum: f64,
 }
 
-#[must_use]
-pub fn spawn_tank(pos: Vec2f, angle: f64) -> Tank {
-    Tank {
-        pos,
-        vel: Vec2f::zero(),
-        angle,
-        angular_momentum: 0.0,
+impl Tank {
+    #[must_use]
+    pub fn spawn(pos: Vec2f, angle: f64) -> Tank {
+        Tank {
+            pos,
+            vel: Vec2f::zero(),
+            angle,
+            angular_momentum: 0.0,
+        }
     }
 }

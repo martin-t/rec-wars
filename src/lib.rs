@@ -20,6 +20,7 @@ use web_sys::{CanvasRenderingContext2d, HtmlImageElement};
 
 use cvars::Cvars;
 use data::{Kind, Map, Surface, Vec2f, TILE_SIZE};
+use entities::{Tank, GuidedMissile};
 use game_state::GameState;
 
 #[wasm_bindgen]
@@ -71,10 +72,13 @@ impl World {
         let surfaces = data::load_tex_list(tex_list_text);
         let map = data::load_map(map_text, &surfaces);
         let (pos, angle) = entities::random_spawn_pos(&mut rng, &map);
-        let guided_missile = entities::spawn_guided_missile(cvars, pos, angle);
+        let guided_missile = GuidedMissile::spawn(cvars, pos, angle);
 
+        let tank = Tank::spawn(pos, angle);
+        //let pe = PlayerEntity::Tank(tank)
         let gs = GameState {
             guided_missile,
+            tank,
             explosions: Vec::new(),
         };
 
@@ -199,7 +203,7 @@ impl World {
     fn impact(&mut self, cvars: &Cvars) {
         self.gs.explosions.push((self.gs.guided_missile.pos, 0));
         let (pos, angle) = entities::random_spawn_pos(&mut self.rng, &self.map);
-        self.gs.guided_missile = entities::spawn_guided_missile(cvars, pos, angle);
+        self.gs.guided_missile = GuidedMissile::spawn(cvars, pos, angle);
     }
 
     pub fn draw(&mut self, cvars: &Cvars) -> Result<(), JsValue> {
