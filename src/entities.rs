@@ -88,7 +88,7 @@ impl GuidedMissile {
     }
 
     /// Returns if it hit something.
-    pub fn physics(&mut self, cvars: &Cvars, dt: f64, map: &Map, surfaces: &Vec<Surface>) -> bool {
+    pub fn physics(&mut self, dt: f64, map: &Map, surfaces: &Vec<Surface>) -> bool {
         // TODO this is broken when minimized (collision detection, etc.)
         self.pos += self.vel * dt;
         if self.pos.x <= 0.0 {

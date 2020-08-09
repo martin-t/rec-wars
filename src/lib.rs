@@ -130,7 +130,11 @@ impl World {
         let dt = self.frame_time - self.frame_time_prev;
 
         self.gs.guided_missile.input(cvars, dt, &self.input);
-        if self.gs.guided_missile.physics(cvars, dt, &self.map, &self.surfaces) {
+        if self
+            .gs
+            .guided_missile
+            .physics(dt, &self.map, &self.surfaces)
+        {
             self.impact(cvars);
         }
     }
