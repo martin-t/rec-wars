@@ -28,7 +28,7 @@ pub fn spawn_guided_missile(cvars: &Cvars, pos: Vec2f, angle: f64) -> GuidedMiss
     // vel: Vec2f::new(0.3, 0.2),
 
     GuidedMissile {
-        pos: pos,
+        pos,
         vel: Vec2f::new(cvars.g_guided_missile_speed_initial, 0.0).rotated_z(angle),
         turn_rate: 0.0,
     }
