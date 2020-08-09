@@ -31,6 +31,7 @@ pub struct World {
     canvas_size: Vec2f,
     imgs_textures: Vec<HtmlImageElement>,
     img_gm: HtmlImageElement,
+    img_tank: HtmlImageElement,
     img_explosion: HtmlImageElement,
     surfaces: Vec<Surface>,
     map: Map,
@@ -55,6 +56,7 @@ impl World {
         height: f64,
         textures: Array,
         img_gm: HtmlImageElement,
+        img_tank: HtmlImageElement,
         img_explosion: HtmlImageElement,
         tex_list_text: &str,
         map_text: &str,
@@ -88,6 +90,7 @@ impl World {
             canvas_size: Vec2f::new(width, height),
             imgs_textures,
             img_gm,
+            img_tank,
             img_explosion,
             surfaces,
             map,
@@ -188,8 +191,13 @@ impl World {
         // Draw missile
         let gm = &self.gs.gm;
         let player_scr_pos = gm.pos - top_left;
-        let angle = gm.vel.y.atan2(gm.vel.x);
-        self.draw_img_center(&self.img_gm, player_scr_pos, angle)?;
+        let gm_angle = gm.vel.y.atan2(gm.vel.x);
+        self.draw_img_center(&self.img_gm, player_scr_pos, gm_angle)?;
+
+        // Draw tank
+        let tank = &self.gs.tank;
+        let tank_scr_pos = tank.pos - top_left;
+        self.draw_img_center(&self.img_tank, tank_scr_pos, tank.angle)?;
 
         // Draw explosions
         for &(pos, frame) in &self.gs.explosions {

@@ -78,6 +78,8 @@ async function run() {
     img_explosion.src = "../assets/explosion.png";
     let img_gm = new Image();
     img_gm.src = "../assets/weapons/guided_missile.png";
+    let img_tank = new Image();
+    img_tank.src = "../assets/tank.png";
     // https://stackoverflow.com/questions/46399223/async-await-in-image-loading
     // https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/createImageBitmap
     // or better yet, figure out how webpack works
@@ -178,7 +180,7 @@ async function run() {
         // - TODO try returning Rc/Arc
         const cvars = new Cvars();
         const world = new World(cvars, ctx, canvas.width, canvas.height,
-            imgs_textures, img_gm, img_explosion,
+            imgs_textures, img_gm, img_tank, img_explosion,
             tex_list_text, map_text);
 
         // Make some things available on window for easier debugging.
