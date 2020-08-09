@@ -131,10 +131,6 @@ impl World {
 
         self.gs.guided_missile.input(cvars, dt, &self.input);
 
-        // TODO remove
-        //self.debug_text(format!("GM speed {:.3}", speed_new));
-        //self.debug_text(format!("GM turn rate {:.3}", tr));
-
         // TODO this is broken when minimized (collision detection, etc.)
         self.gs.guided_missile.pos += self.gs.guided_missile.vel * dt;
         if self.gs.guided_missile.pos.x <= 0.0 {
