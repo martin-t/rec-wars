@@ -6,10 +6,10 @@ use crate::data::{Map, Vec2f};
 /// Returns (pos, angle).
 pub fn random_spawn_pos(rng: &mut SmallRng, map:&Map)->(Vec2f, f64){
     let r = rng.gen_range(0, map.spawns().len());
-    let spawn_index = map.spawns()[r];
-    let spawn_pos = map.tile_center(spawn_index);
-    let spawn_angle = map[spawn_index].angle;
-    (spawn_pos, spawn_angle)
+    let index = map.spawns()[r];
+    let pos = map.tile_center(index);
+    let angle = map[index].angle;
+    (pos, angle)
 }
 
 #[derive(Debug, Clone)]
