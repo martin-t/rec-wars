@@ -251,7 +251,7 @@ impl World {
         }
 
         // Draw FPS
-        // TODO wring with d_speed
+        // TODO this is wrong with d_speed
         let fps = if self.frame_times.is_empty() {
             0.0
         } else {
