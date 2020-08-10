@@ -203,6 +203,7 @@ impl World {
         self.draw_img_center(&self.img_gm, player_scr_pos, gm_angle)?;
 
         // Draw tank
+        // TODO chassis, then cow, then turret
         let tank = &self.gs.tank;
         let tank_scr_pos = tank.pos - top_left;
         self.draw_img_center(&self.img_tank, tank_scr_pos, tank.angle)?;
