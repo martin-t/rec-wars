@@ -17,7 +17,8 @@ macro_rules! logd {
     };
 }
 
-/// Helper to print the name and value of each given variable
+/// Private helper to print the name and value of each given variable.
+/// Not meant to be used directly.
 #[macro_export]
 macro_rules! __print_pairs {
     ( $t:tt ) => {
