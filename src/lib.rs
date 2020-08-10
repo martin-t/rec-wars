@@ -1,10 +1,12 @@
 // TODO lints
 
+#[macro_use]
+mod logging;
+
 mod cvars;
 mod data;
 mod entities;
 mod game_state;
-mod logging;
 
 use js_sys::Array;
 

@@ -151,12 +151,7 @@ impl Tank {
         self.angular_momentum += tr_increase;
         self.angular_momentum *= cvars.g_tank_turn_rate_friction.powf(dt);
 
-        use crate::logging::DEBUG_TEXTS;
-        DEBUG_TEXTS.with(|texts| {
-            texts
-                .borrow_mut()
-                .push(format!("tank am: {}", self.angular_momentum))
-        });
+        debug_text!(self.angular_momentum);
 
         // TODO move to physics
         self.vel *= cvars.g_tank_friction.powf(dt);

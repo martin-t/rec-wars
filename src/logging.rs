@@ -21,16 +21,26 @@ macro_rules! logd {
 /// Not meant to be used directly.
 #[macro_export]
 macro_rules! __print_pairs {
-    ( $t:tt ) => {
-        format!("{}: {:.3}", stringify!($t), $t)
+    ( $e:expr ) => {
+        format!("{}: {:.3}", stringify!($e), $e)
     };
-    ( $t:tt, $( $rest:tt ),+ ) => {
+    ( $e:expr, $( $rest:expr ),+ ) => {
         format!(
             "{}, {}",
-            __print_pairs!($t),
+            __print_pairs!($e),
             __print_pairs!( $( $rest ),+ )
         )
     };
 }
 
 thread_local!(pub static DEBUG_TEXTS: RefCell<Vec<String>> = RefCell::new(Vec::new()));
+
+#[macro_export]
+macro_rules! debug_text {
+    ( $( $e:expr ),* ) => {
+        let s = __print_pairs!( $( $e ),* );
+        crate::logging::DEBUG_TEXTS.with(|texts| {
+            texts.borrow_mut().push(s)
+        });
+    };
+}
