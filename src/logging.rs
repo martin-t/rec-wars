@@ -1,3 +1,5 @@
+use std::cell::RefCell;
+
 /// A macro to provide `println!(..)`-style syntax for `console.log` logging
 #[macro_export]
 macro_rules! log {
@@ -29,3 +31,5 @@ macro_rules! __print_pairs {
         )
     };
 }
+
+thread_local!(pub static DEBUG_TEXTS: RefCell<Vec<String>> = RefCell::new(Vec::new()));

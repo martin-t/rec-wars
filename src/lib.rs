@@ -280,6 +280,15 @@ impl World {
             self.context.fill_text(line, 20.0, y)?;
             y += 10.0;
         }
+        use crate::logging::DEBUG_TEXTS;
+        DEBUG_TEXTS.with(|texts| {
+            let mut texts = texts.borrow_mut();
+            for line in texts.iter() {
+                self.context.fill_text(line, 20.0, y).unwrap();
+                y += 10.0;
+            }
+            texts.clear();
+        });
         self.debug_texts.clear();
 
         Ok(())
