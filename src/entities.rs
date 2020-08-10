@@ -137,12 +137,25 @@ impl Tank {
     }
 
     pub fn input(&mut self, dt: f64, cvars: &Cvars, input: &Input) {
+        // Accel
         let accel_input =
             cvars.g_tank_accel_forward * input.up - cvars.g_tank_accel_backward * input.down;
         let accel = accel_input * dt;
         self.vel += Vec2f::unit_x().rotated_z(self.angle) * accel;
 
+        // Turning
+        let tr_input = cvars.g_tank_turn_rate_increase * input.left
+            - cvars.g_tank_turn_rate_increase * input.right;
+        let tr_increase = tr_input * dt;
+
+        self.angular_momentum += tr_increase;
+        // FIXME friction
+
+        // TODO move to physics
         self.vel *= cvars.g_tank_friction.powf(dt);
+
+        // FIXME unify order with missile / input
+        self.angle += self.angular_momentum;
         self.pos += self.vel * dt;
     }
 }
