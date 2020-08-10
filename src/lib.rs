@@ -134,7 +134,7 @@ impl World {
     pub fn update_pre(&mut self, cvars: &Cvars) {
         let dt = self.frame_time - self.frame_time_prev;
 
-        self.gs.gm.input(cvars, dt, &self.input);
+        self.gs.gm.input(dt, cvars, &self.input);
         if self.gs.gm.physics(dt, &self.map, &self.surfaces) {
             self.impact(cvars);
         }

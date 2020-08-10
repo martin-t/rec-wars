@@ -40,7 +40,7 @@ impl GuidedMissile {
         }
     }
 
-    pub fn input(&mut self, cvars: &Cvars, dt: f64, input: &Input) {
+    pub fn input(&mut self, dt: f64, cvars: &Cvars, input: &Input) {
         // Accel / decel
         let accel = input.up * cvars.g_guided_missile_speed_change * dt
             - input.down * cvars.g_guided_missile_speed_change * dt;
