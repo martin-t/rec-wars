@@ -42,8 +42,9 @@ impl GuidedMissile {
 
     pub fn input(&mut self, dt: f64, cvars: &Cvars, input: &Input) {
         // Accel / decel
-        let accel = input.up * cvars.g_guided_missile_speed_change * dt
-            - input.down * cvars.g_guided_missile_speed_change * dt;
+        let accel_input = input.up * cvars.g_guided_missile_speed_change
+            - input.down * cvars.g_guided_missile_speed_change;
+        let accel = accel_input * dt;
         let dir = self.vel.normalized();
         let speed_old = self.vel.magnitude();
         let speed_new = (speed_old + accel).clamped(
@@ -133,5 +134,15 @@ impl Tank {
             angle,
             angular_momentum: 0.0,
         }
+    }
+
+    pub fn input(&mut self, dt: f64, cvars: &Cvars, input: &Input) {
+        let accel_input =
+            cvars.g_tank_accel_forward * input.up - cvars.g_tank_accel_backward * input.down;
+        let accel = accel_input * dt;
+        self.vel += Vec2f::unit_x().rotated_z(self.angle) * accel;
+
+        self.vel *= cvars.g_tank_friction.powf(dt);
+        self.pos += self.vel * dt;
     }
 }

@@ -23,6 +23,9 @@ pub struct Cvars {
     /// Linear decrease to stop completely
     pub g_guided_missile_turn_rate_decrease: f64,
     pub g_guided_missile_turn_rate_max: f64,
+    pub g_tank_accel_backward: f64,
+    pub g_tank_accel_forward: f64,
+    pub g_tank_friction: f64,
     pub r_align_to_pixels_background: bool,
     pub r_smoothing: bool,
 }
@@ -48,6 +51,9 @@ impl Default for Cvars {
             g_guided_missile_turn_rate_friction: 0.01,
             g_guided_missile_turn_rate_decrease: 1.0,
             g_guided_missile_turn_rate_max: 3.15,
+            g_tank_accel_backward: 500.0,
+            g_tank_accel_forward: 500.0,
+            g_tank_friction: 0.1,
             r_align_to_pixels_background: true,
             r_smoothing: false,
         }
