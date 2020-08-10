@@ -148,7 +148,8 @@ impl World {
 
     pub fn draw(&mut self, cvars: &Cvars) -> Result<(), JsValue> {
         // Nicer rockets (more like original RW).
-        // This also means everything is aligned to pixels.
+        // This also means everything is aligned to pixels
+        // without the need to explicitly round x and y in draw calls to whole numbers.
         // TODO revisit when drawing tanks - maybe make configurable per drawn object
         self.context.set_image_smoothing_enabled(cvars.r_smoothing);
 
