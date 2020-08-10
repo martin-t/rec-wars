@@ -14,6 +14,7 @@ pub type Vec2u = Vec2<usize>;
 
 pub const TILE_SIZE: f64 = 64.0;
 
+/// A rectangular tile based map with origin in the top-left corner.
 #[derive(Debug, Clone)]
 pub struct Map {
     tiles: Vec<Vec<Tile>>,
