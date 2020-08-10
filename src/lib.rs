@@ -299,7 +299,7 @@ impl World {
 
         // Now back off to the img's corner and draw it.
         // This can be done either by translating -half_size, then drawing at 0,0
-        // or at once by drawing at -half_size which his perhaps marginally more efficient.
+        // or at once by drawing at -half_size which is perhaps marginally more efficient.
         self.context
             .draw_image_with_html_image_element(img, -half_size.x, -half_size.y)?;
 
