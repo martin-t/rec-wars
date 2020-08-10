@@ -250,7 +250,7 @@ impl World {
             y += TILE_SIZE;
         }
 
-        // Draw
+        // Draw FPS
         // TODO wring with d_speed
         let fps = if self.frame_times.is_empty() {
             0.0
