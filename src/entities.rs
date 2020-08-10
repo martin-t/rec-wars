@@ -144,8 +144,8 @@ impl Tank {
         self.vel += Vec2f::unit_x().rotated_z(self.angle) * accel;
 
         // Turning
-        let tr_input = cvars.g_tank_turn_rate_increase * input.left
-            - cvars.g_tank_turn_rate_increase * input.right;
+        let tr_input = cvars.g_tank_turn_rate_increase * input.right
+            - cvars.g_tank_turn_rate_increase * input.left;
         let tr_increase = tr_input * dt;
 
         self.angular_momentum += tr_increase;
