@@ -22,9 +22,9 @@ use web_sys::{CanvasRenderingContext2d, HtmlImageElement};
 
 use cvars::Cvars;
 use data::{Kind, Map, Surface, Vec2f, TILE_SIZE};
+use debugging::DEBUG_TEXTS;
 use entities::{GuidedMissile, Tank};
 use game_state::{GameState, PlayerEntity};
-use debugging::DEBUG_TEXTS;
 
 #[wasm_bindgen]
 #[derive(Debug, Clone)]
