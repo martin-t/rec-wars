@@ -39,7 +39,7 @@ thread_local!(pub static DEBUG_TEXTS: RefCell<Vec<String>> = RefCell::new(Vec::n
 macro_rules! debug_text {
     ( $( $e:expr ),* ) => {
         let s = __print_pairs!( $( $e ),* );
-        crate::logging::DEBUG_TEXTS.with(|texts| {
+        crate::debugging::DEBUG_TEXTS.with(|texts| {
             texts.borrow_mut().push(s)
         });
     };

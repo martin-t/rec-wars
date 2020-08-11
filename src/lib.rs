@@ -1,7 +1,7 @@
 // TODO lints
 
 #[macro_use]
-mod logging;
+mod debugging;
 
 mod cvars;
 mod data;
@@ -24,7 +24,7 @@ use cvars::Cvars;
 use data::{Kind, Map, Surface, Vec2f, TILE_SIZE};
 use entities::{GuidedMissile, Tank};
 use game_state::{GameState, PlayerEntity};
-use logging::DEBUG_TEXTS;
+use debugging::DEBUG_TEXTS;
 
 #[wasm_bindgen]
 #[derive(Debug, Clone)]
