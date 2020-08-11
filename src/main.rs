@@ -83,7 +83,13 @@
 //          needs to be stateful
 //      if dedicated servers, need at least 2 - EU and US
 // [ ] icon
-// [ ] network - UDP tunneling?
+// [ ] network
+//      WASM doesn't allow UDP sockets
+//          https://gafferongames.com/post/why_cant_i_send_udp_packets_from_a_browser/
+//          https://www.html5rocks.com/en/tutorials/webrtc/datachannels/
+//          TCP
+//          webRTC
+//          crazy idea: multiple TCP streams, rotate through them
 //      https://arewegameyet.rs/ecosystem/networking/ or custom?
 //      [ ] master server hosting
 //      [ ] prediction / reconciliation
