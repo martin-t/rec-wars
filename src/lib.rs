@@ -24,6 +24,7 @@ use cvars::Cvars;
 use data::{Kind, Map, Surface, Vec2f, TILE_SIZE};
 use entities::{GuidedMissile, Tank};
 use game_state::{GameState, PlayerEntity};
+use logging::DEBUG_TEXTS;
 
 #[wasm_bindgen]
 #[derive(Debug, Clone)]
@@ -282,7 +283,6 @@ impl World {
             self.context.fill_text(line, 20.0, y)?;
             y += 10.0;
         }
-        use crate::logging::DEBUG_TEXTS;
         DEBUG_TEXTS.with(|texts| {
             let mut texts = texts.borrow_mut();
             for line in texts.iter() {
