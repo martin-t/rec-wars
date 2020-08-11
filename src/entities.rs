@@ -151,15 +151,11 @@ impl Tank {
         self.angular_momentum += tr_increase;
         self.angular_momentum *= cvars.g_tank_turn_rate_friction.powf(dt);
 
-        dbgf!("tank am {}", self.angular_momentum);
-
         // TODO move to physics
         self.vel *= cvars.g_tank_friction.powf(dt);
 
         // FIXME unify order with missile / input
         self.angle += self.angular_momentum;
-        dbgf!("tank angle {}", self.angle);
         self.pos += self.vel * dt;
-        dbgd!(self.angle, self.pos);
     }
 }
