@@ -18,7 +18,7 @@ macro_rules! logf {
 #[macro_export]
 macro_rules! logd {
     ( $( $e:expr ),* ) => {
-        let s = __print_pairs!( $( $e ),* );
+        let s = $crate::__print_pairs!( $( $e ),* );
         web_sys::console::log_1(&s.into());
     };
 }
@@ -42,8 +42,8 @@ macro_rules! dbgf {
 #[macro_export]
 macro_rules! dbgd {
     ( $( $e:expr ),* ) => {
-        let s = __print_pairs!( $( $e ),* );
-        crate::debugging::DEBUG_TEXTS.with(|texts| {
+        let s = $crate::__print_pairs!( $( $e ),* );
+        $crate::debugging::DEBUG_TEXTS.with(|texts| {
             texts.borrow_mut().push(s)
         });
     };
@@ -59,8 +59,8 @@ macro_rules! __print_pairs {
     ( $e:expr, $( $rest:expr ),+ ) => {
         format!(
             "{}, {}",
-            __print_pairs!($e),
-            __print_pairs!( $( $rest ),+ )
+            $crate::__print_pairs!($e),
+            $crate::__print_pairs!( $( $rest ),+ )
         )
     };
 }
