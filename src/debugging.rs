@@ -2,9 +2,10 @@ use std::cell::RefCell;
 
 /// A macro to provide `println!(..)`-style syntax for `console.log` logging
 #[macro_export]
-macro_rules! log {
+macro_rules! logf {
     ( $( $t:tt ),* ) => {
-        web_sys::console::log_1(&format!( $( $t ),* ).into());
+        let s = format!( $( $t ),* );
+        web_sys::console::log_1(&s.into());
     };
 }
 
@@ -36,7 +37,17 @@ macro_rules! __print_pairs {
 thread_local!(pub static DEBUG_TEXTS: RefCell<Vec<String>> = RefCell::new(Vec::new()));
 
 #[macro_export]
-macro_rules! debug_text {
+macro_rules! dbgf {
+    ( $( $e:expr ),* ) => {
+        let s = format!( $( $e ),* );
+        crate::debugging::DEBUG_TEXTS.with(|texts| {
+            texts.borrow_mut().push(s)
+        });
+    };
+}
+
+#[macro_export]
+macro_rules! dbgd {
     ( $( $e:expr ),* ) => {
         let s = __print_pairs!( $( $e ),* );
         crate::debugging::DEBUG_TEXTS.with(|texts| {

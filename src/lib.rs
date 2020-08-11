@@ -207,7 +207,7 @@ impl World {
         let gm_angle = gm.vel.y.atan2(gm.vel.x);
         // TODO angles / up/down are a mess - fix/doc
         //debug_text!("gm angle deg: {}", gm_angle.to_degrees());
-        debug_text!(gm_angle.to_degrees());
+        dbgd!(gm_angle.to_degrees());
         self.draw_img_center(&self.img_gm, player_scr_pos, gm_angle)?;
 
         // Draw tank
