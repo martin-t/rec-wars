@@ -46,7 +46,6 @@ pub struct World {
     frame_times: Vec<f64>,
     input: Input,
     gs: GameState,
-    debug_texts: Vec<String>,
 }
 
 #[wasm_bindgen]
@@ -104,7 +103,6 @@ impl World {
             frame_times: Vec::new(),
             input: Input::default(),
             gs,
-            debug_texts: Vec::new(),
         }
     }
 
@@ -207,8 +205,9 @@ impl World {
         let gm = &self.gs.gm;
         let player_scr_pos = gm.pos - top_left;
         let gm_angle = gm.vel.y.atan2(gm.vel.x);
-        // TODO this is a mess - fix/doc
-        self.debug_text(format!("gm angle deg: {}", gm_angle.to_degrees()));
+        // TODO angles / up/down are a mess - fix/doc
+        //debug_text!("gm angle deg: {}", gm_angle.to_degrees());
+        debug_text!(gm_angle.to_degrees());
         self.draw_img_center(&self.img_gm, player_scr_pos, gm_angle)?;
 
         // Draw tank
@@ -279,10 +278,6 @@ impl World {
         // Draw debug text
         self.context.set_fill_style(&"red".into());
         let mut y = 20.0;
-        for line in &self.debug_texts {
-            self.context.fill_text(line, 20.0, y)?;
-            y += 10.0;
-        }
         DEBUG_TEXTS.with(|texts| {
             let mut texts = texts.borrow_mut();
             for line in texts.iter() {
@@ -291,7 +286,6 @@ impl World {
             }
             texts.clear();
         });
-        self.debug_texts.clear();
 
         Ok(())
     }
@@ -348,11 +342,6 @@ impl World {
         self.context.fill_rect(screen_pos.x, screen_pos.y, 1.0, 1.0); // TODO remove
 
         Ok(())
-    }
-
-    #[allow(unused)]
-    fn debug_text<S: Into<String>>(&mut self, s: S) {
-        self.debug_texts.push(s.into());
     }
 }
 
