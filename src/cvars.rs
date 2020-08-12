@@ -33,6 +33,7 @@ pub struct Cvars {
     pub g_tank_turn_rate_friction_linear: f64,
     pub g_tank_turn_rate_increase: f64,
     pub g_tank_turn_rate_max: f64,
+    pub g_tank_speed_max: f64,
 
     pub r_align_to_pixels_background: bool,
     pub r_smoothing: bool,
@@ -68,6 +69,7 @@ impl Default for Cvars {
             g_tank_turn_rate_friction_linear: 0.04,
             g_tank_turn_rate_increase: 0.2,
             g_tank_turn_rate_max: 0.04,
+            g_tank_speed_max: 250.0,
 
             r_align_to_pixels_background: true,
             r_smoothing: false,

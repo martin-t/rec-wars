@@ -174,6 +174,9 @@ impl Tank {
         let vel_new = self.vel * cvars.g_tank_friction_linear.powf(dt);
         dbgf!("diff: {:?}", (self.vel - vel_new).magnitude());
         self.vel = vel_new;
+        if self.vel.magnitude_squared() > cvars.g_tank_speed_max.powi(2) {
+            self.vel = vel_norm * cvars.g_tank_speed_max;
+        }
         dbgd!(self.vel.magnitude());
 
         // TODO unify order with missile / input
