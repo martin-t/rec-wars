@@ -127,7 +127,7 @@ impl World {
         }
     }
 
-    pub fn input(&mut self, left: f64, right: f64, up: f64, down: f64, space: f64) {
+    pub fn input(&mut self, left: f64, right: f64, up: f64, down: f64, space: bool) {
         self.gs.input = Input {
             left,
             right,

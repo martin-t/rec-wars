@@ -24,5 +24,5 @@ pub struct Input {
     pub right: f64,
     pub up: f64,
     pub down: f64,
-    pub space: f64,
+    pub space: bool,
 }
