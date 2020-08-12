@@ -59,8 +59,8 @@ impl Default for Cvars {
             g_guided_missile_turn_rate_decrease: 1.0,
             g_guided_missile_turn_rate_max: 3.15,
 
-            g_tank_accel_backward: 500.0,
-            g_tank_accel_forward: 500.0,
+            g_tank_accel_backward: 550.0,
+            g_tank_accel_forward: 550.0,
             g_tank_friction_const: 50.0,
             g_tank_friction_linear: 0.1,
             g_tank_turn_rate_friction_const: 0.05,
