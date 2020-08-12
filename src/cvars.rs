@@ -27,9 +27,9 @@ pub struct Cvars {
 
     pub g_tank_accel_backward: f64,
     pub g_tank_accel_forward: f64,
-    pub g_tank_friction: f64,
-    pub g_tank_turn_rate_friction_linear: f64,
+    pub g_tank_friction_linear: f64,
     pub g_tank_turn_rate_friction_const: f64,
+    pub g_tank_turn_rate_friction_linear: f64,
     pub g_tank_turn_rate_increase: f64,
 
     pub r_align_to_pixels_background: bool,
@@ -60,9 +60,9 @@ impl Default for Cvars {
 
             g_tank_accel_backward: 500.0,
             g_tank_accel_forward: 500.0,
-            g_tank_friction: 0.1,
-            g_tank_turn_rate_friction_linear: 0.04,
+            g_tank_friction_linear: 0.1,
             g_tank_turn_rate_friction_const: 0.05,
+            g_tank_turn_rate_friction_linear: 0.04,
             g_tank_turn_rate_increase: 0.2,
 
             r_align_to_pixels_background: true,

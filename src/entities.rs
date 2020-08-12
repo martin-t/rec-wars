@@ -167,7 +167,7 @@ impl Tank {
         self.angle += self.turn_rate;
 
         // TODO move to physics?
-        self.vel *= cvars.g_tank_friction.powf(dt);
+        self.vel *= cvars.g_tank_friction_linear.powf(dt);
 
         // FIXME unify order with missile / input
 
