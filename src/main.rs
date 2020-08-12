@@ -132,5 +132,6 @@
 //      [ ] make parsing return errors instead of crashing
 // [x] pause, variable speed
 // [ ] frame debug mode - only render gamelogic frames, no interpolation
+// [ ] shield pickups
 
 fn main() {}

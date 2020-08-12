@@ -269,6 +269,15 @@ impl World {
             y += TILE_SIZE;
         }
 
+        // Draw HUD
+        self.context.set_fill_style(&"yellow".into());
+        self.context.fill_rect(
+            cvars.hud_charge_x,
+            cvars.hud_charge_y,
+            cvars.hud_charge_width * self.gs.tank.charge,
+            cvars.hud_charge_height,
+        );
+
         // Draw FPS
         // TODO this is wrong with d_speed
         let fps = if self.frame_times.is_empty() {

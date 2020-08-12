@@ -5,6 +5,7 @@ use wasm_bindgen::prelude::*;
 /// Prefix meanings:
 /// d_ is debug
 /// g_ is gameplay
+/// hud_ is the heads-up display
 /// r_ is rendering
 #[wasm_bindgen]
 #[derive(Debug, Clone)]
@@ -35,6 +36,11 @@ pub struct Cvars {
     pub g_tank_turn_rate_increase: f64,
     pub g_tank_turn_rate_max: f64,
     pub g_tank_speed_max: f64,
+
+    pub hud_charge_x: f64,
+    pub hud_charge_y: f64,
+    pub hud_charge_width: f64,
+    pub hud_charge_height: f64,
 
     pub r_align_to_pixels_background: bool,
     pub r_smoothing: bool,
@@ -72,6 +78,11 @@ impl Default for Cvars {
             g_tank_turn_rate_increase: 0.2,
             g_tank_turn_rate_max: 0.04,
             g_tank_speed_max: 250.0,
+
+            hud_charge_x: 30.0,
+            hud_charge_y: 770.0,
+            hud_charge_width: 100.0,
+            hud_charge_height: 3.0,
 
             r_align_to_pixels_background: true,
             r_smoothing: false,
