@@ -151,7 +151,7 @@ impl World {
         self.gs.gm = GuidedMissile::spawn(cvars, pos, angle);
     }
 
-    pub fn draw(&mut self, cvars: &Cvars) -> Result<(), JsValue> {
+    pub fn draw(&self, cvars: &Cvars) -> Result<(), JsValue> {
         // Nicer rockets (more like original RW).
         // This also means everything is aligned to pixels
         // without the need to explicitly round x and y in draw calls to whole numbers.
