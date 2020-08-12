@@ -161,6 +161,7 @@ impl Tank {
         dbgd!(self.turn_rate);
 
         // Accel / decel
+        // TODO lateral friction
         dbgd!(self.vel.magnitude());
         let vel_input =
             cvars.g_tank_accel_forward * input.up - cvars.g_tank_accel_backward * input.down;
@@ -195,7 +196,8 @@ impl Tank {
         self.pos += self.vel * dt;
 
         // Firing
-        self.charge = (self.charge * dt).min(1.0);
+        self.charge = (self.charge + dt).min(1.0);
+        dbgd!(self.charge);
         if input.space && self.charge == 1.0 {
             self.charge = 0.0;
             logf!("firing");
