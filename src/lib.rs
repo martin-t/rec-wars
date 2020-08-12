@@ -24,7 +24,7 @@ use cvars::Cvars;
 use data::{Kind, Map, Surface, Vec2f, TILE_SIZE};
 use debugging::DEBUG_TEXTS;
 use entities::{GuidedMissile, Tank};
-use game_state::{GameState, PlayerEntity};
+use game_state::{GameState, Input, PlayerEntity};
 
 #[wasm_bindgen]
 #[derive(Debug, Clone)]
@@ -44,7 +44,6 @@ pub struct World {
     frame_time_prev: f64,
     /// Saved frame times in seconds over some period of time to measure FPS
     frame_times: Vec<f64>,
-    input: Input,
     gs: GameState,
 }
 
@@ -82,6 +81,7 @@ impl World {
         let pe = PlayerEntity::Tank;
 
         let gs = GameState {
+            input: Input::default(),
             gm,
             tank,
             pe,
@@ -101,7 +101,6 @@ impl World {
             frame_time: 0.0,
             frame_time_prev: 0.0,
             frame_times: Vec::new(),
-            input: Input::default(),
             gs,
         }
     }
@@ -124,7 +123,7 @@ impl World {
     }
 
     pub fn input(&mut self, left: f64, right: f64, up: f64, down: f64, space: f64) {
-        self.input = Input {
+        self.gs.input = Input {
             left,
             right,
             up,
@@ -137,8 +136,8 @@ impl World {
         let dt = self.frame_time - self.frame_time_prev;
 
         match self.gs.pe {
-            PlayerEntity::GuidedMissile => self.gs.gm.input(dt, cvars, &self.input),
-            PlayerEntity::Tank => self.gs.tank.input(dt, cvars, &self.input),
+            PlayerEntity::GuidedMissile => self.gs.gm.input(dt, cvars, &self.gs.input),
+            PlayerEntity::Tank => self.gs.tank.input(dt, cvars, &self.gs.input),
         }
 
         if self.gs.gm.physics(dt, &self.map, &self.surfaces) {
@@ -344,13 +343,4 @@ impl World {
 
         Ok(())
     }
-}
-
-#[derive(Debug, Clone, Default)]
-pub struct Input {
-    left: f64,
-    right: f64,
-    up: f64,
-    down: f64,
-    space: f64,
 }
