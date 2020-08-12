@@ -155,7 +155,7 @@ impl Tank {
 
         let tr_new = self.turn_rate * cvars.g_tank_turn_rate_friction_linear.powf(dt);
         dbgf!("diff: {:?}", self.turn_rate - tr_new);
-        self.turn_rate = tr_new;
+        self.turn_rate = tr_new.clamped(-cvars.g_tank_turn_rate_max, cvars.g_tank_turn_rate_max);
         dbgd!(self.turn_rate);
 
         // Accel / decel
