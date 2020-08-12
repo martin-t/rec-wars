@@ -54,7 +54,7 @@ macro_rules! dbgd {
 #[macro_export]
 macro_rules! __print_pairs {
     ( $e:expr ) => {
-        format!("{}: {:.3?}", stringify!($e), $e)
+        format!("{}: {:.6?}", stringify!($e), $e)
     };
     ( $e:expr, $( $rest:expr ),+ ) => {
         format!(
