@@ -137,13 +137,13 @@ impl Tank {
     }
 
     pub fn input(&mut self, dt: f64, cvars: &Cvars, input: &Input) {
-        // Turning
+        // Turn rate
         dbgd!(self.turn_rate);
         let tr_input = cvars.g_tank_turn_rate_increase * input.right
             - cvars.g_tank_turn_rate_increase * input.left;
-        let tr_increase = tr_input * dt;
-        dbgd!(tr_increase);
-        self.turn_rate += tr_increase;
+        let tr_change = tr_input * dt;
+        dbgd!(tr_change);
+        self.turn_rate += tr_change;
 
         let tr_fric_const = cvars.g_tank_turn_rate_friction_const * dt;
         dbgd!(tr_fric_const);
@@ -158,19 +158,25 @@ impl Tank {
         self.turn_rate = tr_new;
         dbgd!(self.turn_rate);
 
-        // Accel
-        let accel_input =
+        // Accel / decel
+        dbgd!(self.vel);
+        let vel_input =
             cvars.g_tank_accel_forward * input.up - cvars.g_tank_accel_backward * input.down;
-        let accel = accel_input * dt;
-        self.vel += Vec2f::unit_x().rotated_z(self.angle) * accel;
+        let vel_change = vel_input * dt;
+        dbgd!(vel_change);
+        self.vel += Vec2f::unit_x().rotated_z(self.angle) * vel_change;
+        
+        
+        self.vel *= cvars.g_tank_friction_linear.powf(dt);
+        dbgd!(self.vel);
 
+        // TODO unify order with missile / input
+        // TODO move to physics?
+
+        // Angle
         self.angle += self.turn_rate;
 
-        // TODO move to physics?
-        self.vel *= cvars.g_tank_friction_linear.powf(dt);
-
-        // FIXME unify order with missile / input
-
+        // Position
         self.pos += self.vel * dt;
     }
 }
