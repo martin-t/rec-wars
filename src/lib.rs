@@ -142,7 +142,15 @@ impl World {
 
         match self.gs.pe {
             PlayerEntity::GuidedMissile => self.gs.gm.input(dt, cvars, &self.gs.input),
-            PlayerEntity::Tank => self.gs.tank.input(dt, cvars, &self.gs.input),
+            PlayerEntity::Tank => {
+                if self.gs.input.space && self.gs.tank.charge == 1.0 {
+                    self.gs.tank.charge = 0.0;
+                    self.gs.gm = GuidedMissile::spawn(cvars, self.gs.tank.pos, self.gs.tank.angle);
+                    self.gs.pe = PlayerEntity::GuidedMissile;
+                } else {
+                    self.gs.tank.input(dt, cvars, &self.gs.input);
+                }
+            }
         }
 
         if self.gs.gm.physics(dt, &self.map, &self.surfaces) {
@@ -152,6 +160,7 @@ impl World {
 
     fn impact(&mut self, cvars: &Cvars) {
         self.gs.explosions.push((self.gs.gm.pos, 0));
+        self.gs.pe = PlayerEntity::Tank;
         let (pos, angle) = entities::random_spawn_pos(&mut self.rng, &self.map);
         self.gs.gm = GuidedMissile::spawn(cvars, pos, angle);
     }

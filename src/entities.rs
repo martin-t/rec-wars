@@ -195,10 +195,8 @@ impl Tank {
         // Position
         self.pos += self.vel * dt;
 
-        // Firing
+        // TODO some generic tick function?
+        // Reloading
         self.charge = (self.charge + dt).min(1.0);
-        if input.space && self.charge == 1.0 {
-            self.charge = 0.0;
-        }
     }
 }
