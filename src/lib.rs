@@ -140,10 +140,6 @@ impl World {
     pub fn update_pre(&mut self, cvars: &Cvars) {
         let dt = self.frame_time - self.frame_time_prev;
 
-        if !self.gs_prev.input.space && self.gs.input.space {
-            logf!("space");
-        }
-
         match self.gs.pe {
             PlayerEntity::GuidedMissile => self.gs.gm.input(dt, cvars, &self.gs.input),
             PlayerEntity::Tank => self.gs.tank.input(dt, cvars, &self.gs.input),

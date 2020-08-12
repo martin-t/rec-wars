@@ -197,10 +197,8 @@ impl Tank {
 
         // Firing
         self.charge = (self.charge + dt).min(1.0);
-        dbgd!(self.charge);
         if input.space && self.charge == 1.0 {
             self.charge = 0.0;
-            logf!("firing");
         }
     }
 }
