@@ -159,16 +159,22 @@ impl Tank {
         dbgd!(self.turn_rate);
 
         // Accel / decel
-        dbgd!(self.vel);
+        dbgd!(self.vel.magnitude());
         let vel_input =
             cvars.g_tank_accel_forward * input.up - cvars.g_tank_accel_backward * input.down;
         let vel_change = vel_input * dt;
         dbgd!(vel_change);
         self.vel += Vec2f::unit_x().rotated_z(self.angle) * vel_change;
-        
-        
-        self.vel *= cvars.g_tank_friction_linear.powf(dt);
-        dbgd!(self.vel);
+
+        let vel_fric_const = cvars.g_tank_friction_const * dt;
+        dbgd!(vel_fric_const);
+        let vel_norm = self.vel.try_normalized().unwrap_or_default();
+        self.vel -= (vel_fric_const).min(self.vel.magnitude()) * vel_norm;
+
+        let vel_new = self.vel * cvars.g_tank_friction_linear.powf(dt);
+        dbgf!("diff: {:?}", (self.vel - vel_new).magnitude());
+        self.vel = vel_new;
+        dbgd!(self.vel.magnitude());
 
         // TODO unify order with missile / input
         // TODO move to physics?
