@@ -179,7 +179,10 @@ impl Tank {
         }
         dbgd!(self.vel.magnitude());
 
-        // TODO proper turning - part of vel gets rotated?
+        // Turning - part of vel gets rotated
+        let vel_rotation = self.turn_rate * cvars.g_tank_turn_effectiveness;
+        self.vel.rotate_z(vel_rotation);
+
         // TODO unify order with missile / input
         // TODO move to physics?
 
