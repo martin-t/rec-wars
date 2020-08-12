@@ -62,7 +62,7 @@ impl Default for Cvars {
             g_tank_accel_forward: 500.0,
             g_tank_friction: 0.1,
             g_tank_turn_rate_friction_linear: 0.04,
-            g_tank_turn_rate_friction_const: 0.02,
+            g_tank_turn_rate_friction_const: 0.05,
             g_tank_turn_rate_increase: 0.2,
 
             r_align_to_pixels_background: true,

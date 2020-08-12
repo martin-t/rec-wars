@@ -122,7 +122,7 @@ pub struct Tank {
     pub pos: Vec2f,
     pub vel: Vec2f,
     pub angle: f64,
-    pub angular_momentum: f64,
+    pub turn_rate: f64,
 }
 
 impl Tank {
@@ -132,29 +132,31 @@ impl Tank {
             pos,
             vel: Vec2f::zero(),
             angle,
-            angular_momentum: 0.0,
+            turn_rate: 0.0,
         }
     }
 
     pub fn input(&mut self, dt: f64, cvars: &Cvars, input: &Input) {
         // Turning
+        dbgd!(self.turn_rate);
         let tr_input = cvars.g_tank_turn_rate_increase * input.right
             - cvars.g_tank_turn_rate_increase * input.left;
         let tr_increase = tr_input * dt;
-        self.angular_momentum += tr_increase;
+        dbgd!(tr_increase);
+        self.turn_rate += tr_increase;
 
         let tr_fric_const = cvars.g_tank_turn_rate_friction_const * dt;
-        if self.angular_momentum >= 0.0 {
-            self.angular_momentum -= tr_fric_const;
+        dbgd!(tr_fric_const);
+        if self.turn_rate >= 0.0 {
+            self.turn_rate = (self.turn_rate - tr_fric_const).max(0.0);
         } else {
-            self.angular_momentum += tr_fric_const;
+            self.turn_rate = (self.turn_rate + tr_fric_const).min(0.0);
         }
 
-        let tr_fric_lin = cvars.g_tank_turn_rate_friction_linear.powf(dt);
-        self.angular_momentum *= tr_fric_lin;
-        dbgd!(tr_increase);
-        dbgd!(tr_fric_const);
-        dbgd!(tr_fric_lin);
+        let tr_new = self.turn_rate * cvars.g_tank_turn_rate_friction_linear.powf(dt);
+        dbgf!("diff: {:?}", self.turn_rate - tr_new);
+        self.turn_rate = tr_new;
+        dbgd!(self.turn_rate);
 
         // Accel
         let accel_input =
@@ -162,7 +164,7 @@ impl Tank {
         let accel = accel_input * dt;
         self.vel += Vec2f::unit_x().rotated_z(self.angle) * accel;
 
-        self.angle += self.angular_momentum;
+        self.angle += self.turn_rate;
 
         // TODO move to physics?
         self.vel *= cvars.g_tank_friction.powf(dt);
