@@ -55,6 +55,8 @@
 // [ ] physics
 //      [ ] surfaces
 //      [ ] pushing wrecks
+// [ ] hp/health, wrecks (vehicle turned into wreck immediately on hit)
+//      [ ] configurable
 // [ ] weapons
 //      [ ] MG - more on hovercraft
 //      [ ] rail - from chassis on hummer
@@ -65,6 +67,7 @@
 //      [ ] homing missile
 //      [ ] guided missile
 //      [ ] BFG - delay? speed change? range? random dir when dead? explosion range (through wall)?
+//          explosion animation goes backwards
 // [ ] mines
 //      [ ] not within radius of base/cow
 // [ ] shadows
@@ -118,6 +121,7 @@
 //          probably BFG briefly enters wall before collision is detected and does proximity dmg
 //      server say for 0 deaths
 // nice to have:
+// [ ] make driving feel more real - simulate terrain unevenness? mild speed/angle changes?
 // [ ] map editor - sharing maps, voting, recommended mode / number of bots
 //      [ ] bots say hi/gg/sry/n1
 // [ ] log of past games (to show activity even if nobody currently online)
@@ -127,5 +131,6 @@
 // [ ] native binary
 //      [ ] make parsing return errors instead of crashing
 // [x] pause, variable speed
+// [ ] frame debug mode - only render gamelogic frames, no interpolation
 
 fn main() {}

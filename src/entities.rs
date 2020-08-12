@@ -179,6 +179,7 @@ impl Tank {
         }
         dbgd!(self.vel.magnitude());
 
+        // TODO proper turning - part of vel gets rotated?
         // TODO unify order with missile / input
         // TODO move to physics?
 
