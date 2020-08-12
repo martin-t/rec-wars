@@ -123,12 +123,13 @@ impl World {
         }
     }
 
-    pub fn input(&mut self, left: f64, right: f64, up: f64, down: f64) {
+    pub fn input(&mut self, left: f64, right: f64, up: f64, down: f64, space: f64) {
         self.input = Input {
             left,
             right,
             up,
             down,
+            space,
         };
     }
 
@@ -351,4 +352,5 @@ pub struct Input {
     right: f64,
     up: f64,
     down: f64,
+    space: f64,
 }

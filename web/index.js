@@ -99,6 +99,8 @@ async function run() {
             up = 1;
         } else if (event.key === "ArrowDown" || event.key === "s") {
             down = 1;
+        } else if (event.key === " ") {
+            space = 1;
         } else if (event.key === "p") {
             paused = !paused;
         }
@@ -113,6 +115,8 @@ async function run() {
             up = 0;
         } else if (event.key === "ArrowDown" || event.key === "s") {
             down = 0;
+        } else if (event.key === " ") {
+            space = 0;
         }
     });
 
@@ -229,7 +233,7 @@ async function run() {
                 }
 
                 world.start_frame(t_scaled);
-                world.input(left, right, up, down);
+                world.input(left, right, up, down, space);
                 world.update_pre(cvars);
                 world.draw(cvars);
                 world.update_post();
