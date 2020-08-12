@@ -123,6 +123,7 @@ pub struct Tank {
     pub vel: Vec2f,
     pub angle: f64,
     pub turn_rate: f64,
+    pub charge: f64,
 }
 
 impl Tank {
@@ -133,6 +134,7 @@ impl Tank {
             vel: Vec2f::zero(),
             angle,
             turn_rate: 0.0,
+            charge: 1.0,
         }
     }
 
@@ -191,5 +193,12 @@ impl Tank {
 
         // Position
         self.pos += self.vel * dt;
+
+        // Firing
+        self.charge = (self.charge * dt).min(1.0);
+        if input.space && self.charge == 1.0 {
+            self.charge = 0.0;
+            logf!("firing");
+        }
     }
 }
