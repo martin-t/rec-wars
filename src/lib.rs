@@ -45,6 +45,7 @@ pub struct World {
     /// Saved frame times in seconds over some period of time to measure FPS
     frame_times: Vec<f64>,
     gs: GameState,
+    gs_prev: GameState,
 }
 
 #[wasm_bindgen]
@@ -87,6 +88,7 @@ impl World {
             pe,
             explosions: Vec::new(),
         };
+        let gs_prev = gs.clone();
 
         Self {
             rng,
@@ -102,6 +104,7 @@ impl World {
             frame_time_prev: 0.0,
             frame_times: Vec::new(),
             gs,
+            gs_prev,
         }
     }
 
@@ -111,6 +114,8 @@ impl World {
 
     /// Update time tracking variables (in seconds)
     pub fn start_frame(&mut self, t: f64) {
+        self.gs_prev = self.gs.clone();
+
         // These two always exist while the vector can get almost empty.
         self.frame_time_prev = self.frame_time;
         self.frame_time = t;
