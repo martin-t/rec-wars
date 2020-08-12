@@ -39,11 +39,16 @@
 //      https://crates.io/crates/cvar
 //          no tab completion in js console
 //          https://crates.io/crates/amethyst-console - uses cvar and imgui
-// [ ] render tank
+// [ ] render vehicles
+//      [x] basic tank
+//      [ ] skins, colors
+//      [ ] vehicle types
 // [x] explosions
 //      [ ] sizes
 // [ ] movement
 //      [ ] reverse steering
+//          https://engineeringdotnet.blogspot.com/2010/04/simple-2d-car-physics-in-games.html
+//          https://www.asawicki.info/Mirror/Car%20Physics%20for%20Games/Car%20Physics%20for%20Games.html
 // [ ] collision detection with proper traces
 //      [ ] walls
 //      [ ] vehicles
@@ -75,6 +80,7 @@
 //      [ ] pathfinding - custom / from soko solver / crate?
 //          https://old.reddit.com/r/rust_gamedev/comments/hr7m3j/which_lib_do_you_use_for_pathfinding_in_you_games/
 //      [ ] roles / commands
+// [ ] decent default binds (2x for splitscreen)
 // [ ] hosting
 //      GH pages? - needs public repo first
 //      domain? SSL?
