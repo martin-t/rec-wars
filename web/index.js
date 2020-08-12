@@ -87,7 +87,7 @@ async function run() {
     const canvas = document.getElementById("canvas");
     const ctx = canvas.getContext("2d", { alpha: false });
 
-    let left = 0, right = 0, up = 0, down = 0;
+    let left = 0, right = 0, up = 0, down = 0, space = false;
     let paused = false;
 
     document.addEventListener("keydown", event => {
