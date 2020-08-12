@@ -278,6 +278,8 @@ impl World {
             cvars.hud_charge_height,
         );
 
+        self.context.set_fill_style(&"red".into());
+
         // Draw FPS
         // TODO this is wrong with d_speed
         let fps = if self.frame_times.is_empty() {
@@ -294,7 +296,6 @@ impl World {
         )?;
 
         // Draw debug text
-        self.context.set_fill_style(&"red".into());
         let mut y = 20.0;
         DEBUG_TEXTS.with(|texts| {
             let mut texts = texts.borrow_mut();
