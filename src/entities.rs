@@ -40,7 +40,7 @@ impl GuidedMissile {
         }
     }
 
-    pub fn input(&mut self, dt: f64, cvars: &Cvars, input: &Input) {
+    pub fn physics(&mut self, dt: f64, cvars: &Cvars, input: &Input) {
         // Accel / decel
         let accel_input = input.up * cvars.g_guided_missile_speed_change
             - input.down * cvars.g_guided_missile_speed_change;
@@ -89,7 +89,7 @@ impl GuidedMissile {
     }
 
     /// Returns if it hit something.
-    pub fn physics(&mut self, dt: f64, map: &Map, surfaces: &Vec<Surface>) -> bool {
+    pub fn collisions(&mut self, dt: f64, map: &Map, surfaces: &Vec<Surface>) -> bool {
         // TODO this is broken when minimized (collision detection, etc.)
         self.pos += self.vel * dt;
         if self.pos.x <= 0.0 {

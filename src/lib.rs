@@ -153,11 +153,11 @@ impl World {
         };
 
         if self.gs.pe == PlayerEntity::GuidedMissile {
-            self.gs.gm.input(dt, cvars, &self.gs.input);
+            self.gs.gm.physics(dt, cvars, &self.gs.input);
         } else {
-            self.gs.gm.input(dt, cvars, &Input::default());
+            self.gs.gm.physics(dt, cvars, &Input::default());
         }
-        let hit_something = self.gs.gm.physics(dt, &self.map, &self.surfaces);
+        let hit_something = self.gs.gm.collisions(dt, &self.map, &self.surfaces);
         if hit_something {
             self.impact(cvars);
         }
