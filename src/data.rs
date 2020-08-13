@@ -8,8 +8,14 @@ use vek::Vec2;
 
 /// Position in world or screen space.
 ///
-/// `x` is right, `y` is down.
+/// ### Coord system
+/// `x` is right, `y` is down - origin is top-left.
+/// This is to make world and screen coords behave the same
+/// (although I believe it's more common for world coords to start in bottom-left so that `y` is up).
+/// The result of having `y` down is that the unit circle in mirrored around the X axis.
+/// **Angles are clockwise**, in radians and 0 is usually pointing right.
 pub type Vec2f = Vec2<f64>;
+
 /// Position of a tile in the map.
 ///
 /// To avoid confusion with world positions,
@@ -126,7 +132,7 @@ pub struct TilePos {
 pub struct Tile {
     /// Index into texture_list.txt
     pub surface: usize,
-    /// Rotation counterclockwise in radians
+    /// Rotation in radians - see Vec2f for how the coord system and angles work.
     pub angle: f64,
 }
 
@@ -192,10 +198,17 @@ pub fn load_map(text: &str, surfaces: &[Surface]) -> Map {
             line.split(" ")
                 .map(|tile| {
                     let val: usize = tile.parse().unwrap();
-                    // TODO to rad
+                    // rotation is number of turns counterclockwise
+                    // angle is clockwise (see Vec2f for coord system explanation)
+                    // g_spawn: rotation - angle - meaning
+                    // 0    0           right
+                    // 1    -1/2*PI     up
+                    // 2    -PI         left
+                    // 3    -3/2*PI     down
+                    let rotation = val % 4;
                     Tile {
                         surface: val / 4,
-                        angle: (val % 4) as f64 * -PI / 2.0,
+                        angle: rotation as f64 * -PI / 2.0,
                     }
                 })
                 .collect()

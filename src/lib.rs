@@ -326,7 +326,7 @@ impl World {
         self.gs.explosions.retain(|expl| expl.1 < 26);
     }
 
-    /// Rotate counterclockwise around the image's top left corner.
+    /// Rotate clockwise around the image's top left corner.
     fn draw_img_top_left(
         &self,
         img: &HtmlImageElement,
@@ -349,7 +349,7 @@ impl World {
         Ok(())
     }
 
-    /// Rotate counterclockwise around the image's center.
+    /// Rotate clockwise around the image's center.
     fn draw_img_center(
         &self,
         img: &HtmlImageElement,
