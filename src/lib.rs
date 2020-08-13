@@ -140,20 +140,25 @@ impl World {
     pub fn update_pre(&mut self, cvars: &Cvars) {
         let dt = self.frame_time - self.frame_time_prev;
 
-        match self.gs.pe {
-            PlayerEntity::GuidedMissile => self.gs.gm.input(dt, cvars, &self.gs.input),
-            PlayerEntity::Tank => {
-                if self.gs.input.space && self.gs.tank.charge == 1.0 {
-                    self.gs.tank.charge = 0.0;
-                    self.gs.gm = GuidedMissile::spawn(cvars, self.gs.tank.pos, self.gs.tank.angle);
-                    self.gs.pe = PlayerEntity::GuidedMissile;
-                } else {
-                    self.gs.tank.tick(dt, cvars, &self.gs.input);
-                }
-            }
+        // Tank can shoot while controlling a missile
+        if self.gs.input.space && self.gs.tank.charge == 1.0 {
+            self.gs.tank.charge = 0.0;
+            self.gs.gm = GuidedMissile::spawn(cvars, self.gs.tank.pos, self.gs.tank.angle);
+            self.gs.pe = PlayerEntity::GuidedMissile;
         }
+        if self.gs.pe == PlayerEntity::Tank {
+            self.gs.tank.tick(dt, cvars, &self.gs.input);
+        } else {
+            self.gs.tank.tick(dt, cvars, &Input::default());
+        };
 
-        if self.gs.gm.physics(dt, &self.map, &self.surfaces) {
+        if self.gs.pe == PlayerEntity::GuidedMissile {
+            self.gs.gm.input(dt, cvars, &self.gs.input);
+        } else {
+            self.gs.gm.input(dt, cvars, &Input::default());
+        }
+        let hit_something = self.gs.gm.physics(dt, &self.map, &self.surfaces);
+        if hit_something {
             self.impact(cvars);
         }
     }

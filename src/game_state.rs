@@ -12,7 +12,7 @@ pub struct GameState {
     pub explosions: Vec<(Vec2f, i32)>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum PlayerEntity {
     GuidedMissile,
     Tank,
