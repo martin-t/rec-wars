@@ -138,7 +138,7 @@ impl Tank {
         }
     }
 
-    pub fn input(&mut self, dt: f64, cvars: &Cvars, input: &Input) {
+    pub fn tick(&mut self, dt: f64, cvars: &Cvars, input: &Input) {
         // Turn rate
         dbgd!(self.turn_rate);
         let tr_input = cvars.g_tank_turn_rate_increase * input.right
@@ -185,17 +185,13 @@ impl Tank {
         // Turning - part of vel gets rotated
         let vel_rotation = self.turn_rate * cvars.g_tank_turn_effectiveness;
         self.vel.rotate_z(vel_rotation);
-
-        // TODO unify order with missile / input
-        // TODO move to physics?
-
-        // Angle
         self.angle += self.turn_rate;
 
-        // Position
+        // TODO unify order with missile / input
+
+        // Moving
         self.pos += self.vel * dt;
 
-        // TODO some generic tick function?
         // Reloading
         self.charge = (self.charge + dt).min(1.0);
     }

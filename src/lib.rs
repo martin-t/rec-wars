@@ -148,7 +148,7 @@ impl World {
                     self.gs.gm = GuidedMissile::spawn(cvars, self.gs.tank.pos, self.gs.tank.angle);
                     self.gs.pe = PlayerEntity::GuidedMissile;
                 } else {
-                    self.gs.tank.input(dt, cvars, &self.gs.input);
+                    self.gs.tank.tick(dt, cvars, &self.gs.input);
                 }
             }
         }
