@@ -11,11 +11,21 @@
 //          [ ] webgl
 // [x] pick a math lib, don't overthink it
 // [ ] engine? rendering crate? nice if native and WASM backends
-//      https://crates.io/crates/ggez - WASM in progress
-//      https://crates.io/crates/luminance - mentions webgl/canvas
-//      https://crates.io/crates/piston
-//      https://crates.io/crates/quicksilver - all 3 OSes + WASM supported
-//      miniquad, macroquad, godot
+//      [x] check https://arewegameyet.rs/ecosystem/engines/
+//      [x] check https://github.com/dasifefe/rust-game-development-frameworks
+//      engines
+//          godot
+//          https://crates.io/crates/bevy - no WASM
+//          https://crates.io/crates/amethyst - no menton of WASM
+//          https://crates.io/crates/piston - no menton of WASM
+//          https://crates.io/crates/ggez - WASM in progress
+//          https://crates.io/crates/quicksilver
+//              all 3 OSes + WASM supported
+//              no audio?
+//              has game showcase in readme (mostly bad)
+//          macroquad - no docs?
+//      rendering only
+//          https://crates.io/crates/luminance - mentions webgl/canvas
 // [ ] solve tearing - maybe only align to pixels at high speeds?
 // [x] image fails to draw the first time after opening browser
 //      bug in python server maybe? - doesn't happen with rhino
@@ -93,6 +103,7 @@
 //      if dedicated servers, need at least 2 - EU and US
 // [x] icon
 // [ ] network
+//      https://arewegameyet.rs/ecosystem/networking/
 //      WASM doesn't allow UDP sockets
 //          https://gafferongames.com/post/why_cant_i_send_udp_packets_from_a_browser/
 //          https://www.html5rocks.com/en/tutorials/webrtc/datachannels/
