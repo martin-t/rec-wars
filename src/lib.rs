@@ -175,6 +175,7 @@ impl World {
         // This also means everything is aligned to pixels
         // without the need to explicitly round x and y in draw calls to whole numbers.
         // TODO revisit when drawing tanks - maybe make configurable per drawn object
+        //      if disabling, try changing quality
         self.context.set_image_smoothing_enabled(cvars.r_smoothing);
 
         let pe_pos = match self.gs.pe {
@@ -281,7 +282,10 @@ impl World {
             y += TILE_SIZE;
         }
 
+        // TODO Draw HM indicator using canvas dashed lines
+
         // Draw HUD
+        // TODO canvas shadow methods to draw shadows
         self.context.set_fill_style(&"yellow".into());
         self.context.fill_rect(
             cvars.hud_charge_x,

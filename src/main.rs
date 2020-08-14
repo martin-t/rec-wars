@@ -52,6 +52,7 @@
 // [ ] render vehicles
 //      [x] basic tank
 //      [ ] skins, colors
+//          canvas imageData?
 //      [ ] vehicle types
 // [x] explosions
 //      [ ] sizes
