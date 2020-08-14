@@ -124,14 +124,11 @@ async function run() {
     const speed_value = document.getElementById("speed-value");
     speed_slider.addEventListener("input", () => {
         // This fires every time the selected value changes while dragging.
-        console.log("input");
         cvars.d_speed = speed_slider.value;
         speed_value.innerHTML = speed_slider.value;
     });
     speed_slider.addEventListener("change", () => {
         // This fires once dragging is complete.
-        console.log("change");
-
         // Unfocus so that arrows don't move the slider when using them to play.
         // Needs to be the `change` event, not `input`.
         speed_slider.blur();
@@ -227,7 +224,6 @@ async function run() {
                 // Check the label instead of the actual value to avoid floating point comparisons
                 // and the related issues with rounding.
                 if (speed_value.innerHTML !== cvars.d_speed.toString()) {
-                    console.log("speed cvar updated");
                     speed_slider.value = cvars.d_speed;
                     speed_value.innerHTML = cvars.d_speed;
                 }
