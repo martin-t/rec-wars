@@ -226,6 +226,10 @@ impl World {
         let gm_angle = gm.vel.y.atan2(gm.vel.x);
         dbgd!(gm_angle.to_degrees());
         self.draw_img_center(&self.img_gm, player_scr_pos, gm_angle)?;
+        if cvars.d_debug_draw {
+            self.context
+                .fill_rect(player_scr_pos.x, player_scr_pos.y, 1.0, 1.0);
+        }
 
         // Draw tank
         // TODO chassis, then cow, then turret
@@ -307,9 +311,11 @@ impl World {
         let mut y = 20.0;
         DEBUG_TEXTS.with(|texts| {
             let mut texts = texts.borrow_mut();
-            for line in texts.iter() {
-                self.context.fill_text(line, 20.0, y).unwrap();
-                y += 10.0;
+            if cvars.d_debug_text {
+                for line in texts.iter() {
+                    self.context.fill_text(line, 20.0, y).unwrap();
+                    y += 10.0;
+                }
             }
             texts.clear();
         });
@@ -365,8 +371,6 @@ impl World {
             .draw_image_with_html_image_element(img, -half_size.x, -half_size.y)?;
 
         self.context.reset_transform()?;
-
-        self.context.fill_rect(screen_pos.x, screen_pos.y, 1.0, 1.0); // TODO remove
 
         Ok(())
     }

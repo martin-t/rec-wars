@@ -12,6 +12,10 @@ use wasm_bindgen::prelude::*;
 pub struct Cvars {
     // Would be nice to keep alphabetically.
     // Long-term this needs some kind of better system to reduce duplication / manual work.
+    //  |
+    //  v
+    pub d_debug_draw: bool,
+    pub d_debug_text: bool,
     /// Change speed of everything in the game
     pub d_speed: f64,
 
@@ -57,6 +61,8 @@ impl Cvars {
 impl Default for Cvars {
     fn default() -> Self {
         Self {
+            d_debug_draw: true,
+            d_debug_text: true,
             d_speed: 1.0,
 
             g_guided_missile_speed_change: 600.0,
