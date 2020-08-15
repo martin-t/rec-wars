@@ -29,7 +29,6 @@ use game_state::{GameState, Input, PlayerEntity};
 #[wasm_bindgen]
 #[derive(Debug, Clone)]
 pub struct World {
-    rng: SmallRng,
     context: CanvasRenderingContext2d,
     canvas_size: Vec2f,
     imgs_textures: Vec<HtmlImageElement>,
@@ -82,6 +81,7 @@ impl World {
         let pe = PlayerEntity::Tank;
 
         let gs = GameState {
+            rng,
             input: Input::default(),
             gm,
             tank,
@@ -91,7 +91,6 @@ impl World {
         let gs_prev = gs.clone();
 
         Self {
-            rng,
             context,
             canvas_size: Vec2f::new(width, height),
             imgs_textures,

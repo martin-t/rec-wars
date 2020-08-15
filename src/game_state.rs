@@ -1,3 +1,5 @@
+use rand::prelude::*;
+
 use crate::data::Vec2f;
 use crate::entities::{GuidedMissile, Tank};
 
@@ -5,6 +7,7 @@ use crate::entities::{GuidedMissile, Tank};
 /// and might need to be taken back during frame interpolation / reconciliation.
 #[derive(Debug, Clone)]
 pub struct GameState {
+    pub rng: SmallRng,
     pub input: Input,
     pub gm: GuidedMissile,
     pub tank: Tank,
