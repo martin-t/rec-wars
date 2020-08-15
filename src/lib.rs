@@ -165,7 +165,7 @@ impl World {
     fn impact(&mut self, cvars: &Cvars) {
         self.gs.explosions.push((self.gs.gm.pos, 0));
         self.gs.pe = PlayerEntity::Tank;
-        let (pos, angle) = entities::random_spawn_pos(&mut self.rng, &self.map);
+        let (pos, angle) = entities::random_spawn_pos(&mut self.gs.rng, &self.map);
         self.gs.gm = GuidedMissile::spawn(cvars, pos, angle);
     }
 
