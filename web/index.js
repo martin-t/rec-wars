@@ -79,7 +79,7 @@ async function run() {
     let img_gm = new Image();
     img_gm.src = "../assets/weapons/guided_missile.png";
     let img_tank = new Image();
-    img_tank.src = "../assets/tank.png";
+    img_tank.src = "../assets/tank_green.png";
     // https://stackoverflow.com/questions/46399223/async-await-in-image-loading
     // https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/createImageBitmap
     // or better yet, figure out how webpack works
