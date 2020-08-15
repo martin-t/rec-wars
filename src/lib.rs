@@ -65,7 +65,7 @@ impl World {
     ) -> Self {
         console_error_panic_hook::set_once();
 
-        let mut rng = SmallRng::seed_from_u64(5);
+        let mut rng = SmallRng::seed_from_u64(6);
 
         // TODO try https://rustwasm.github.io/docs/wasm-bindgen/reference/types/boxed-jsvalue-slice.html
         let imgs_textures = textures

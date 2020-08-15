@@ -140,7 +140,7 @@ impl Tank {
 
     pub fn tick(&mut self, dt: f64, cvars: &Cvars, input: &Input) {
         // Turn rate
-        dbgd!(self.turn_rate);
+        dbgf!("tank orig tr: {}", self.turn_rate);
         let tr_input = cvars.g_tank_turn_rate_increase * input.right
             - cvars.g_tank_turn_rate_increase * input.left;
         let tr_change = tr_input * dt;
@@ -155,14 +155,14 @@ impl Tank {
             self.turn_rate = (self.turn_rate + tr_fric_const).min(0.0);
         }
 
-        let tr_new = self.turn_rate * cvars.g_tank_turn_rate_friction_linear.powf(dt);
+        let tr_new = self.turn_rate * (1.0-cvars.g_tank_turn_rate_friction_linear).powf(dt);
         dbgf!("diff: {:?}", self.turn_rate - tr_new);
         self.turn_rate = tr_new.clamped(-cvars.g_tank_turn_rate_max, cvars.g_tank_turn_rate_max);
         dbgd!(self.turn_rate);
 
         // Accel / decel
         // TODO lateral friction
-        dbgd!(self.vel.magnitude());
+        dbgf!("tank orig speed: {}", self.vel.magnitude());
         let vel_input =
             cvars.g_tank_accel_forward * input.up - cvars.g_tank_accel_backward * input.down;
         let vel_change = vel_input * dt;

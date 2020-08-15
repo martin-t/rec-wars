@@ -80,9 +80,9 @@ impl Default for Cvars {
             g_tank_friction_linear: 0.1,
             g_tank_turn_effectiveness: 0.5,
             g_tank_turn_rate_friction_const: 0.05,
-            g_tank_turn_rate_friction_linear: 0.04,
+            g_tank_turn_rate_friction_linear: 0.96,
             g_tank_turn_rate_increase: 0.2,
-            g_tank_turn_rate_max: 0.04,
+            g_tank_turn_rate_max: f64::INFINITY,
             g_tank_speed_max: 250.0,
 
             hud_charge_x: 30.0,
