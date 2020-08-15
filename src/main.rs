@@ -96,6 +96,7 @@
 // [ ] TW
 // [ ] CTC
 //      [ ] cow movement
+//      crab instead? easter-egg only (temporarily? - e.g. after making a circlearound)?
 // [ ] bot AI
 //      [ ] pathfinding - custom / from soko solver / crate?
 //          https://old.reddit.com/r/rust_gamedev/comments/hr7m3j/which_lib_do_you_use_for_pathfinding_in_you_games/
