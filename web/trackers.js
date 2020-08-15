@@ -1,4 +1,4 @@
-if (!location.hostname === "localhost") {
+if (location.hostname !== "localhost") {
     document.write(`
         <a href="https://www.webfreecounter.com/" target="_blank">
             <img src="https://www.webfreecounter.com/hit.php?id=gvuvfxfcd&nd=6&style=1" alt="Views">
