@@ -16,6 +16,7 @@ pub struct Cvars {
     //  v
     pub d_debug_draw: bool,
     pub d_debug_text: bool,
+    pub d_seed: u64,
     /// Change speed of everything in the game
     pub d_speed: f64,
 
@@ -63,6 +64,7 @@ impl Default for Cvars {
         Self {
             d_debug_draw: true,
             d_debug_text: true,
+            d_seed: 6,
             d_speed: 1.0,
 
             g_guided_missile_speed_change: 600.0,
