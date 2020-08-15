@@ -13,7 +13,7 @@ use vek::Vec2;
 /// This is to make world and screen coords behave the same
 /// (although I believe it's more common for world coords to start in bottom-left so that `y` is up).
 /// The result of having `y` down is that the unit circle in mirrored around the X axis.
-/// **Angles are clockwise**, in radians and 0 is usually pointing right.
+/// As a result, **angles are clockwise**, in radians and 0 is pointing right.
 pub type Vec2f = Vec2<f64>;
 
 /// Position of a tile in the map.
