@@ -84,8 +84,14 @@
 // [ ] shadows
 // [ ] self destruct - bigger exposion, countdown, sounds
 //      works through walls
-// [ ] UI to select mode, map, bots, start game
-// [ ] fullscreen?
+// [ ] UI
+//      requirements
+//          minimum: select mode, map, bots, start game
+//          server list? quick join? start server?
+//          tank customization (only pattern, colors, name - vehicle type should be changeable in-game)
+//          binds (show keyboard image?)
+//      maybe https://www.sitepoint.com/css-layouts-floats-flexbox-grid/
+// [ ] fullscreen
 // [ ] FFA
 // [ ] TW
 // [ ] CTC
