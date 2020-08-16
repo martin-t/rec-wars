@@ -62,7 +62,8 @@ impl GuidedMissile {
         let tr_old = self.turn_rate;
         let tr = if tr_input == 0.0 {
             // With a fixed timestep, this would multiply tr_old each frame.
-            let tr_after_friction = tr_old * cvars.g_guided_missile_turn_rate_friction.powf(dt);
+            let tr_after_friction =
+                tr_old * (1.0 - cvars.g_guided_missile_turn_rate_friction).powf(dt);
             let linear = (tr_old - tr_after_friction).abs();
             // With a fixed timestep, this would subtract from tr_old each frame.
             let constant = cvars.g_guided_missile_turn_rate_decrease * dt;
@@ -155,7 +156,7 @@ impl Tank {
             self.turn_rate = (self.turn_rate + tr_fric_const).min(0.0);
         }
 
-        let tr_new = self.turn_rate * (1.0-cvars.g_tank_turn_rate_friction_linear).powf(dt);
+        let tr_new = self.turn_rate * (1.0 - cvars.g_tank_turn_rate_friction_linear).powf(dt);
         dbgf!("diff: {:?}", self.turn_rate - tr_new);
         self.turn_rate = tr_new.clamped(-cvars.g_tank_turn_rate_max, cvars.g_tank_turn_rate_max);
         dbgd!(self.turn_rate);
@@ -174,7 +175,7 @@ impl Tank {
         let vel_norm = self.vel.try_normalized().unwrap_or_default();
         self.vel -= (vel_fric_const).min(self.vel.magnitude()) * vel_norm;
 
-        let vel_new = self.vel * cvars.g_tank_friction_linear.powf(dt);
+        let vel_new = self.vel * (1.0 - cvars.g_tank_friction_linear).powf(dt);
         dbgf!("diff: {:?}", (self.vel - vel_new).magnitude());
         self.vel = vel_new;
         if self.vel.magnitude_squared() > cvars.g_tank_speed_max.powi(2) {
