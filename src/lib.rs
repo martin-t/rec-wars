@@ -277,6 +277,7 @@ impl World {
 
         // Draw HUD
         // TODO canvas shadow methods to draw shadows
+        // health: 99x9, goes from greed to red
         self.context.set_fill_style(&"yellow".into());
         self.context.fill_rect(
             cvars.hud_charge_x,

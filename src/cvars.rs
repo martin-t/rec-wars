@@ -44,7 +44,9 @@ pub struct Cvars {
 
     pub hud_charge_x: f64,
     pub hud_charge_y: f64,
+    /// Original RecWar had 99.
     pub hud_charge_width: f64,
+    /// Original RecWar had 4.
     pub hud_charge_height: f64,
 
     pub r_align_to_pixels_background: bool,
@@ -90,7 +92,7 @@ impl Default for Cvars {
             hud_charge_x: 30.0,
             hud_charge_y: 770.0,
             hud_charge_width: 100.0,
-            hud_charge_height: 3.0,
+            hud_charge_height: 4.0,
 
             r_align_to_pixels_background: true,
             r_smoothing: false,

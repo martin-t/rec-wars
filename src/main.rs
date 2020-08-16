@@ -75,6 +75,8 @@
 //          [ ] explosions happen on walls, just partially obscured
 //          [ ] reflect off map edge
 //      [ ] rockets - do they accell?
+//          6 per reload
+//          tank could shoot through a wall tile by putting the turret inside
 //      [ ] homing missile
 //      [ ] guided missile
 //      [ ] BFG - delay? speed change? range? random dir when dead? explosion range (through wall)?
