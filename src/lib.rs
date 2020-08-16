@@ -37,10 +37,6 @@ pub struct World {
     img_explosion: HtmlImageElement,
     surfaces: Vec<Surface>,
     map: Map,
-    /// Current frame's time in seconds
-    frame_time: f64,
-    /// Previous frame's time in seconds
-    frame_time_prev: f64,
     /// Saved frame times in seconds over some period of time to measure FPS
     frame_times: Vec<f64>,
     gs: GameState,
@@ -82,6 +78,7 @@ impl World {
 
         let gs = GameState {
             rng,
+            frame_time: 0.0,
             input: Input::default(),
             gm,
             tank,
@@ -99,8 +96,6 @@ impl World {
             img_explosion,
             surfaces,
             map,
-            frame_time: 0.0,
-            frame_time_prev: 0.0,
             frame_times: Vec::new(),
             gs,
             gs_prev,
@@ -114,11 +109,8 @@ impl World {
     /// Update time tracking variables (in seconds)
     pub fn start_frame(&mut self, t: f64) {
         self.gs_prev = self.gs.clone();
-
-        // These two always exist while the vector can get almost empty.
-        self.frame_time_prev = self.frame_time;
-        self.frame_time = t;
-        assert!(self.frame_time >= self.frame_time_prev);
+        self.gs.frame_time = t;
+        assert!(self.gs.frame_time >= self.gs_prev.frame_time);
 
         self.frame_times.push(t);
         while !self.frame_times.is_empty() && self.frame_times[0] + 1.0 < t {
@@ -137,7 +129,7 @@ impl World {
     }
 
     pub fn update_pre(&mut self, cvars: &Cvars) {
-        let dt = self.frame_time - self.frame_time_prev;
+        let dt = self.gs.frame_time - self.gs_prev.frame_time;
 
         // Tank can shoot while controlling a missile
         if self.gs.input.space && self.gs.tank.charge == 1.0 {

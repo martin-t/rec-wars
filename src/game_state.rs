@@ -8,6 +8,8 @@ use crate::entities::{GuidedMissile, Tank};
 #[derive(Debug, Clone)]
 pub struct GameState {
     pub rng: SmallRng,
+    /// This frame's time in seconds
+    pub frame_time: f64,
     pub input: Input,
     pub gm: GuidedMissile,
     pub tank: Tank,
