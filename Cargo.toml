@@ -7,13 +7,15 @@ edition = "2018"
 [lib]
 crate-type = ["cdylib"]
 
-[profile.release]
 # wasm-pack apparently uses the release profile
-debug = true  # this doesn't seem to help with stack traces in WASM
+[profile.release]
+# this doesn't seem to help with stack traces in WASM but let's keep it - maybe one day?
+debug = true
 
 [dependencies]
 approx = "0.3.2"
 console_error_panic_hook = "0.1.6"
+hecs = "0.2.14"
 js-sys = "0.3.42"
 vek = "0.11.2"
 wasm-bindgen = "0.2.65"
