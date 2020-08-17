@@ -32,6 +32,7 @@ pub struct World {
     context: CanvasRenderingContext2d,
     canvas_size: Vec2f,
     imgs_textures: Vec<HtmlImageElement>,
+    imgs_weapon_icons: Vec<HtmlImageElement>,
     img_gm: HtmlImageElement,
     img_tank: HtmlImageElement,
     img_explosion: HtmlImageElement,
@@ -52,6 +53,7 @@ impl World {
         width: f64,
         height: f64,
         textures: Array,
+        weapon_icons: Array,
         img_gm: HtmlImageElement,
         img_tank: HtmlImageElement,
         img_explosion: HtmlImageElement,
@@ -62,10 +64,13 @@ impl World {
 
         let mut rng = SmallRng::seed_from_u64(cvars.d_seed);
 
-        // TODO try https://rustwasm.github.io/docs/wasm-bindgen/reference/types/boxed-jsvalue-slice.html
         let imgs_textures = textures
             .iter()
             .map(|tile| tile.dyn_into().unwrap())
+            .collect();
+        let imgs_weapon_icons = weapon_icons
+            .iter()
+            .map(|js_val| js_val.dyn_into().unwrap())
             .collect();
 
         let surfaces = data::load_tex_list(tex_list_text);
@@ -91,6 +96,7 @@ impl World {
             context,
             canvas_size: Vec2f::new(width, height),
             imgs_textures,
+            imgs_weapon_icons,
             img_gm,
             img_tank,
             img_explosion,

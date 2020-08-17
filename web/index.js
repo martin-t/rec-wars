@@ -74,6 +74,20 @@ async function run() {
         return img;
     });
 
+    let imgs_weapon_icons = [
+        "../assets/mg.png",
+        "../assets/rail.png",
+        "../assets/cb.png",
+        "../assets/rockets.png",
+        "../assets/hm.png",
+        "../assets/gm.png",
+        "../assets/bfg.png",
+    ].map((tile) => {
+        let img = new Image();
+        img.src = tile;
+        return img;
+    });
+
     let img_explosion = new Image();
     img_explosion.src = "../assets/explosion.png";
     let img_gm = new Image();
@@ -181,7 +195,7 @@ async function run() {
         // - TODO try returning Rc/Arc
         const cvars = new Cvars();
         const world = new World(cvars, ctx, canvas.width, canvas.height,
-            imgs_textures, img_gm, img_tank, img_explosion,
+            imgs_textures, imgs_weapon_icons, img_gm, img_tank, img_explosion,
             tex_list_text, map_text);
 
         // Make some things available on window for easier debugging.
