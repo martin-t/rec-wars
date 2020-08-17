@@ -235,6 +235,10 @@ impl World {
             // It looks like the original animation is made for 30 fps.
             // When stepping through frames of a recording, some images take 3 frames,
             // might be a bug in mplayer though.
+            // Update: maybe the explosion is supposed to last 31 frames
+            // single stepping in blender: 13 sprites, 31 frames:
+            //      2,2,3,1,3,3,2,3,2,2,3,2,3
+            //      2,2,2,3,1,3,2,2,3,2,2,3,4
             let real_frame = frame / 2;
             let offset = real_frame as f64 * 100.0;
             let scr_pos = pos - top_left;
