@@ -11,6 +11,7 @@ pub struct GameState {
     /// This frame's time in seconds
     pub frame_time: f64,
     pub input: Input,
+    pub cur_weapon: usize,
     pub gm: GuidedMissile,
     pub tank: Tank,
     pub pe: PlayerEntity,
@@ -29,5 +30,6 @@ pub struct Input {
     pub right: f64,
     pub up: f64,
     pub down: f64,
+    pub change_weapon: bool,
     pub space: bool,
 }

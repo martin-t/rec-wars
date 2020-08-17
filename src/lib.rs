@@ -85,6 +85,7 @@ impl World {
             rng,
             frame_time: 0.0,
             input: Input::default(),
+            cur_weapon: 5,
             gm,
             tank,
             pe,
@@ -124,18 +125,31 @@ impl World {
         }
     }
 
-    pub fn input(&mut self, left: f64, right: f64, up: f64, down: f64, space: bool) {
+    pub fn input(
+        &mut self,
+        left: f64,
+        right: f64,
+        up: f64,
+        down: f64,
+        change_weapon: bool,
+        space: bool,
+    ) {
         self.gs.input = Input {
             left,
             right,
             up,
             down,
+            change_weapon,
             space,
         };
     }
 
     pub fn update_pre(&mut self, cvars: &Cvars) {
         let dt = self.gs.frame_time - self.gs_prev.frame_time;
+
+        if self.gs.input.change_weapon && !self.gs_prev.input.change_weapon {
+            self.gs.cur_weapon = (self.gs.cur_weapon + 1) % 7;
+        }
 
         // Tank can shoot while controlling a missile
         if self.gs.input.space && self.gs.tank.charge == 1.0 {
@@ -292,7 +306,7 @@ impl World {
             cvars.hud_charge_height,
         );
         self.draw_img_center(
-            &self.imgs_weapon_icons[5],
+            &self.imgs_weapon_icons[self.gs.cur_weapon],
             Vec2f::new(cvars.hud_weapon_icon_x, cvars.hud_weapon_icon_y),
             0.0,
         )?;
