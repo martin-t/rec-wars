@@ -49,6 +49,9 @@ pub struct Cvars {
     /// Original RecWar had 4.
     pub hud_charge_height: f64,
 
+    pub hud_weapon_icon_x: f64,
+    pub hud_weapon_icon_y: f64,
+
     pub r_align_to_pixels_background: bool,
     pub r_smoothing: bool,
 }
@@ -93,6 +96,9 @@ impl Default for Cvars {
             hud_charge_y: 770.0,
             hud_charge_width: 100.0,
             hud_charge_height: 4.0,
+
+            hud_weapon_icon_x: 170.0,
+            hud_weapon_icon_y: 772.0,
 
             r_align_to_pixels_background: true,
             r_smoothing: false,

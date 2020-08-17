@@ -75,13 +75,13 @@ async function run() {
     });
 
     let imgs_weapon_icons = [
-        "../assets/mg.png",
-        "../assets/rail.png",
-        "../assets/cb.png",
-        "../assets/rockets.png",
-        "../assets/hm.png",
-        "../assets/gm.png",
-        "../assets/bfg.png",
+        "../assets/weapon_icons/mg.png",
+        "../assets/weapon_icons/rail.png",
+        "../assets/weapon_icons/cb.png",
+        "../assets/weapon_icons/rockets.png",
+        "../assets/weapon_icons/hm.png",
+        "../assets/weapon_icons/gm.png",
+        "../assets/weapon_icons/bfg.png",
     ].map((tile) => {
         let img = new Image();
         img.src = tile;

@@ -295,6 +295,11 @@ impl World {
             cvars.hud_charge_width * self.gs.tank.charge,
             cvars.hud_charge_height,
         );
+        self.draw_img_center(
+            &self.imgs_weapon_icons[5],
+            Vec2f::new(cvars.hud_weapon_icon_x, cvars.hud_weapon_icon_y),
+            0.0,
+        )?;
 
         self.context.set_fill_style(&"red".into());
 
