@@ -105,7 +105,9 @@ async function run() {
     let paused = false;
 
     document.addEventListener("keydown", event => {
-        // TODO IE/edge? https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key
+        // TODO IE/edge?
+        //  https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key
+        //  https://www.w3.org/TR/uievents-key/#keys-navigation
         if (event.key === "ArrowLeft" || event.key === "a") {
             left = 1;
         } else if (event.key === "ArrowRight" || event.key === "d") {
