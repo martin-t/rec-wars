@@ -156,15 +156,11 @@ impl World {
         }
         let hit_something = self.gs.gm.collisions(dt, &self.map, &self.surfaces);
         if hit_something {
-            self.impact(cvars);
+            self.gs.explosions.push((self.gs.gm.pos, 0));
+            self.gs.pe = PlayerEntity::Tank;
+            let (pos, angle) = entities::random_spawn_pos(&mut self.gs.rng, &self.map);
+            self.gs.gm = GuidedMissile::spawn(cvars, pos, angle);
         }
-    }
-
-    fn impact(&mut self, cvars: &Cvars) {
-        self.gs.explosions.push((self.gs.gm.pos, 0));
-        self.gs.pe = PlayerEntity::Tank;
-        let (pos, angle) = entities::random_spawn_pos(&mut self.gs.rng, &self.map);
-        self.gs.gm = GuidedMissile::spawn(cvars, pos, angle);
     }
 
     pub fn draw(&self, cvars: &Cvars) -> Result<(), JsValue> {
