@@ -12,7 +12,7 @@
 // will "boot" the module and make it ready to use. Currently browsers
 // don't support natively imported WebAssembly as an ES module, but
 // eventually the manual initialization won't be required!
-import init, { World, Cvars } from '../pkg/rec_wars.js';
+import init, { Game, Cvars } from '../pkg/rec_wars.js';
 
 async function run() {
     // First up we need to actually load the wasm file, so we use the
@@ -197,17 +197,17 @@ async function run() {
         // For now, they need to live on the JS heap and be passed into each function that needs them.
         // I couldn't find a better way to make them mutable in JS and readable in Rust:
         // - can't return references from Rust into JS
-        // - can't have a reference in World
-        // - owned pub cvars in World need to be copy -> can't be changed from JS (changing will have no effect)
+        // - can't have a reference in Game
+        // - owned pub cvars in Game need to be copy -> can't be changed from JS (changing will have no effect)
         // - TODO try returning Rc/Arc
         const cvars = new Cvars();
-        const world = new World(cvars, ctx, canvas.width, canvas.height,
+        const game = new Game(cvars, ctx, canvas.width, canvas.height,
             imgs_textures, imgs_weapon_icons, img_gm, img_tank, img_explosion,
             tex_list_text, map_text);
 
         // Make some things available on window for easier debugging.
         window.cvars = cvars;
-        window.world = world;
+        window.game = game;
         window.min_frame_delay = 0;
 
         let last_frame_t_real = 0;
@@ -249,11 +249,11 @@ async function run() {
                     speed_value.innerHTML = cvars.d_speed;
                 }
 
-                world.start_frame(t_scaled);
-                world.input(left, right, up, down, change_weapon, space);
-                world.update_pre(cvars);
-                world.draw(cvars);
-                world.update_post();
+                game.start_frame(t_scaled);
+                game.input(left, right, up, down, change_weapon, space);
+                game.update_pre(cvars);
+                game.draw(cvars);
+                game.update_post();
             } catch (e) {
                 console.log("exception - aborting next frame");
                 window.cancelAnimationFrame(handle);

@@ -28,7 +28,7 @@ use game_state::{GameState, Input, PlayerEntity};
 
 #[wasm_bindgen]
 #[derive(Debug, Clone)]
-pub struct World {
+pub struct Game {
     context: CanvasRenderingContext2d,
     canvas_size: Vec2f,
     imgs_textures: Vec<HtmlImageElement>,
@@ -45,7 +45,7 @@ pub struct World {
 }
 
 #[wasm_bindgen]
-impl World {
+impl Game {
     #[wasm_bindgen(constructor)]
     pub fn new(
         cvars: &Cvars,
