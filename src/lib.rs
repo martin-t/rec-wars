@@ -325,7 +325,7 @@ impl World {
             if cvars.d_debug_text {
                 for line in texts.iter() {
                     self.context.fill_text(line, 20.0, y).unwrap();
-                    y += 10.0;
+                    y += cvars.d_debug_text_line_height;
                 }
             }
             texts.clear();
