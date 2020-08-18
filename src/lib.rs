@@ -28,6 +28,15 @@ use debugging::DEBUG_TEXTS;
 use entities::{GuidedMissile, Tank};
 use game_state::{GameState, Input, PlayerEntity};
 
+const WEAP_MG: usize = 0;
+const WEAP_RAIL: usize = 1;
+const WEAP_CB: usize = 2;
+const WEAP_ROCKETS: usize = 3;
+const WEAP_HM: usize = 4;
+const WEAP_GM: usize = 5;
+const WEAP_BFG: usize = 6;
+const WEAPS_CNT: usize = 7;
+
 #[wasm_bindgen]
 pub struct Game {
     context: CanvasRenderingContext2d,
@@ -153,14 +162,25 @@ impl Game {
         let dt = self.gs.frame_time - self.gs_prev.frame_time;
 
         if self.gs.input.change_weapon && !self.gs_prev.input.change_weapon {
-            self.gs.cur_weapon = (self.gs.cur_weapon + 1) % 7;
+            self.gs.cur_weapon = (self.gs.cur_weapon + 1) % WEAPS_CNT;
         }
 
         // Tank can shoot while controlling a missile
         if self.gs.input.space && self.gs.tank.charge == 1.0 {
-            self.gs.tank.charge = 0.0;
-            self.gs.gm = GuidedMissile::spawn(cvars, self.gs.tank.pos, self.gs.tank.angle);
-            self.gs.pe = PlayerEntity::GuidedMissile;
+            match self.gs.cur_weapon {
+                WEAP_MG => {}
+                WEAP_RAIL => {}
+                WEAP_CB => {}
+                WEAP_ROCKETS => {}
+                WEAP_HM => {}
+                WEAP_GM => {
+                    self.gs.tank.charge = 0.0;
+                    self.gs.gm = GuidedMissile::spawn(cvars, self.gs.tank.pos, self.gs.tank.angle);
+                    self.gs.pe = PlayerEntity::GuidedMissile;
+                }
+                WEAP_BFG => {}
+                _ => unreachable!("current weapon index out of range"),
+            }
         }
         if self.gs.pe == PlayerEntity::Tank {
             self.gs.tank.tick(dt, cvars, &self.gs.input);
