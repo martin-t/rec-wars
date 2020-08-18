@@ -37,6 +37,12 @@ const WEAP_GM: usize = 5;
 const WEAP_BFG: usize = 6;
 const WEAPS_CNT: usize = 7;
 
+#[derive(Debug)]
+struct Pos(Vec2f);
+
+#[derive(Debug)]
+struct Vel(Vec2f);
+
 #[wasm_bindgen]
 pub struct Game {
     context: CanvasRenderingContext2d,
@@ -168,7 +174,15 @@ impl Game {
         // Tank can shoot while controlling a missile
         if self.gs.input.fire && self.gs.tank.charge == 1.0 {
             match self.gs.cur_weapon {
-                WEAP_MG => {}
+                WEAP_MG => {
+                    let pos = Pos(self.gs.tank.pos);
+                    let mut vel =
+                        Vec2f::new(cvars.g_machine_gun_speed, 0.0).rotated_z(self.gs.tank.angle);
+                    if cvars.g_machine_gun_add_vehicle_velocity {
+                        vel += self.gs.tank.vel;
+                    }
+                    self.ecs.spawn((pos, Vel(vel)));
+                }
                 WEAP_RAIL => {}
                 WEAP_CB => {}
                 WEAP_ROCKETS => {}
@@ -182,6 +196,12 @@ impl Game {
                 _ => unreachable!("current weapon index out of range"),
             }
         }
+
+        // TODO reorder?
+        for (_, (pos, vel)) in self.ecs.query::<(&mut Pos, &Vel)>().iter() {
+            pos.0 += vel.0 * dt;
+        }
+
         if self.gs.pe == PlayerEntity::Tank {
             self.gs.tank.tick(dt, cvars, &self.gs.input);
         } else {
@@ -251,6 +271,18 @@ impl Game {
             }
             r += 1;
             y += TILE_SIZE;
+        }
+
+        // Draw MG
+        self.context.set_stroke_style(&"yellow".into());
+        for (_, (pos, vel)) in self.ecs.query::<(&Pos, &Vel)>().iter() {
+            let scr_pos = pos.0 - top_left;
+            self.context.begin_path();
+            self.context.move_to(scr_pos.x, scr_pos.y);
+            // we're drawing from the bullet's position backwards
+            let scr_end = scr_pos - vel.0.normalized() * cvars.g_machine_gun_trail_length;
+            self.context.line_to(scr_end.x, scr_end.y);
+            self.context.stroke();
         }
 
         // Draw missile
