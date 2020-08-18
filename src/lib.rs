@@ -8,6 +8,8 @@ mod data;
 mod entities;
 mod game_state;
 
+use hecs::World;
+
 use js_sys::Array;
 
 use rand::prelude::*;
@@ -27,7 +29,6 @@ use entities::{GuidedMissile, Tank};
 use game_state::{GameState, Input, PlayerEntity};
 
 #[wasm_bindgen]
-#[derive(Debug, Clone)]
 pub struct Game {
     context: CanvasRenderingContext2d,
     canvas_size: Vec2f,
@@ -42,6 +43,7 @@ pub struct Game {
     frame_times: Vec<f64>,
     gs: GameState,
     gs_prev: GameState,
+    ecs: World,
 }
 
 #[wasm_bindgen]
@@ -106,12 +108,14 @@ impl Game {
             frame_times: Vec::new(),
             gs,
             gs_prev,
+            ecs: World::new(),
         }
     }
 
-    pub fn to_debug_string(&self) -> String {
+    // TODO Debug for hecs?
+    /*pub fn to_debug_string(&self) -> String {
         format!("{:#?}", self)
-    }
+    }*/
 
     /// Update time tracking variables (in seconds)
     pub fn start_frame(&mut self, t: f64) {
@@ -125,6 +129,7 @@ impl Game {
         }
     }
 
+    // TODO export Input instead, let JS set the values?
     pub fn input(
         &mut self,
         left: f64,
