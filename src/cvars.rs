@@ -79,7 +79,7 @@ impl Default for Cvars {
             d_speed: 1.0,
 
             g_machine_gun_add_vehicle_velocity: true,
-            g_machine_gun_speed: 600.0,
+            g_machine_gun_speed: 1000.0,
             g_machine_gun_trail_length: 8.0,
 
             g_guided_missile_speed_change: 600.0,
