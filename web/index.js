@@ -101,7 +101,7 @@ async function run() {
     const canvas = document.getElementById("canvas");
     const ctx = canvas.getContext("2d", { alpha: false });
 
-    let left = 0, right = 0, up = 0, down = 0, change_weapon = false, space = false;
+    let left = 0, right = 0, up = 0, down = 0, change_weapon = false, fire = false;
     let paused = false;
 
     document.addEventListener("keydown", event => {
@@ -119,7 +119,7 @@ async function run() {
         } else if (event.key === "Shift") {
             change_weapon = true;
         } else if (event.key === " ") {
-            space = 1;
+            fire = true;
         } else if (event.key === "p") {
             paused = !paused;
         }
@@ -137,7 +137,7 @@ async function run() {
         } else if (event.key === "Shift") {
             change_weapon = false;
         } else if (event.key === " ") {
-            space = 0;
+            fire = false;
         }
     });
 
@@ -250,7 +250,7 @@ async function run() {
                 }
 
                 game.start_frame(t_scaled);
-                game.input(left, right, up, down, change_weapon, space);
+                game.input(left, right, up, down, change_weapon, fire);
                 game.update_pre(cvars);
                 game.draw(cvars);
                 game.update_post();

@@ -146,7 +146,7 @@ impl Game {
         up: f64,
         down: f64,
         change_weapon: bool,
-        space: bool,
+        fire: bool,
     ) {
         self.gs.input = Input {
             left,
@@ -154,7 +154,7 @@ impl Game {
             up,
             down,
             change_weapon,
-            space,
+            fire,
         };
     }
 
@@ -166,7 +166,7 @@ impl Game {
         }
 
         // Tank can shoot while controlling a missile
-        if self.gs.input.space && self.gs.tank.charge == 1.0 {
+        if self.gs.input.fire && self.gs.tank.charge == 1.0 {
             match self.gs.cur_weapon {
                 WEAP_MG => {}
                 WEAP_RAIL => {}
