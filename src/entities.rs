@@ -93,28 +93,7 @@ impl GuidedMissile {
     pub fn collisions(&mut self, dt: f64, map: &Map) -> bool {
         // TODO this is broken when minimized (collision detection, etc.)
         self.pos += self.vel * dt;
-        if self.pos.x <= 0.0 {
-            return true;
-        }
-        if self.pos.y <= 0.0 {
-            return true;
-        }
-        let map_size = map.maxs();
-        if self.pos.x >= map_size.x {
-            return true;
-        }
-        if self.pos.y >= map_size.y {
-            return true;
-        }
-
-        let tile_pos = map.tile_pos(self.pos);
-        let surface = map[tile_pos.index].surface_index;
-        let kind = map.surfaces()[surface].kind;
-        if kind == Kind::Wall {
-            return true;
-        }
-
-        false
+        map.collision(self.pos)
     }
 }
 

@@ -105,12 +105,37 @@ impl Map {
         tile_index.as_() * TILE_SIZE + TILE_SIZE / 2.0
     }
 
-    pub fn surfaces(&self) -> &Vec<Surface> {
-        &self.surfaces
-    }
-
     pub fn surface_of(&self, tile: &Tile) -> &Surface {
         &self.surfaces[tile.surface_index]
+    }
+
+    pub fn surface_at_pos(&self, pos: Vec2f) -> &Surface {
+        let tile_pos = self.tile_pos(pos);
+        let surface_index = self[tile_pos.index].surface_index;
+        &self.surfaces[surface_index]
+    }
+
+    pub fn collision(&self, pos: Vec2f) -> bool {
+        if pos.x <= 0.0 {
+            return true;
+        }
+        if pos.y <= 0.0 {
+            return true;
+        }
+        let map_size = self.maxs();
+        if pos.x >= map_size.x {
+            return true;
+        }
+        if pos.y >= map_size.y {
+            return true;
+        }
+
+        let kind = self.surface_at_pos(pos).kind;
+        if kind == Kind::Wall {
+            return true;
+        }
+
+        false
     }
 
     pub fn spawns(&self) -> &Vec<Vec2u> {
