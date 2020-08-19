@@ -195,9 +195,16 @@ impl Game {
             }
         }
 
-        // TODO reorder?
-        for (_, (pos, vel)) in self.ecs.query::<(&mut Pos, &Vel)>().iter() {
+        let mut to_remove = Vec::new();
+        for (entity, (pos, vel)) in self.ecs.query::<(&mut Pos, &Vel)>().iter() {
             pos.0 += vel.0 * dt;
+
+            if self.map.collision(pos.0) {
+                to_remove.push(entity);
+            }
+        }
+        for entity in to_remove {
+            self.ecs.despawn(entity).unwrap();
         }
 
         if self.gs.pe == PlayerEntity::Tank {
@@ -272,7 +279,9 @@ impl Game {
 
         // Draw MG
         self.context.set_stroke_style(&"yellow".into());
+        let mut mg_cnt = 0;
         for (_, (pos, vel)) in self.ecs.query::<(&Pos, &Vel)>().iter() {
+            mg_cnt += 1;
             let scr_pos = pos.0 - top_left;
             self.context.begin_path();
             self.context.move_to(scr_pos.x, scr_pos.y);
@@ -281,6 +290,7 @@ impl Game {
             self.context.line_to(scr_end.x, scr_end.y);
             self.context.stroke();
         }
+        dbgd!(mg_cnt);
 
         // Draw missile
         let gm = &self.gs.gm;
