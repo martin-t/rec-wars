@@ -1,6 +1,6 @@
 use rand::prelude::*;
 
-use crate::data::Vec2f;
+use crate::map::Vec2f;
 use crate::entities::{GuidedMissile, Tank};
 
 /// Everyting that changes during the game

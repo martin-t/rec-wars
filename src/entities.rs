@@ -4,7 +4,7 @@ use vek::Clamp;
 
 use crate::cvars::Cvars;
 use crate::{
-    data::{Map, Vec2f},
+    map::{Map, Vec2f},
     Input,
 };
 

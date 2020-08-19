@@ -4,7 +4,7 @@
 mod debugging;
 
 mod cvars;
-mod data;
+mod map;
 mod entities;
 mod game_state;
 
@@ -23,7 +23,7 @@ use wasm_bindgen::JsCast;
 use web_sys::{CanvasRenderingContext2d, HtmlImageElement};
 
 use cvars::Cvars;
-use data::{Kind, Map, Vec2f, TILE_SIZE};
+use map::{Kind, Map, Vec2f, TILE_SIZE};
 use debugging::DEBUG_TEXTS;
 use entities::{GuidedMissile, Tank};
 use game_state::{GameState, Input, PlayerEntity};
@@ -89,8 +89,8 @@ impl Game {
             .map(|js_val| js_val.dyn_into().unwrap())
             .collect();
 
-        let surfaces = data::load_tex_list(tex_list_text);
-        let map = data::load_map(map_text, surfaces);
+        let surfaces = map::load_tex_list(tex_list_text);
+        let map = map::load_map(map_text, surfaces);
         let (pos, angle) = entities::random_spawn_pos(&mut rng, &map);
 
         let gm = GuidedMissile::spawn(cvars, pos, angle);

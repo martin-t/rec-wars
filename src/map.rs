@@ -1,3 +1,5 @@
+/// Map data and coords
+
 use std::f64::consts::PI;
 use std::ops::Index;
 
