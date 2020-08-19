@@ -84,8 +84,8 @@ impl Map {
     }
 
     /// Returns tile at (c,r). Col is x, row is y
-    pub fn col_row(&self, c: usize, r: usize) -> &Tile {
-        &self[Vec2::new(c, r)]
+    pub fn col_row(&self, c: usize, r: usize) -> Tile {
+        self[Vec2::new(c, r)]
     }
 
     /// Converts world coords into tile position and offset within it.
@@ -105,7 +105,7 @@ impl Map {
         tile_index.as_() * TILE_SIZE + TILE_SIZE / 2.0
     }
 
-    pub fn surface_of(&self, tile: &Tile) -> &Surface {
+    pub fn surface_of(&self, tile: Tile) -> &Surface {
         &self.surfaces[tile.surface_index]
     }
 
