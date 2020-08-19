@@ -137,7 +137,7 @@ async function run() {
         } else if (event.key === "Shift") {
             input.change_weapon = false;
         } else if (event.key === " ") {
-            fire = false;
+            input.fire = false;
         }
     });
 
