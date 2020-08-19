@@ -4,9 +4,9 @@
 mod debugging;
 
 mod cvars;
-mod map;
 mod entities;
 mod game_state;
+mod map;
 
 use hecs::World;
 
@@ -23,10 +23,10 @@ use wasm_bindgen::JsCast;
 use web_sys::{CanvasRenderingContext2d, HtmlImageElement};
 
 use cvars::Cvars;
-use map::{Kind, Map, Vec2f, TILE_SIZE};
 use debugging::DEBUG_TEXTS;
 use entities::{GuidedMissile, Tank};
 use game_state::{GameState, Input, PlayerEntity};
+use map::{Kind, Map, Vec2f, TILE_SIZE};
 
 const WEAP_MG: usize = 0;
 const WEAP_RAIL: usize = 1;
@@ -206,12 +206,11 @@ impl Game {
             self.gs.tank.tick(dt, cvars, &Input::default());
         };
 
-        if self.gs.pe == PlayerEntity::GuidedMissile {
-            self.gs.gm.physics(dt, cvars, &self.gs.input);
+        let hit_something = if self.gs.pe == PlayerEntity::GuidedMissile {
+            self.gs.gm.tick(dt, cvars, &self.gs.input, &self.map)
         } else {
-            self.gs.gm.physics(dt, cvars, &Input::default());
-        }
-        let hit_something = self.gs.gm.collisions(dt, &self.map);
+            self.gs.gm.tick(dt, cvars, &Input::default(), &self.map)
+        };
         if hit_something {
             self.gs.explosions.push((self.gs.gm.pos, 0));
             self.gs.pe = PlayerEntity::Tank;

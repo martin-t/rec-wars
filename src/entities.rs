@@ -40,7 +40,8 @@ impl GuidedMissile {
         }
     }
 
-    pub fn physics(&mut self, dt: f64, cvars: &Cvars, input: &Input) {
+    /// Returns if it hit something.
+    pub fn tick(&mut self, dt: f64, cvars: &Cvars, input: &Input, map: &Map) -> bool {
         // Accel / decel
         let accel_input = input.up * cvars.g_guided_missile_speed_change
             - input.down * cvars.g_guided_missile_speed_change;
@@ -87,10 +88,7 @@ impl GuidedMissile {
 
         self.vel.rotate_z(tr * dt);
         self.turn_rate = tr;
-    }
 
-    /// Returns if it hit something.
-    pub fn collisions(&mut self, dt: f64, map: &Map) -> bool {
         // TODO this is broken when minimized (collision detection, etc.)
         self.pos += self.vel * dt;
         map.collision(self.pos)
