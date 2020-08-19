@@ -368,6 +368,26 @@ impl Game {
             0.0,
         )?;
 
+        // let mut scr_pos = Vec2f::new(50.0, 50.0);
+        // self.draw_img_top_left(&self.img_tank, scr_pos, 0.0f64.to_radians())?;
+        // self.context.stroke_rect(scr_pos.x, scr_pos.y, 50.0, 30.0);
+        // scr_pos.y += 100.0;
+        // self.draw_img_top_left(&self.img_tank, scr_pos, 45.0f64.to_radians())?;
+        // self.context.stroke_rect(scr_pos.x, scr_pos.y, 50.0, 30.0);
+        // scr_pos.y += 100.0;
+        // self.draw_img_top_left(&self.img_tank, scr_pos, 90.0f64.to_radians())?;
+        // self.context.stroke_rect(scr_pos.x, scr_pos.y, 50.0, 30.0);
+
+        // let mut scr_pos = Vec2f::new(150.0, 50.0);
+        // self.draw_img_center(&self.img_tank, scr_pos, 0.0f64.to_radians())?;
+        // self.context.stroke_rect(scr_pos.x, scr_pos.y, 50.0, 30.0);
+        // scr_pos.y += 100.0;
+        // self.draw_img_center(&self.img_tank, scr_pos, 45.0f64.to_radians())?;
+        // self.context.stroke_rect(scr_pos.x, scr_pos.y, 50.0, 30.0);
+        // scr_pos.y += 100.0;
+        // self.draw_img_center(&self.img_tank, scr_pos, 90.0f64.to_radians())?;
+        // self.context.stroke_rect(scr_pos.x, scr_pos.y, 50.0, 30.0);
+
         self.context.set_fill_style(&"red".into());
 
         // Draw FPS
@@ -408,7 +428,8 @@ impl Game {
         self.gs.explosions.retain(|expl| expl.1 < 26);
     }
 
-    /// Rotate clockwise around the image's top left corner.
+    /// Place the image's *top-left corner* at `screen_pos`,
+    /// rotate it clockwise around its center.
     fn draw_img_top_left(
         &self,
         img: &HtmlImageElement,
@@ -431,7 +452,8 @@ impl Game {
         Ok(())
     }
 
-    /// Rotate clockwise around the image's center.
+    /// Place the image's *center* at `screen_pos`,
+    /// rotate it clockwise around its center.
     fn draw_img_center(
         &self,
         img: &HtmlImageElement,
