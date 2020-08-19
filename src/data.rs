@@ -263,7 +263,7 @@ mod tests {
         for entry in fs::read_dir("maps").unwrap() {
             let entry = entry.unwrap();
             let map_text = fs::read_to_string(entry.path()).unwrap();
-            let map = load_map(&map_text, surfaces);
+            let map = load_map(&map_text, surfaces.clone());
             assert_ne!(map.width(), 0);
             assert_ne!(map.height(), 0);
             cnt += 1;
