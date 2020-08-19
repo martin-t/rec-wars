@@ -12,7 +12,7 @@
 // will "boot" the module and make it ready to use. Currently browsers
 // don't support natively imported WebAssembly as an ES module, but
 // eventually the manual initialization won't be required!
-import init, { Game, Cvars } from '../pkg/rec_wars.js';
+import init, { Input, Game, Cvars } from '../pkg/rec_wars.js';
 
 async function run() {
     // First up we need to actually load the wasm file, so we use the
@@ -101,7 +101,7 @@ async function run() {
     const canvas = document.getElementById("canvas");
     const ctx = canvas.getContext("2d", { alpha: false });
 
-    let left = 0, right = 0, up = 0, down = 0, change_weapon = false, fire = false;
+    const input = new Input();
     let paused = false;
 
     document.addEventListener("keydown", event => {
@@ -109,17 +109,17 @@ async function run() {
         //  https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key
         //  https://www.w3.org/TR/uievents-key/#keys-navigation
         if (event.key === "ArrowLeft" || event.key === "a") {
-            left = 1;
+            input.left = 1;
         } else if (event.key === "ArrowRight" || event.key === "d") {
-            right = 1;
+            input.right = 1;
         } else if (event.key === "ArrowUp" || event.key === "w") {
-            up = 1;
+            input.up = 1;
         } else if (event.key === "ArrowDown" || event.key === "s") {
-            down = 1;
+            input.down = 1;
         } else if (event.key === "Shift") {
-            change_weapon = true;
+            input.change_weapon = true;
         } else if (event.key === " ") {
-            fire = true;
+            input.fire = true;
         } else if (event.key === "p") {
             paused = !paused;
         }
@@ -127,15 +127,15 @@ async function run() {
 
     document.addEventListener("keyup", event => {
         if (event.key === "ArrowLeft" || event.key === "a") {
-            left = 0;
+            input.left = 0;
         } else if (event.key === "ArrowRight" || event.key === "d") {
-            right = 0;
+            input.right = 0;
         } else if (event.key === "ArrowUp" || event.key === "w") {
-            up = 0;
+            input.up = 0;
         } else if (event.key === "ArrowDown" || event.key === "s") {
-            down = 0;
+            input.down = 0;
         } else if (event.key === "Shift") {
-            change_weapon = false;
+            input.change_weapon = false;
         } else if (event.key === " ") {
             fire = false;
         }
@@ -250,7 +250,7 @@ async function run() {
                 }
 
                 game.start_frame(t_scaled);
-                game.input(left, right, up, down, change_weapon, fire);
+                game.input(input);
                 game.update_pre(cvars);
                 game.draw(cvars);
                 game.update_post();

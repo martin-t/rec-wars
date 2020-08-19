@@ -142,24 +142,8 @@ impl Game {
         }
     }
 
-    // TODO export Input instead, let JS set the values?
-    pub fn input(
-        &mut self,
-        left: f64,
-        right: f64,
-        up: f64,
-        down: f64,
-        change_weapon: bool,
-        fire: bool,
-    ) {
-        self.gs.input = Input {
-            left,
-            right,
-            up,
-            down,
-            change_weapon,
-            fire,
-        };
+    pub fn input(&mut self, input: &Input) {
+        self.gs.input = input.clone();
     }
 
     pub fn update_pre(&mut self, cvars: &Cvars) {

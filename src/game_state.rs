@@ -1,7 +1,9 @@
 use rand::prelude::*;
 
-use crate::map::Vec2f;
+use wasm_bindgen::prelude::*;
+
 use crate::entities::{GuidedMissile, Tank};
+use crate::map::Vec2f;
 
 /// Everyting that changes during the game
 /// and might need to be taken back during frame interpolation / reconciliation.
@@ -24,6 +26,7 @@ pub enum PlayerEntity {
     Tank,
 }
 
+#[wasm_bindgen]
 #[derive(Debug, Clone, Default)]
 pub struct Input {
     pub left: f64,
@@ -32,4 +35,12 @@ pub struct Input {
     pub down: f64,
     pub change_weapon: bool,
     pub fire: bool,
+}
+
+#[wasm_bindgen]
+impl Input {
+    #[wasm_bindgen(constructor)]
+    pub fn new() -> Self {
+        Self::default()
+    }
 }
