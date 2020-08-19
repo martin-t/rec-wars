@@ -40,7 +40,7 @@ impl Map {
         let mut bases = Vec::new();
         for (r, row) in tiles.iter().enumerate() {
             for (c, tile) in row.iter().enumerate() {
-                let kind = surfaces[tile.surface].kind;
+                let kind = surfaces[tile.surface_index].kind;
                 if kind == Kind::Spawn {
                     spawns.push(Vec2u::new(c, r));
                 } else if kind == Kind::Base {
@@ -137,7 +137,7 @@ pub struct TilePos {
 #[derive(Debug, Clone, Copy)]
 pub struct Tile {
     /// Index into texture_list.txt
-    pub surface: usize,
+    pub surface_index: usize,
     /// Rotation in radians - see Vec2f for how the coord system and angles work.
     pub angle: f64,
 }
@@ -213,7 +213,7 @@ pub fn load_map(text: &str, surfaces: Vec<Surface>) -> Map {
                     // 3    -3/2*PI     down
                     let rotation = val % 4;
                     Tile {
-                        surface: val / 4,
+                        surface_index: val / 4,
                         angle: rotation as f64 * -PI / 2.0,
                     }
                 })

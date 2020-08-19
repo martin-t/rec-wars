@@ -108,7 +108,7 @@ impl GuidedMissile {
         }
 
         let tile_pos = map.tile_pos(self.pos);
-        let surface = map[tile_pos.index].surface;
+        let surface = map[tile_pos.index].surface_index;
         let kind = map.surfaces()[surface].kind;
         if kind == Kind::Wall {
             return true;
