@@ -4,7 +4,7 @@ use vek::Clamp;
 
 use crate::cvars::Cvars;
 use crate::{
-    data::{Kind, Map, Surface, Vec2f},
+    data::{Map, Vec2f},
     Input,
 };
 

@@ -23,7 +23,7 @@ use wasm_bindgen::JsCast;
 use web_sys::{CanvasRenderingContext2d, HtmlImageElement};
 
 use cvars::Cvars;
-use data::{Kind, Map, Surface, Vec2f, TILE_SIZE};
+use data::{Kind, Map, Vec2f, TILE_SIZE};
 use debugging::DEBUG_TEXTS;
 use entities::{GuidedMissile, Tank};
 use game_state::{GameState, Input, PlayerEntity};
