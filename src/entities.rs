@@ -90,7 +90,7 @@ impl GuidedMissile {
     }
 
     /// Returns if it hit something.
-    pub fn collisions(&mut self, dt: f64, map: &Map, surfaces: &Vec<Surface>) -> bool {
+    pub fn collisions(&mut self, dt: f64, map: &Map) -> bool {
         // TODO this is broken when minimized (collision detection, etc.)
         self.pos += self.vel * dt;
         if self.pos.x <= 0.0 {
@@ -109,7 +109,7 @@ impl GuidedMissile {
 
         let tile_pos = map.tile_pos(self.pos);
         let surface = map[tile_pos.index].surface;
-        let kind = surfaces[surface].kind;
+        let kind = map.surfaces()[surface].kind;
         if kind == Kind::Wall {
             return true;
         }

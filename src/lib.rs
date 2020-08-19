@@ -52,7 +52,6 @@ pub struct Game {
     img_gm: HtmlImageElement,
     img_tank: HtmlImageElement,
     img_explosion: HtmlImageElement,
-    surfaces: Vec<Surface>,
     map: Map,
     /// Saved frame times in seconds over some period of time to measure FPS
     frame_times: Vec<f64>,
@@ -91,7 +90,7 @@ impl Game {
             .collect();
 
         let surfaces = data::load_tex_list(tex_list_text);
-        let map = data::load_map(map_text, &surfaces);
+        let map = data::load_map(map_text, surfaces);
         let (pos, angle) = entities::random_spawn_pos(&mut rng, &map);
 
         let gm = GuidedMissile::spawn(cvars, pos, angle);
@@ -118,7 +117,6 @@ impl Game {
             img_gm,
             img_tank,
             img_explosion,
-            surfaces,
             map,
             frame_times: Vec::new(),
             gs,
@@ -213,7 +211,7 @@ impl Game {
         } else {
             self.gs.gm.physics(dt, cvars, &Input::default());
         }
-        let hit_something = self.gs.gm.collisions(dt, &self.map, &self.surfaces);
+        let hit_something = self.gs.gm.collisions(dt, &self.map);
         if hit_something {
             self.gs.explosions.push((self.gs.gm.pos, 0));
             self.gs.pe = PlayerEntity::Tank;
@@ -261,7 +259,7 @@ impl Game {
             while x < self.canvas_size.x {
                 let tile = self.map.col_row(c, r);
 
-                if self.surfaces[tile.surface].kind != Kind::Wall {
+                if self.map.surfaces()[tile.surface].kind != Kind::Wall {
                     let img = &self.imgs_textures[tile.surface];
                     self.draw_img_top_left(img, Vec2::new(x, y), tile.angle)?;
                 }
@@ -338,7 +336,7 @@ impl Game {
             while x < self.canvas_size.x {
                 let tile = self.map.col_row(c, r);
 
-                if self.surfaces[tile.surface].kind == Kind::Wall {
+                if self.map.surfaces()[tile.surface].kind == Kind::Wall {
                     let img = &self.imgs_textures[tile.surface];
                     self.draw_img_top_left(img, Vec2::new(x, y), tile.angle)?;
                 }

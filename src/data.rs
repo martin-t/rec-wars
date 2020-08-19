@@ -28,13 +28,14 @@ pub const TILE_SIZE: f64 = 64.0;
 /// A rectangular tile based map with origin in the top-left corner.
 #[derive(Debug, Clone)]
 pub struct Map {
+    surfaces: Vec<Surface>,
     tiles: Vec<Vec<Tile>>,
     spawns: Vec<Vec2u>,
     bases: Vec<Vec2u>,
 }
 
 impl Map {
-    fn new(tiles: Vec<Vec<Tile>>, surfaces: &[Surface]) -> Self {
+    fn new(tiles: Vec<Vec<Tile>>, surfaces: Vec<Surface>) -> Self {
         let mut spawns = Vec::new();
         let mut bases = Vec::new();
         for (r, row) in tiles.iter().enumerate() {
@@ -48,6 +49,7 @@ impl Map {
             }
         }
         Map {
+            surfaces,
             tiles,
             spawns,
             bases,
@@ -101,6 +103,10 @@ impl Map {
 
     pub fn tile_center(&self, tile_index: Vec2u) -> Vec2f {
         tile_index.as_() * TILE_SIZE + TILE_SIZE / 2.0
+    }
+
+    pub fn surfaces(&self) -> &Vec<Surface> {
+        &self.surfaces
     }
 
     pub fn spawns(&self) -> &Vec<Vec2u> {
@@ -190,7 +196,7 @@ impl Kind {
     }
 }
 
-pub fn load_map(text: &str, surfaces: &[Surface]) -> Map {
+pub fn load_map(text: &str, surfaces: Vec<Surface>) -> Map {
     // TODO handle both CRLF and LF properly
     let tiles = text
         .split_terminator("\r\n")
@@ -257,7 +263,7 @@ mod tests {
         for entry in fs::read_dir("maps").unwrap() {
             let entry = entry.unwrap();
             let map_text = fs::read_to_string(entry.path()).unwrap();
-            let map = load_map(&map_text, &surfaces);
+            let map = load_map(&map_text, surfaces);
             assert_ne!(map.width(), 0);
             assert_ne!(map.height(), 0);
             cnt += 1;
@@ -270,7 +276,7 @@ mod tests {
         let tex_list_text = fs::read_to_string("assets/texture_list.txt").unwrap();
         let surfaces = load_tex_list(&tex_list_text);
         let map_text = fs::read_to_string("maps/A simple plan (2).map").unwrap();
-        let map = load_map(&map_text, &surfaces);
+        let map = load_map(&map_text, surfaces);
         assert_eq!(map.width(), 55);
         assert_eq!(map.height(), 23);
         assert_eq!(map.size(), Vec2u::new(55, 23));
