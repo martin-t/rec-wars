@@ -64,7 +64,7 @@ impl Map {
         self.tiles[0].len()
     }
 
-    /// Width, height / cols, rows / x, y
+    /// Returns (width, height) / (cols, rows) / (x, y)
     pub fn size(&self) -> Vec2u {
         Vec2u::new(self.width(), self.height())
     }
@@ -83,7 +83,7 @@ impl Map {
         self.size().as_() * TILE_SIZE
     }
 
-    /// Col is x, row is y
+    /// Returns tile at (c,r). Col is x, row is y
     pub fn col_row(&self, c: usize, r: usize) -> &Tile {
         &self[Vec2::new(c, r)]
     }
@@ -107,6 +107,10 @@ impl Map {
 
     pub fn surfaces(&self) -> &Vec<Surface> {
         &self.surfaces
+    }
+
+    pub fn surface_of(&self, tile: &Tile) -> &Surface {
+        &self.surfaces[tile.surface_index]
     }
 
     pub fn spawns(&self) -> &Vec<Vec2u> {

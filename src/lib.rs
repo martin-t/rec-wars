@@ -259,7 +259,7 @@ impl Game {
             while x < self.canvas_size.x {
                 let tile = self.map.col_row(c, r);
 
-                if self.map.surfaces()[tile.surface_index].kind != Kind::Wall {
+                if self.map.surface_of(tile).kind != Kind::Wall {
                     let img = &self.imgs_textures[tile.surface_index];
                     self.draw_img_top_left(img, Vec2::new(x, y), tile.angle)?;
                 }
@@ -336,7 +336,7 @@ impl Game {
             while x < self.canvas_size.x {
                 let tile = self.map.col_row(c, r);
 
-                if self.map.surfaces()[tile.surface_index].kind == Kind::Wall {
+                if self.map.surface_of(tile).kind == Kind::Wall {
                     let img = &self.imgs_textures[tile.surface_index];
                     self.draw_img_top_left(img, Vec2::new(x, y), tile.angle)?;
                 }
