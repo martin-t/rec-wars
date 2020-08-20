@@ -5,23 +5,26 @@ Rec Wars
 
 A top-down vehicle shooter based on an old Windows game called RecWar.
 
-TODO logo? use in-game entities to spell out Rec Wars?
-TODO screenshot - clicking opens game?
-TODO Key Features
+[Play Online](https://martin-t.gitlab.io/gitlab-pages/rec-wars/web)
 
 Rec Wars aims to have similar gameplay as the original RecWar but not identical since it would be impossible to replicate exactly without decompiling the binary.
 
 Additionally I suspect RecWar was balanced for playing against bots and might result in annoying strats when people start [playing to win](http://www.sirlin.net/articles/playing-to-win). E.g. with enough mines, the cow can be made completely inaccessible, especially to less maneuverable vehicles like the hovercraft. Experience from other poorly designed games also shows large areas will be dominated by instant-hit weapons (here the Railgun) and there might simply be no way to get across the map without getting hit.
 
-TODO badges (flat like https://github.com/dtolnay/enumn ?)
-    discord? like https://github.com/not-fl3/macroquad
-TODO github description, tags (same as topics?)
+TODOs
+    badges (flat like https://github.com/dtolnay/enumn ?)
+        discord? like https://github.com/not-fl3/macroquad
+    github description, tags (same as topics?)
 
-TODO goals - web client+server if possible, native client+server
-TODO describe impl basics - ecs, net, AI
+    goals - web client+server if possible, native client+server
+    describe impl basics - ecs, net, AI
 
-TODO Installation / Compiling
-TODO Contributing
+    Installation / Compiling
+    Contributing
+    
+    logo? use in-game entities to spell out Rec Wars?
+    screenshot - clicking opens game?
+    Key Features
 
 note to self:
     - fix npm
