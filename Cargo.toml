@@ -26,4 +26,6 @@ features = [
   "console",
   "DomMatrix",
   "HtmlImageElement",
+  "Performance",
+  "Window",
 ]

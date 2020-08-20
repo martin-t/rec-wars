@@ -130,15 +130,31 @@ impl Game {
         format!("{:#?}", self)
     }*/
 
+    /// Run gamelogic up to `t` (in seconds) and render.
     pub fn update_and_draw(&mut self, t: f64, input: &Input, cvars: &Cvars) -> Result<(), JsValue> {
+        // I want to track update and render time in Rust so i can draw the FPS counter and keep stats.
+        // Unfortunately, Instant::now() panics in WASM so i have to use performance.now().
+        // And just like in JS, it has limited precision in some browsers like firefox.
+        let performance = web_sys::window().unwrap().performance().unwrap();
+        let t_start = performance.now();
+        self.update(t, input, cvars);
+        let t_updated = performance.now();
+        self.draw(cvars)?;
+        let t_rendered = performance.now();
+        let duration_update = t_updated - t_start;
+        let duration_render = t_rendered - t_updated;
+        dbgd!(duration_update, duration_render);
+        Ok(())
+    }
+
+    pub fn update(&mut self, t: f64, input: &Input, cvars: &Cvars) {
         self.start_frame(t);
         self.input(input);
-        self.update(cvars);
-        self.draw(cvars)
+        self.tick(cvars);
     }
 
     /// Update time tracking variables (in seconds)
-    pub fn start_frame(&mut self, t: f64) {
+    fn start_frame(&mut self, t: f64) {
         self.gs_prev = self.gs.clone();
         self.gs.frame_time = t;
         assert!(self.gs.frame_time >= self.gs_prev.frame_time);
@@ -149,11 +165,11 @@ impl Game {
         }
     }
 
-    pub fn input(&mut self, input: &Input) {
+    fn input(&mut self, input: &Input) {
         self.gs.input = input.clone();
     }
 
-    pub fn update(&mut self, cvars: &Cvars) {
+    fn tick(&mut self, cvars: &Cvars) {
         let frame_time = self.gs.frame_time; // borrowchk
         let dt = frame_time - self.gs_prev.frame_time;
 
