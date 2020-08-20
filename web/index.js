@@ -253,7 +253,6 @@ async function run() {
                 game.input(input);
                 game.update_pre(cvars);
                 game.draw(cvars);
-                game.update_post();
             } catch (e) {
                 console.log("exception - aborting next frame");
                 window.cancelAnimationFrame(handle);

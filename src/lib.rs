@@ -414,13 +414,6 @@ impl Game {
         Ok(())
     }
 
-    pub fn update_post(&mut self) {
-        // for explosion in &mut self.gs.explosions {
-        //     explosion.1 += 1;
-        // }
-        // self.gs.explosions.retain(|expl| expl.1 < 26);
-    }
-
     /// Place the image's *top-left corner* at `screen_pos`,
     /// rotate it clockwise around its center.
     fn draw_img_top_left(
