@@ -15,17 +15,29 @@
 //      [x] check https://github.com/dasifefe/rust-game-development-frameworks
 //      engines
 //          godot
-//          https://crates.io/crates/bevy - no WASM
-//          https://crates.io/crates/amethyst - no menton of WASM
-//          https://crates.io/crates/piston - no menton of WASM
-//          https://crates.io/crates/ggez - WASM in progress
+//          https://crates.io/crates/amethyst
+//              WASM in progress: https://github.com/amethyst/amethyst/issues/2260
+//          https://crates.io/crates/bevy
+//              no WASM yet: https://github.com/bevyengine/bevy/issues/88
+//          https://crates.io/crates/coffee
+//              no WASM: https://github.com/hecrj/coffee/issues/135 (not even a reply)
+//          https://crates.io/crates/ggez
+//              WASM in progress: https://github.com/ggez/ggez/issues/71
+//          https://crates.io/crates/macroquad
+//              win/lin/mac + WASM + android
+//              bad docs, some examples
+//          https://crates.io/crates/piston
+//              no WASM: https://github.com/PistonDevelopers/piston/issues/1131
 //          https://crates.io/crates/quicksilver
-//              all 3 OSes + WASM supported
+//              win/lin/max + WASM
 //              no audio?
-//              has game showcase in readme (mostly bad)
+//                  https://github.com/ryanisaacg/quicksilver/issues/552
+//                  https://github.com/RustyVolley/RustyVolleySrc has sound
+//              8 example games in readme (mostly bad)
 //          macroquad - no docs?
 //      rendering only
 //          https://crates.io/crates/luminance - mentions webgl/canvas
+//          https://crates.io/crates/miniquad - should support WASM
 // [ ] solve tearing - maybe only align to pixels at high speeds?
 // [x] image fails to draw the first time after opening browser
 //      bug in python server maybe? - doesn't happen with rhino
