@@ -12,19 +12,19 @@ Rec Wars aims to have similar gameplay as the original RecWar but not identical 
 Additionally I suspect RecWar was balanced for playing against bots and might result in annoying strats when people start [playing to win](http://www.sirlin.net/articles/playing-to-win). E.g. with enough mines, the cow can be made completely inaccessible, especially to less maneuverable vehicles like the hovercraft. Experience from other poorly designed games also shows large areas will be dominated by instant-hit weapons (here the Railgun) and there might simply be no way to get across the map without getting hit.
 
 TODOs
-    badges (flat like https://github.com/dtolnay/enumn ?)
-        discord? like https://github.com/not-fl3/macroquad
-    github description, tags (same as topics?)
+- badges (flat like https://github.com/dtolnay/enumn ?)
+    - discord? like https://github.com/not-fl3/macroquad
+- github description, tags (same as topics?)
 
-    goals - web client+server if possible, native client+server
-    describe impl basics - ecs, net, AI
+- goals - web client+server if possible, native client+server
+- describe impl basics - ecs, net, AI
 
-    Installation / Compiling
-    Contributing
+- Installation / Compiling
+- Contributing
     
-    logo? use in-game entities to spell out Rec Wars?
-    screenshot - clicking opens game?
-    Key Features
+- logo? use in-game entities to spell out Rec Wars?
+- screenshot - clicking opens game?
+- Key Features
 
 note to self:
     - fix npm
