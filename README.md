@@ -19,7 +19,6 @@ TODOs
 - goals - web client+server if possible, native client+server
 - describe impl basics - ecs, net, AI
 
-- Installation / Compiling
 - Contributing
     
 - logo? use in-game entities to spell out Rec Wars?
@@ -31,6 +30,13 @@ note to self:
         - https://stackoverflow.com/questions/16151018/npm-throws-error-without-sudo/24404451#24404451
         - prefix path or it uses old debian npm which breaks everything
     - build with `wasm-pack build --target web --dev` or it gives a mime type error
+
+Compiling
+---------
+
+- build with `wasm-pack build --target web --dev`
+- host with `python3 -m http.server` (or any other web server, simply opening `index.html` will *not* work though)
+- open http://localhost:8000/web/
 
 The Original Game
 -----------------
