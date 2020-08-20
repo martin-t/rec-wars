@@ -7,6 +7,7 @@ use wasm_bindgen::prelude::*;
 /// g_ is gameplay
 /// hud_ is the heads-up display
 /// r_ is rendering
+/// sv_ is server administration + performance
 #[wasm_bindgen]
 #[derive(Debug, Clone)]
 pub struct Cvars {
@@ -61,6 +62,18 @@ pub struct Cvars {
 
     pub r_align_to_pixels_background: bool,
     pub r_smoothing: bool,
+
+    pub sv_gamelogic_mode: TickrateMode,
+    pub sv_gamelogic_fixed_fps: f64,
+}
+
+#[wasm_bindgen]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum TickrateMode {
+    /// Same FPS as rendering - runs update once before rendering with variable timestep
+    Synchronized,
+    /// Fixed FPS - always the same timestep, leftovers carry over to the next render frame
+    Fixed,
 }
 
 #[wasm_bindgen]
@@ -116,6 +129,9 @@ impl Default for Cvars {
 
             r_align_to_pixels_background: true,
             r_smoothing: false,
+
+            sv_gamelogic_mode: TickrateMode::Synchronized,
+            sv_gamelogic_fixed_fps: 150.0,
         }
     }
 }

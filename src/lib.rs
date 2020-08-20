@@ -22,7 +22,7 @@ use wasm_bindgen::JsCast;
 
 use web_sys::{CanvasRenderingContext2d, HtmlImageElement};
 
-use cvars::Cvars;
+use cvars::{Cvars, TickrateMode};
 use debugging::DEBUG_TEXTS;
 use entities::{GuidedMissile, Tank};
 use game_state::{Explosion, GameState, Input, PlayerEntity};
@@ -148,16 +148,38 @@ impl Game {
     }
 
     pub fn update(&mut self, t: f64, input: &Input, cvars: &Cvars) {
-        self.start_frame(t);
-        self.input(input);
-        self.tick(cvars);
+        // Recommended reading: https://gafferongames.com/post/fix_your_timestep/
+
+        // FIXME toggling crashes
+        match cvars.sv_gamelogic_mode {
+            TickrateMode::Synchronized => {
+                self.start_frame(t);
+                self.input(input);
+                self.tick(cvars);
+            }
+            TickrateMode::Fixed => loop {
+                let remaining = t - self.gs_prev.frame_time;
+                let dt = 1.0 / cvars.sv_gamelogic_fixed_fps;
+                if remaining < dt {
+                    break;
+                }
+                self.start_frame(self.gs_prev.frame_time + dt);
+                self.input(input);
+                self.tick(cvars);
+            },
+        }
     }
 
     /// Update time tracking variables (in seconds)
     fn start_frame(&mut self, t: f64) {
         self.gs_prev = self.gs.clone();
         self.gs.frame_time = t;
-        assert!(self.gs.frame_time >= self.gs_prev.frame_time);
+        assert!(
+            self.gs.frame_time >= self.gs_prev.frame_time,
+            "frametime didn't increase: prev {}, current {}",
+            self.gs_prev.frame_time,
+            self.gs.frame_time
+        );
 
         self.frame_times.push(t);
         while !self.frame_times.is_empty() && self.frame_times[0] + 1.0 < t {
