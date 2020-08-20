@@ -10,15 +10,13 @@ _**[Play Online](https://martin-t.gitlab.io/gitlab-pages/rec-wars/web)**_
 TODOs
 - badges (flat like https://github.com/dtolnay/enumn ?)
     - discord? like https://github.com/not-fl3/macroquad
-
-- goals - web client+server if possible, native client+server
-- describe impl basics - ecs, net, AI
-
-- Contributing
-    
+   
 - logo? use in-game entities to spell out Rec Wars?
 - screenshot - clicking opens game?
 - Key Features
+
+- goals - web client+server if possible, native client+server
+- describe impl basics - ecs, net, AI
 
 note to self:
 - fix npm
