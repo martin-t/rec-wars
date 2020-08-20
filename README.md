@@ -1,5 +1,5 @@
-Rec Wars
-========
+RecWars
+=======
 
 *Recreational Warfare .rs*
 
@@ -18,6 +18,8 @@ TODOs
 - goals - web client+server if possible, native client+server
 - describe impl basics - ecs, net, AI
 
+- Rec Wars vs RecWars
+
 note to self:
 - fix npm
     - https://stackoverflow.com/questions/16151018/npm-throws-error-without-sudo/24404451#24404451
@@ -35,7 +37,7 @@ Contributing
 
 If you notice a bug or have a suggestion, don't hesitate to [open an Issue](https://github.com/martin-t/rec-wars/issues/new).
 
-If you'd like to improve RecWars, feel free to make a [Pull Request](https://github.com/martin-t/rec-wars/pulls), I'll do my best to review it soon. I want to make RecWars highly configurable with many different gamemodes and balance settings votable by players. If you have a gameplay idea and don't suffer from the NIH syndrome, i'd be very happy to let you test it in RecWars.
+If you'd like to improve RecWars, feel free to make a [Pull Request](https://github.com/martin-t/rec-wars/pulls), I'll do my best to review it soon. I want to make RecWars highly configurable with many different gamemodes and balance settings votable by players. If you have a gameplay idea and don't suffer from the NIH syndrome, I'd be very happy to let you test it in RecWars.
 
 The Original Game
 -----------------
