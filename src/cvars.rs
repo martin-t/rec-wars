@@ -21,6 +21,8 @@ pub struct Cvars {
     /// Change speed of everything in the game
     pub d_speed: f64,
 
+    pub g_explosion_duration: f64,
+
     pub g_machine_gun_add_vehicle_velocity: bool,
     pub g_machine_gun_speed: f64,
     pub g_machine_gun_trail_length: f64,
@@ -77,6 +79,8 @@ impl Default for Cvars {
             d_debug_text_line_height: 11.0,
             d_seed: 6,
             d_speed: 1.0,
+
+            g_explosion_duration: 0.5,
 
             g_machine_gun_add_vehicle_velocity: true,
             g_machine_gun_speed: 1000.0,

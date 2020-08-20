@@ -25,7 +25,7 @@ use web_sys::{CanvasRenderingContext2d, HtmlImageElement};
 use cvars::Cvars;
 use debugging::DEBUG_TEXTS;
 use entities::{GuidedMissile, Tank};
-use game_state::{GameState, Input, PlayerEntity};
+use game_state::{Explosion, GameState, Input, PlayerEntity};
 use map::{Kind, Map, Vec2f, TILE_SIZE};
 
 const WEAP_MG: usize = 0;
@@ -203,7 +203,8 @@ impl Game {
             self.gs.gm.tick(dt, cvars, &Input::default(), &self.map)
         };
         if hit_something {
-            self.gs.explosions.push((self.gs.gm.pos, 0));
+            let explosion = Explosion::new(self.gs.gm.pos, self.gs.frame_time);
+            self.gs.explosions.push(explosion);
             self.gs.pe = PlayerEntity::Tank;
             let (pos, angle) = entities::random_spawn_pos(&mut self.gs.rng, &self.map);
             self.gs.gm = GuidedMissile::spawn(cvars, pos, angle);
@@ -294,18 +295,19 @@ impl Game {
         self.draw_img_center(&self.img_tank, tank_scr_pos, tank.angle)?;
 
         // Draw explosions
-        for &(pos, frame) in &self.gs.explosions {
-            // TODO frame rate independence
+        for explosion in &self.gs.explosions {
             // It looks like the original animation is made for 30 fps.
-            // When stepping through frames of a recording, some images take 3 frames,
-            // might be a bug in mplayer though.
-            // Update: maybe the explosion is supposed to last 31 frames
-            // single stepping in blender: 13 sprites, 31 frames:
+            // Single stepping a recording of the original RecWars explosion in blender:
+            // 13 sprites, 31 frames - examples:
             //      2,2,3,1,3,3,2,3,2,2,3,2,3
             //      2,2,2,3,1,3,2,2,3,2,2,3,4
-            let real_frame = frame / 2;
-            let offset = real_frame as f64 * 100.0;
-            let scr_pos = pos - top_left;
+            // This code produces similar results,
+            // though it might display a single sprite for 4 frames slightly more often.
+            let progress = (self.gs.frame_time - explosion.start_time) / cvars.g_explosion_duration;
+            // 13 sprites in the sheet, 100x100 pixels per sprite
+            let frame = (progress * 13.0).floor();
+            let offset = frame * 100.0;
+            let scr_pos = explosion.pos - top_left;
             self.context
                 .draw_image_with_html_image_element_and_sw_and_sh_and_dx_and_dy_and_dw_and_dh(
                     &self.img_explosion,
@@ -413,10 +415,10 @@ impl Game {
     }
 
     pub fn update_post(&mut self) {
-        for explosion in &mut self.gs.explosions {
-            explosion.1 += 1;
-        }
-        self.gs.explosions.retain(|expl| expl.1 < 26);
+        // for explosion in &mut self.gs.explosions {
+        //     explosion.1 += 1;
+        // }
+        // self.gs.explosions.retain(|expl| expl.1 < 26);
     }
 
     /// Place the image's *top-left corner* at `screen_pos`,

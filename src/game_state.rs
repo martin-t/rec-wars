@@ -17,7 +17,19 @@ pub struct GameState {
     pub gm: GuidedMissile,
     pub tank: Tank,
     pub pe: PlayerEntity,
-    pub explosions: Vec<(Vec2f, i32)>,
+    pub explosions: Vec<Explosion>,
+}
+
+#[derive(Debug, Clone)]
+pub struct Explosion {
+    pub pos: Vec2f,
+    pub start_time: f64,
+}
+
+impl Explosion {
+    pub fn new(pos: Vec2f, start_time: f64) -> Self {
+        Self { pos, start_time }
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
