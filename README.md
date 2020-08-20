@@ -17,6 +17,7 @@ TODO badges (flat like https://github.com/dtolnay/enumn ?)
     discord? like https://github.com/not-fl3/macroquad
 TODO github description, tags (same as topics?)
 
+TODO goals - web client+server if possible, native client+server
 TODO describe impl basics - ecs, net, AI
 
 TODO Installation / Compiling
