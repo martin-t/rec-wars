@@ -147,7 +147,13 @@ impl Game {
     }
 
     pub fn update_pre(&mut self, cvars: &Cvars) {
-        let dt = self.gs.frame_time - self.gs_prev.frame_time;
+        let frame_time = self.gs.frame_time; // borrowchk
+        let dt = frame_time - self.gs_prev.frame_time;
+
+        self.gs.explosions.retain(|explosion| {
+            let progress = (frame_time - explosion.start_time) / cvars.g_explosion_duration;
+            progress <= 1.0
+        });
 
         if self.gs.input.change_weapon && !self.gs_prev.input.change_weapon {
             self.gs.cur_weapon = (self.gs.cur_weapon + 1) % WEAPS_CNT;
@@ -209,11 +215,6 @@ impl Game {
             let (pos, angle) = entities::random_spawn_pos(&mut self.gs.rng, &self.map);
             self.gs.gm = GuidedMissile::spawn(cvars, pos, angle);
         }
-        let frame_time = self.gs.frame_time;
-        self.gs.explosions.retain(|explosion| {
-            let progress = (frame_time - explosion.start_time) / cvars.g_explosion_duration;
-            progress <= 1.0
-        })
     }
 
     pub fn draw(&self, cvars: &Cvars) -> Result<(), JsValue> {
