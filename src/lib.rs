@@ -146,7 +146,7 @@ impl Game {
         self.gs.input = input.clone();
     }
 
-    pub fn update_pre(&mut self, cvars: &Cvars) {
+    pub fn update(&mut self, cvars: &Cvars) {
         let frame_time = self.gs.frame_time; // borrowchk
         let dt = frame_time - self.gs_prev.frame_time;
 

@@ -251,7 +251,7 @@ async function run() {
 
                 game.start_frame(t_scaled);
                 game.input(input);
-                game.update_pre(cvars);
+                game.update(cvars);
                 game.draw(cvars);
             } catch (e) {
                 console.log("exception - aborting next frame");
