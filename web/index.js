@@ -101,10 +101,15 @@ async function run() {
     const canvas = document.getElementById("canvas");
     const ctx = canvas.getContext("2d", { alpha: false });
 
+    const log_time_checkbox = document.getElementById("log-time-checkbox");
+
     const input = new Input();
     let paused = false;
 
     document.addEventListener("keydown", event => {
+        if (log_time_checkbox.checked) {
+            console.log(performance.now(), "down", event.key);
+        }
         // TODO IE/edge?
         //  https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key
         //  https://www.w3.org/TR/uievents-key/#keys-navigation
@@ -126,6 +131,9 @@ async function run() {
     });
 
     document.addEventListener("keyup", event => {
+        if (log_time_checkbox.checked) {
+            console.log(performance.now(), "up", event.key);
+        }
         if (event.key === "ArrowLeft" || event.key === "a") {
             input.left = 0;
         } else if (event.key === "ArrowRight" || event.key === "d") {
@@ -214,6 +222,10 @@ async function run() {
         let last_frame_t_scaled = 0;
 
         const frame = (t) => {
+            if (log_time_checkbox.checked) {
+                console.log(performance.now(), "frame", t);
+            }
+
             // Seconds just make more sense, plus I keep assuming they're seconds and causing bugs.
             const t_real = t / 1000.0;
 
@@ -249,10 +261,7 @@ async function run() {
                     speed_value.innerHTML = cvars.d_speed;
                 }
 
-                game.start_frame(t_scaled);
-                game.input(input);
-                game.update(cvars);
-                game.draw(cvars);
+                game.update_and_draw(t_scaled, input, cvars);
             } catch (e) {
                 console.log("exception - aborting next frame");
                 window.cancelAnimationFrame(handle);

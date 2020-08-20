@@ -130,6 +130,13 @@ impl Game {
         format!("{:#?}", self)
     }*/
 
+    pub fn update_and_draw(&mut self, t: f64, input: &Input, cvars: &Cvars) -> Result<(), JsValue> {
+        self.start_frame(t);
+        self.input(input);
+        self.update(cvars);
+        self.draw(cvars)
+    }
+
     /// Update time tracking variables (in seconds)
     pub fn start_frame(&mut self, t: f64) {
         self.gs_prev = self.gs.clone();
