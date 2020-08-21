@@ -398,6 +398,7 @@ impl Game {
         // Draw HUD
         // TODO canvas shadow methods to draw shadows
         // health: 99x9, goes from greed to red
+
         self.context.set_fill_style(&"yellow".into());
         self.context.fill_rect(
             cvars.hud_charge_x,
@@ -405,11 +406,19 @@ impl Game {
             cvars.hud_charge_width * self.gs.tank.charge,
             cvars.hud_charge_height,
         );
+
+        // The original shadows were part of the image but this is good enough for now.
+        self.context.save();
+        let rgba = format!("rgba(0, 0, 0, {})", cvars.hud_weapon_icon_shadow_alpha);
+        self.context.set_shadow_color(&rgba);
+        self.context.set_shadow_offset_x(cvars.hud_weapon_icon_shadow_x);
+        self.context.set_shadow_offset_y(cvars.hud_weapon_icon_shadow_y);
         self.draw_img_center(
             &self.imgs_weapon_icons[self.gs.cur_weapon],
             Vec2f::new(cvars.hud_weapon_icon_x, cvars.hud_weapon_icon_y),
             0.0,
         )?;
+        self.context.restore();
 
         // let mut scr_pos = Vec2f::new(50.0, 50.0);
         // self.draw_img_top_left(&self.img_tank, scr_pos, 0.0f64.to_radians())?;
