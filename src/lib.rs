@@ -214,6 +214,12 @@ impl Game {
                         vel += self.gs.tank.vel;
                     }
                     self.ecs.spawn((pos, Vel(vel)));
+
+                    // TODO for debugging - remove
+                    self.gs.tank.hp -= 0.05;
+                    if self.gs.tank.hp < 0.0 {
+                        self.gs.tank.hp = 1.0;
+                    }
                 }
                 WEAP_RAIL => {}
                 WEAP_CB => {}
@@ -395,10 +401,29 @@ impl Game {
 
         // TODO Draw HM indicator using canvas dashed lines
 
-        // Draw HUD
-        // TODO canvas shadow methods to draw shadows
-        // health: 99x9, goes from greed to red
+        // Draw HUD:
 
+        // Hit points (goes from green to red)
+        let hp = self.gs.tank.hp;
+        // Might wanna use https://crates.io/crates/colorsys if I need more color operations.
+        // Hit points to color (poor man's HSV):
+        // 0.0 = red
+        // 0.0..0.5 -> increase green channel
+        // 0.5 = yellow
+        // 0.5..1.0 -> decrease red channel
+        // 1.0 = green
+        let r = 1.0 - (hp.clamped(0.5, 1.0) - 0.5) * 2.0;
+        let g = hp.clamped(0.0, 0.5) * 2.0;
+        let rgb = format!("rgb({}, {}, 0)", r * 255.0, g * 255.0);
+        self.context.set_fill_style(&rgb.into());
+        self.context.fill_rect(
+            cvars.hud_hp_x,
+            cvars.hud_hp_y,
+            cvars.hud_hp_width * hp,
+            cvars.hud_hp_height,
+        );
+
+        // Charge
         self.context.set_fill_style(&"yellow".into());
         self.context.fill_rect(
             cvars.hud_charge_x,
@@ -407,12 +432,15 @@ impl Game {
             cvars.hud_charge_height,
         );
 
+        // Weapon icon
         // The original shadows were part of the image but this is good enough for now.
         self.context.save();
         let rgba = format!("rgba(0, 0, 0, {})", cvars.hud_weapon_icon_shadow_alpha);
         self.context.set_shadow_color(&rgba);
-        self.context.set_shadow_offset_x(cvars.hud_weapon_icon_shadow_x);
-        self.context.set_shadow_offset_y(cvars.hud_weapon_icon_shadow_y);
+        self.context
+            .set_shadow_offset_x(cvars.hud_weapon_icon_shadow_x);
+        self.context
+            .set_shadow_offset_y(cvars.hud_weapon_icon_shadow_y);
         self.draw_img_center(
             &self.imgs_weapon_icons[self.gs.cur_weapon],
             Vec2f::new(cvars.hud_weapon_icon_x, cvars.hud_weapon_icon_y),

@@ -101,6 +101,7 @@ pub struct Tank {
     pub vel: Vec2f,
     pub angle: f64,
     pub turn_rate: f64,
+    pub hp: f64,
     pub charge: f64,
 }
 
@@ -112,6 +113,7 @@ impl Tank {
             vel: Vec2f::zero(),
             angle,
             turn_rate: 0.0,
+            hp: 1.0,
             charge: 1.0,
         }
     }
