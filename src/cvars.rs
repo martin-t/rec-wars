@@ -67,13 +67,29 @@ pub struct Cvars {
     pub sv_gamelogic_fixed_fps: f64,
 }
 
+/// Various options how to handle different physics/gamelogic and rendering framerates.
 #[wasm_bindgen]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum TickrateMode {
-    /// Same FPS as rendering - runs update once before rendering with variable timestep
+    /// Same FPS as rendering - runs one tick with variable timestep before rendering.
+    /// This means simulation always catches up to rendering (wall-clock time) exactly.
     Synchronized,
-    /// Fixed FPS - always the same timestep, leftovers carry over to the next render frame
+    /// Same FPS as rendering unless the step would be too large or too small.
+    /// Too large steps are split into smaller ones.
+    /// Too small steps are skipped and the time carries over to the next render frame,
+    /// this means simulation can be slightly behind what should be rendered.
+    SynchronizedBounded,
+    /// Fixed FPS - always the same timestep, leftover time carries over to the next render frame.
+    /// This means simulation can be slightly behind what should be rendered.
     Fixed,
+    /// Simulation runs in fixed steps as long as it can, the last step is smaller
+    /// to catch up to rendering exactly. The last step is then thrown away and simulation
+    /// resumes from the last full step so it's deterministic.
+    /// TODO what with too small steps?
+    /// TODO link to john blow vid
+    FixedOrSmaller,
+    /// TODO doc
+    FixedWithInterpolation,
 }
 
 #[wasm_bindgen]

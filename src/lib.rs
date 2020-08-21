@@ -157,6 +157,7 @@ impl Game {
                 self.input(input);
                 self.tick(cvars);
             }
+            TickrateMode::SynchronizedBounded => todo!(),
             TickrateMode::Fixed => loop {
                 let remaining = t - self.gs_prev.frame_time;
                 let dt = 1.0 / cvars.sv_gamelogic_fixed_fps;
@@ -167,6 +168,8 @@ impl Game {
                 self.input(input);
                 self.tick(cvars);
             },
+            TickrateMode::FixedOrSmaller => todo!(),
+            TickrateMode::FixedWithInterpolation => todo!(),
         }
     }
 
