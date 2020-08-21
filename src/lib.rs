@@ -125,11 +125,6 @@ impl Game {
         }
     }
 
-    // TODO Debug for hecs?
-    /*pub fn to_debug_string(&self) -> String {
-        format!("{:#?}", self)
-    }*/
-
     /// Run gamelogic up to `t` (in seconds) and render.
     pub fn update_and_draw(&mut self, t: f64, input: &Input, cvars: &Cvars) -> Result<(), JsValue> {
         // I want to track update and render time in Rust so i can draw the FPS counter and keep stats.
