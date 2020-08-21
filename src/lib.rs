@@ -8,6 +8,8 @@ mod entities;
 mod game_state;
 mod map;
 
+use std::f64::consts::PI;
+
 use hecs::World;
 
 use js_sys::Array;
@@ -399,9 +401,26 @@ impl Game {
             y += TILE_SIZE;
         }
 
-        // TODO Draw HM indicator using canvas dashed lines
-
         // Draw HUD:
+
+        // Homing missile indicator
+        self.context.set_stroke_style(&"rgb(0, 255, 0)".into());
+        let dash_len = cvars.hud_missile_indicator_dash_length.into();
+        let dash_pattern = Array::of2(&dash_len, &dash_len);
+        self.context.set_line_dash(&dash_pattern)?;
+        self.context.begin_path();
+        self.context.arc(
+            tank_scr_pos.x,
+            tank_scr_pos.y,
+            cvars.hud_missile_indicator_radius,
+            0.0,
+            2.0 * PI,
+        )?;
+        self.context.move_to(tank_scr_pos.x, tank_scr_pos.y);
+        let dir = (self.gs.gm.pos - self.gs.tank.pos).normalized();
+        let end = tank_scr_pos + dir * cvars.hud_missile_indicator_radius;
+        self.context.line_to(end.x, end.y);
+        self.context.stroke();
 
         // Hit points (goes from green to red)
         let hp = self.gs.tank.hp;
