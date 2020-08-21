@@ -101,7 +101,9 @@ pub struct Tank {
     pub vel: Vec2f,
     pub angle: f64,
     pub turn_rate: f64,
+    /// Fraction of full
     pub hp: f64,
+    /// Fraction of full
     pub charge: f64,
 }
 
