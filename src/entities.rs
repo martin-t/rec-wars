@@ -165,6 +165,7 @@ impl Tank {
         dbgd!(self.vel.magnitude());
 
         // Turning - part of vel gets rotated to simulate steering
+        // TODO cvar to set turning origin - original RW turned around turret center
         let vel_rotation = self.turn_rate * cvars.g_tank_turn_effectiveness;
         self.vel.rotate_z(vel_rotation);
         self.angle += self.turn_rate; // TODO * dt
