@@ -60,6 +60,6 @@ https://recwar.osoba.cz/rubriky/download
 Licence
 -------
 
-All code is available under GPL-v3 or newer.
+All code is available under [GPL-v3](GPL-3.0.txt) or newer.
 
-All assets (maps, textures, sounds, etc.) are taken from the original RecWar by Willem Janssen.
+All assets (maps, textures, sounds, etc.) are taken from the original RecWar by Willem Janssen which is freely available online.
