@@ -150,7 +150,7 @@ impl Game {
     pub fn update(&mut self, t: f64, input: &Input, cvars: &Cvars) {
         // Recommended reading: https://gafferongames.com/post/fix_your_timestep/
 
-        // FIXME toggling crashes
+        // TODO prevent death spirals
         match cvars.sv_gamelogic_mode {
             TickrateMode::Synchronized => {
                 self.begin_frame(t);
