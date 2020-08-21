@@ -46,10 +46,10 @@ Rec Wars aims to have similar gameplay as the original RecWar but not identical 
 
 Additionally I suspect RecWar was balanced for playing against bots and might result in annoying strats when people start [playing to win](http://www.sirlin.net/articles/playing-to-win). E.g. with enough mines, the cow can be made completely inaccessible, especially to less maneuverable vehicles like the hovercraft. Experience from other poorly designed games also shows large areas will be dominated by instant-hit weapons (here the Railgun) and there might simply be no way to get across the map without getting hit.
 
-homepage: http://recreationalwarfare.atspace.com/index_willem.html (the game's download is broken but still hosts extra maps)
-unofficial homepage: http://www.recwar.50webs.com/
-archive.org download: https://archive.org/details/recwar_201903
-archive.org download with extra maps: https://archive.org/details/RecWar
+- homepage: http://recreationalwarfare.atspace.com/index_willem.html (the game's download is broken but still hosts extra maps)
+- unofficial homepage: http://www.recwar.50webs.com/
+- archive.org download: https://archive.org/details/recwar_201903
+- archive.org download with extra maps: https://archive.org/details/RecWar
 
 Windows .exe only but runs ok-ish wine (sometimes freezes on map load). Includes a map editor. The binaries in both archive.org links are identical to what i got on an old CD so should be safe.
 
