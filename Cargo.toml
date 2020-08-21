@@ -3,6 +3,9 @@ name = "rec-wars"
 version = "0.1.0"
 authors = ["Martin Taibr <taibr.martin@gmail.com>"]
 edition = "2018"
+description = "A top-down vehicle shooter game playable in the browser"
+repository = "https://github.com/martin-t/rec-wars"
+license = "GPL-3.0-or-later"
 
 [lib]
 crate-type = ["cdylib"]

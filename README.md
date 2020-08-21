@@ -60,7 +60,7 @@ Additionally I suspect RecWar was balanced for playing against bots and might re
 Licence
 -------
 
-<!-- When updating this, also update COPYING -->
+<!-- When updating this, also update LICENSE -->
 
 All code is available under [GPL-v3](GPL-3.0.txt) or newer.
 
