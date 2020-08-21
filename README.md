@@ -42,23 +42,25 @@ If you'd like to improve RecWars, feel free to make a [Pull Request](https://git
 The Original Game
 -----------------
 
-Rec Wars aims to have similar gameplay as the original RecWar but not identical since it would be impossible to replicate exactly without decompiling the binary.
+- homepage: http://recreationalwarfare.atspace.com/index_willem.html (the game's download is broken but still hosts extra maps)
+- unofficial homepage: http://www.recwar.50webs.com/
+- archive.org download: https://archive.org/details/recwar_201903
+- archive.org download with extra maps: https://archive.org/details/RecWar
 
-Additionally I suspect RecWar was balanced for playing against bots and might result in annoying strats when people start [playing to win](http://www.sirlin.net/articles/playing-to-win). E.g. with enough mines, the cow can be made completely inaccessible, especially to less maneuverable vehicles like the hovercraft. Experience from other poorly designed games also shows large areas will be dominated by instant-hit weapons (here the Railgun) and there might simply be no way to get across the map without getting hit.
-
-homepage: http://recreationalwarfare.atspace.com/index_willem.html (the game's download is broken but still hosts extra maps)
-unofficial homepage: http://www.recwar.50webs.com/
-archive.org download: https://archive.org/details/recwar_201903
-archive.org download with extra maps: https://archive.org/details/RecWar
-
-Windows .exe only but runs ok-ish wine (sometimes freezes on map load). Includes a map editor. The binaries in both archive.org links are identical to what i got on an old CD so should be safe.
+The original RecWar only contains a Windows .exe but runs ok-ish wine (sometimes freezes on map load). It includes a map editor. The binaries in both archive.org links are identical to what I got on an old CD so should be safe.
 
 TODO look at:
 https://hupage.mypage.cz/menu/domovska-stranka/download/recwar
 https://recwar.osoba.cz/rubriky/download
 
+Rec Wars aims to have similar gameplay as the original RecWar but not identical since it would be impossible to replicate exactly without decompiling the binary (which doesn't even contain debug symbols as far as I can tell).
+
+Additionally I suspect RecWar was balanced for playing against bots and might result in annoying strats when people start [playing to win](http://www.sirlin.net/articles/playing-to-win). E.g. with enough mines, the cow can be made completely inaccessible, especially to less maneuverable vehicles like the hovercraft. Experience from other poorly designed games also shows large areas will be dominated by instant-hit weapons (here the Railgun) and there might simply be no way to get across the map without getting hit.
+
 Licence
 -------
+
+<!-- When updating this, also update COPYING -->
 
 All code is available under [GPL-v3](GPL-3.0.txt) or newer.
 
