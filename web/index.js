@@ -102,6 +102,10 @@ async function run() {
     const ctx = canvas.getContext("2d", { alpha: false });
 
     const log_time_checkbox = document.getElementById("log-time-checkbox");
+    log_time_checkbox.addEventListener("change", event => {
+        // Unfocus so it doesn't react to keyboard after being clicked.
+        log_time_checkbox.blur();
+    });
 
     const input = new Input();
     let paused = false;
@@ -164,13 +168,13 @@ async function run() {
     });
 
     // listen to all events
-    /*Object.keys(window).forEach(key => {
-        if (/^on/.test(key)) {
-            window.addEventListener(key.slice(2), event => {
-                console.log(event);
-            });
-        }
-    });*/
+    // Object.keys(window).forEach(key => {
+    //     if (/^on/.test(key)) {
+    //         window.addEventListener(key.slice(2), event => {
+    //             console.log(event);
+    //         });
+    //     }
+    // });
 
     let load_tex_list = () => {
         let request = new XMLHttpRequest();
