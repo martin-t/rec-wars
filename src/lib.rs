@@ -159,12 +159,13 @@ impl Game {
             }
             TickrateMode::SynchronizedBounded => todo!(),
             TickrateMode::Fixed => loop {
-                let remaining = t - self.gs_prev.frame_time;
+                // gs, not gs_prev, is the previous frame here
+                let remaining = t - self.gs.frame_time;
                 let dt = 1.0 / cvars.sv_gamelogic_fixed_fps;
                 if remaining < dt {
                     break;
                 }
-                self.start_frame(self.gs_prev.frame_time + dt);
+                self.start_frame(self.gs.frame_time + dt);
                 self.input(input);
                 self.tick(cvars);
             },
@@ -181,7 +182,7 @@ impl Game {
             self.gs.frame_time >= self.gs_prev.frame_time,
             "frametime didn't increase: prev {}, current {}",
             self.gs_prev.frame_time,
-            self.gs.frame_time
+            self.gs.frame_time,
         );
 
         self.frame_times.push(t);
