@@ -153,7 +153,7 @@ impl Game {
         // FIXME toggling crashes
         match cvars.sv_gamelogic_mode {
             TickrateMode::Synchronized => {
-                self.start_frame(t);
+                self.begin_frame(t);
                 self.input(input);
                 self.tick(cvars);
             }
@@ -165,7 +165,7 @@ impl Game {
                 if remaining < dt {
                     break;
                 }
-                self.start_frame(self.gs.frame_time + dt);
+                self.begin_frame(self.gs.frame_time + dt);
                 self.input(input);
                 self.tick(cvars);
             },
@@ -175,7 +175,7 @@ impl Game {
     }
 
     /// Update time tracking variables (in seconds)
-    fn start_frame(&mut self, t: f64) {
+    fn begin_frame(&mut self, t: f64) {
         self.gs_prev = self.gs.clone();
         self.gs.frame_time = t;
         assert!(
