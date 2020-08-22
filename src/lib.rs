@@ -3,6 +3,7 @@
 #[macro_use]
 mod debugging;
 
+mod components;
 mod cvars;
 mod entities;
 mod game_state;
@@ -13,6 +14,7 @@ use std::f64::consts::PI;
 use hecs;
 
 use legion;
+use legion::query::IntoQuery;
 
 use js_sys::Array;
 
@@ -26,6 +28,7 @@ use wasm_bindgen::JsCast;
 
 use web_sys::{CanvasRenderingContext2d, HtmlImageElement};
 
+use components::{Pos, Vel};
 use cvars::{Cvars, TickrateMode};
 use debugging::DEBUG_TEXTS;
 use entities::{GuidedMissile, Tank};
@@ -40,12 +43,6 @@ const WEAP_HM: usize = 4;
 const WEAP_GM: usize = 5;
 const WEAP_BFG: usize = 6;
 const WEAPS_CNT: usize = 7;
-
-#[derive(Debug)]
-struct Pos(Vec2f);
-
-#[derive(Debug)]
-struct Vel(Vec2f);
 
 #[wasm_bindgen]
 pub struct Game {
@@ -216,13 +213,15 @@ impl Game {
         if self.gs.input.fire && self.gs.tank.charge == 1.0 {
             match self.gs.cur_weapon {
                 WEAP_MG => {
+                    // TODO move to MG
                     let pos = Pos(self.gs.tank.pos);
                     let mut vel =
                         Vec2f::new(cvars.g_machine_gun_speed, 0.0).rotated_z(self.gs.tank.angle);
                     if cvars.g_machine_gun_add_vehicle_velocity {
                         vel += self.gs.tank.vel;
                     }
-                    self.hecs.spawn((pos, Vel(vel)));
+                    let vel = Vel(vel);
+                    self.hecs.spawn((pos, vel));
 
                     // TODO for debugging - remove
                     self.gs.tank.hp -= 0.05;
@@ -232,7 +231,17 @@ impl Game {
                 }
                 WEAP_RAIL => {}
                 WEAP_CB => {}
-                WEAP_ROCKETS => {}
+                WEAP_ROCKETS => {
+                    // TODO move to turret end
+                    let pos = Pos(self.gs.tank.pos);
+                    let mut vel =
+                        Vec2f::new(cvars.g_rockets_speed, 0.0).rotated_z(self.gs.tank.angle);
+                    if cvars.g_rockets_add_vehicle_velocity {
+                        vel += self.gs.tank.vel;
+                    }
+                    let vel = Vel(vel);
+                    self.legion.push((pos, vel));
+                }
                 WEAP_HM => {}
                 WEAP_GM => {
                     self.gs.tank.charge = 0.0;
@@ -341,6 +350,22 @@ impl Game {
             self.context.stroke();
         }
         dbgd!(mg_cnt);
+
+        // Draw rockets
+        self.context.set_stroke_style(&"white".into());
+        let mut rocket_cnt = 0;
+        let mut query = <(&Pos, &Vel)>::query();
+        for (pos, vel) in query.iter(&self.legion) {
+            rocket_cnt += 1;
+            let scr_pos = pos.0 - top_left;
+            // TODO use actual image
+            self.context.begin_path();
+            self.context.move_to(scr_pos.x, scr_pos.y);
+            let scr_end = scr_pos - vel.0.normalized() * 16.0;
+            self.context.line_to(scr_end.x, scr_end.y);
+            self.context.stroke();
+        }
+        dbgd!(rocket_cnt);
 
         // Draw missile
         let gm = &self.gs.gm;

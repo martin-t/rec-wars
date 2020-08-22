@@ -39,6 +39,9 @@ pub struct Cvars {
     pub g_guided_missile_turn_rate_decrease: f64,
     pub g_guided_missile_turn_rate_max: f64,
 
+    pub g_rockets_add_vehicle_velocity: bool,
+    pub g_rockets_speed: f64,
+
     pub g_tank_accel_backward: f64,
     pub g_tank_accel_forward: f64,
     pub g_tank_friction_const: f64,
@@ -111,6 +114,9 @@ impl Default for Cvars {
             g_guided_missile_turn_rate_friction: 0.99,
             g_guided_missile_turn_rate_decrease: 1.0,
             g_guided_missile_turn_rate_max: 3.15,
+
+            g_rockets_add_vehicle_velocity: true,
+            g_rockets_speed: 600.0,
 
             g_tank_accel_backward: 550.0,
             g_tank_accel_forward: 550.0,
