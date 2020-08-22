@@ -78,7 +78,8 @@
 // [ ] physics
 //      [ ] surfaces
 //      [ ] pushing wrecks
-// [ ] hp/health, wrecks (vehicle turned into wreck immediately on hit)
+// [ ] hp/health
+//      [ ] wrecks (vehicle turned into wreck immediately on hit)
 //      [ ] configurable
 // [ ] weapons
 //      [ ] MG
