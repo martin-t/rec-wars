@@ -421,6 +421,7 @@ impl Game {
         let end = tank_scr_pos + dir * cvars.hud_missile_indicator_radius;
         self.context.line_to(end.x, end.y);
         self.context.stroke();
+        self.context.set_line_dash(&Array::new())?;
 
         // Hit points (goes from green to red)
         let hp = self.gs.tank.hp;
