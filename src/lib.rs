@@ -454,7 +454,6 @@ impl Game {
 
         // Weapon icon
         // The original shadows were part of the image but this is good enough for now.
-        self.context.save();
         let rgba = format!("rgba(0, 0, 0, {})", cvars.hud_weapon_icon_shadow_alpha);
         self.context.set_shadow_color(&rgba);
         self.context
@@ -466,7 +465,8 @@ impl Game {
             Vec2f::new(cvars.hud_weapon_icon_x, cvars.hud_weapon_icon_y),
             0.0,
         )?;
-        self.context.restore();
+        self.context.set_shadow_offset_x(0.0);
+        self.context.set_shadow_offset_y(0.0);
 
         // let mut scr_pos = Vec2f::new(50.0, 50.0);
         // self.draw_img_top_left(&self.img_tank, scr_pos, 0.0f64.to_radians())?;
