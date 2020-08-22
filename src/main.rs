@@ -81,23 +81,36 @@
 // [ ] hp/health, wrecks (vehicle turned into wreck immediately on hit)
 //      [ ] configurable
 // [ ] weapons
-//      [ ] MG - more on hovercraft
-//      [ ] rail - from chassis on hummer
+//      [ ] MG
+//          [ ] more on hovercraft
+//          [ ] origins: tank: MG
+//          [ ] reload: 1 s
+//          [ ] 50 per reload
+//      [ ] rail
+//          [ ] origins: tank: gun, hummer: chassis
+//          [ ] reload: 1 s
 //      [ ] CB
 //          [ ] explosions happen on walls, just partially obscured
 //          [ ] reflect off map edge
-//      [ ] rockets - do they accell?
-//          6 per reload
-//          tank could shoot through a wall tile by putting the turret inside
+//          [ ] reload: 1.5 s
+//          [ ] 40 per shot
+//          [ ] next shot starts a few frames after last explosion disappears
+//      [ ] rockets
+//          [ ] acceleration (judging by changing distance between them)
+//          [ ] 6 per reload
 //      [ ] homing missile
+//          [ ] reload: 1.5 s
 //      [ ] guided missile
+//          [ ] reload: 1.5 s
 //      [ ] BFG - delay? speed change? range? random dir when dead? explosion range (through wall)?
 //          explosion animation goes backwards
+//          [ ] reload: 2.5 s
 // [ ] mines
 //      [ ] not within radius of base/cow
 // [ ] shadows
 //      [ ] HUD
 //      [ ] vehicles (is turret "higher"?)
+//      [ ] CB
 // [ ] self destruct - bigger exposion, countdown, sounds
 //      works through walls
 // [ ] UI
@@ -151,14 +164,6 @@
 //      [x] google analytics
 //      [ ] master server
 // [ ] FAQ - stuttering/tearing due to compositor - Alt+Shift+f12 - somehow this doesn't work anymore
-// [ ] easter eggs
-//      BFG can shoot through walls touching on the corner (well, somewhat)
-//          detect when doing multiple times and print a message
-//              private?
-//              server say? (lol no collision detection?)
-//      BFG does a tiny bit of dmg when hitting a wall with a tank on the other side
-//          probably BFG briefly enters wall before collision is detected and does proximity dmg
-//      server say for 0 deaths
 // [ ] version info
 // nice to have:
 // [ ] make driving feel more real - simulate terrain unevenness? mild speed/angle changes?
@@ -173,6 +178,16 @@
 // [x] pause, variable speed
 // [ ] frame debug mode - only render gamelogic frames, no interpolation
 // [ ] shield pickups
+// [ ] easter eggs
+//      [ ] server say for 0 deaths
+//      [ ] bugfeatures from original RW:
+//          [ ] BFG can shoot through walls touching on the corner (well, somewhat)
+//              detect when doing multiple times and print a message
+//                  private?
+//                  server say? (lol no collision detection?)
+//          [ ] BFG does a tiny bit of dmg when hitting a wall with a tank on the other side
+//              probably BFG briefly enters wall before collision is detected and does proximity dmg
+//          [ ] tank could shoot through a wall tile by putting the turret inside
 
 fn main() {
     println!("There is no native binary yet, compile to WASM instead (see readme)");
