@@ -174,4 +174,6 @@
 // [ ] frame debug mode - only render gamelogic frames, no interpolation
 // [ ] shield pickups
 
-fn main() {}
+fn main() {
+    println!("There is no native binary yet, compile to WASM instead (see readme)");
+}
