@@ -201,7 +201,10 @@ impl Game {
             progress <= 1.0
         });
 
-        if self.gs.input.change_weapon && !self.gs_prev.input.change_weapon {
+        if self.gs.input.prev_weapon && !self.gs_prev.input.prev_weapon {
+            self.gs.cur_weapon = (self.gs.cur_weapon + WEAPS_CNT - 1) % WEAPS_CNT;
+        }
+        if self.gs.input.next_weapon && !self.gs_prev.input.next_weapon {
             self.gs.cur_weapon = (self.gs.cur_weapon + 1) % WEAPS_CNT;
         }
 

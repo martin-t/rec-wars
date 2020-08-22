@@ -116,7 +116,7 @@ async function run() {
         }
         // TODO IE/edge?
         //  https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key
-        //  https://www.w3.org/TR/uievents-key/#keys-navigation
+        //  https://www.w3.org/TR/uievents-key
         if (event.key === "ArrowLeft" || event.key === "a") {
             input.left = 1;
         } else if (event.key === "ArrowRight" || event.key === "d") {
@@ -125,8 +125,10 @@ async function run() {
             input.up = 1;
         } else if (event.key === "ArrowDown" || event.key === "s") {
             input.down = 1;
+        } else if (event.key === "Control") {
+            input.prev_weapon = true;
         } else if (event.key === "Shift") {
-            input.change_weapon = true;
+            input.next_weapon = true;
         } else if (event.key === " ") {
             input.fire = true;
         } else if (event.key === "p") {
@@ -146,8 +148,10 @@ async function run() {
             input.up = 0;
         } else if (event.key === "ArrowDown" || event.key === "s") {
             input.down = 0;
+        } else if (event.key === "Control") {
+            input.prev_weapon = false;
         } else if (event.key === "Shift") {
-            input.change_weapon = false;
+            input.next_weapon = false;
         } else if (event.key === " ") {
             input.fire = false;
         }

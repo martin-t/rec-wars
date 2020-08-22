@@ -45,7 +45,8 @@ pub struct Input {
     pub right: f64,
     pub up: f64,
     pub down: f64,
-    pub change_weapon: bool,
+    pub prev_weapon: bool,
+    pub next_weapon: bool,
     pub fire: bool,
 }
 
