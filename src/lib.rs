@@ -265,9 +265,17 @@ impl Game {
             self.hecs.despawn(entity).unwrap();
         }
 
-        let mut query = <(&mut Pos, &Vel)>::query();
-        for (pos, vel) in query.iter_mut(&mut self.legion) {
+        let mut to_remove = Vec::new();
+        let mut query = <(legion::Entity, &mut Pos, &Vel)>::query();
+        for (&entity, pos, vel) in query.iter_mut(&mut self.legion) {
             pos.0 += vel.0 * dt;
+
+            if self.map.collision(pos.0) {
+                to_remove.push(entity);
+            }
+        }
+        for entity in to_remove {
+            self.legion.remove(entity);
         }
 
         if self.gs.pe == PlayerEntity::Tank {
