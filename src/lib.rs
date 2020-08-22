@@ -10,7 +10,9 @@ mod map;
 
 use std::f64::consts::PI;
 
-use hecs::World;
+use hecs;
+
+use legion;
 
 use js_sys::Array;
 
@@ -59,7 +61,8 @@ pub struct Game {
     frame_times: Vec<f64>,
     gs: GameState,
     gs_prev: GameState,
-    ecs: World,
+    hecs: hecs::World,
+    legion: legion::World,
 }
 
 #[wasm_bindgen]
@@ -123,7 +126,8 @@ impl Game {
             frame_times: Vec::new(),
             gs,
             gs_prev,
-            ecs: World::new(),
+            hecs: hecs::World::new(),
+            legion: legion::World::default(),
         }
     }
 
@@ -218,7 +222,7 @@ impl Game {
                     if cvars.g_machine_gun_add_vehicle_velocity {
                         vel += self.gs.tank.vel;
                     }
-                    self.ecs.spawn((pos, Vel(vel)));
+                    self.hecs.spawn((pos, Vel(vel)));
 
                     // TODO for debugging - remove
                     self.gs.tank.hp -= 0.05;
@@ -241,7 +245,7 @@ impl Game {
         }
 
         let mut to_remove = Vec::new();
-        for (entity, (pos, vel)) in self.ecs.query::<(&mut Pos, &Vel)>().iter() {
+        for (entity, (pos, vel)) in self.hecs.query::<(&mut Pos, &Vel)>().iter() {
             pos.0 += vel.0 * dt;
 
             if self.map.collision(pos.0) {
@@ -249,7 +253,7 @@ impl Game {
             }
         }
         for entity in to_remove {
-            self.ecs.despawn(entity).unwrap();
+            self.hecs.despawn(entity).unwrap();
         }
 
         if self.gs.pe == PlayerEntity::Tank {
@@ -326,7 +330,7 @@ impl Game {
         // Draw MG
         self.context.set_stroke_style(&"yellow".into());
         let mut mg_cnt = 0;
-        for (_, (pos, vel)) in self.ecs.query::<(&Pos, &Vel)>().iter() {
+        for (_, (pos, vel)) in self.hecs.query::<(&Pos, &Vel)>().iter() {
             mg_cnt += 1;
             let scr_pos = pos.0 - top_left;
             self.context.begin_path();
