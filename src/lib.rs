@@ -265,6 +265,11 @@ impl Game {
             self.hecs.despawn(entity).unwrap();
         }
 
+        let mut query = <(&mut Pos, &Vel)>::query();
+        for (pos, vel) in query.iter_mut(&mut self.legion) {
+            pos.0 += vel.0 * dt;
+        }
+
         if self.gs.pe == PlayerEntity::Tank {
             self.gs.tank.tick(dt, cvars, &self.gs.input);
         } else {
