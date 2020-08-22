@@ -45,7 +45,7 @@
 //      postMessage / MessageChannel / https://github.com/YuzuJS/setImmediate polyfill
 // [ ] extract/screenshot/record assets from RecWar or find alternatives
 //      [ ] images
-//          [ ] weapon icons
+//          [x] weapon icons
 //          [ ] weapons
 //          [ ] vehicles + skins
 //          [ ] cow, stolen effects
@@ -64,7 +64,7 @@
 // [ ] render vehicles
 //      [x] basic tank
 //      [ ] skins, colors
-//          canvas imageData?
+//              canvas imageData?
 //      [ ] vehicle types
 // [x] explosions
 //      [ ] sizes
@@ -96,6 +96,8 @@
 // [ ] mines
 //      [ ] not within radius of base/cow
 // [ ] shadows
+//      [ ] HUD
+//      [ ] vehicles (is turret "higher"?)
 // [ ] self destruct - bigger exposion, countdown, sounds
 //      works through walls
 // [ ] UI
@@ -146,6 +148,8 @@
 //      [ ] cvars
 // [ ] analytics
 //      https://simpleanalytics.com/sandspiel.club - paid only
+//      [x] google analytics
+//      [ ] master server
 // [ ] FAQ - stuttering/tearing due to compositor - Alt+Shift+f12 - somehow this doesn't work anymore
 // [ ] easter eggs
 //      BFG can shoot through walls touching on the corner (well, somewhat)
