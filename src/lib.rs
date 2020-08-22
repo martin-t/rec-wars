@@ -286,9 +286,9 @@ impl Game {
         }
 
         if self.gs.pe == PlayerEntity::Tank {
-            self.gs.tank.tick(dt, cvars, &self.gs.input);
+            self.gs.tank.tick(dt, cvars, &self.gs.input, &self.map);
         } else {
-            self.gs.tank.tick(dt, cvars, &Input::default());
+            self.gs.tank.tick(dt, cvars, &Input::default(), &self.map);
         };
 
         let hit_something = if self.gs.pe == PlayerEntity::GuidedMissile {

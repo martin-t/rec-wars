@@ -120,7 +120,7 @@ impl Tank {
         }
     }
 
-    pub fn tick(&mut self, dt: f64, cvars: &Cvars, input: &Input) {
+    pub fn tick(&mut self, dt: f64, cvars: &Cvars, input: &Input, map: &Map) {
         // Turn rate
         dbgf!("tank orig tr: {}", self.turn_rate);
         let tr_input = cvars.g_tank_turn_rate_increase * input.right
@@ -173,7 +173,12 @@ impl Tank {
         // TODO unify order with missile / input
 
         // Moving
-        self.pos += self.vel * dt;
+        let new_pos = self.pos + self.vel * dt;
+        if map.collision(new_pos) {
+            self.vel = Vec2f::zero();
+        } else {
+            self.pos = new_pos;
+        }
 
         // Reloading
         self.charge = (self.charge + dt).min(1.0);
