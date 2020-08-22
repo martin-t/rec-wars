@@ -1,7 +1,12 @@
+//! Console variables - configuration options for anything and everything.
+
 use std::default::Default;
 
 use wasm_bindgen::prelude::*;
 
+
+/// Console variables - configuration options for anything and everything.
+///
 /// Prefix meanings:
 /// d_ is debug
 /// g_ is gameplay
