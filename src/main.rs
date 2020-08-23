@@ -106,6 +106,7 @@
 //      [ ] BFG - delay? speed change? range? random dir when dead? explosion range (through wall)?
 //          explosion animation goes backwards
 //          [ ] reload: 2.5 s
+//      [ ] entity culling? faster to render?
 // [ ] mines
 //      [ ] not within radius of base/cow
 // [ ] shadows
