@@ -173,14 +173,29 @@ impl Tank {
         // TODO unify order with missile / input
 
         // Moving
-        let new_pos = self.pos + self.vel * dt;
-        if map.collision(new_pos) {
+        if self
+            .corners(cvars)
+            .iter()
+            .any(|&corner| map.collision(corner + self.vel * dt))
+        {
             self.vel = Vec2f::zero();
         } else {
-            self.pos = new_pos;
+            self.pos += self.vel * dt;
         }
 
         // Reloading
         self.charge = (self.charge + dt).min(1.0);
+    }
+
+    pub fn corners(&self, cvars: &Cvars) -> [Vec2f; 4] {
+        let back_left =
+            self.pos + Vec2f::new(cvars.g_tank_mins_x, cvars.g_tank_mins_y).rotated_z(self.angle);
+        let front_left =
+            self.pos + Vec2f::new(cvars.g_tank_maxs_x, cvars.g_tank_mins_y).rotated_z(self.angle);
+        let front_right =
+            self.pos + Vec2f::new(cvars.g_tank_maxs_x, cvars.g_tank_maxs_y).rotated_z(self.angle);
+        let back_right =
+            self.pos + Vec2f::new(cvars.g_tank_mins_x, cvars.g_tank_maxs_y).rotated_z(self.angle);
+        [back_left, front_left, front_right, back_right]
     }
 }

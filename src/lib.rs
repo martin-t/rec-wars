@@ -406,18 +406,15 @@ impl Game {
         if cvars.d_debug_draw {
             self.context.set_stroke_style(&"blue".into());
             self.context.begin_path();
-            let back_left = Vec2f::new(cvars.g_tank_mins_x, cvars.g_tank_mins_y);
-            let corner1 = tank_scr_pos + back_left.rotated_z(tank.angle);
-            let front_left = Vec2f::new(cvars.g_tank_maxs_x, cvars.g_tank_mins_y);
-            let corner2 = tank_scr_pos + front_left.rotated_z(tank.angle);
-            let front_right = Vec2f::new(cvars.g_tank_maxs_x, cvars.g_tank_maxs_y);
-            let corner3 = tank_scr_pos + front_right.rotated_z(tank.angle);
-            let back_right = Vec2f::new(cvars.g_tank_mins_x, cvars.g_tank_maxs_y);
-            let corner4 = tank_scr_pos + back_right.rotated_z(tank.angle);
-            self.context.move_to(corner1.x, corner1.y);
-            self.context.line_to(corner2.x, corner2.y);
-            self.context.line_to(corner3.x, corner3.y);
-            self.context.line_to(corner4.x, corner4.y);
+            let corners: Vec<Vec2f> = tank
+                .corners(cvars)
+                .iter()
+                .map(|corner| corner - top_left)
+                .collect();
+            self.context.move_to(corners[0].x, corners[0].y);
+            self.context.line_to(corners[1].x, corners[1].y);
+            self.context.line_to(corners[2].x, corners[2].y);
+            self.context.line_to(corners[3].x, corners[3].y);
             self.context.close_path();
             self.context.stroke();
         }
