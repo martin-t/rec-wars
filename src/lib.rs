@@ -406,11 +406,7 @@ impl Game {
         if cvars.d_debug_draw {
             self.context.set_stroke_style(&"blue".into());
             self.context.begin_path();
-            let corners: Vec<Vec2f> = tank
-                .corners(cvars)
-                .iter()
-                .map(|corner| corner - top_left)
-                .collect();
+            let corners = Tank::corners(cvars, tank_scr_pos, tank.angle);
             self.context.move_to(corners[0].x, corners[0].y);
             self.context.line_to(corners[1].x, corners[1].y);
             self.context.line_to(corners[2].x, corners[2].y);

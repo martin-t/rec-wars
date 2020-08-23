@@ -168,34 +168,41 @@ impl Tank {
         // TODO cvar to set turning origin - original RW turned around turret center
         let vel_rotation = self.turn_rate * cvars.g_tank_turn_effectiveness;
         self.vel.rotate_z(vel_rotation);
-        self.angle += self.turn_rate; // TODO * dt
+        let new_angle = self.angle + self.turn_rate; // TODO * dt
+        if Self::corners(cvars, self.pos, new_angle)
+            .iter()
+            .any(|&corner| map.collision(corner))
+        {
+            self.turn_rate = 0.0;
+        } else {
+            self.angle = new_angle;
+        }
 
         // TODO unify order with missile / input
 
         // Moving
-        if self
-            .corners(cvars)
+        let new_pos = self.pos + self.vel * dt;
+        if Self::corners(cvars, new_pos, self.angle)
             .iter()
-            .any(|&corner| map.collision(corner + self.vel * dt))
+            .any(|&corner| map.collision(corner))
         {
             self.vel = Vec2f::zero();
         } else {
-            self.pos += self.vel * dt;
+            self.pos = new_pos;
         }
 
         // Reloading
         self.charge = (self.charge + dt).min(1.0);
     }
 
-    pub fn corners(&self, cvars: &Cvars) -> [Vec2f; 4] {
-        let back_left =
-            self.pos + Vec2f::new(cvars.g_tank_mins_x, cvars.g_tank_mins_y).rotated_z(self.angle);
+    pub fn corners(cvars: &Cvars, pos: Vec2f, angle: f64) -> [Vec2f; 4] {
+        let back_left = pos + Vec2f::new(cvars.g_tank_mins_x, cvars.g_tank_mins_y).rotated_z(angle);
         let front_left =
-            self.pos + Vec2f::new(cvars.g_tank_maxs_x, cvars.g_tank_mins_y).rotated_z(self.angle);
+            pos + Vec2f::new(cvars.g_tank_maxs_x, cvars.g_tank_mins_y).rotated_z(angle);
         let front_right =
-            self.pos + Vec2f::new(cvars.g_tank_maxs_x, cvars.g_tank_maxs_y).rotated_z(self.angle);
+            pos + Vec2f::new(cvars.g_tank_maxs_x, cvars.g_tank_maxs_y).rotated_z(angle);
         let back_right =
-            self.pos + Vec2f::new(cvars.g_tank_mins_x, cvars.g_tank_maxs_y).rotated_z(self.angle);
+            pos + Vec2f::new(cvars.g_tank_mins_x, cvars.g_tank_maxs_y).rotated_z(angle);
         [back_left, front_left, front_right, back_right]
     }
 }
