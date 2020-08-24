@@ -67,7 +67,7 @@
 //              canvas imageData?
 //      [ ] vehicle types
 // [x] explosions
-//      [ ] sizes
+//      [x] sizes
 // [ ] movement
 //      [ ] reverse steering
 //          https://engineeringdotnet.blogspot.com/2010/04/simple-2d-car-physics-in-games.html
