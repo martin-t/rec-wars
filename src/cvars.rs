@@ -4,7 +4,6 @@ use std::default::Default;
 
 use wasm_bindgen::prelude::*;
 
-
 /// Console variables - configuration options for anything and everything.
 ///
 /// Prefix meanings:
@@ -45,6 +44,7 @@ pub struct Cvars {
     pub g_guided_missile_turn_rate_max: f64,
 
     pub g_rockets_add_vehicle_velocity: bool,
+    pub g_rockets_explosion_size: f64,
     pub g_rockets_speed: f64,
     pub g_rockets_image: bool,
 
@@ -126,6 +126,7 @@ impl Default for Cvars {
             g_guided_missile_turn_rate_max: 3.15,
 
             g_rockets_add_vehicle_velocity: true,
+            g_rockets_explosion_size: 0.5,
             g_rockets_speed: 600.0,
             g_rockets_image: true,
 

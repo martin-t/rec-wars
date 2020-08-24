@@ -281,9 +281,11 @@ impl Game {
             pos.0 += vel.0 * dt;
 
             if self.map.collision(pos.0) {
-                self.gs
-                    .explosions
-                    .push(Explosion::new(pos.0, self.gs.frame_time));
+                self.gs.explosions.push(Explosion::new(
+                    pos.0,
+                    cvars.g_rockets_explosion_size,
+                    self.gs.frame_time,
+                ));
                 to_remove.push(entity);
             }
         }
@@ -303,7 +305,7 @@ impl Game {
             self.gs.gm.tick(dt, cvars, &Input::default(), &self.map)
         };
         if hit_something {
-            let explosion = Explosion::new(self.gs.gm.pos, self.gs.frame_time);
+            let explosion = Explosion::new(self.gs.gm.pos, 1.0, self.gs.frame_time);
             self.gs.explosions.push(explosion);
             self.gs.pe = PlayerEntity::Tank;
             let (pos, angle) = entities::random_spawn_pos(&mut self.gs.rng, &self.map);
@@ -443,10 +445,10 @@ impl Game {
                     0.0,
                     100.0,
                     100.0,
-                    scr_pos.x - 50.0,
-                    scr_pos.y - 50.0,
-                    100.0,
-                    100.0,
+                    scr_pos.x - 50.0 * explosion.size,
+                    scr_pos.y - 50.0 * explosion.size,
+                    100.0 * explosion.size,
+                    100.0 * explosion.size,
                 )?;
         }
 
