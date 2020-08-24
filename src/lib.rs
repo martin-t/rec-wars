@@ -281,6 +281,9 @@ impl Game {
             pos.0 += vel.0 * dt;
 
             if self.map.collision(pos.0) {
+                self.gs
+                    .explosions
+                    .push(Explosion::new(pos.0, self.gs.frame_time));
                 to_remove.push(entity);
             }
         }
