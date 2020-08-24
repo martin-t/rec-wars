@@ -88,6 +88,7 @@
 //          [ ] reload: 1 s
 //          [ ] 50 per reload
 //      [ ] rail
+//          [ ] push
 //          [ ] origins: tank: gun, hummer: chassis
 //          [ ] reload: 1 s
 //      [ ] CB
