@@ -33,7 +33,7 @@ use vek::Vec2;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 
-use web_sys::{CanvasRenderingContext2d, HtmlImageElement};
+use web_sys::{CanvasRenderingContext2d, HtmlImageElement, Performance};
 
 use components::{Pos, Vel};
 use cvars::{Cvars, TickrateMode};
@@ -53,6 +53,10 @@ const WEAPS_CNT: usize = 7;
 
 #[wasm_bindgen]
 pub struct Game {
+    /// I want to track update and render time in Rust so i can draw the FPS counter and keep stats.
+    /// Unfortunately, Instant::now() panics in WASM so i have to use performance.now().
+    /// And just like in JS, it has limited precision in some browsers like firefox.
+    performance: Performance,
     context: CanvasRenderingContext2d,
     canvas_size: Vec2f,
     imgs_textures: Vec<HtmlImageElement>,
@@ -61,9 +65,11 @@ pub struct Game {
     img_gm: HtmlImageElement,
     img_tank: HtmlImageElement,
     img_explosion: HtmlImageElement,
-    map: Map,
     /// Saved frame times in seconds over some period of time to measure FPS
     frame_times: Vec<f64>,
+    update_durations: Vec<f64>,
+    draw_durations: Vec<f64>,
+    map: Map,
     gs: GameState,
     gs_prev: GameState,
     hecs: hecs::World,
@@ -121,6 +127,7 @@ impl Game {
         let gs_prev = gs.clone();
 
         Self {
+            performance: web_sys::window().unwrap().performance().unwrap(),
             context,
             canvas_size: Vec2f::new(width, height),
             imgs_textures,
@@ -129,8 +136,10 @@ impl Game {
             img_gm,
             img_tank,
             img_explosion,
-            map,
             frame_times: Vec::new(),
+            update_durations: Vec::new(),
+            draw_durations: Vec::new(),
+            map,
             gs,
             gs_prev,
             hecs: hecs::World::new(),
@@ -140,23 +149,15 @@ impl Game {
 
     /// Run gamelogic up to `t` (in seconds) and render.
     pub fn update_and_draw(&mut self, t: f64, input: &Input, cvars: &Cvars) -> Result<(), JsValue> {
-        // I want to track update and render time in Rust so i can draw the FPS counter and keep stats.
-        // Unfortunately, Instant::now() panics in WASM so i have to use performance.now().
-        // And just like in JS, it has limited precision in some browsers like firefox.
-        let performance = web_sys::window().unwrap().performance().unwrap();
-        let t_start = performance.now();
         self.update(t, input, cvars);
-        let t_updated = performance.now();
         self.draw(cvars)?;
-        let t_rendered = performance.now();
-        let duration_update = t_updated - t_start;
-        let duration_render = t_rendered - t_updated;
-        dbgd!(duration_update, duration_render);
         Ok(())
     }
 
     pub fn update(&mut self, t: f64, input: &Input, cvars: &Cvars) {
         // Recommended reading: https://gafferongames.com/post/fix_your_timestep/
+
+        let start = self.performance.now();
 
         // TODO prevent death spirals
         match cvars.sv_gamelogic_mode {
@@ -180,6 +181,12 @@ impl Game {
             TickrateMode::FixedOrSmaller => todo!(),
             TickrateMode::FixedWithInterpolation => todo!(),
         }
+
+        let end = self.performance.now();
+        if self.update_durations.len() >= 60 {
+            self.update_durations.remove(0);
+        }
+        self.update_durations.push(end - start);
     }
 
     /// Update time tracking variables (in seconds)
@@ -313,7 +320,9 @@ impl Game {
         }
     }
 
-    pub fn draw(&self, cvars: &Cvars) -> Result<(), JsValue> {
+    pub fn draw(&mut self, cvars: &Cvars) -> Result<(), JsValue> {
+        let start = self.performance.now();
+
         // Nicer rockets (more like original RW).
         // This also means everything is aligned to pixels
         // without the need to explicitly round x and y in draw calls to whole numbers.
@@ -562,6 +571,48 @@ impl Game {
 
         self.context.set_fill_style(&"red".into());
 
+        // Draw perf info
+        if !self.update_durations.is_empty() {
+            let mut sum = 0.0;
+            let mut max = 0.0;
+            for &dur in &self.update_durations {
+                sum += dur;
+                if dur > max {
+                    max = dur;
+                }
+            }
+
+            self.context.fill_text(
+                &format!(
+                    "update avg: {:.1}, max: {:.1}",
+                    sum / self.update_durations.len() as f64,
+                    max
+                ),
+                self.canvas_size.x - 150.0,
+                self.canvas_size.y - 60.0,
+            )?;
+        }
+        if !self.draw_durations.is_empty() {
+            let mut sum = 0.0;
+            let mut max = 0.0;
+            for &dur in &self.draw_durations {
+                sum += dur;
+                if dur > max {
+                    max = dur;
+                }
+            }
+
+            self.context.fill_text(
+                &format!(
+                    "draw avg: {:.1}, max: {:.1}",
+                    sum / self.draw_durations.len() as f64,
+                    max
+                ),
+                self.canvas_size.x - 150.0,
+                self.canvas_size.y - 45.0,
+            )?;
+        }
+
         // Draw FPS
         // TODO this is wrong with d_speed
         let fps = if self.frame_times.is_empty() {
@@ -589,6 +640,12 @@ impl Game {
             }
             texts.clear();
         });
+
+        let end = self.performance.now();
+        if self.draw_durations.len() >= 60 {
+            self.draw_durations.remove(0);
+        }
+        self.draw_durations.push(end - start);
 
         Ok(())
     }
