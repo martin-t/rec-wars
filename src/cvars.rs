@@ -22,6 +22,7 @@ pub struct Cvars {
     pub d_debug_draw: bool,
     pub d_debug_text: bool,
     pub d_debug_text_line_height: f64,
+    pub d_rockets_image: bool,
     pub d_seed: u64,
     /// Change speed of everything in the game
     pub d_speed: f64,
@@ -46,7 +47,6 @@ pub struct Cvars {
     pub g_rockets_add_vehicle_velocity: bool,
     pub g_rockets_explosion_size: f64,
     pub g_rockets_speed: f64,
-    pub g_rockets_image: bool,
 
     pub g_tank_accel_backward: f64,
     pub g_tank_accel_forward: f64,
@@ -107,6 +107,7 @@ impl Default for Cvars {
             d_debug_draw: true,
             d_debug_text: true,
             d_debug_text_line_height: 11.0,
+            d_rockets_image: true,
             d_seed: 6,
             d_speed: 1.0,
 
@@ -124,11 +125,9 @@ impl Default for Cvars {
             g_guided_missile_turn_rate_friction: 0.99,
             g_guided_missile_turn_rate_decrease: 1.0,
             g_guided_missile_turn_rate_max: 3.15,
-
             g_rockets_add_vehicle_velocity: true,
             g_rockets_explosion_size: 0.5,
             g_rockets_speed: 600.0,
-            g_rockets_image: true,
 
             g_tank_accel_backward: 550.0,
             g_tank_accel_forward: 550.0,

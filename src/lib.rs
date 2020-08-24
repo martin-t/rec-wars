@@ -386,7 +386,7 @@ impl Game {
         for (pos, vel) in query.iter(&self.legion) {
             rocket_cnt += 1;
             let scr_pos = pos.0 - top_left;
-            if cvars.g_rockets_image {
+            if cvars.d_rockets_image {
                 self.draw_img_center(&self.img_rocket, scr_pos, vel.0.to_angle())?;
             } else {
                 self.context.begin_path();
