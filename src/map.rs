@@ -1,4 +1,4 @@
-/// Map data and coords
+//! Map data and coords
 
 use std::f64::consts::PI;
 use std::ops::Index;
@@ -24,6 +24,16 @@ pub type Vec2f = Vec2<f64>;
 /// it's sometimes referred to as tile index since it's a pair of indices.
 /// `x` is column, `y` is row to match the order of `Vec2f`.
 pub type Vec2u = Vec2<usize>;
+
+pub trait VecExt {
+    fn to_angle(self) -> f64;
+}
+
+impl VecExt for Vec2f {
+    fn to_angle(self) -> f64 {
+        self.y.atan2(self.x)
+    }
+}
 
 pub const TILE_SIZE: f64 = 64.0;
 

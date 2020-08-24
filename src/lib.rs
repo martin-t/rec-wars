@@ -40,7 +40,7 @@ use cvars::{Cvars, TickrateMode};
 use debugging::DEBUG_TEXTS;
 use entities::{GuidedMissile, Tank};
 use game_state::{Explosion, GameState, Input, PlayerEntity};
-use map::{Kind, Map, Vec2f, TILE_SIZE};
+use map::{Kind, Map, Vec2f, VecExt, TILE_SIZE};
 
 const WEAP_MG: usize = 0;
 const WEAP_RAIL: usize = 1;
@@ -374,10 +374,6 @@ impl Game {
         }
         dbgd!(mg_cnt);
 
-        fn to_angle(vec: Vec2f) -> f64 {
-            vec.y.atan2(vec.x)
-        }
-
         // Draw rockets
         self.context.set_stroke_style(&"white".into());
         let mut rocket_cnt = 0;
@@ -386,7 +382,7 @@ impl Game {
             rocket_cnt += 1;
             let scr_pos = pos.0 - top_left;
             if cvars.g_rockets_image {
-                self.draw_img_center(&self.img_rocket, scr_pos, to_angle(vel.0))?;
+                self.draw_img_center(&self.img_rocket, scr_pos, vel.0.to_angle())?;
             } else {
                 self.context.begin_path();
                 self.context.move_to(scr_pos.x, scr_pos.y);
@@ -400,7 +396,7 @@ impl Game {
         // Draw missile
         let gm = &self.gs.gm;
         let player_scr_pos = gm.pos - top_left;
-        self.draw_img_center(&self.img_gm, player_scr_pos, to_angle(gm.vel))?;
+        self.draw_img_center(&self.img_gm, player_scr_pos, gm.vel.to_angle())?;
         if cvars.d_debug_draw {
             self.context
                 .fill_rect(player_scr_pos.x, player_scr_pos.y, 1.0, 1.0);
