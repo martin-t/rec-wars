@@ -46,6 +46,7 @@ pub struct Cvars {
 
     pub g_rockets_add_vehicle_velocity: bool,
     pub g_rockets_speed: f64,
+    pub g_rockets_image: bool,
 
     pub g_tank_accel_backward: f64,
     pub g_tank_accel_forward: f64,
@@ -126,6 +127,7 @@ impl Default for Cvars {
 
             g_rockets_add_vehicle_velocity: true,
             g_rockets_speed: 600.0,
+            g_rockets_image: true,
 
             g_tank_accel_backward: 550.0,
             g_tank_accel_forward: 550.0,

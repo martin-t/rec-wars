@@ -57,6 +57,7 @@ pub struct Game {
     canvas_size: Vec2f,
     imgs_textures: Vec<HtmlImageElement>,
     imgs_weapon_icons: Vec<HtmlImageElement>,
+    img_rocket: HtmlImageElement,
     img_gm: HtmlImageElement,
     img_tank: HtmlImageElement,
     img_explosion: HtmlImageElement,
@@ -79,6 +80,7 @@ impl Game {
         height: f64,
         textures: Array,
         weapon_icons: Array,
+        img_rocket: HtmlImageElement,
         img_gm: HtmlImageElement,
         img_tank: HtmlImageElement,
         img_explosion: HtmlImageElement,
@@ -123,6 +125,7 @@ impl Game {
             canvas_size: Vec2f::new(width, height),
             imgs_textures,
             imgs_weapon_icons,
+            img_rocket,
             img_gm,
             img_tank,
             img_explosion,
@@ -371,6 +374,10 @@ impl Game {
         }
         dbgd!(mg_cnt);
 
+        fn to_angle(vec: Vec2f) -> f64 {
+            vec.y.atan2(vec.x)
+        }
+
         // Draw rockets
         self.context.set_stroke_style(&"white".into());
         let mut rocket_cnt = 0;
@@ -378,21 +385,22 @@ impl Game {
         for (pos, vel) in query.iter(&self.legion) {
             rocket_cnt += 1;
             let scr_pos = pos.0 - top_left;
-            // TODO use actual image
-            self.context.begin_path();
-            self.context.move_to(scr_pos.x, scr_pos.y);
-            let scr_end = scr_pos - vel.0.normalized() * 16.0;
-            self.context.line_to(scr_end.x, scr_end.y);
-            self.context.stroke();
+            if cvars.g_rockets_image {
+                self.draw_img_center(&self.img_rocket, scr_pos, to_angle(vel.0))?;
+            } else {
+                self.context.begin_path();
+                self.context.move_to(scr_pos.x, scr_pos.y);
+                let scr_end = scr_pos - vel.0.normalized() * 16.0;
+                self.context.line_to(scr_end.x, scr_end.y);
+                self.context.stroke();
+            }
         }
         dbgd!(rocket_cnt);
 
         // Draw missile
         let gm = &self.gs.gm;
         let player_scr_pos = gm.pos - top_left;
-        let gm_angle = gm.vel.y.atan2(gm.vel.x);
-        dbgd!(gm_angle.to_degrees());
-        self.draw_img_center(&self.img_gm, player_scr_pos, gm_angle)?;
+        self.draw_img_center(&self.img_gm, player_scr_pos, to_angle(gm.vel))?;
         if cvars.d_debug_draw {
             self.context
                 .fill_rect(player_scr_pos.x, player_scr_pos.y, 1.0, 1.0);
