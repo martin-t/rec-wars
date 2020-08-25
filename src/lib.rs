@@ -35,7 +35,7 @@ use wasm_bindgen::JsCast;
 
 use web_sys::{CanvasRenderingContext2d, HtmlImageElement, Performance};
 
-use components::{Pos, Vel};
+use components::{Angle, Hitbox, Pos, Vel};
 use cvars::{Cvars, TickrateMode};
 use debugging::DEBUG_TEXTS;
 use entities::{GuidedMissile, Tank};
@@ -63,7 +63,8 @@ pub struct Game {
     imgs_weapon_icons: Vec<HtmlImageElement>,
     img_rocket: HtmlImageElement,
     img_gm: HtmlImageElement,
-    img_tank: HtmlImageElement,
+    img_tank_green: HtmlImageElement,
+    img_tank_red: HtmlImageElement,
     img_explosion: HtmlImageElement,
     /// Saved frame times in seconds over some period of time to measure FPS
     frame_times: Vec<f64>,
@@ -88,7 +89,8 @@ impl Game {
         weapon_icons: Array,
         img_rocket: HtmlImageElement,
         img_gm: HtmlImageElement,
-        img_tank: HtmlImageElement,
+        img_tank_green: HtmlImageElement,
+        img_tank_red: HtmlImageElement,
         img_explosion: HtmlImageElement,
         tex_list_text: &str,
         map_text: &str,
@@ -114,7 +116,7 @@ impl Game {
         let tank = Tank::spawn(pos, angle);
         let pe = PlayerEntity::Tank;
 
-        let gs = GameState {
+        let mut gs = GameState {
             rng,
             frame_time: 0.0,
             input: Input::default(),
@@ -126,6 +128,15 @@ impl Game {
         };
         let gs_prev = gs.clone();
 
+        let mut legion = legion::World::default();
+        for _ in 0..15 {
+            let pos = entities::random_spawn_pos(&mut gs.rng, &map).0;
+            let mins = Vec2f::new(cvars.g_tank_mins_x, cvars.g_tank_mins_y);
+            let maxs = Vec2f::new(cvars.g_tank_maxs_x, cvars.g_tank_maxs_y);
+            let hitbox = Hitbox::new(mins, maxs);
+            legion.push((Pos(pos), Angle(0.0), hitbox));
+        }
+
         Self {
             performance: web_sys::window().unwrap().performance().unwrap(),
             context,
@@ -134,7 +145,8 @@ impl Game {
             imgs_weapon_icons,
             img_rocket,
             img_gm,
-            img_tank,
+            img_tank_green: img_tank_green,
+            img_tank_red: img_tank_red,
             img_explosion,
             frame_times: Vec::new(),
             update_durations: Vec::new(),
@@ -143,7 +155,7 @@ impl Game {
             gs,
             gs_prev,
             hecs: hecs::World::new(),
-            legion: legion::World::default(),
+            legion,
         }
     }
 
@@ -416,11 +428,11 @@ impl Game {
                 .fill_rect(player_scr_pos.x, player_scr_pos.y, 1.0, 1.0);
         }
 
-        // Draw tank
+        // Draw tanks
         // TODO chassis, then cow, then turret
         let tank = &self.gs.tank;
         let tank_scr_pos = tank.pos - top_left;
-        self.draw_img_center(&self.img_tank, tank_scr_pos, tank.angle)?;
+        self.draw_img_center(&self.img_tank_green, tank_scr_pos, tank.angle)?;
         if cvars.d_debug_draw {
             self.context.set_stroke_style(&"blue".into());
             self.context.begin_path();
@@ -431,6 +443,12 @@ impl Game {
             self.context.line_to(corners[3].x, corners[3].y);
             self.context.close_path();
             self.context.stroke();
+        }
+        dbgd!(self.img_tank_green);
+        dbgd!(self.img_tank_red);
+        let mut query = <(&Pos, &Angle, &Hitbox)>::query();
+        for (pos, angle, hitbox) in query.iter(&self.legion) {
+            self.draw_img_center(&self.img_tank_red, pos.0 - top_left, angle.0)?;
         }
 
         // Draw explosions
