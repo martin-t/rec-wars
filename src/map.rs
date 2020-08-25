@@ -5,6 +5,8 @@ use std::ops::Index;
 
 use approx::AbsDiffEq;
 
+use rand::{prelude::SmallRng, Rng};
+
 use vek::Clamp;
 use vek::Vec2;
 
@@ -123,7 +125,11 @@ impl Map {
 
     pub fn surface_at_pos(&self, pos: Vec2f) -> &Surface {
         let tile_pos = self.tile_pos(pos);
-        let surface_index = self[tile_pos.index].surface_index;
+        self.surface_at_index(tile_pos.index)
+    }
+
+    pub fn surface_at_index(&self, index: Vec2u) -> &Surface {
+        let surface_index = self[index].surface_index;
         &self.surfaces[surface_index]
     }
 
@@ -157,6 +163,30 @@ impl Map {
     #[allow(unused)] // TODO remove after CTC works
     pub fn bases(&self) -> &Vec<Vec2u> {
         &self.bases
+    }
+
+    /// Returns (pos, angle).
+    pub fn random_spawn(&self, rng: &mut SmallRng) -> (Vec2f, f64) {
+        // TODO maps with no spawns (or even all walls)
+        let i = rng.gen_range(0, self.spawns().len());
+        let index = self.spawns()[i];
+        let pos = self.tile_center(index);
+        let angle = self[index].angle;
+        (pos, angle)
+    }
+
+    /// Returns (pos, angle).
+    pub fn random_nonwall(&self, rng: &mut SmallRng) -> (Vec2f, f64) {
+        loop {
+            let c = rng.gen_range(0, self.width());
+            let r = rng.gen_range(0, self.height());
+            let index = Vec2u::new(c, r);
+            if self.surface_at_index(index).kind != Kind::Wall {
+                let pos = self.tile_center(index);
+                let angle = self[index].angle;
+                return (pos, angle);
+            }
+        }
     }
 }
 

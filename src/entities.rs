@@ -8,15 +8,6 @@ use crate::{
     Input,
 };
 
-/// Returns (pos, angle).
-pub fn random_spawn_pos(rng: &mut SmallRng, map: &Map) -> (Vec2f, f64) {
-    let r = rng.gen_range(0, map.spawns().len());
-    let index = map.spawns()[r];
-    let pos = map.tile_center(index);
-    let angle = map[index].angle;
-    (pos, angle)
-}
-
 #[derive(Debug, Clone)]
 pub struct GuidedMissile {
     pub pos: Vec2f,

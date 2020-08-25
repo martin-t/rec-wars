@@ -110,7 +110,7 @@ impl Game {
 
         let surfaces = map::load_tex_list(tex_list_text);
         let map = map::load_map(map_text, surfaces);
-        let (pos, angle) = entities::random_spawn_pos(&mut rng, &map);
+        let (pos, angle) = map.random_spawn(&mut rng);
 
         let gm = GuidedMissile::spawn(cvars, pos, angle);
         let tank = Tank::spawn(pos, angle);
@@ -130,7 +130,7 @@ impl Game {
 
         let mut legion = legion::World::default();
         for _ in 0..15 {
-            let pos = entities::random_spawn_pos(&mut gs.rng, &map).0;
+            let pos = map.random_nonwall(&mut gs.rng).0;
             let mins = Vec2f::new(cvars.g_tank_mins_x, cvars.g_tank_mins_y);
             let maxs = Vec2f::new(cvars.g_tank_maxs_x, cvars.g_tank_maxs_y);
             let hitbox = Hitbox::new(mins, maxs);
@@ -327,7 +327,7 @@ impl Game {
             let explosion = Explosion::new(self.gs.gm.pos, 1.0, self.gs.frame_time);
             self.gs.explosions.push(explosion);
             self.gs.pe = PlayerEntity::Tank;
-            let (pos, angle) = entities::random_spawn_pos(&mut self.gs.rng, &self.map);
+            let (pos, angle) = self.map.random_spawn(&mut self.gs.rng);
             self.gs.gm = GuidedMissile::spawn(cvars, pos, angle);
         }
     }
