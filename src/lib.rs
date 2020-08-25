@@ -444,8 +444,6 @@ impl Game {
             self.context.close_path();
             self.context.stroke();
         }
-        dbgd!(self.img_tank_green);
-        dbgd!(self.img_tank_red);
         let mut query = <(&Pos, &Angle, &Hitbox)>::query();
         for (pos, angle, hitbox) in query.iter(&self.legion) {
             self.draw_img_center(&self.img_tank_red, pos.0 - top_left, angle.0)?;
