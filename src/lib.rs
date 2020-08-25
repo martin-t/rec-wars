@@ -129,12 +129,12 @@ impl Game {
         let gs_prev = gs.clone();
 
         let mut legion = legion::World::default();
-        for _ in 0..15 {
+        for _ in 0..50 {
             let pos = map.random_nonwall(&mut gs.rng).0;
             let mins = Vec2f::new(cvars.g_tank_mins_x, cvars.g_tank_mins_y);
             let maxs = Vec2f::new(cvars.g_tank_maxs_x, cvars.g_tank_maxs_y);
-            let hitbox = Hitbox::new(mins, maxs);
-            legion.push((Pos(pos), Angle(0.0), hitbox));
+            let angle = gs.rng.gen_range(0.0, 2.0 * PI);
+            legion.push((Pos(pos), Angle(angle), Hitbox::new(mins, maxs)));
         }
 
         Self {
@@ -434,7 +434,7 @@ impl Game {
         let tank_scr_pos = tank.pos - top_left;
         self.draw_img_center(&self.img_tank_green, tank_scr_pos, tank.angle)?;
         if cvars.d_debug_draw {
-            self.context.set_stroke_style(&"blue".into());
+            self.context.set_stroke_style(&"yellow".into());
             self.context.begin_path();
             let corners = Tank::corners(cvars, tank_scr_pos, tank.angle);
             self.context.move_to(corners[0].x, corners[0].y);
@@ -446,7 +446,16 @@ impl Game {
         }
         let mut query = <(&Pos, &Angle, &Hitbox)>::query();
         for (pos, angle, hitbox) in query.iter(&self.legion) {
-            self.draw_img_center(&self.img_tank_red, pos.0 - top_left, angle.0)?;
+            let scr_pos = pos.0 - top_left;
+            self.draw_img_center(&self.img_tank_red, scr_pos, angle.0)?;
+            self.context.begin_path();
+            let corners = Tank::corners(cvars, scr_pos, angle.0);
+            self.context.move_to(corners[0].x, corners[0].y);
+            self.context.line_to(corners[1].x, corners[1].y);
+            self.context.line_to(corners[2].x, corners[2].y);
+            self.context.line_to(corners[3].x, corners[3].y);
+            self.context.close_path();
+            self.context.stroke();
         }
 
         // Draw explosions
