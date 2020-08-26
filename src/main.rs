@@ -108,6 +108,7 @@
 //          explosion animation goes backwards
 //          [ ] reload: 2.5 s
 //      [ ] entity culling? faster to render?
+//      [ ] check collision detection works is gun is inside another vehicle
 // [ ] mines
 //      [ ] not within radius of base/cow
 // [ ] shadows
