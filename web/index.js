@@ -219,7 +219,7 @@ async function run() {
         // - can't return references from Rust into JS
         // - can't have a reference in Game
         // - owned pub cvars in Game need to be copy -> can't be changed from JS (changing will have no effect)
-        // - TODO try returning Rc/Arc
+        // - LATER try returning Rc/Arc
         const cvars = new Cvars();
         const game = new Game(cvars, ctx, canvas.width, canvas.height,
             imgs_textures, imgs_weapon_icons, img_rocket, img_gm, img_tank_green, img_tank_red, img_explosion,
@@ -283,7 +283,7 @@ async function run() {
         window.requestAnimationFrame(frame);
     }
 
-    // TODO there's gotta be a way to avoid this retarded chain
+    // LATER there's gotta be a way to avoid this retarded chain
     load_tex_list();
 }
 

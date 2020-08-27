@@ -410,7 +410,6 @@ impl Game {
         dbgd!(mg_cnt);
 
         // Draw railguns
-        // FIXME draw debug above everything
         self.context.set_stroke_style(&"blue".into());
         for (begin, end) in &self.gs.railguns {
             let scr_src = begin - top_left;

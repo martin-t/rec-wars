@@ -196,6 +196,7 @@
 //          [ ] BFG does a tiny bit of dmg when hitting a wall with a tank on the other side
 //              probably BFG briefly enters wall before collision is detected and does proximity dmg
 //          [ ] tank could shoot through a wall tile by putting the turret inside
+// [ ] all the LATERs - they mean something can be done better but marking it as a todo would be just noise when grepping
 
 fn main() {
     println!("There is no native binary yet, compile to WASM instead (see readme)");
