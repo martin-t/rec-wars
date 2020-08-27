@@ -111,6 +111,9 @@
 //      [ ] check collision detection works is gun is inside another vehicle
 // [ ] mines
 //      [ ] not within radius of base/cow
+// [ ] turrets
+//      original RW has a bug: quick left,left,right would result in turning the longer way around
+//      better control scheme - changing direction cancels the queue, starts counting from current position
 // [ ] shadows
 //      [ ] HUD
 //      [ ] vehicles (is turret "higher"?)
