@@ -1,8 +1,10 @@
 <div align="center">
     <h1>RecWars</h1>
     <i>Recreational Warfare .rs</i>
+    <br />
     A top-down vehicle shooter - Rust/WASM port of an old Windows game called RecWar.
 </div>
+<br />
 
 _**[Play Online](https://martin-t.gitlab.io/gitlab-pages/rec-wars/web)**_
 
