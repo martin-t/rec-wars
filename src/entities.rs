@@ -1,5 +1,3 @@
-use rand::prelude::*;
-
 use vek::Clamp;
 
 use crate::cvars::Cvars;
