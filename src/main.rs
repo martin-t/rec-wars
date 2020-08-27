@@ -177,6 +177,7 @@
 // [ ] splitscreen
 // [ ] figure out what webpack is and how to create a static site
 //      probably best template: https://github.com/rustwasm/rust-webpack-template
+//      alternative: https://github.com/thedodd/trunk
 // [ ] native binary
 //      [ ] make parsing return errors instead of crashing
 // [x] pause, variable speed
