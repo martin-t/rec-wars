@@ -185,7 +185,7 @@ pub enum TickrateMode {
     /// this means simulation can be slightly behind what should be rendered.
     SynchronizedBounded,
     /// Fixed FPS - always the same timestep, leftover time carries over to the next render frame.
-    /// This means simulation can be slightly behind what should be rendered.
+    /// This means simulation can be up to almost a frame behind what should be rendered.
     Fixed,
     /// Simulation runs in fixed steps as long as it can, the last step is smaller
     /// to catch up to rendering exactly. The last step is then thrown away and simulation
