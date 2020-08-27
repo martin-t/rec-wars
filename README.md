@@ -1,9 +1,8 @@
-RecWars
-=======
-
-*Recreational Warfare .rs*
-
-A top-down vehicle shooter based on an old Windows game called RecWar.
+<div align="center">
+    <h1>RecWars</h1>
+    <i>Recreational Warfare .rs</i>
+    A top-down vehicle shooter - Rust/WASM port of an old Windows game called RecWar.
+</div>
 
 _**[Play Online](https://martin-t.gitlab.io/gitlab-pages/rec-wars/web)**_
 
