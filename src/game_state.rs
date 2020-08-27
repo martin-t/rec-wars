@@ -14,6 +14,7 @@ pub struct GameState {
     pub frame_time: f64,
     pub input: Input,
     pub cur_weapon: usize,
+    pub railguns: Vec<(Vec2f, Vec2f)>,
     pub gm: GuidedMissile,
     pub tank: Tank,
     pub pe: PlayerEntity,

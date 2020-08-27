@@ -37,6 +37,16 @@ impl VecExt for Vec2f {
     }
 }
 
+pub trait F64Ext {
+    fn to_vec2f(self) -> Vec2f;
+}
+
+impl F64Ext for f64 {
+    fn to_vec2f(self) -> Vec2f {
+        Vec2f::new(self.cos(), self.sin())
+    }
+}
+
 pub const TILE_SIZE: f64 = 64.0;
 
 /// A rectangular tile based map with origin in the top-left corner.
@@ -133,6 +143,7 @@ impl Map {
         &self.surfaces[surface_index]
     }
 
+    /// Is `pos` outside the map or inside a wall?
     pub fn collision(&self, pos: Vec2f) -> bool {
         if pos.x <= 0.0 {
             return true;
@@ -154,6 +165,75 @@ impl Map {
         }
 
         false
+    }
+
+    /// Find first wall collision when traveling from `begin` to `end`.
+    /// The returned point is nudged slightly inside the wall.
+    pub fn collision_between(&self, begin: Vec2f, end: Vec2f) -> Option<Vec2f> {
+        if self.collision(begin) {
+            return Some(begin);
+        }
+
+        // similar to the simple, unoptimized version here:
+        // https://playtechs.blogspot.com/2007/03/raytracing-on-grid.html
+
+        let delta = end - begin;
+        let nudge = delta.normalized() * 0.01;
+
+        // Find closest vertical and horizontal intersections with the grid.
+        let mut t_x;
+        if delta.x == 0.0 {
+            t_x = f64::INFINITY;
+        } else {
+            // Next intersection along the X axis (with a vertical line).
+            let next_x = if delta.x > 0.0 {
+                (begin.x / TILE_SIZE).ceil() * TILE_SIZE
+            } else {
+                (begin.x / TILE_SIZE).floor() * TILE_SIZE
+            };
+
+            // How far along the line are we?
+            let travelled_x = next_x - begin.x;
+            t_x = travelled_x / delta.x;
+        }
+        let mut t_y;
+        if delta.y == 0.0 {
+            t_y = f64::INFINITY;
+        } else {
+            // Next intersection along the X axis (with a vertical line).
+            let next_y;
+            if delta.y > 0.0 {
+                next_y = (begin.y / TILE_SIZE).ceil() * TILE_SIZE
+            } else {
+                next_y = (begin.y / TILE_SIZE).floor() * TILE_SIZE
+            };
+
+            // How far along the line are we?
+            let travelled_y = next_y - begin.y;
+            t_y = travelled_y / delta.y;
+        }
+
+        // After finding the first intersection, the subsequent steps all have the same size.
+        let t_step_x = TILE_SIZE / delta.x.abs();
+        let t_step_y = TILE_SIZE / delta.y.abs();
+        loop {
+            let t;
+            if t_x < t_y {
+                t = t_x;
+                t_x += t_step_x;
+            } else {
+                t = t_y;
+                t_y += t_step_y;
+            };
+            if t > 1.0 {
+                return None;
+            }
+            let intersection = begin + delta * t;
+            let wall = intersection + nudge;
+            if self.collision(wall) {
+                return Some(wall);
+            }
+        }
     }
 
     pub fn spawns(&self) -> &Vec<Vec2u> {
@@ -217,7 +297,7 @@ pub struct Tile {
 pub struct Surface {
     pub name: String,
     pub kind: Kind,
-    /// Seems to affect both turning and accellaration
+    /// Seems to affect both turning and acceleration
     pub friction: f32,
     /// Maybe a multiplier for speed
     pub speed: f32,
@@ -362,5 +442,32 @@ mod tests {
         assert_eq!(map.spawns()[0], Vec2u::new(9, 3));
         assert_eq!(map.bases().len(), 2);
         assert_eq!(map.bases()[0], Vec2u::new(10, 11));
+    }
+
+    #[test]
+    fn test_collisions_between() {
+        let tex_list_text = fs::read_to_string("assets/texture_list.txt").unwrap();
+        let surfaces = load_tex_list(&tex_list_text);
+        let map_text = fs::read_to_string("maps/Corners (4).map").unwrap();
+        let map = load_map(&map_text, surfaces);
+
+        let outside = Vec2f::new(-50.0, -50.0);
+
+        // These form a triangle which clips the edge of a wall
+        let top_left = map.tile_center(Vec2u::new(0, 0));
+        let bottom_left = map.tile_center(Vec2u::new(0, 3));
+        let top_right = map.tile_center(Vec2u::new(3, 0));
+
+        assert!(map.collision_between(outside, outside).is_some());
+        assert!(map.collision_between(outside, top_left).is_some());
+        assert!(map.collision_between(top_left, outside).is_some());
+
+        assert!(map.collision_between(top_left, top_left).is_none());
+        assert!(map.collision_between(top_left, bottom_left).is_none());
+        assert!(map.collision_between(bottom_left, top_left).is_none());
+
+        let up = Vec2f::new(0.0, -10.0);
+        assert!(map.collision_between(bottom_left, top_right + up).is_none());
+        assert!(map.collision_between(bottom_left, top_right - up).is_some());
     }
 }

@@ -37,10 +37,10 @@ use web_sys::{CanvasRenderingContext2d, HtmlImageElement, Performance};
 
 use components::{Angle, Hitbox, Pos, Vel};
 use cvars::{Cvars, TickrateMode};
-use debugging::DEBUG_TEXTS;
+use debugging::{DEBUG_CROSSES, DEBUG_LINES, DEBUG_TEXTS};
 use entities::{GuidedMissile, Tank};
 use game_state::{Explosion, GameState, Input, PlayerEntity};
-use map::{Kind, Map, Vec2f, VecExt, TILE_SIZE};
+use map::{F64Ext, Kind, Map, Vec2f, VecExt, TILE_SIZE};
 
 const WEAP_MG: usize = 0;
 const WEAP_RAIL: usize = 1;
@@ -121,6 +121,7 @@ impl Game {
             frame_time: 0.0,
             input: Input::default(),
             cur_weapon: 5,
+            railguns: Vec::new(),
             gm,
             tank,
             pe,
@@ -258,7 +259,15 @@ impl Game {
                         self.gs.tank.hp = 1.0;
                     }
                 }
-                WEAP_RAIL => {}
+                WEAP_RAIL => {
+                    //self.gs.tank.charge = 0.0;
+                    let begin = self.gs.tank.pos;
+                    let end = begin + self.gs.tank.angle.to_vec2f() * 100_000.0;
+                    let hit = self.map.collision_between(begin, end);
+                    if let Some(hit) = hit {
+                        self.gs.railguns.push((begin, hit));
+                    }
+                }
                 WEAP_CB => {}
                 WEAP_ROCKETS => {
                     // TODO move to turret end
@@ -385,7 +394,7 @@ impl Game {
             y += TILE_SIZE;
         }
 
-        // Draw MG
+        // Draw MGs
         self.context.set_stroke_style(&"yellow".into());
         let mut mg_cnt = 0;
         for (_, (pos, vel)) in self.hecs.query::<(&Pos, &Vel)>().iter() {
@@ -395,10 +404,23 @@ impl Game {
             self.context.move_to(scr_pos.x, scr_pos.y);
             // we're drawing from the bullet's position backwards
             let scr_end = scr_pos - vel.0.normalized() * cvars.g_machine_gun_trail_length;
-            self.context.line_to(scr_end.x, scr_end.y);
+            self.line_to(scr_end);
             self.context.stroke();
         }
         dbgd!(mg_cnt);
+
+        // Draw railguns
+        // FIXME draw debug above everything
+        self.context.set_stroke_style(&"blue".into());
+        for (begin, end) in &self.gs.railguns {
+            let scr_src = begin - top_left;
+            let scr_hit = end - top_left;
+            self.context.begin_path();
+            self.move_to(scr_src);
+            self.line_to(scr_hit);
+            self.context.stroke();
+        }
+        self.gs.railguns.clear();
 
         // Draw rockets
         self.context.set_stroke_style(&"white".into());
@@ -411,9 +433,9 @@ impl Game {
                 self.draw_img_center(&self.img_rocket, scr_pos, vel.0.to_angle())?;
             } else {
                 self.context.begin_path();
-                self.context.move_to(scr_pos.x, scr_pos.y);
+                self.move_to(scr_pos);
                 let scr_end = scr_pos - vel.0.normalized() * 16.0;
-                self.context.line_to(scr_end.x, scr_end.y);
+                self.line_to(scr_end);
                 self.context.stroke();
             }
         }
@@ -437,10 +459,10 @@ impl Game {
             self.context.set_stroke_style(&"yellow".into());
             self.context.begin_path();
             let corners = Tank::corners(cvars, tank_scr_pos, tank.angle);
-            self.context.move_to(corners[0].x, corners[0].y);
-            self.context.line_to(corners[1].x, corners[1].y);
-            self.context.line_to(corners[2].x, corners[2].y);
-            self.context.line_to(corners[3].x, corners[3].y);
+            self.move_to(corners[0]);
+            self.line_to(corners[1]);
+            self.line_to(corners[2]);
+            self.line_to(corners[3]);
             self.context.close_path();
             self.context.stroke();
         }
@@ -450,10 +472,10 @@ impl Game {
             self.draw_img_center(&self.img_tank_red, scr_pos, angle.0)?;
             self.context.begin_path();
             let corners = Tank::corners(cvars, scr_pos, angle.0);
-            self.context.move_to(corners[0].x, corners[0].y);
-            self.context.line_to(corners[1].x, corners[1].y);
-            self.context.line_to(corners[2].x, corners[2].y);
-            self.context.line_to(corners[3].x, corners[3].y);
+            self.move_to(corners[0]);
+            self.line_to(corners[1]);
+            self.line_to(corners[2]);
+            self.line_to(corners[3]);
             self.context.close_path();
             self.context.stroke();
         }
@@ -507,6 +529,40 @@ impl Game {
             y += TILE_SIZE;
         }
 
+        // Draw debug lines and crosses
+        // TODO clear in logic frames
+        if cvars.d_debug_draw {
+            DEBUG_LINES.with(|lines| {
+                let mut lines = lines.borrow_mut();
+                for line in lines.drain(0..) {
+                    self.context.set_stroke_style(&line.color.into());
+                    let scr_begin = line.begin - top_left;
+                    let scr_end = line.end - top_left;
+                    self.context.begin_path();
+                    self.move_to(scr_begin);
+                    self.line_to(scr_end);
+                    self.context.stroke();
+                }
+            });
+            DEBUG_CROSSES.with(|crosses| {
+                let mut crosses = crosses.borrow_mut();
+                for cross in crosses.drain(0..) {
+                    self.context.set_stroke_style(&cross.color.into());
+                    let scr_point = cross.point - top_left;
+                    let top_left = scr_point - Vec2f::new(-3.0, -3.0);
+                    let bottom_right = scr_point - Vec2f::new(3.0, 3.0);
+                    let top_right = scr_point - Vec2f::new(3.0, -3.0);
+                    let bottom_left = scr_point - Vec2f::new(-3.0, 3.0);
+                    self.context.begin_path();
+                    self.move_to(top_left);
+                    self.line_to(bottom_right);
+                    self.move_to(top_right);
+                    self.line_to(bottom_left);
+                    self.context.stroke();
+                }
+            });
+        }
+
         // Draw HUD:
 
         // Homing missile indicator
@@ -525,7 +581,7 @@ impl Game {
         self.context.move_to(tank_scr_pos.x, tank_scr_pos.y);
         let dir = (self.gs.gm.pos - self.gs.tank.pos).normalized();
         let end = tank_scr_pos + dir * cvars.hud_missile_indicator_radius;
-        self.context.line_to(end.x, end.y);
+        self.line_to(end);
         self.context.stroke();
         self.context.set_line_dash(&Array::new())?;
 
@@ -673,6 +729,14 @@ impl Game {
         self.draw_durations.push(end - start);
 
         Ok(())
+    }
+
+    fn move_to(&self, point: Vec2f) {
+        self.context.move_to(point.x, point.y);
+    }
+
+    fn line_to(&self, point: Vec2f) {
+        self.context.line_to(point.x, point.y);
     }
 
     /// Place the image's *top-left corner* at `screen_pos`,

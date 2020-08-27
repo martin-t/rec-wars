@@ -1,8 +1,25 @@
+#![allow(unused)]
+
 use std::cell::RefCell;
+
+use crate::map::Vec2f;
+
+pub struct Line {
+    pub begin: Vec2f,
+    pub end: Vec2f,
+    pub color: &'static str,
+}
+
+pub struct Cross {
+    pub point: Vec2f,
+    pub color: &'static str,
+}
 
 thread_local! {
     /// Lines of text to be printed onto the screen, cleared after printing.
-    pub static DEBUG_TEXTS: RefCell<Vec<String>> = RefCell::new(Vec::new())
+    pub static DEBUG_TEXTS: RefCell<Vec<String>> = RefCell::new(Vec::new());
+    pub static DEBUG_LINES: RefCell<Vec<Line>> = RefCell::new(Vec::new());
+    pub static DEBUG_CROSSES: RefCell<Vec<Cross>> = RefCell::new(Vec::new());
 }
 
 /// Print text into the console. Uses `println!(..)`-style formatting.
@@ -63,4 +80,26 @@ macro_rules! __print_pairs {
             $crate::__print_pairs!( $( $rest ),+ )
         )
     };
+}
+
+pub fn debug_line(begin: Vec2f, end: Vec2f) {
+    debug_line_color(begin, end, "red");
+}
+
+pub fn debug_line_color(begin: Vec2f, end: Vec2f, color: &'static str) {
+    DEBUG_LINES.with(|lines| {
+        let line = Line { begin, end, color };
+        lines.borrow_mut().push(line);
+    });
+}
+
+pub fn debug_cross(point: Vec2f) {
+    debug_cross_color(point, "red");
+}
+
+pub fn debug_cross_color(point: Vec2f, color: &'static str) {
+    DEBUG_CROSSES.with(|crosses| {
+        let cross = Cross { point, color };
+        crosses.borrow_mut().push(cross);
+    });
 }
