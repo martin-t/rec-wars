@@ -69,7 +69,9 @@
 // [x] explosions
 //      [x] sizes
 // [ ] movement
-//      [ ] reverse steering
+//      [ ] tank
+//      [ ] hovercraft
+//      [ ] hummer + reverse steering
 //          https://engineeringdotnet.blogspot.com/2010/04/simple-2d-car-physics-in-games.html
 //          https://www.asawicki.info/Mirror/Car%20Physics%20for%20Games/Car%20Physics%20for%20Games.html
 // [ ] collision detection with proper traces
@@ -78,6 +80,7 @@
 // [ ] physics
 //      [ ] surfaces
 //      [ ] pushing wrecks
+//      [ ] pushing moving vehicles
 // [ ] hp/health
 //      [ ] wrecks (vehicle turned into wreck immediately on hit)
 //      [ ] configurable
@@ -120,6 +123,8 @@
 //      [ ] CB
 // [ ] self destruct - bigger exposion, countdown, sounds
 //      works through walls
+// [ ] player separate from vehicle
+// [ ] what happens to Entity handles after player disconnect
 // [ ] UI
 //      requirements
 //          minimum: select mode, map, bots, start game
