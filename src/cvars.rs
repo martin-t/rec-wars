@@ -27,6 +27,13 @@ pub struct Cvars {
     /// Change speed of everything in the game
     pub d_speed: f64,
 
+    pub g_cluster_bomb_add_vehicle_velocity: bool,
+    pub g_cluster_bomb_speed: f64,
+    pub g_cluster_bomb_speed_spread: f64,
+    pub g_cluster_bomb_angle_spread: f64,
+    pub g_cluster_bomb_time: f64,
+    pub g_cluster_bomb_time_spread: f64,
+
     pub g_explosion_duration: f64,
 
     pub g_machine_gun_add_vehicle_velocity: bool,
@@ -110,6 +117,13 @@ impl Default for Cvars {
             d_rockets_image: true,
             d_seed: 6,
             d_speed: 1.0,
+
+            g_cluster_bomb_add_vehicle_velocity: true,
+            g_cluster_bomb_speed: 600.0,
+            g_cluster_bomb_speed_spread: 50.0,
+            g_cluster_bomb_angle_spread: 0.1,
+            g_cluster_bomb_time: 0.5,
+            g_cluster_bomb_time_spread: 0.1,
 
             g_explosion_duration: 0.5,
 

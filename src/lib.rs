@@ -36,7 +36,7 @@ use wasm_bindgen::JsCast;
 
 use web_sys::{CanvasRenderingContext2d, HtmlImageElement, Performance};
 
-use components::{Angle, Hitbox, Pos, Vel};
+use components::{Angle, Cb, Hitbox, Pos, Rocket, Time, Vel};
 use cvars::{Cvars, TickrateMode};
 use debugging::{DEBUG_CROSSES, DEBUG_LINES, DEBUG_TEXTS};
 use entities::{GuidedMissile, Tank};
@@ -263,7 +263,23 @@ impl Game {
                         self.gs.railguns.push((begin, hit));
                     }
                 }
-                WEAP_CB => {}
+                WEAP_CB => {
+                    let pos = Pos(self.gs.tank.pos);
+                    let speed = cvars.g_cluster_bomb_speed
+                        + self.gs.rng.gen_range(-1.0, 1.0) * cvars.g_cluster_bomb_speed_spread;
+                    let angle = self.gs.tank.angle
+                        + self.gs.rng.gen_range(-1.0, 1.0) * cvars.g_cluster_bomb_angle_spread;
+                    let mut vel = Vec2f::new(speed, 0.0).rotated_z(angle);
+                    if cvars.g_cluster_bomb_add_vehicle_velocity {
+                        vel += self.gs.tank.vel;
+                    }
+                    let vel = Vel(vel);
+                    let time = frame_time
+                        + cvars.g_cluster_bomb_time
+                        + self.gs.rng.gen_range(-1.0, 1.0) * cvars.g_cluster_bomb_time_spread;
+                    let time = Time(time);
+                    self.legion.push((Cb, pos, vel, time));
+                }
                 WEAP_ROCKETS => {
                     // TODO move to turret end
                     let pos = Pos(self.gs.tank.pos);
@@ -273,7 +289,7 @@ impl Game {
                         vel += self.gs.tank.vel;
                     }
                     let vel = Vel(vel);
-                    self.legion.push((pos, vel));
+                    self.legion.push((Rocket, pos, vel));
                 }
                 WEAP_HM => {}
                 WEAP_GM => {
@@ -299,8 +315,8 @@ impl Game {
         }
 
         let mut to_remove = Vec::new();
-        let mut query = <(legion::Entity, &mut Pos, &Vel)>::query();
-        for (&entity, pos, vel) in query.iter_mut(&mut self.legion) {
+        let mut query = <(legion::Entity, &Rocket, &mut Pos, &Vel)>::query();
+        for (&entity, _, pos, vel) in query.iter_mut(&mut self.legion) {
             pos.0 += vel.0 * dt;
 
             if self.map.collision(pos.0) {
@@ -416,11 +432,32 @@ impl Game {
         }
         self.gs.railguns.clear();
 
+        // Draw cluster bombs
+        self.context.set_stroke_style(&"blue".into());
+        //let shadow_rgba = "rgba(0, 0, 0, 0.5)";
+        //self.context.set_shadow_color(shadow_rgba);
+        //self.context.set_shadow_offset_x(1.0);
+        //self.context.set_shadow_offset_y(1.0);
+        let mut cb_cnt = 0;
+        let mut query = <(&Cb, &Pos)>::query();
+        for (_, pos) in query.iter(&self.legion) {
+            cb_cnt += 1;
+            let scr_pos = pos.0 - top_left;
+            /*self.context.begin_path();
+            self.move_to(scr_pos);
+            self.line_to(scr_pos);
+            self.context.stroke();*/
+            dbg_cross!(pos.0);
+        }
+        //self.context.set_shadow_offset_x(0.0);
+        //self.context.set_shadow_offset_y(0.0);
+        dbgd!(cb_cnt);
+
         // Draw rockets
         self.context.set_stroke_style(&"white".into());
         let mut rocket_cnt = 0;
-        let mut query = <(&Pos, &Vel)>::query();
-        for (pos, vel) in query.iter(&self.legion) {
+        let mut query = <(&Rocket, &Pos, &Vel)>::query();
+        for (_, pos, vel) in query.iter(&self.legion) {
             rocket_cnt += 1;
             let scr_pos = pos.0 - top_left;
             if cvars.d_rockets_image {
@@ -610,8 +647,8 @@ impl Game {
 
         // Weapon icon
         // The original shadows were part of the image but this is good enough for now.
-        let rgba = format!("rgba(0, 0, 0, {})", cvars.hud_weapon_icon_shadow_alpha);
-        self.context.set_shadow_color(&rgba);
+        let shadow_rgba = format!("rgba(0, 0, 0, {})", cvars.hud_weapon_icon_shadow_alpha);
+        self.context.set_shadow_color(&shadow_rgba);
         self.context
             .set_shadow_offset_x(cvars.hud_weapon_icon_shadow_x);
         self.context
