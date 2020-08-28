@@ -82,6 +82,10 @@ macro_rules! __print_pairs {
     };
 }
 
+// Macros are more convenient:
+//  - no need to rename when adding color
+//  - can be used without importing this module
+
 /// Draw line between world coordinates.
 #[macro_export]
 macro_rules! dbg_line {
