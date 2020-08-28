@@ -228,11 +228,13 @@ impl Game {
         let frame_time = self.gs.frame_time; // borrowchk
         let dt = frame_time - self.gs_prev.frame_time;
 
+        // Cleanup old entities
         self.gs.explosions.retain(|explosion| {
             let progress = (frame_time - explosion.start_time) / cvars.g_explosion_duration;
             progress <= 1.0
         });
 
+        // Change weapon
         if self.gs.input.prev_weapon && !self.gs_prev.input.prev_weapon {
             self.gs.cur_weapon = (self.gs.cur_weapon + WEAPS_CNT - 1) % WEAPS_CNT;
         }
@@ -240,7 +242,8 @@ impl Game {
             self.gs.cur_weapon = (self.gs.cur_weapon + 1) % WEAPS_CNT;
         }
 
-        // Tank can shoot while controlling a missile
+        // Firing
+        // Vehicles can shoot while controlling a missile
         if self.gs.input.fire && self.gs.tank.charge == 1.0 {
             match self.gs.cur_weapon {
                 WEAP_MG => {
@@ -302,6 +305,7 @@ impl Game {
             }
         }
 
+        // MG
         let mut to_remove = Vec::new();
         for (entity, (pos, vel)) in self.hecs.query::<(&mut Pos, &Vel)>().iter() {
             pos.0 += vel.0 * dt;
@@ -315,6 +319,23 @@ impl Game {
         }
 
         let mut to_remove = Vec::new();
+
+        // CBs
+        let mut query = <(legion::Entity, &Cb, &mut Pos, &Vel, &Time)>::query();
+        for (&entity, _, pos, vel, time) in query.iter_mut(&mut self.legion) {
+            pos.0 += vel.0 * dt;
+
+            if frame_time > time.0 {
+                self.gs.explosions.push(Explosion::new(
+                    pos.0,
+                    cvars.g_cluster_bomb_explosion_size,
+                    time.0,
+                ));
+                to_remove.push(entity);
+            }
+        }
+
+        // Rockets
         let mut query = <(legion::Entity, &Rocket, &mut Pos, &Vel)>::query();
         for (&entity, _, pos, vel) in query.iter_mut(&mut self.legion) {
             pos.0 += vel.0 * dt;
@@ -328,10 +349,12 @@ impl Game {
                 to_remove.push(entity);
             }
         }
+
         for entity in to_remove {
             self.legion.remove(entity);
         }
 
+        // Movement
         if self.gs.pe == PlayerEntity::Tank {
             self.gs.tank.tick(dt, cvars, &self.gs.input, &self.map);
         } else {
