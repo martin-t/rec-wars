@@ -267,21 +267,24 @@ impl Game {
                     }
                 }
                 WEAP_CB => {
+                    self.gs.tank.charge = 0.0;
                     let pos = Pos(self.gs.tank.pos);
-                    let speed = cvars.g_cluster_bomb_speed
-                        + self.gs.rng.gen_range(-1.0, 1.0) * cvars.g_cluster_bomb_speed_spread;
-                    let angle = self.gs.tank.angle
-                        + self.gs.rng.gen_range(-1.0, 1.0) * cvars.g_cluster_bomb_angle_spread;
-                    let mut vel = Vec2f::new(speed, 0.0).rotated_z(angle);
-                    if cvars.g_cluster_bomb_add_vehicle_velocity {
-                        vel += self.gs.tank.vel;
+                    for _ in 0..cvars.g_cluster_bomb_count {
+                        let speed = cvars.g_cluster_bomb_speed
+                            + self.gs.rng.gen_range(-1.0, 1.0) * cvars.g_cluster_bomb_speed_spread;
+                        let angle = self.gs.tank.angle
+                            + self.gs.rng.gen_range(-1.0, 1.0) * cvars.g_cluster_bomb_angle_spread;
+                        let mut vel = Vec2f::new(speed, 0.0).rotated_z(angle);
+                        if cvars.g_cluster_bomb_add_vehicle_velocity {
+                            vel += self.gs.tank.vel;
+                        }
+                        let vel = Vel(vel);
+                        let time = frame_time
+                            + cvars.g_cluster_bomb_time
+                            + self.gs.rng.gen_range(-1.0, 1.0) * cvars.g_cluster_bomb_time_spread;
+                        let time = Time(time);
+                        self.legion.push((Cb, pos, vel, time));
                     }
-                    let vel = Vel(vel);
-                    let time = frame_time
-                        + cvars.g_cluster_bomb_time
-                        + self.gs.rng.gen_range(-1.0, 1.0) * cvars.g_cluster_bomb_time_spread;
-                    let time = Time(time);
-                    self.legion.push((Cb, pos, vel, time));
                 }
                 WEAP_ROCKETS => {
                     // TODO move to turret end

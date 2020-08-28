@@ -28,6 +28,7 @@ pub struct Cvars {
     pub d_speed: f64,
 
     pub g_cluster_bomb_add_vehicle_velocity: bool,
+    pub g_cluster_bomb_count: i32,
     pub g_cluster_bomb_explosion_size: f64,
     pub g_cluster_bomb_speed: f64,
     pub g_cluster_bomb_speed_spread: f64,
@@ -120,6 +121,7 @@ impl Default for Cvars {
             d_speed: 1.0,
 
             g_cluster_bomb_add_vehicle_velocity: true,
+            g_cluster_bomb_count: 40,
             g_cluster_bomb_explosion_size: 0.5,
             g_cluster_bomb_speed: 600.0,
             g_cluster_bomb_speed_spread: 50.0,

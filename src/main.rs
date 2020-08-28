@@ -98,7 +98,7 @@
 //          [ ] explosions happen on walls, just partially obscured
 //          [ ] reflect off map edge
 //          [ ] reload: 1.5 s
-//          [ ] 40 per shot
+//          [x] 40 per shot
 //          [ ] next shot starts a few frames after last explosion disappears
 //      [ ] rockets
 //          [ ] acceleration (judging by changing distance between them)
