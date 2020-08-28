@@ -460,24 +460,21 @@ impl Game {
 
         // Draw cluster bombs
         self.context.set_fill_style(&"rgb(0, 255, 255)".into());
-        //let shadow_rgba = "rgba(0, 0, 0, 0.5)";
-        //self.context.set_shadow_color(shadow_rgba);
-        //self.context.set_shadow_offset_x(1.0);
-        //self.context.set_shadow_offset_y(1.0);
+        let shadow_rgba = format!("rgba(0, 0, 0, {})", cvars.g_cluster_bomb_shadow_alpha);
+        self.context.set_shadow_color(&shadow_rgba);
+        self.context
+            .set_shadow_offset_x(cvars.g_cluster_bomb_shadow_x);
+        self.context
+            .set_shadow_offset_y(cvars.g_cluster_bomb_shadow_y);
         let mut cb_cnt = 0;
         let mut query = <(&Cb, &Pos)>::query();
         for (_, pos) in query.iter(&self.legion) {
             cb_cnt += 1;
             let scr_pos = pos.0 - top_left;
             self.context.fill_rect(scr_pos.x, scr_pos.y, 1.0, 1.0);
-            //self.context.begin_path();
-            //self.move_to(scr_pos);
-            //self.line_to(scr_pos);
-            //self.context.stroke();
-            //dbg_cross!(pos.0);
         }
-        //self.context.set_shadow_offset_x(0.0);
-        //self.context.set_shadow_offset_y(0.0);
+        self.context.set_shadow_offset_x(0.0);
+        self.context.set_shadow_offset_y(0.0);
         dbgd!(cb_cnt);
 
         // Draw rockets
