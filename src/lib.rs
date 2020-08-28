@@ -16,6 +16,7 @@ mod entities;
 mod game_state;
 mod map;
 
+use std::collections::VecDeque;
 use std::f64::consts::PI;
 
 use hecs;
@@ -67,9 +68,9 @@ pub struct Game {
     img_tank_red: HtmlImageElement,
     img_explosion: HtmlImageElement,
     /// Saved frame times in seconds over some period of time to measure FPS
-    frame_times: Vec<f64>,
-    update_durations: Vec<f64>,
-    draw_durations: Vec<f64>,
+    frame_times: VecDeque<f64>,
+    update_durations: VecDeque<f64>,
+    draw_durations: VecDeque<f64>,
     map: Map,
     gs: GameState,
     gs_prev: GameState,
@@ -149,9 +150,9 @@ impl Game {
             img_tank_green,
             img_tank_red,
             img_explosion,
-            frame_times: Vec::new(),
-            update_durations: Vec::new(),
-            draw_durations: Vec::new(),
+            frame_times: VecDeque::new(),
+            update_durations: VecDeque::new(),
+            draw_durations: VecDeque::new(),
             map,
             gs,
             gs_prev,
@@ -197,9 +198,9 @@ impl Game {
 
         let end = self.performance.now();
         if self.update_durations.len() >= 60 {
-            self.update_durations.remove(0);
+            self.update_durations.pop_front();
         }
-        self.update_durations.push(end - start);
+        self.update_durations.push_back(end - start);
     }
 
     /// Update time tracking variables (in seconds)
@@ -213,9 +214,9 @@ impl Game {
             self.gs.frame_time,
         );
 
-        self.frame_times.push(t);
-        while !self.frame_times.is_empty() && self.frame_times[0] + 1.0 < t {
-            self.frame_times.remove(0);
+        self.frame_times.push_back(t);
+        while !self.frame_times.is_empty() && self.frame_times.front().unwrap() + 1.0 < t {
+            self.frame_times.pop_front();
         }
     }
 
@@ -698,7 +699,7 @@ impl Game {
         let fps = if self.frame_times.is_empty() {
             0.0
         } else {
-            let diff_time = self.frame_times.last().unwrap() - self.frame_times.first().unwrap();
+            let diff_time = self.frame_times.back().unwrap() - self.frame_times.front().unwrap();
             let diff_frames = self.frame_times.len() - 1;
             diff_frames as f64 / diff_time
         };
@@ -723,9 +724,9 @@ impl Game {
 
         let end = self.performance.now();
         if self.draw_durations.len() >= 60 {
-            self.draw_durations.remove(0);
+            self.draw_durations.pop_front();
         }
-        self.draw_durations.push(end - start);
+        self.draw_durations.push_back(end - start);
 
         Ok(())
     }
