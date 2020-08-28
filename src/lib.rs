@@ -253,12 +253,6 @@ impl Game {
                     }
                     let vel = Vel(vel);
                     self.hecs.spawn((pos, vel));
-
-                    // TODO for debugging - remove
-                    self.gs.tank.hp -= 0.05;
-                    if self.gs.tank.hp < 0.0 {
-                        self.gs.tank.hp = 1.0;
-                    }
                 }
                 WEAP_RAIL => {
                     //self.gs.tank.charge = 0.0;
