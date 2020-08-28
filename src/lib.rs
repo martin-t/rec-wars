@@ -459,7 +459,7 @@ impl Game {
         self.gs.railguns.clear();
 
         // Draw cluster bombs
-        self.context.set_stroke_style(&"blue".into());
+        self.context.set_fill_style(&"rgb(0, 255, 255)".into());
         //let shadow_rgba = "rgba(0, 0, 0, 0.5)";
         //self.context.set_shadow_color(shadow_rgba);
         //self.context.set_shadow_offset_x(1.0);
@@ -469,11 +469,12 @@ impl Game {
         for (_, pos) in query.iter(&self.legion) {
             cb_cnt += 1;
             let scr_pos = pos.0 - top_left;
-            /*self.context.begin_path();
-            self.move_to(scr_pos);
-            self.line_to(scr_pos);
-            self.context.stroke();*/
-            dbg_cross!(pos.0);
+            self.context.fill_rect(scr_pos.x, scr_pos.y, 1.0, 1.0);
+            //self.context.begin_path();
+            //self.move_to(scr_pos);
+            //self.line_to(scr_pos);
+            //self.context.stroke();
+            //dbg_cross!(pos.0);
         }
         //self.context.set_shadow_offset_x(0.0);
         //self.context.set_shadow_offset_y(0.0);
