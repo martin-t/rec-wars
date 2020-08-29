@@ -471,7 +471,12 @@ impl Game {
         for (_, pos) in query.iter(&self.legion) {
             cb_cnt += 1;
             let scr_pos = pos.0 - top_left;
-            self.context.fill_rect(scr_pos.x, scr_pos.y, 1.0, 1.0);
+            self.context.fill_rect(
+                scr_pos.x - cvars.g_cluster_bomb_size_x / 2.0,
+                scr_pos.y - cvars.g_cluster_bomb_size_y / 2.0,
+                cvars.g_cluster_bomb_size_x,
+                cvars.g_cluster_bomb_size_y,
+            );
         }
         self.context.set_shadow_offset_x(0.0);
         self.context.set_shadow_offset_y(0.0);

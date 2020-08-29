@@ -15,8 +15,9 @@ use wasm_bindgen::prelude::*;
 #[wasm_bindgen]
 #[derive(Debug, Clone)]
 pub struct Cvars {
-    // Would be nice to keep alphabetically.
     // Long-term this needs some kind of better system to reduce duplication / manual work.
+    // Veloren uses https://crates.io/crates/const-tweaker
+    // Would be nice to keep alphabetically.
     //  |
     //  v
     pub d_debug_draw: bool,
@@ -33,6 +34,8 @@ pub struct Cvars {
     pub g_cluster_bomb_shadow_alpha: f64,
     pub g_cluster_bomb_shadow_x: f64,
     pub g_cluster_bomb_shadow_y: f64,
+    pub g_cluster_bomb_size_x: f64,
+    pub g_cluster_bomb_size_y: f64,
     pub g_cluster_bomb_speed: f64,
     pub g_cluster_bomb_speed_spread: f64,
     pub g_cluster_bomb_angle_spread: f64,
@@ -128,6 +131,8 @@ impl Default for Cvars {
             g_cluster_bomb_explosion_size: 0.5,
             g_cluster_bomb_shadow_alpha: 1.0,
             g_cluster_bomb_shadow_x: 2.0,
+            g_cluster_bomb_size_x: 2.0,
+            g_cluster_bomb_size_y: 2.0,
             g_cluster_bomb_shadow_y: 2.0,
             g_cluster_bomb_speed: 600.0,
             g_cluster_bomb_speed_spread: 50.0,
