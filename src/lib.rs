@@ -98,7 +98,12 @@ impl Game {
     ) -> Self {
         console_error_panic_hook::set_once();
 
-        let mut rng = SmallRng::seed_from_u64(cvars.d_seed);
+        let mut rng = if cvars.d_seed == 0 {
+            // This requires the `wasm-bindgen` feature on `rand` or it crashes at runtime.
+            SmallRng::from_entropy()
+        } else {
+            SmallRng::seed_from_u64(cvars.d_seed)
+        };
 
         let imgs_textures = textures
             .iter()

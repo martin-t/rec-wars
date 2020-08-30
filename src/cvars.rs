@@ -123,7 +123,7 @@ impl Default for Cvars {
             d_debug_text: true,
             d_debug_text_line_height: 11.0,
             d_rockets_image: true,
-            d_seed: 6,
+            d_seed: 0,
             d_speed: 1.0,
 
             g_cluster_bomb_add_vehicle_velocity: true,
