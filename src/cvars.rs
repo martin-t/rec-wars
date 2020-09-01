@@ -134,11 +134,11 @@ impl Default for Cvars {
             g_cluster_bomb_size_x: 2.0,
             g_cluster_bomb_size_y: 2.0,
             g_cluster_bomb_shadow_y: 2.0,
-            g_cluster_bomb_speed: 600.0,
-            g_cluster_bomb_speed_spread: 50.0,
-            g_cluster_bomb_angle_spread: 0.1,
-            g_cluster_bomb_time: 0.5,
-            g_cluster_bomb_time_spread: 0.1,
+            g_cluster_bomb_speed: 400.0,
+            g_cluster_bomb_speed_spread: 100.0,
+            g_cluster_bomb_angle_spread: 0.3,
+            g_cluster_bomb_time: 0.8,
+            g_cluster_bomb_time_spread: 0.2,
 
             g_explosion_duration: 0.5,
 
