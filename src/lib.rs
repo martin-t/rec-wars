@@ -477,10 +477,10 @@ impl Game {
             cb_cnt += 1;
             let scr_pos = pos.0 - top_left;
             self.context.fill_rect(
-                scr_pos.x - cvars.g_cluster_bomb_size_x / 2.0,
-                scr_pos.y - cvars.g_cluster_bomb_size_y / 2.0,
-                cvars.g_cluster_bomb_size_x,
-                cvars.g_cluster_bomb_size_y,
+                scr_pos.x - cvars.g_cluster_bomb_size / 2.0,
+                scr_pos.y - cvars.g_cluster_bomb_size / 2.0,
+                cvars.g_cluster_bomb_size,
+                cvars.g_cluster_bomb_size,
             );
         }
         self.context.set_shadow_offset_x(0.0);
