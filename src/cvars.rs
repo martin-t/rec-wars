@@ -30,7 +30,7 @@ pub struct Cvars {
 
     pub g_cluster_bomb_add_vehicle_velocity: bool,
     pub g_cluster_bomb_count: i32,
-    pub g_cluster_bomb_explosion_size: f64,
+    pub g_cluster_bomb_explosion_scale: f64,
     pub g_cluster_bomb_shadow_alpha: f64,
     pub g_cluster_bomb_shadow_x: f64,
     pub g_cluster_bomb_shadow_y: f64,
@@ -59,7 +59,7 @@ pub struct Cvars {
     pub g_guided_missile_turn_rate_max: f64,
 
     pub g_rockets_add_vehicle_velocity: bool,
-    pub g_rockets_explosion_size: f64,
+    pub g_rockets_explosion_scale: f64,
     pub g_rockets_speed: f64,
 
     pub g_tank_accel_backward: f64,
@@ -127,7 +127,7 @@ impl Default for Cvars {
 
             g_cluster_bomb_add_vehicle_velocity: true,
             g_cluster_bomb_count: 40,
-            g_cluster_bomb_explosion_size: 0.5,
+            g_cluster_bomb_explosion_scale: 0.5,
             g_cluster_bomb_shadow_alpha: 1.0,
             g_cluster_bomb_shadow_x: 2.0,
             g_cluster_bomb_size: 1.2,
@@ -153,7 +153,7 @@ impl Default for Cvars {
             g_guided_missile_turn_rate_decrease: 1.0,
             g_guided_missile_turn_rate_max: 3.15,
             g_rockets_add_vehicle_velocity: true,
-            g_rockets_explosion_size: 0.5,
+            g_rockets_explosion_scale: 0.5,
             g_rockets_speed: 600.0,
 
             g_tank_accel_backward: 550.0,

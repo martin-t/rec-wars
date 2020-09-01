@@ -336,7 +336,7 @@ impl Game {
             if frame_time > time.0 {
                 self.gs.explosions.push(Explosion::new(
                     pos.0,
-                    cvars.g_cluster_bomb_explosion_size,
+                    cvars.g_cluster_bomb_explosion_scale,
                     time.0,
                 ));
                 to_remove.push(entity);
@@ -351,7 +351,7 @@ impl Game {
             if self.map.collision(pos.0) {
                 self.gs.explosions.push(Explosion::new(
                     pos.0,
-                    cvars.g_rockets_explosion_size,
+                    cvars.g_rockets_explosion_scale,
                     self.gs.frame_time,
                 ));
                 to_remove.push(entity);
@@ -566,10 +566,10 @@ impl Game {
                     0.0,
                     100.0,
                     100.0,
-                    scr_pos.x - 50.0 * explosion.size,
-                    scr_pos.y - 50.0 * explosion.size,
-                    100.0 * explosion.size,
-                    100.0 * explosion.size,
+                    scr_pos.x - 50.0 * explosion.scale,
+                    scr_pos.y - 50.0 * explosion.scale,
+                    100.0 * explosion.scale,
+                    100.0 * explosion.scale,
                 )?;
         }
 

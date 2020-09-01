@@ -24,15 +24,15 @@ pub struct GameState {
 #[derive(Debug, Clone)]
 pub struct Explosion {
     pub pos: Vec2f,
-    pub size: f64,
+    pub scale: f64,
     pub start_time: f64,
 }
 
 impl Explosion {
-    pub fn new(pos: Vec2f, size: f64, start_time: f64) -> Self {
+    pub fn new(pos: Vec2f, scale: f64, start_time: f64) -> Self {
         Self {
             pos,
-            size,
+            scale,
             start_time,
         }
     }
