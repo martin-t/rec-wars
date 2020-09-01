@@ -130,7 +130,7 @@ impl Default for Cvars {
             g_cluster_bomb_explosion_size: 0.5,
             g_cluster_bomb_shadow_alpha: 1.0,
             g_cluster_bomb_shadow_x: 2.0,
-            g_cluster_bomb_size: 2.0,
+            g_cluster_bomb_size: 1.2,
             g_cluster_bomb_shadow_y: 2.0,
             g_cluster_bomb_speed: 400.0,
             g_cluster_bomb_speed_spread: 100.0,
