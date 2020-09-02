@@ -27,6 +27,7 @@ use legion::query::IntoQuery;
 use js_sys::Array;
 
 use rand::prelude::*;
+use rand_distr::StandardNormal;
 
 use vek::ops::Clamp;
 use vek::Vec2;
@@ -275,11 +276,15 @@ impl Game {
                     self.gs.tank.charge = 0.0;
                     let pos = Pos(self.gs.tank.pos);
                     for _ in 0..cvars.g_cluster_bomb_count {
-                        let speed = cvars.g_cluster_bomb_speed
-                            + self.gs.rng.gen_range(-1.0, 1.0) * cvars.g_cluster_bomb_speed_spread;
-                        let angle = self.gs.tank.angle
-                            + self.gs.rng.gen_range(-1.0, 1.0) * cvars.g_cluster_bomb_angle_spread;
-                        let mut vel = Vec2f::new(speed, 0.0).rotated_z(angle);
+                        let speed = cvars.g_cluster_bomb_speed;
+                        // Broken type inference (works with rand crate but distributions are deprecated).
+                        let r: f64 = self.gs.rng.sample(StandardNormal);
+                        let spread_forward = cvars.g_cluster_bomb_speed_spread_forward * r;
+                        let r: f64 = self.gs.rng.sample(StandardNormal);
+                        let spread_sideways = cvars.g_cluster_bomb_speed_spread_sideways * r;
+
+                        let mut vel = Vec2f::new(speed + spread_forward, spread_sideways)
+                            .rotated_z(self.gs.tank.angle);
                         if cvars.g_cluster_bomb_add_vehicle_velocity {
                             vel += self.gs.tank.vel;
                         }
@@ -599,7 +604,7 @@ impl Game {
         if cvars.d_debug_draw {
             DEBUG_LINES.with(|lines| {
                 let mut lines = lines.borrow_mut();
-                for line in lines.drain(0..) {
+                for line in lines.iter() {
                     self.context.set_stroke_style(&line.color.into());
                     let scr_begin = line.begin - top_left;
                     let scr_end = line.end - top_left;
@@ -608,10 +613,11 @@ impl Game {
                     self.line_to(scr_end);
                     self.context.stroke();
                 }
+                lines.clear();
             });
             DEBUG_CROSSES.with(|crosses| {
                 let mut crosses = crosses.borrow_mut();
-                for cross in crosses.drain(0..) {
+                for cross in crosses.iter() {
                     self.context.set_stroke_style(&cross.color.into());
                     let scr_point = cross.point - top_left;
                     let top_left = scr_point - Vec2f::new(-3.0, -3.0);
@@ -625,6 +631,7 @@ impl Game {
                     self.line_to(bottom_left);
                     self.context.stroke();
                 }
+                crosses.clear();
             });
         }
 

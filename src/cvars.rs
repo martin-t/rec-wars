@@ -36,8 +36,8 @@ pub struct Cvars {
     pub g_cluster_bomb_shadow_y: f64,
     pub g_cluster_bomb_size: f64,
     pub g_cluster_bomb_speed: f64,
-    pub g_cluster_bomb_speed_spread: f64,
-    pub g_cluster_bomb_angle_spread: f64,
+    pub g_cluster_bomb_speed_spread_forward: f64,
+    pub g_cluster_bomb_speed_spread_sideways: f64,
     pub g_cluster_bomb_time: f64,
     pub g_cluster_bomb_time_spread: f64,
 
@@ -133,8 +133,8 @@ impl Default for Cvars {
             g_cluster_bomb_size: 1.2,
             g_cluster_bomb_shadow_y: 2.0,
             g_cluster_bomb_speed: 400.0,
-            g_cluster_bomb_speed_spread: 100.0,
-            g_cluster_bomb_angle_spread: 0.3,
+            g_cluster_bomb_speed_spread_forward: 50.0,
+            g_cluster_bomb_speed_spread_sideways: 50.0,
             g_cluster_bomb_time: 0.8,
             g_cluster_bomb_time_spread: 0.2,
 
