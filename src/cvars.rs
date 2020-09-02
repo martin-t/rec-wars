@@ -101,6 +101,7 @@ pub struct Cvars {
     pub hud_weapon_icon_y: f64,
 
     pub r_align_to_pixels_background: bool,
+    pub r_explosions_reverse: bool,
     pub r_smoothing: bool,
 
     pub sv_gamelogic_mode: TickrateMode,
@@ -191,6 +192,7 @@ impl Default for Cvars {
             hud_weapon_icon_y: 772.0,
 
             r_align_to_pixels_background: true,
+            r_explosions_reverse: true,
             r_smoothing: false,
 
             sv_gamelogic_mode: TickrateMode::Synchronized,

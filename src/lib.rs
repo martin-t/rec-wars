@@ -551,7 +551,12 @@ impl Game {
         }
 
         // Draw explosions
-        for explosion in &self.gs.explosions {
+        let iter: Box<dyn Iterator<Item = &Explosion>> = if cvars.r_explosions_reverse {
+            Box::new(self.gs.explosions.iter().rev())
+        } else {
+            Box::new(self.gs.explosions.iter())
+        };
+        for explosion in iter {
             // It looks like the original animation is made for 30 fps.
             // Single stepping a recording of the original RecWars explosion in blender:
             // 13 sprites, 31 frames - examples:
