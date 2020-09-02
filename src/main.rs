@@ -100,6 +100,10 @@
 //          [ ] reload: 1.5 s
 //          [x] 40 per shot
 //          [ ] next shot starts a few frames after last explosion disappears
+//          orig RW:
+//              size 1, shadow offset 1
+//              40 frames to first explosion, 58 to last
+//              distance - 80-300 while moving slowly backwards
 //      [ ] rockets
 //          [ ] acceleration (judging by changing distance between them)
 //          [ ] 6 per reload
