@@ -92,7 +92,8 @@ pub struct Tank {
     pub turn_rate: f64,
     /// Fraction of full
     pub hp: f64,
-    /// Fraction of full
+    /// Each weapon has a separate reload status even if they all reload at the same time.
+    /// I plan to generalize this and have a cvar to choose between multiple reload mechanisms.
     pub ammos: Vec<Ammo>,
 }
 
