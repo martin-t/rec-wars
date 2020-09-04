@@ -272,7 +272,11 @@ impl Default for Cvars {
             hud_weapon_icon_y: 772.0,
 
             r_align_to_pixels_background: true,
-            r_explosions_reverse: true,
+            // After trying true for a while, i think false looks better:
+            // - CB looks smoother. With true it sometimes looked like it had 2 stages
+            //   because the later explosions were suddenly revealed after the first ones disappeared.
+            // - Rockets look better if hitting the same spot.
+            r_explosions_reverse: false,
             r_smoothing: false,
 
             sv_gamelogic_mode: TickrateMode::Synchronized,
