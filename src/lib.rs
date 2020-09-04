@@ -244,84 +244,92 @@ impl Game {
         // Reloading
         let cur_weap = self.gs.cur_weapon;
         let ammo = &mut self.gs.tank.ammos[cur_weap];
-        if let Ammo::Reloading(_start, end) = ammo {
-            if frame_time > *end {
-                *ammo = Ammo::Loaded(cvars.g_weapon_reload_ammo(self.gs.cur_weapon));
+        if let Ammo::Reloading(_, end) = ammo {
+            if frame_time >= *end {
+                *ammo = Ammo::Loaded(
+                    frame_time,
+                    cvars.g_weapon_reload_ammo(cur_weap),
+                );
             }
         }
 
         // Firing
         // Note: vehicles can shoot while controlling a missile
         if self.gs.input.fire {
-            if let Ammo::Loaded(count) = ammo {
-                *count -= 1;
-                if *count == 0 {
-                    *ammo = Ammo::Reloading(frame_time, frame_time + 1.0);
-                }
-
-                match self.gs.cur_weapon {
-                    WEAP_MG => {
-                        // TODO move to MG
-                        let pos = Pos(self.gs.tank.pos);
-                        let mut vel = Vec2f::new(cvars.g_machine_gun_speed, 0.0)
-                            .rotated_z(self.gs.tank.angle);
-                        if cvars.g_machine_gun_add_vehicle_velocity {
-                            vel += self.gs.tank.vel;
-                        }
-                        let vel = Vel(vel);
-                        self.hecs.spawn((pos, vel));
+            if let Ammo::Loaded(ready_time, count) = ammo {
+                if frame_time >= *ready_time {
+                    logd!(frame_time, ready_time);
+                    *ready_time = frame_time + cvars.g_weapon_refire(cur_weap);
+                    *count -= 1;
+                    if *count == 0 {
+                        *ammo = Ammo::Reloading(frame_time, frame_time + 1.0);
                     }
-                    WEAP_RAIL => {
-                        let begin = self.gs.tank.pos;
-                        let end = begin + self.gs.tank.angle.to_vec2f() * 100_000.0;
-                        let hit = self.map.collision_between(begin, end);
-                        if let Some(hit) = hit {
-                            self.gs.railguns.push((begin, hit));
-                        }
-                    }
-                    WEAP_CB => {
-                        let pos = Pos(self.gs.tank.pos);
-                        for _ in 0..cvars.g_cluster_bomb_count {
-                            let speed = cvars.g_cluster_bomb_speed;
-                            // Broken type inference (works with rand crate but distributions are deprecated).
-                            let r: f64 = self.gs.rng.sample(StandardNormal);
-                            let spread_forward = cvars.g_cluster_bomb_speed_spread_forward * r;
-                            let r: f64 = self.gs.rng.sample(StandardNormal);
-                            let spread_sideways = cvars.g_cluster_bomb_speed_spread_sideways * r;
 
-                            let mut vel = Vec2f::new(speed + spread_forward, spread_sideways)
+                    match self.gs.cur_weapon {
+                        WEAP_MG => {
+                            // TODO move to MG
+                            let pos = Pos(self.gs.tank.pos);
+                            let mut vel = Vec2f::new(cvars.g_machine_gun_speed, 0.0)
                                 .rotated_z(self.gs.tank.angle);
-                            if cvars.g_cluster_bomb_add_vehicle_velocity {
+                            if cvars.g_machine_gun_add_vehicle_velocity {
                                 vel += self.gs.tank.vel;
                             }
                             let vel = Vel(vel);
-                            let time = frame_time
-                                + cvars.g_cluster_bomb_time
-                                + self.gs.rng.gen_range(-1.0, 1.0)
-                                    * cvars.g_cluster_bomb_time_spread;
-                            let time = Time(time);
-                            self.legion.push((Cb, pos, vel, time));
+                            self.hecs.spawn((pos, vel));
                         }
-                    }
-                    WEAP_ROCKETS => {
-                        // TODO move to turret end
-                        let pos = Pos(self.gs.tank.pos);
-                        let mut vel =
-                            Vec2f::new(cvars.g_rockets_speed, 0.0).rotated_z(self.gs.tank.angle);
-                        if cvars.g_rockets_add_vehicle_velocity {
-                            vel += self.gs.tank.vel;
+                        WEAP_RAIL => {
+                            let begin = self.gs.tank.pos;
+                            let end = begin + self.gs.tank.angle.to_vec2f() * 100_000.0;
+                            let hit = self.map.collision_between(begin, end);
+                            if let Some(hit) = hit {
+                                self.gs.railguns.push((begin, hit));
+                            }
                         }
-                        let vel = Vel(vel);
-                        self.legion.push((Rocket, pos, vel));
+                        WEAP_CB => {
+                            let pos = Pos(self.gs.tank.pos);
+                            for _ in 0..cvars.g_cluster_bomb_count {
+                                let speed = cvars.g_cluster_bomb_speed;
+                                // Broken type inference (works with rand crate but distributions are deprecated).
+                                let r: f64 = self.gs.rng.sample(StandardNormal);
+                                let spread_forward = cvars.g_cluster_bomb_speed_spread_forward * r;
+                                let r: f64 = self.gs.rng.sample(StandardNormal);
+                                let spread_sideways =
+                                    cvars.g_cluster_bomb_speed_spread_sideways * r;
+
+                                let mut vel = Vec2f::new(speed + spread_forward, spread_sideways)
+                                    .rotated_z(self.gs.tank.angle);
+                                if cvars.g_cluster_bomb_add_vehicle_velocity {
+                                    vel += self.gs.tank.vel;
+                                }
+                                let vel = Vel(vel);
+                                let time = frame_time
+                                    + cvars.g_cluster_bomb_time
+                                    + self.gs.rng.gen_range(-1.0, 1.0)
+                                        * cvars.g_cluster_bomb_time_spread;
+                                let time = Time(time);
+                                self.legion.push((Cb, pos, vel, time));
+                            }
+                        }
+                        WEAP_ROCKETS => {
+                            // TODO move to turret end
+                            let pos = Pos(self.gs.tank.pos);
+                            let mut vel = Vec2f::new(cvars.g_rockets_speed, 0.0)
+                                .rotated_z(self.gs.tank.angle);
+                            if cvars.g_rockets_add_vehicle_velocity {
+                                vel += self.gs.tank.vel;
+                            }
+                            let vel = Vel(vel);
+                            self.legion.push((Rocket, pos, vel));
+                        }
+                        WEAP_HM => {}
+                        WEAP_GM => {
+                            self.gs.gm =
+                                GuidedMissile::spawn(cvars, self.gs.tank.pos, self.gs.tank.angle);
+                            self.gs.pe = PlayerEntity::GuidedMissile;
+                        }
+                        WEAP_BFG => {}
+                        _ => unreachable!("current weapon index out of range"),
                     }
-                    WEAP_HM => {}
-                    WEAP_GM => {
-                        self.gs.gm =
-                            GuidedMissile::spawn(cvars, self.gs.tank.pos, self.gs.tank.angle);
-                        self.gs.pe = PlayerEntity::GuidedMissile;
-                    }
-                    WEAP_BFG => {}
-                    _ => unreachable!("current weapon index out of range"),
                 }
             }
         }
@@ -693,7 +701,7 @@ impl Game {
         // Ammo
         self.context.set_fill_style(&"yellow".into());
         let fraction = match self.gs.tank.ammos[self.gs.cur_weapon] {
-            Ammo::Loaded(count) => {
+            Ammo::Loaded(_, count) => {
                 let max = cvars.g_weapon_reload_ammo(self.gs.cur_weapon);
                 count as f64 / max as f64
             }

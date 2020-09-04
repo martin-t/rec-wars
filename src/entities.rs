@@ -101,13 +101,13 @@ impl Tank {
     #[must_use]
     pub fn spawn(cvars: &Cvars, pos: Vec2f, angle: f64) -> Tank {
         let ammos = vec![
-            Ammo::Loaded(cvars.g_weapon_reload_ammo(0)),
-            Ammo::Loaded(cvars.g_weapon_reload_ammo(1)),
-            Ammo::Loaded(cvars.g_weapon_reload_ammo(2)),
-            Ammo::Loaded(cvars.g_weapon_reload_ammo(3)),
-            Ammo::Loaded(cvars.g_weapon_reload_ammo(4)),
-            Ammo::Loaded(cvars.g_weapon_reload_ammo(5)),
-            Ammo::Loaded(cvars.g_weapon_reload_ammo(6)),
+            Ammo::Loaded(0.0, cvars.g_weapon_reload_ammo(0)),
+            Ammo::Loaded(0.0, cvars.g_weapon_reload_ammo(1)),
+            Ammo::Loaded(0.0, cvars.g_weapon_reload_ammo(2)),
+            Ammo::Loaded(0.0, cvars.g_weapon_reload_ammo(3)),
+            Ammo::Loaded(0.0, cvars.g_weapon_reload_ammo(4)),
+            Ammo::Loaded(0.0, cvars.g_weapon_reload_ammo(5)),
+            Ammo::Loaded(0.0, cvars.g_weapon_reload_ammo(6)),
         ];
 
         Tank {
@@ -206,7 +206,8 @@ impl Tank {
 
 #[derive(Debug, Clone)]
 pub enum Ammo {
-    Loaded(u32),
+    /// Refire delay end time, ammo count remaining
+    Loaded(f64, u32),
     /// Start time, end time
     Reloading(f64, f64),
 }
