@@ -4,6 +4,8 @@ use std::default::Default;
 
 use wasm_bindgen::prelude::*;
 
+use crate::weapons::*;
+
 /// Console variables - configuration options for anything and everything.
 ///
 /// Prefix meanings:
@@ -52,6 +54,7 @@ pub struct Cvars {
     pub g_homing_missile_reload_time: f64,
 
     pub g_machine_gun_add_vehicle_velocity: bool,
+    pub g_machine_gun_refire: f64,
     pub g_machine_gun_reload_ammo: u32,
     pub g_machine_gun_reload_time: f64,
     pub g_machine_gun_speed: f64,
@@ -75,6 +78,7 @@ pub struct Cvars {
 
     pub g_rockets_add_vehicle_velocity: bool,
     pub g_rockets_explosion_scale: f64,
+    pub g_rockets_refire: f64,
     pub g_rockets_reload_ammo: u32,
     pub g_rockets_reload_time: f64,
     pub g_rockets_speed: f64,
@@ -132,28 +136,41 @@ impl Cvars {
         Self::default()
     }
 
+    pub fn g_weapon_refire(&self, weap_index: usize) -> f64 {
+        match weap_index {
+            WEAP_MG => self.g_machine_gun_refire,
+            WEAP_RAIL => 0.0,
+            WEAP_CB => 0.0,
+            WEAP_ROCKETS => self.g_rockets_refire,
+            WEAP_HM => 0.0,
+            WEAP_GM => 0.0,
+            WEAP_BFG => 0.0,
+            _ => unreachable!(),
+        }
+    }
+
     pub fn g_weapon_reload_ammo(&self, weap_index: usize) -> u32 {
         match weap_index {
-            0 => self.g_machine_gun_reload_ammo,
-            1 => self.g_railgun_reload_ammo,
-            2 => self.g_cluster_bomb_reload_ammo,
-            3 => self.g_rockets_reload_ammo,
-            4 => self.g_homing_missile_reload_ammo,
-            5 => self.g_guided_missile_reload_ammo,
-            6 => self.g_bfg_reload_ammo,
+            WEAP_MG => self.g_machine_gun_reload_ammo,
+            WEAP_RAIL => self.g_railgun_reload_ammo,
+            WEAP_CB => self.g_cluster_bomb_reload_ammo,
+            WEAP_ROCKETS => self.g_rockets_reload_ammo,
+            WEAP_HM => self.g_homing_missile_reload_ammo,
+            WEAP_GM => self.g_guided_missile_reload_ammo,
+            WEAP_BFG => self.g_bfg_reload_ammo,
             _ => unreachable!(),
         }
     }
 
     pub fn g_weapon_reload_time(&self, weap_index: usize) -> f64 {
         match weap_index {
-            0 => self.g_machine_gun_reload_time,
-            1 => self.g_railgun_reload_time,
-            2 => self.g_cluster_bomb_reload_time,
-            3 => self.g_rockets_reload_time,
-            4 => self.g_homing_missile_reload_time,
-            5 => self.g_guided_missile_reload_time,
-            6 => self.g_bfg_reload_time,
+            WEAP_MG => self.g_machine_gun_reload_time,
+            WEAP_RAIL => self.g_railgun_reload_time,
+            WEAP_CB => self.g_cluster_bomb_reload_time,
+            WEAP_ROCKETS => self.g_rockets_reload_time,
+            WEAP_HM => self.g_homing_missile_reload_time,
+            WEAP_GM => self.g_guided_missile_reload_time,
+            WEAP_BFG => self.g_bfg_reload_time,
             _ => unreachable!(),
         }
     }
@@ -193,6 +210,7 @@ impl Default for Cvars {
             g_homing_missile_reload_time: 1.5,
 
             g_machine_gun_add_vehicle_velocity: true,
+            g_machine_gun_refire: 0.050,
             g_machine_gun_reload_ammo: 50,
             g_machine_gun_reload_time: 1.0,
             g_machine_gun_speed: 1000.0,
@@ -214,6 +232,7 @@ impl Default for Cvars {
 
             g_rockets_add_vehicle_velocity: true,
             g_rockets_explosion_scale: 0.5,
+            g_rockets_refire: 0.200,
             g_rockets_reload_ammo: 6,
             g_rockets_reload_time: 1.5,
             g_rockets_speed: 600.0,

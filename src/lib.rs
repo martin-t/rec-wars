@@ -15,6 +15,7 @@ mod cvars;
 mod entities;
 mod game_state;
 mod map;
+mod weapons;
 
 use std::collections::VecDeque;
 use std::f64::consts::PI;
@@ -43,15 +44,7 @@ use debugging::{DEBUG_CROSSES, DEBUG_LINES, DEBUG_TEXTS};
 use entities::{Ammo, GuidedMissile, Tank};
 use game_state::{Explosion, GameState, Input, PlayerEntity};
 use map::{F64Ext, Kind, Map, Vec2f, VecExt, TILE_SIZE};
-
-const WEAP_MG: usize = 0;
-const WEAP_RAIL: usize = 1;
-const WEAP_CB: usize = 2;
-const WEAP_ROCKETS: usize = 3;
-const WEAP_HM: usize = 4;
-const WEAP_GM: usize = 5;
-const WEAP_BFG: usize = 6;
-const WEAPS_CNT: usize = 7;
+use weapons::*;
 
 #[wasm_bindgen]
 pub struct Game {
