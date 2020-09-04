@@ -545,7 +545,7 @@ impl Game {
             self.context.stroke();
         }
         let mut query = <(&Pos, &Angle, &Hitbox)>::query();
-        for (pos, angle, hitbox) in query.iter(&self.legion) {
+        for (pos, angle, _hitbox) in query.iter(&self.legion) {
             let scr_pos = pos.0 - top_left;
             self.draw_img_center(&self.img_tank_red, scr_pos, angle.0)?;
             self.context.begin_path();
