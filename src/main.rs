@@ -89,7 +89,7 @@
 //          [ ] more on hovercraft
 //          [ ] origins: tank: MG
 //          [ ] reload: 1 s
-//          [ ] 50 per reload
+//          [x] 50 per reload
 //      [ ] rail
 //          [ ] push
 //          [ ] origins: tank: gun, hummer: chassis
@@ -106,7 +106,7 @@
 //              distance - 80-300 while moving slowly backwards
 //      [ ] rockets
 //          [ ] acceleration (judging by changing distance between them)
-//          [ ] 6 per reload
+//          [x] 6 per reload
 //      [ ] homing missile
 //          [ ] reload: 1.5 s
 //      [ ] guided missile
