@@ -100,13 +100,13 @@ impl Tank {
     #[must_use]
     pub fn spawn(cvars: &Cvars, pos: Vec2f, angle: f64) -> Tank {
         let ammos = vec![
-            Ammo::Loaded(cvars.g_machine_gun_reload_ammo),
-            Ammo::Loaded(cvars.g_railgun_reload_ammo),
-            Ammo::Loaded(cvars.g_cluster_bomb_reload_ammo),
-            Ammo::Loaded(cvars.g_rockets_reload_ammo),
-            Ammo::Loaded(cvars.g_homing_missile_reload_ammo),
-            Ammo::Loaded(cvars.g_guided_missile_reload_ammo),
-            Ammo::Loaded(cvars.g_bfg_reload_ammo),
+            Ammo::Loaded(cvars.g_weapon_reload_ammo(0)),
+            Ammo::Loaded(cvars.g_weapon_reload_ammo(1)),
+            Ammo::Loaded(cvars.g_weapon_reload_ammo(2)),
+            Ammo::Loaded(cvars.g_weapon_reload_ammo(3)),
+            Ammo::Loaded(cvars.g_weapon_reload_ammo(4)),
+            Ammo::Loaded(cvars.g_weapon_reload_ammo(5)),
+            Ammo::Loaded(cvars.g_weapon_reload_ammo(6)),
         ];
 
         Tank {
