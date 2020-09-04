@@ -29,11 +29,13 @@ pub struct Cvars {
     pub d_speed: f64,
 
     pub g_bfg_reload_ammo: u32,
+    pub g_bfg_reload_time: f64,
 
     pub g_cluster_bomb_add_vehicle_velocity: bool,
     pub g_cluster_bomb_count: i32,
     pub g_cluster_bomb_explosion_scale: f64,
     pub g_cluster_bomb_reload_ammo: u32,
+    pub g_cluster_bomb_reload_time: f64,
     pub g_cluster_bomb_shadow_alpha: f64,
     pub g_cluster_bomb_shadow_x: f64,
     pub g_cluster_bomb_shadow_y: f64,
@@ -47,13 +49,16 @@ pub struct Cvars {
     pub g_explosion_duration: f64,
 
     pub g_homing_missile_reload_ammo: u32,
+    pub g_homing_missile_reload_time: f64,
 
     pub g_machine_gun_add_vehicle_velocity: bool,
     pub g_machine_gun_reload_ammo: u32,
+    pub g_machine_gun_reload_time: f64,
     pub g_machine_gun_speed: f64,
     pub g_machine_gun_trail_length: f64,
 
     pub g_guided_missile_reload_ammo: u32,
+    pub g_guided_missile_reload_time: f64,
     pub g_guided_missile_speed_change: f64,
     pub g_guided_missile_speed_initial: f64,
     pub g_guided_missile_speed_max: f64,
@@ -66,10 +71,12 @@ pub struct Cvars {
     pub g_guided_missile_turn_rate_max: f64,
 
     pub g_railgun_reload_ammo: u32,
+    pub g_railgun_reload_time: f64,
 
     pub g_rockets_add_vehicle_velocity: bool,
     pub g_rockets_explosion_scale: f64,
     pub g_rockets_reload_ammo: u32,
+    pub g_rockets_reload_time: f64,
     pub g_rockets_speed: f64,
 
     pub g_tank_accel_backward: f64,
@@ -137,6 +144,19 @@ impl Cvars {
             _ => unreachable!(),
         }
     }
+
+    pub fn g_weapon_reload_time(&self, weap_index: usize) -> f64 {
+        match weap_index {
+            0 => self.g_machine_gun_reload_time,
+            1 => self.g_railgun_reload_time,
+            2 => self.g_cluster_bomb_reload_time,
+            3 => self.g_rockets_reload_time,
+            4 => self.g_homing_missile_reload_time,
+            5 => self.g_guided_missile_reload_time,
+            6 => self.g_bfg_reload_time,
+            _ => unreachable!(),
+        }
+    }
 }
 
 impl Default for Cvars {
@@ -150,11 +170,13 @@ impl Default for Cvars {
             d_speed: 1.0,
 
             g_bfg_reload_ammo: 1,
+            g_bfg_reload_time: 2.5,
 
             g_cluster_bomb_add_vehicle_velocity: true,
             g_cluster_bomb_count: 40,
             g_cluster_bomb_explosion_scale: 0.5,
             g_cluster_bomb_reload_ammo: 1,
+            g_cluster_bomb_reload_time: 1.5,
             g_cluster_bomb_shadow_alpha: 1.0,
             g_cluster_bomb_shadow_x: 2.0,
             g_cluster_bomb_size: 1.2,
@@ -168,13 +190,16 @@ impl Default for Cvars {
             g_explosion_duration: 0.5,
 
             g_homing_missile_reload_ammo: 1,
+            g_homing_missile_reload_time: 1.5,
 
             g_machine_gun_add_vehicle_velocity: true,
             g_machine_gun_reload_ammo: 50,
+            g_machine_gun_reload_time: 1.0,
             g_machine_gun_speed: 1000.0,
             g_machine_gun_trail_length: 8.0,
 
             g_guided_missile_reload_ammo: 1,
+            g_guided_missile_reload_time: 1.5,
             g_guided_missile_speed_change: 600.0,
             g_guided_missile_speed_initial: 360.0,
             g_guided_missile_speed_max: 500.0,
@@ -185,10 +210,12 @@ impl Default for Cvars {
             g_guided_missile_turn_rate_max: 3.15,
 
             g_railgun_reload_ammo: 1,
+            g_railgun_reload_time: 1.0,
 
             g_rockets_add_vehicle_velocity: true,
             g_rockets_explosion_scale: 0.5,
             g_rockets_reload_ammo: 6,
+            g_rockets_reload_time: 1.5,
             g_rockets_speed: 600.0,
 
             g_tank_accel_backward: 550.0,

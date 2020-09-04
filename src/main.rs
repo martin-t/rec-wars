@@ -88,16 +88,16 @@
 //      [ ] MG
 //          [ ] more on hovercraft
 //          [ ] origins: tank: MG
-//          [ ] reload: 1 s
+//          [x] reload: 1 s
 //          [x] 50 per reload
 //      [ ] rail
 //          [ ] push
 //          [ ] origins: tank: gun, hummer: chassis
-//          [ ] reload: 1 s
+//          [x] reload: 1 s
 //      [ ] CB
 //          [ ] explosions happen on walls, just partially obscured
 //          [ ] reflect off map edge
-//          [ ] reload: 1.5 s
+//          [x] reload: 1.5 s
 //          [x] 40 per shot
 //          [ ] next shot starts a few frames after last explosion disappears
 //          orig RW:
@@ -106,16 +106,17 @@
 //              distance - 80-300 while moving slowly backwards
 //      [ ] rockets
 //          [ ] acceleration (judging by changing distance between them)
+//          [x] reload: 1.5 s
 //          [x] 6 per reload
 //      [ ] homing missile
-//          [ ] reload: 1.5 s
+//          [x] reload: 1.5 s
 //      [ ] guided missile
-//          [ ] reload: 1.5 s
+//          [x] reload: 1.5 s
 //      [ ] BFG - delay? speed change? range? random dir when dead? explosion range (through wall)?
 //          explosion animation goes backwards
-//          [ ] reload: 2.5 s
+//          [x] reload: 2.5 s
 //      [ ] entity culling? faster to render?
-//      [ ] check collision detection works is gun is inside another vehicle
+//      [ ] check collision detection works if gun is inside another vehicle
 // [ ] mines
 //      [ ] not within radius of base/cow
 // [ ] turrets
