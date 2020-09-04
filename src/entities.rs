@@ -93,19 +93,29 @@ pub struct Tank {
     /// Fraction of full
     pub hp: f64,
     /// Fraction of full
-    pub charge: f64,
+    pub ammos: Vec<Ammo>,
 }
 
 impl Tank {
     #[must_use]
-    pub fn spawn(pos: Vec2f, angle: f64) -> Tank {
+    pub fn spawn(cvars: &Cvars, pos: Vec2f, angle: f64) -> Tank {
+        let ammos = vec![
+            Ammo::Loaded(cvars.g_machine_gun_reload_ammo),
+            Ammo::Loaded(cvars.g_railgun_reload_ammo),
+            Ammo::Loaded(cvars.g_cluster_bomb_reload_ammo),
+            Ammo::Loaded(cvars.g_rockets_reload_ammo),
+            Ammo::Loaded(cvars.g_homing_missile_reload_ammo),
+            Ammo::Loaded(cvars.g_guided_missile_reload_ammo),
+            Ammo::Loaded(cvars.g_bfg_reload_ammo),
+        ];
+
         Tank {
             pos,
             vel: Vec2f::zero(),
             angle,
             turn_rate: 0.0,
             hp: 1.0,
-            charge: 1.0,
+            ammos,
         }
     }
 
@@ -179,9 +189,6 @@ impl Tank {
         } else {
             self.pos = new_pos;
         }
-
-        // Reloading
-        self.charge = (self.charge + dt).min(1.0);
     }
 
     pub fn corners(cvars: &Cvars, pos: Vec2f, angle: f64) -> [Vec2f; 4] {
@@ -194,4 +201,11 @@ impl Tank {
             pos + Vec2f::new(cvars.g_tank_mins_x, cvars.g_tank_maxs_y).rotated_z(angle);
         [back_left, front_left, front_right, back_right]
     }
+}
+
+#[derive(Debug, Clone)]
+pub enum Ammo {
+    Loaded(u32),
+    /// Start time, end time
+    Reloading(f64, f64),
 }
