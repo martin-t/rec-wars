@@ -48,8 +48,6 @@ pub struct Cvars {
     pub g_cluster_bomb_time: f64,
     pub g_cluster_bomb_time_spread: f64,
 
-    pub g_explosion_duration: f64,
-
     pub g_homing_missile_reload_ammo: u32,
     pub g_homing_missile_reload_time: f64,
 
@@ -122,6 +120,7 @@ pub struct Cvars {
     pub hud_weapon_icon_y: f64,
 
     pub r_align_to_pixels_background: bool,
+    pub r_explosion_duration: f64,
     pub r_explosions_reverse: bool,
     pub r_smoothing: bool,
 
@@ -204,8 +203,6 @@ impl Default for Cvars {
             g_cluster_bomb_time: 0.8,
             g_cluster_bomb_time_spread: 0.2,
 
-            g_explosion_duration: 0.5,
-
             g_homing_missile_reload_ammo: 1,
             g_homing_missile_reload_time: 1.5,
 
@@ -272,6 +269,7 @@ impl Default for Cvars {
             hud_weapon_icon_y: 772.0,
 
             r_align_to_pixels_background: true,
+            r_explosion_duration: 0.5,
             // After trying true for a while, i think false looks better:
             // - CB looks smoother. With true it sometimes looked like it had 2 stages
             //   because the later explosions were suddenly revealed after the first ones disappeared.

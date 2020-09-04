@@ -229,7 +229,7 @@ impl Game {
 
         // Cleanup old entities
         self.gs.explosions.retain(|explosion| {
-            let progress = (frame_time - explosion.start_time) / cvars.g_explosion_duration;
+            let progress = (frame_time - explosion.start_time) / cvars.r_explosion_duration;
             progress <= 1.0
         });
 
@@ -580,7 +580,7 @@ impl Game {
             //      2,2,2,3,1,3,2,2,3,2,2,3,4
             // This code produces similar results,
             // though it might display a single sprite for 4 frames slightly more often.
-            let progress = (self.gs.frame_time - explosion.start_time) / cvars.g_explosion_duration;
+            let progress = (self.gs.frame_time - explosion.start_time) / cvars.r_explosion_duration;
             // 13 sprites in the sheet, 100x100 pixels per sprite
             let frame = (progress * 13.0).floor();
             let offset = frame * 100.0;
