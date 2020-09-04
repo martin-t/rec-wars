@@ -90,7 +90,7 @@
 //          [ ] origins: tank: MG
 //          [x] reload: 1 s
 //          [x] 50 per reload
-//          [ ] about 2.5 s to empty magazine -> refire 50 ms
+//          [x] about 2.5 s to empty magazine -> refire 50 ms
 //      [ ] rail
 //          [ ] push
 //          [ ] origins: tank: gun, hummer: chassis
@@ -109,7 +109,7 @@
 //          [ ] acceleration (judging by changing distance between them)
 //          [x] reload: 1.5 s
 //          [x] 6 per reload
-//          [ ] about 1 s between first and last rocket -> refire 200 ms
+//          [x] about 1 s between first and last rocket -> refire 200 ms
 //      [ ] homing missile
 //          [x] reload: 1.5 s
 //      [ ] guided missile
