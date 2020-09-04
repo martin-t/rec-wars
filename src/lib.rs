@@ -711,10 +711,10 @@ impl Game {
             }
         };
         self.context.fill_rect(
-            cvars.hud_charge_x,
-            cvars.hud_charge_y,
-            cvars.hud_charge_width * fraction,
-            cvars.hud_charge_height,
+            cvars.hud_ammo_x,
+            cvars.hud_ammo_y,
+            cvars.hud_ammo_width * fraction,
+            cvars.hud_ammo_height,
         );
 
         // Weapon icon

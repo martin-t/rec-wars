@@ -87,12 +87,12 @@ pub struct Cvars {
     pub g_tank_turn_rate_max: f64,
     pub g_tank_speed_max: f64,
 
-    pub hud_charge_x: f64,
-    pub hud_charge_y: f64,
+    pub hud_ammo_x: f64,
+    pub hud_ammo_y: f64,
     /// Original RecWar had 99.
-    pub hud_charge_width: f64,
+    pub hud_ammo_width: f64,
     /// Original RecWar had 4.
-    pub hud_charge_height: f64,
+    pub hud_ammo_height: f64,
 
     pub hud_hp_x: f64,
     pub hud_hp_y: f64,
@@ -206,10 +206,10 @@ impl Default for Cvars {
             g_tank_turn_rate_max: f64::INFINITY,
             g_tank_speed_max: 250.0,
 
-            hud_charge_x: 30.0,
-            hud_charge_y: 770.0,
-            hud_charge_width: 100.0,
-            hud_charge_height: 4.0,
+            hud_ammo_x: 30.0,
+            hud_ammo_y: 770.0,
+            hud_ammo_width: 100.0,
+            hud_ammo_height: 4.0,
 
             hud_hp_x: 30.0,
             hud_hp_y: 750.0,
