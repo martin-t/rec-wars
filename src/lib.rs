@@ -246,10 +246,7 @@ impl Game {
         let ammo = &mut self.gs.tank.ammos[cur_weap];
         if let Ammo::Reloading(_, end) = ammo {
             if frame_time >= *end {
-                *ammo = Ammo::Loaded(
-                    frame_time,
-                    cvars.g_weapon_reload_ammo(cur_weap),
-                );
+                *ammo = Ammo::Loaded(frame_time, cvars.g_weapon_reload_ammo(cur_weap));
             }
         }
 
@@ -365,6 +362,12 @@ impl Game {
         }
 
         // Rockets
+        let mut query_vehicles = <(&Pos, &Angle, &Hitbox)>::query();
+        let vehicles: Vec<_> = query_vehicles
+            .iter(&self.legion)
+            .map(|(&pos, &angle, &hitbox)| (pos, angle, hitbox))
+            .collect();
+
         let mut query = <(legion::Entity, &Rocket, &mut Pos, &Vel)>::query();
         for (&entity, _, pos, vel) in query.iter_mut(&mut self.legion) {
             pos.0 += vel.0 * dt;
@@ -376,6 +379,19 @@ impl Game {
                     self.gs.frame_time,
                 ));
                 to_remove.push(entity);
+                continue;
+            }
+
+            for (veh_pos, _veh_angle, _veh_hitbox) in &vehicles {
+                if (pos.0 - veh_pos.0).magnitude_squared() <= 24.0 * 24.0 {
+                    self.gs.explosions.push(Explosion::new(
+                        pos.0,
+                        cvars.g_rockets_explosion_scale,
+                        self.gs.frame_time,
+                    ));
+                    to_remove.push(entity);
+                    break;
+                }
             }
         }
 
