@@ -255,7 +255,6 @@ impl Game {
         if self.gs.input.fire {
             if let Ammo::Loaded(ready_time, count) = ammo {
                 if frame_time >= *ready_time {
-                    logd!(frame_time, ready_time);
                     *ready_time = frame_time + cvars.g_weapon_refire(cur_weap);
                     *count -= 1;
                     if *count == 0 {
@@ -486,7 +485,7 @@ impl Game {
             self.line_to(scr_end);
             self.context.stroke();
         }
-        dbgd!(mg_cnt);
+        dbg_textd!(mg_cnt);
 
         // Draw railguns
         self.context.set_stroke_style(&"blue".into());
@@ -522,7 +521,7 @@ impl Game {
         }
         self.context.set_shadow_offset_x(0.0);
         self.context.set_shadow_offset_y(0.0);
-        dbgd!(cb_cnt);
+        dbg_textd!(cb_cnt);
 
         // Draw rockets
         self.context.set_stroke_style(&"white".into());
@@ -541,7 +540,7 @@ impl Game {
                 self.context.stroke();
             }
         }
-        dbgd!(rocket_cnt);
+        dbg_textd!(rocket_cnt);
 
         // Draw missile
         let gm = &self.gs.gm;

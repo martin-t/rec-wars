@@ -24,7 +24,7 @@ thread_local! {
 
 /// Print text into the console. Uses `println!(..)`-style formatting.
 #[macro_export]
-macro_rules! logf {
+macro_rules! dbg_logf {
     ( $( $t:tt )* ) => {
         let s = format!( $( $t )* );
         web_sys::console::log_1(&s.into());
@@ -33,7 +33,7 @@ macro_rules! logf {
 
 /// Print variables into console formatted as `var1: value1, var2: value2`
 #[macro_export]
-macro_rules! logd {
+macro_rules! dbg_logd {
     ( $( $e:expr ),* ) => {
         let s = $crate::__print_pairs!( $( $e ),* );
         web_sys::console::log_1(&s.into());
@@ -44,7 +44,7 @@ macro_rules! logd {
 ///
 /// Useful for printing debug info each frame.
 #[macro_export]
-macro_rules! dbgf {
+macro_rules! dbg_textf {
     ( $( $t:tt )* ) => {
         let s = format!( $( $t )* );
         crate::debugging::DEBUG_TEXTS.with(|texts| {
@@ -57,7 +57,7 @@ macro_rules! dbgf {
 ///
 /// Useful for printing debug info each frame.
 #[macro_export]
-macro_rules! dbgd {
+macro_rules! dbg_textd {
     ( $( $e:expr ),* ) => {
         let s = $crate::__print_pairs!( $( $e ),* );
         $crate::debugging::DEBUG_TEXTS.with(|texts| {
