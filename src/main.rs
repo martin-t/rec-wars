@@ -61,6 +61,17 @@
 //      https://crates.io/crates/cvar
 //          no tab completion in js console
 //          https://crates.io/crates/amethyst-console - uses cvar and imgui
+// [ ] ECS
+//      hecs
+//          - can't delete while iterating
+//          - no clone / snapshots
+//          + ffa example
+//          + nested queries
+//      legion
+//          - can't delete while iterating
+//          + should be able to make a clone of the world manually
+//          - bad docs / no examples / 0.3 transition
+//          - how to do nested queries without copying?
 // [ ] render vehicles
 //      [x] basic tank
 //      [ ] skins, colors
