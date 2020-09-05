@@ -285,12 +285,22 @@ impl Game {
                             let pos = Pos(self.gs.tank.pos);
                             for _ in 0..cvars.g_cluster_bomb_count {
                                 let speed = cvars.g_cluster_bomb_speed;
-                                // Broken type inference (works with rand crate but distributions are deprecated).
-                                let r: f64 = self.gs.rng.sample(StandardNormal);
-                                let spread_forward = cvars.g_cluster_bomb_speed_spread_forward * r;
-                                let r: f64 = self.gs.rng.sample(StandardNormal);
-                                let spread_sideways =
-                                    cvars.g_cluster_bomb_speed_spread_sideways * r;
+                                let spread_forward;
+                                let spread_sideways;
+                                if cvars.g_cluster_bomb_speed_spread_gaussian {
+                                    // Broken type inference (works with rand crate but distributions are deprecated).
+                                    let r: f64 = self.gs.rng.sample(StandardNormal);
+                                    spread_forward = cvars.g_cluster_bomb_speed_spread_forward * r;
+                                    let r: f64 = self.gs.rng.sample(StandardNormal);
+                                    spread_sideways =
+                                        cvars.g_cluster_bomb_speed_spread_sideways * r;
+                                } else {
+                                    let r = self.gs.rng.gen_range(-1.5, 1.5);
+                                    spread_forward = cvars.g_cluster_bomb_speed_spread_forward * r;
+                                    let r = self.gs.rng.gen_range(-1.5, 1.5);
+                                    spread_sideways =
+                                        cvars.g_cluster_bomb_speed_spread_sideways * r;
+                                }
 
                                 let mut vel = Vec2f::new(speed + spread_forward, spread_sideways)
                                     .rotated_z(self.gs.tank.angle);
