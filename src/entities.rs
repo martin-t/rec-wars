@@ -122,15 +122,15 @@ impl Tank {
 
     pub fn tick(&mut self, dt: f64, cvars: &Cvars, input: &Input, map: &Map) {
         // Turn rate
-        dbgf!("tank orig tr: {}", self.turn_rate);
+        dbg_textf!("tank orig tr: {}", self.turn_rate);
         let tr_input = cvars.g_tank_turn_rate_increase * input.right
             - cvars.g_tank_turn_rate_increase * input.left;
         let tr_change = tr_input * dt;
-        dbgd!(tr_change);
+        dbg_textd!(tr_change);
         self.turn_rate += tr_change;
 
         let tr_fric_const = cvars.g_tank_turn_rate_friction_const * dt;
-        dbgd!(tr_fric_const);
+        dbg_textd!(tr_fric_const);
         if self.turn_rate >= 0.0 {
             self.turn_rate = (self.turn_rate - tr_fric_const).max(0.0);
         } else {
@@ -138,31 +138,31 @@ impl Tank {
         }
 
         let tr_new = self.turn_rate * (1.0 - cvars.g_tank_turn_rate_friction_linear).powf(dt);
-        dbgf!("diff: {:?}", self.turn_rate - tr_new);
+        dbg_textf!("diff: {:?}", self.turn_rate - tr_new);
         self.turn_rate = tr_new.clamped(-cvars.g_tank_turn_rate_max, cvars.g_tank_turn_rate_max);
-        dbgd!(self.turn_rate);
+        dbg_textd!(self.turn_rate);
 
         // Accel / decel
         // TODO lateral friction
-        dbgf!("tank orig speed: {}", self.vel.magnitude());
+        dbg_textf!("tank orig speed: {}", self.vel.magnitude());
         let vel_input =
             cvars.g_tank_accel_forward * input.up - cvars.g_tank_accel_backward * input.down;
         let vel_change = vel_input * dt;
-        dbgd!(vel_change);
+        dbg_textd!(vel_change);
         self.vel += Vec2f::unit_x().rotated_z(self.angle) * vel_change;
 
         let vel_fric_const = cvars.g_tank_friction_const * dt;
-        dbgd!(vel_fric_const);
+        dbg_textd!(vel_fric_const);
         let vel_norm = self.vel.try_normalized().unwrap_or_default();
         self.vel -= (vel_fric_const).min(self.vel.magnitude()) * vel_norm;
 
         let vel_new = self.vel * (1.0 - cvars.g_tank_friction_linear).powf(dt);
-        dbgf!("diff: {:?}", (self.vel - vel_new).magnitude());
+        dbg_textf!("diff: {:?}", (self.vel - vel_new).magnitude());
         self.vel = vel_new;
         if self.vel.magnitude_squared() > cvars.g_tank_speed_max.powi(2) {
             self.vel = vel_norm * cvars.g_tank_speed_max;
         }
-        dbgd!(self.vel.magnitude());
+        dbg_textd!(self.vel.magnitude());
 
         // Turning - part of vel gets rotated to simulate steering
         // TODO cvar to set turning origin - original RW turned around turret center
