@@ -510,7 +510,7 @@ impl Game {
         self.gs.railguns.clear();
 
         // Draw cluster bombs
-        self.context.set_fill_style(&"rgb(0, 255, 255)".into());
+        /*self.context.set_fill_style(&"rgb(0, 255, 255)".into());
         let shadow_rgba = format!("rgba(0, 0, 0, {})", cvars.g_cluster_bomb_shadow_alpha);
         self.context.set_shadow_color(&shadow_rgba);
         self.context
@@ -531,7 +531,7 @@ impl Game {
         }
         self.context.set_shadow_offset_x(0.0);
         self.context.set_shadow_offset_y(0.0);
-        dbg_textd!(cb_cnt);
+        dbg_textd!(cb_cnt);*/
 
         // Draw rockets
         self.context.set_stroke_style(&"white".into());
@@ -561,7 +561,7 @@ impl Game {
                 .fill_rect(player_scr_pos.x, player_scr_pos.y, 1.0, 1.0);
         }
 
-        // Draw tanks
+        // Draw player tank
         // TODO chassis, then cow, then turret
         let tank = &self.gs.tank;
         let tank_scr_pos = tank.pos - top_left;
@@ -577,18 +577,23 @@ impl Game {
             self.context.close_path();
             self.context.stroke();
         }
+
+        // Draw other tanks
         let mut query = <(&Pos, &Angle, &Hitbox)>::query();
         for (pos, angle, _hitbox) in query.iter(&self.legion) {
             let scr_pos = pos.0 - top_left;
             self.draw_img_center(&self.img_tank_red, scr_pos, angle.0)?;
-            self.context.begin_path();
-            let corners = Tank::corners(cvars, scr_pos, angle.0);
-            self.move_to(corners[0]);
-            self.line_to(corners[1]);
-            self.line_to(corners[2]);
-            self.line_to(corners[3]);
-            self.context.close_path();
-            self.context.stroke();
+            if cvars.d_debug_draw {
+                self.context.set_stroke_style(&"yellow".into());
+                self.context.begin_path();
+                let corners = Tank::corners(cvars, scr_pos, angle.0);
+                self.move_to(corners[0]);
+                self.line_to(corners[1]);
+                self.line_to(corners[2]);
+                self.line_to(corners[3]);
+                self.context.close_path();
+                self.context.stroke();
+            }
         }
 
         // Draw explosions
