@@ -121,6 +121,7 @@ pub struct Cvars {
     pub hud_weapon_icon_y: f64,
 
     pub r_align_to_pixels_background: bool,
+    pub r_draw_cluster_bombs: bool,
     pub r_explosion_duration: f64,
     pub r_explosions_reverse: bool,
     pub r_smoothing: bool,
@@ -271,6 +272,7 @@ impl Default for Cvars {
             hud_weapon_icon_y: 772.0,
 
             r_align_to_pixels_background: true,
+            r_draw_cluster_bombs: true,
             r_explosion_duration: 0.5,
             // After trying true for a while, i think false looks better:
             // - CB looks smoother. With true it sometimes looked like it had 2 stages

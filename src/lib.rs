@@ -510,28 +510,30 @@ impl Game {
         self.gs.railguns.clear();
 
         // Draw cluster bombs
-        /*self.context.set_fill_style(&"rgb(0, 255, 255)".into());
-        let shadow_rgba = format!("rgba(0, 0, 0, {})", cvars.g_cluster_bomb_shadow_alpha);
-        self.context.set_shadow_color(&shadow_rgba);
-        self.context
-            .set_shadow_offset_x(cvars.g_cluster_bomb_shadow_x);
-        self.context
-            .set_shadow_offset_y(cvars.g_cluster_bomb_shadow_y);
-        let mut cb_cnt = 0;
-        let mut query = <(&Cb, &Pos)>::query();
-        for (_, pos) in query.iter(&self.legion) {
-            cb_cnt += 1;
-            let scr_pos = pos.0 - top_left;
-            self.context.fill_rect(
-                scr_pos.x - cvars.g_cluster_bomb_size / 2.0,
-                scr_pos.y - cvars.g_cluster_bomb_size / 2.0,
-                cvars.g_cluster_bomb_size,
-                cvars.g_cluster_bomb_size,
-            );
+        if cvars.r_draw_cluster_bombs {
+            self.context.set_fill_style(&"rgb(0, 255, 255)".into());
+            let shadow_rgba = format!("rgba(0, 0, 0, {})", cvars.g_cluster_bomb_shadow_alpha);
+            self.context.set_shadow_color(&shadow_rgba);
+            self.context
+                .set_shadow_offset_x(cvars.g_cluster_bomb_shadow_x);
+            self.context
+                .set_shadow_offset_y(cvars.g_cluster_bomb_shadow_y);
+            let mut cb_cnt = 0;
+            let mut query = <(&Cb, &Pos)>::query();
+            for (_, pos) in query.iter(&self.legion) {
+                cb_cnt += 1;
+                let scr_pos = pos.0 - top_left;
+                self.context.fill_rect(
+                    scr_pos.x - cvars.g_cluster_bomb_size / 2.0,
+                    scr_pos.y - cvars.g_cluster_bomb_size / 2.0,
+                    cvars.g_cluster_bomb_size,
+                    cvars.g_cluster_bomb_size,
+                );
+            }
+            self.context.set_shadow_offset_x(0.0);
+            self.context.set_shadow_offset_y(0.0);
+            dbg_textd!(cb_cnt);
         }
-        self.context.set_shadow_offset_x(0.0);
-        self.context.set_shadow_offset_y(0.0);
-        dbg_textd!(cb_cnt);*/
 
         // Draw rockets
         self.context.set_stroke_style(&"white".into());
