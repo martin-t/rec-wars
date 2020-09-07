@@ -10,6 +10,22 @@ license = "GPL-3.0-or-later"
 [lib]
 crate-type = ["cdylib"]
 
+# Commit bcf475e5fb (cargo update) causes wasm-opt to fail
+# (though the compile itself succeeds and the result seems usable, just without these optimizaions).
+# --enable-mutable-globals is a workaround but it seems wasm-opt doesn't help perf that much
+# while somewhat slowing down compiling.
+# https://github.com/rustwasm/wasm-pack/issues/886
+
+[package.metadata.wasm-pack.profile.profiling]
+# Rustc optimizations (which make a huge difference, especially with legion) are still enabled but no additional wasm-opt
+# Debug symbols are enabled
+wasm-opt = false
+
+[package.metadata.wasm-pack.profile.release]
+# All possible optimizations
+# No debug symbols (panic messages have line number but stack staces are without function names)
+wasm-opt = ["-O3", "--enable-mutable-globals"]
+
 [dependencies]
 approx = "0.3.2"
 console_error_panic_hook = "0.1.6"
