@@ -158,7 +158,11 @@
 //      crab instead? easter-egg only (temporarily? - e.g. after making a circlearound)?
 // [ ] bot AI
 //      [ ] pathfinding - custom / from soko solver / crate?
+//          not just 8 directions but any angle
+//          look at what veloren does
 //          https://old.reddit.com/r/rust_gamedev/comments/hr7m3j/which_lib_do_you_use_for_pathfinding_in_you_games/
+//          https://github.com/BezPowell/blitz-path
+//          https://github.com/Winsalot/AutumnRTS/
 //      [ ] roles / commands
 // [ ] decent default binds (2x for splitscreen)
 // [ ] hosting
