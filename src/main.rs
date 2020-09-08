@@ -41,6 +41,7 @@
 //      profiling
 //          https://github.com/EmbarkStudios/puffin
 //          https://github.com/bombomby/optick-rs
+//          list of tools: Instruction counts @ https://blog.mozilla.org/nnethercote/2020/09/08/how-to-speed-up-the-rust-compiler-one-last-time/
 // [ ] solve tearing - maybe only align to pixels at high speeds?
 // [x] image fails to draw the first time after opening browser
 //      bug in python server maybe? - doesn't happen with rhino
