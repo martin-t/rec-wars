@@ -38,6 +38,9 @@
 //      rendering only
 //          https://crates.io/crates/luminance - mentions webgl/canvas
 //          https://crates.io/crates/miniquad - should support WASM
+//      profiling
+//          https://github.com/EmbarkStudios/puffin
+//          https://github.com/bombomby/optick-rs
 // [ ] solve tearing - maybe only align to pixels at high speeds?
 // [x] image fails to draw the first time after opening browser
 //      bug in python server maybe? - doesn't happen with rhino
