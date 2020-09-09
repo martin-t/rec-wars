@@ -220,6 +220,9 @@
 // [x] pause, variable speed
 // [ ] frame debug mode - only render gamelogic frames, no interpolation
 // [ ] shield pickups
+// [ ] horn
+//      [ ] sound, bind
+//      [ ] make AI move out of the way
 // [ ] easter eggs
 //      [ ] server say for 0 deaths
 //      [ ] bugfeatures from original RW:
