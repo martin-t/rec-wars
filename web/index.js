@@ -149,9 +149,9 @@ async function run() {
             input.turret_left = true;
         } else if (event.key.toLowerCase() === "m") {
             input.turret_right = true;
-        } else if (event.key === "Control") {
+        } else if (event.key.toLowerCase() === "v") {
             input.prev_weapon = true;
-        } else if (event.key === "Shift") {
+        } else if (event.key === "Shift" || event.key.toLowerCase() === "b") {
             input.next_weapon = true;
         } else if (event.key === " ") {
             input.fire = true;
@@ -177,9 +177,9 @@ async function run() {
             input.turret_left = false;
         } else if (event.key.toLowerCase() === "m") {
             input.turret_right = false;
-        } else if (event.key === "Control") {
+        } else if (event.key.toLowerCase() === "v") {
             input.prev_weapon = false;
-        } else if (event.key === "Shift") {
+        } else if (event.key === "Shift" || event.key.toLowerCase() === "b") {
             input.next_weapon = false;
         } else if (event.key === " ") {
             input.fire = false;
