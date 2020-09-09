@@ -134,6 +134,7 @@ async function run() {
         // TODO IE/edge?
         //  https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key
         //  https://www.w3.org/TR/uievents-key
+        // TODO possible to disable shortcuts like CTRL+W? binds without modifiers?
         if (event.key === "ArrowLeft" || event.key === "a") {
             input.left = 1;
         } else if (event.key === "ArrowRight" || event.key === "d") {
@@ -148,7 +149,7 @@ async function run() {
             input.next_weapon = true;
         } else if (event.key === " ") {
             input.fire = true;
-        } else if (event.key === "p") {
+        } else if (event.key === "p" || event.key == "Pause") {
             paused = !paused;
         }
     });
