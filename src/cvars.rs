@@ -255,7 +255,7 @@ impl Default for Cvars {
             g_tank_turn_rate_max: f64::INFINITY,
             g_tank_speed_max: 250.0,
 
-            g_turret_turn_speed: 0.1,
+            g_turret_turn_speed: 2.0,
 
             hud_ammo_x: 30.0,
             hud_ammo_y: 770.0,
