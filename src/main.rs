@@ -153,6 +153,8 @@
 //          server list? quick join? start server?
 //          tank customization (only pattern, colors, name - vehicle type should be changeable in-game)
 //          binds (show keyboard image?)
+//              comfortable for 2 players, discoverable
+//              check all the downloaded RW configs, RW2 and RW3 (copy config / firejail)
 //      maybe https://www.sitepoint.com/css-layouts-floats-flexbox-grid/
 // [ ] fullscreen
 // [ ] FFA
