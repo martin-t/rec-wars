@@ -589,7 +589,8 @@ impl Game {
         // TODO Draw cow
 
         // Draw player vehicle turret
-        self.draw_img_center(&self.imgs_vehicles[1], tank_scr_pos, tank.angle)?;
+        let turret_scr_pos = tank_scr_pos + tank.angle.to_vec2f() * cvars.r_turret_offset_tank;
+        self.draw_img_center(&self.imgs_vehicles[1], turret_scr_pos, tank.angle)?;
 
         // Draw other tanks
         let mut query = <(&Pos, &Angle, &Hitbox)>::query();
