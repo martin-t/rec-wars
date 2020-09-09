@@ -598,10 +598,11 @@ impl Game {
 
         // Draw player vehicle turret
         let turret_scr_pos = tank_scr_pos + tank.angle.to_vec2f() * cvars.r_turret_offset_tank;
-        self.draw_img_center(
+        self.draw_img(
             &self.imgs_vehicles[1],
             turret_scr_pos,
             tank.angle + tank.turret_angle,
+            Vec2f::new(12.0, 10.0),
         )?;
 
         // Draw other tanks
@@ -943,6 +944,22 @@ impl Game {
 
         self.context.reset_transform()?;
 
+        Ok(())
+    }
+
+    /// FIXME
+    fn draw_img(
+        &self,
+        img: &HtmlImageElement,
+        scr_pos: Vec2f,
+        angle: f64,
+        offset: Vec2f,
+    ) -> Result<(), JsValue> {
+        self.context.translate(scr_pos.x, scr_pos.y)?;
+        self.context.rotate(angle)?;
+        self.context
+            .draw_image_with_html_image_element(img, -offset.x, -offset.y)?;
+        self.context.reset_transform()?;
         Ok(())
     }
 }

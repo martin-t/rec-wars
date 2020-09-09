@@ -285,7 +285,7 @@ impl Default for Cvars {
             // - Rockets look better if hitting the same spot.
             r_explosions_reverse: false,
             r_smoothing: false,
-            r_turret_offset_tank: 9.0,
+            r_turret_offset_tank: -9.0,
 
             sv_gamelogic_mode: TickrateMode::Synchronized,
             sv_gamelogic_fixed_fps: 150.0,
