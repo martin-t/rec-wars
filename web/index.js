@@ -131,17 +131,19 @@ async function run() {
         if (log_time_checkbox.checked) {
             console.log(performance.now(), "down", event.key);
         }
+
         // TODO IE/edge?
         //  https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key
         //  https://www.w3.org/TR/uievents-key
         // TODO possible to disable shortcuts like CTRL+W? binds without modifiers?
-        if (event.key === "ArrowLeft" || event.key === "a") {
+        // Single letters need toLowerCase to be detected when shift is held.
+        if (event.key === "ArrowLeft" || event.key.toLowerCase() === "a") {
             input.left = 1;
-        } else if (event.key === "ArrowRight" || event.key === "d") {
+        } else if (event.key === "ArrowRight" || event.key.toLowerCase() === "d") {
             input.right = 1;
-        } else if (event.key === "ArrowUp" || event.key === "w") {
+        } else if (event.key === "ArrowUp" || event.key.toLowerCase() === "w") {
             input.up = 1;
-        } else if (event.key === "ArrowDown" || event.key === "s") {
+        } else if (event.key === "ArrowDown" || event.key.toLowerCase() === "s") {
             input.down = 1;
         } else if (event.key === "Control") {
             input.prev_weapon = true;
@@ -149,7 +151,7 @@ async function run() {
             input.next_weapon = true;
         } else if (event.key === " ") {
             input.fire = true;
-        } else if (event.key === "p" || event.key == "Pause") {
+        } else if (event.key == "Pause" || event.key.toLowerCase() === "p") {
             paused = !paused;
         }
     });
@@ -158,13 +160,14 @@ async function run() {
         if (log_time_checkbox.checked) {
             console.log(performance.now(), "up", event.key);
         }
-        if (event.key === "ArrowLeft" || event.key === "a") {
+
+        if (event.key === "ArrowLeft" || event.key.toLowerCase() === "a") {
             input.left = 0;
-        } else if (event.key === "ArrowRight" || event.key === "d") {
+        } else if (event.key === "ArrowRight" || event.key.toLowerCase() === "d") {
             input.right = 0;
-        } else if (event.key === "ArrowUp" || event.key === "w") {
+        } else if (event.key === "ArrowUp" || event.key.toLowerCase() === "w") {
             input.up = 0;
-        } else if (event.key === "ArrowDown" || event.key === "s") {
+        } else if (event.key === "ArrowDown" || event.key.toLowerCase() === "s") {
             input.down = 0;
         } else if (event.key === "Control") {
             input.prev_weapon = false;
