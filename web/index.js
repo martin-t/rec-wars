@@ -68,9 +68,22 @@ async function run() {
         "../assets/tiles/d_rock.bmp",
         "../assets/tiles/g2d.bmp",
         "../assets/tiles/water_middle.bmp",
-    ].map((tile) => {
+    ].map((path) => {
         let img = new Image();
-        img.src = tile;
+        img.src = path;
+        return img;
+    });
+
+    let imgs_vehicles = [
+        "../assets/vehicles/tank_chassis_flames.png",
+        "../assets/vehicles/tank_turret_flames.png",
+        "../assets/vehicles/hovercraft_chassis_flames.png",
+        "../assets/vehicles/hovercraft_turret_flames.png",
+        "../assets/vehicles/hummer_chassis_flames.png",
+        "../assets/vehicles/hummer_turret_flames.png",
+    ].map((path) => {
+        let img = new Image();
+        img.src = path;
         return img;
     });
 
@@ -82,9 +95,9 @@ async function run() {
         "../assets/weapon_icons/hm.png",
         "../assets/weapon_icons/gm.png",
         "../assets/weapon_icons/bfg.png",
-    ].map((tile) => {
+    ].map((path) => {
         let img = new Image();
-        img.src = tile;
+        img.src = path;
         return img;
     });
 
@@ -222,7 +235,7 @@ async function run() {
         // - LATER try returning Rc/Arc
         const cvars = new Cvars();
         const game = new Game(cvars, ctx, canvas.width, canvas.height,
-            imgs_textures, imgs_weapon_icons, img_rocket, img_gm, img_tank_green, img_tank_red, img_explosion,
+            imgs_textures, imgs_vehicles, imgs_weapon_icons, img_rocket, img_gm, img_tank_green, img_tank_red, img_explosion,
             tex_list_text, map_text);
 
         // Make some things available on window for easier debugging.

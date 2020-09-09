@@ -55,6 +55,7 @@ pub struct Game {
     context: CanvasRenderingContext2d,
     canvas_size: Vec2f,
     imgs_textures: Vec<HtmlImageElement>,
+    imgs_vehicles: Vec<HtmlImageElement>,
     imgs_weapon_icons: Vec<HtmlImageElement>,
     img_rocket: HtmlImageElement,
     img_gm: HtmlImageElement,
@@ -81,6 +82,7 @@ impl Game {
         width: f64,
         height: f64,
         textures: Array,
+        vehicles: Array,
         weapon_icons: Array,
         img_rocket: HtmlImageElement,
         img_gm: HtmlImageElement,
@@ -102,6 +104,10 @@ impl Game {
         let imgs_textures = textures
             .iter()
             .map(|tile| tile.dyn_into().unwrap())
+            .collect();
+        let imgs_vehicles = vehicles
+            .iter()
+            .map(|js_val| js_val.dyn_into().unwrap())
             .collect();
         let imgs_weapon_icons = weapon_icons
             .iter()
@@ -143,6 +149,7 @@ impl Game {
             context,
             canvas_size: Vec2f::new(width, height),
             imgs_textures,
+            imgs_vehicles,
             imgs_weapon_icons,
             img_rocket,
             img_gm,
@@ -563,11 +570,10 @@ impl Game {
                 .fill_rect(player_scr_pos.x, player_scr_pos.y, 1.0, 1.0);
         }
 
-        // Draw player tank
-        // TODO chassis, then cow, then turret
+        // Draw player vehicle chassis
         let tank = &self.gs.tank;
         let tank_scr_pos = tank.pos - top_left;
-        self.draw_img_center(&self.img_tank_green, tank_scr_pos, tank.angle)?;
+        self.draw_img_center(&self.imgs_vehicles[0], tank_scr_pos, tank.angle)?;
         if cvars.d_debug_draw {
             self.context.set_stroke_style(&"yellow".into());
             self.context.begin_path();
@@ -579,6 +585,11 @@ impl Game {
             self.context.close_path();
             self.context.stroke();
         }
+
+        // TODO Draw cow
+
+        // Draw player vehicle turret
+        self.draw_img_center(&self.imgs_vehicles[1], tank_scr_pos, tank.angle)?;
 
         // Draw other tanks
         let mut query = <(&Pos, &Angle, &Hitbox)>::query();
