@@ -175,6 +175,15 @@ async function run() {
         }
     });
 
+    // LATER maybe prevent accidental close when using Ctrl (use separate event handlers for detecting the key press/release)
+    // https://stackoverflow.com/questions/10311341/confirmation-before-closing-of-tab-browser
+    // Note: won't work if closing immediately after opening - need to at least click on the page.
+    /*window.addEventListener("beforeunload", event => {
+        event.preventDefault();
+        event.returnValue = "Sure?";
+        return "Sure?";
+    });*/
+
     const speed_slider = document.getElementById("speed-slider");
     const speed_value = document.getElementById("speed-value");
     speed_slider.addEventListener("input", () => {
