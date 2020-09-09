@@ -54,7 +54,7 @@ pub struct Game {
     performance: Performance,
     context: CanvasRenderingContext2d,
     canvas_size: Vec2f,
-    imgs_textures: Vec<HtmlImageElement>,
+    imgs_tiles: Vec<HtmlImageElement>,
     imgs_vehicles: Vec<HtmlImageElement>,
     imgs_weapon_icons: Vec<HtmlImageElement>,
     img_rocket: HtmlImageElement,
@@ -81,7 +81,7 @@ impl Game {
         context: CanvasRenderingContext2d,
         width: f64,
         height: f64,
-        textures: Array,
+        tiles: Array,
         vehicles: Array,
         weapon_icons: Array,
         img_rocket: HtmlImageElement,
@@ -101,7 +101,7 @@ impl Game {
             SmallRng::seed_from_u64(cvars.d_seed)
         };
 
-        let imgs_textures = textures
+        let imgs_tiles = tiles
             .iter()
             .map(|tile| tile.dyn_into().unwrap())
             .collect();
@@ -148,7 +148,7 @@ impl Game {
             performance: web_sys::window().unwrap().performance().unwrap(),
             context,
             canvas_size: Vec2f::new(width, height),
-            imgs_textures,
+            imgs_tiles,
             imgs_vehicles,
             imgs_weapon_icons,
             img_rocket,
@@ -478,7 +478,7 @@ impl Game {
                 let tile = self.map.col_row(c, r);
 
                 if self.map.surface_of(tile).kind != Kind::Wall {
-                    let img = &self.imgs_textures[tile.surface_index];
+                    let img = &self.imgs_tiles[tile.surface_index];
                     self.draw_img_top_left(img, Vec2::new(x, y), tile.angle)?;
                 }
 
@@ -653,7 +653,7 @@ impl Game {
                 let tile = self.map.col_row(c, r);
 
                 if self.map.surface_of(tile).kind == Kind::Wall {
-                    let img = &self.imgs_textures[tile.surface_index];
+                    let img = &self.imgs_tiles[tile.surface_index];
                     self.draw_img_top_left(img, Vec2::new(x, y), tile.angle)?;
                 }
 
