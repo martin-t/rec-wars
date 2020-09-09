@@ -90,6 +90,7 @@ pub struct Tank {
     pub vel: Vec2f,
     pub angle: f64,
     pub turn_rate: f64,
+    pub turret_angle: f64,
     /// Fraction of full
     pub hp: f64,
     /// Each weapon has a separate reload status even if they all reload at the same time.
@@ -115,6 +116,7 @@ impl Tank {
             vel: Vec2f::zero(),
             angle,
             turn_rate: 0.0,
+            turret_angle: 0.0,
             hp: 1.0,
             ammos,
         }

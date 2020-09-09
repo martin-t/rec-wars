@@ -145,6 +145,10 @@ async function run() {
             input.up = 1;
         } else if (event.key === "ArrowDown" || event.key.toLowerCase() === "s") {
             input.down = 1;
+        } else if (event.key.toLowerCase() === "n") {
+            input.turret_left = true;
+        } else if (event.key.toLowerCase() === "m") {
+            input.turret_right = true;
         } else if (event.key === "Control") {
             input.prev_weapon = true;
         } else if (event.key === "Shift") {
@@ -169,6 +173,10 @@ async function run() {
             input.up = 0;
         } else if (event.key === "ArrowDown" || event.key.toLowerCase() === "s") {
             input.down = 0;
+        } else if (event.key.toLowerCase() === "n") {
+            input.turret_left = false;
+        } else if (event.key.toLowerCase() === "m") {
+            input.turret_right = false;
         } else if (event.key === "Control") {
             input.prev_weapon = false;
         } else if (event.key === "Shift") {

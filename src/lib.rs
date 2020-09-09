@@ -434,6 +434,14 @@ impl Game {
             let (pos, angle) = self.map.random_spawn(&mut self.gs.rng);
             self.gs.gm = GuidedMissile::spawn(cvars, pos, angle);
         }
+
+        // Turret turning
+        if self.gs.input.turret_left {
+            self.gs.tank.turret_angle -= cvars.g_turret_turn_speed * dt;
+        }
+        if self.gs.input.turret_right {
+            self.gs.tank.turret_angle += cvars.g_turret_turn_speed * dt;
+        }
     }
 
     pub fn draw(&mut self, cvars: &Cvars) -> Result<(), JsValue> {
@@ -590,7 +598,11 @@ impl Game {
 
         // Draw player vehicle turret
         let turret_scr_pos = tank_scr_pos + tank.angle.to_vec2f() * cvars.r_turret_offset_tank;
-        self.draw_img_center(&self.imgs_vehicles[1], turret_scr_pos, tank.angle)?;
+        self.draw_img_center(
+            &self.imgs_vehicles[1],
+            turret_scr_pos,
+            tank.angle + tank.turret_angle,
+        )?;
 
         // Draw other tanks
         let mut query = <(&Pos, &Angle, &Hitbox)>::query();
