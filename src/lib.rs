@@ -81,9 +81,9 @@ impl Game {
         context: CanvasRenderingContext2d,
         width: f64,
         height: f64,
-        tiles: Array,
-        vehicles: Array,
-        weapon_icons: Array,
+        array_tiles: Array,
+        array_vehicles: Array,
+        array_weapon_icons: Array,
         img_rocket: HtmlImageElement,
         img_gm: HtmlImageElement,
         img_tank_green: HtmlImageElement,
@@ -101,15 +101,15 @@ impl Game {
             SmallRng::seed_from_u64(cvars.d_seed)
         };
 
-        let imgs_tiles = tiles
+        let imgs_tiles = array_tiles
             .iter()
             .map(|tile| tile.dyn_into().unwrap())
             .collect();
-        let imgs_vehicles = vehicles
+        let imgs_vehicles = array_vehicles
             .iter()
             .map(|js_val| js_val.dyn_into().unwrap())
             .collect();
-        let imgs_weapon_icons = weapon_icons
+        let imgs_weapon_icons = array_weapon_icons
             .iter()
             .map(|js_val| js_val.dyn_into().unwrap())
             .collect();
