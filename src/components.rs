@@ -29,3 +29,11 @@ impl Hitbox {
         Self { mins, maxs }
     }
 }
+
+#[allow(unused)]
+#[derive(Debug, Clone, Copy)]
+pub enum Vehicle {
+    Tank,
+    Hovercraft,
+    Hummer,
+}

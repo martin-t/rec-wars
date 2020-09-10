@@ -38,7 +38,7 @@ use wasm_bindgen::JsCast;
 
 use web_sys::{CanvasRenderingContext2d, HtmlImageElement, Performance};
 
-use components::{Angle, Cb, Hitbox, Pos, Rocket, Time, Vel};
+use components::{Angle, Cb, Hitbox, Pos, Rocket, Time, Vehicle, Vel};
 use cvars::{Cvars, TickrateMode};
 use debugging::{DEBUG_CROSSES, DEBUG_LINES, DEBUG_TEXTS};
 use entities::{Ammo, GuidedMissile, Tank};
@@ -597,12 +597,16 @@ impl Game {
         // TODO Draw cow
 
         // Draw player vehicle turret
-        let turret_scr_pos = tank_scr_pos + tank.angle.to_vec2f() * cvars.r_turret_offset_tank;
+        let offset_chassis =
+            tank.angle.to_mat2f() * cvars.g_vehicle_turret_offset_chassis(Vehicle::Tank);
+        let turret_scr_pos = tank_scr_pos + offset_chassis;
+        dbg_cross!(turret_scr_pos + top_left);
+        let offset_turret = cvars.g_vehicle_turret_offset_turret(Vehicle::Tank);
         self.draw_img(
             &self.imgs_vehicles[1],
             turret_scr_pos,
             tank.angle + tank.turret_angle,
-            Vec2f::new(12.0, 10.0),
+            offset_turret,
         )?;
 
         // Draw other tanks
@@ -955,6 +959,8 @@ impl Game {
         angle: f64,
         offset: Vec2f,
     ) -> Result<(), JsValue> {
+        let half_size = Vec2::new(img.natural_width(), img.natural_height()).as_() / 2.0;
+        let offset = offset + half_size;
         self.context.translate(scr_pos.x, scr_pos.y)?;
         self.context.rotate(angle)?;
         self.context

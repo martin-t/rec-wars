@@ -4,7 +4,7 @@ use std::default::Default;
 
 use wasm_bindgen::prelude::*;
 
-use crate::weapons::*;
+use crate::{components::Vehicle, map::Vec2f, weapons::*};
 
 /// Console variables - configuration options for anything and everything.
 ///
@@ -95,6 +95,10 @@ pub struct Cvars {
     pub g_tank_turn_rate_friction_linear: f64,
     pub g_tank_turn_rate_increase: f64,
     pub g_tank_turn_rate_max: f64,
+    pub g_tank_turret_offset_chassis_x: f64,
+    pub g_tank_turret_offset_chassis_y: f64,
+    pub g_tank_turret_offset_turret_x: f64,
+    pub g_tank_turret_offset_turret_y: f64,
     pub g_tank_speed_max: f64,
 
     pub g_turret_turn_speed: f64,
@@ -127,7 +131,6 @@ pub struct Cvars {
     pub r_explosion_duration: f64,
     pub r_explosions_reverse: bool,
     pub r_smoothing: bool,
-    pub r_turret_offset_tank: f64,
 
     pub sv_gamelogic_mode: TickrateMode,
     pub sv_gamelogic_fixed_fps: f64,
@@ -138,6 +141,26 @@ impl Cvars {
     #[wasm_bindgen(constructor)]
     pub fn new() -> Self {
         Self::default()
+    }
+
+    pub(crate) fn g_vehicle_turret_offset_chassis(&self, vehicle: Vehicle) -> Vec2f {
+        match vehicle {
+            Vehicle::Tank => Vec2f::new(
+                self.g_tank_turret_offset_chassis_x,
+                self.g_tank_turret_offset_chassis_y,
+            ),
+            _ => unimplemented!(),
+        }
+    }
+
+    pub(crate) fn g_vehicle_turret_offset_turret(&self, vehicle: Vehicle) -> Vec2f {
+        match vehicle {
+            Vehicle::Tank => Vec2f::new(
+                self.g_tank_turret_offset_turret_x,
+                self.g_tank_turret_offset_turret_y,
+            ),
+            _ => unimplemented!(),
+        }
     }
 
     pub fn g_weapon_refire(&self, weap_index: usize) -> f64 {
@@ -253,6 +276,10 @@ impl Default for Cvars {
             g_tank_turn_rate_friction_linear: 0.96,
             g_tank_turn_rate_increase: 0.2,
             g_tank_turn_rate_max: f64::INFINITY,
+            g_tank_turret_offset_chassis_x: -5.0,
+            g_tank_turret_offset_chassis_y: 0.0,
+            g_tank_turret_offset_turret_x: -14.0,
+            g_tank_turret_offset_turret_y: 0.0,
             g_tank_speed_max: 250.0,
 
             g_turret_turn_speed: 2.0,
@@ -285,7 +312,6 @@ impl Default for Cvars {
             // - Rockets look better if hitting the same spot.
             r_explosions_reverse: false,
             r_smoothing: false,
-            r_turret_offset_tank: -9.0,
 
             sv_gamelogic_mode: TickrateMode::Synchronized,
             sv_gamelogic_fixed_fps: 150.0,
