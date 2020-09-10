@@ -7,8 +7,8 @@ use approx::AbsDiffEq;
 
 use rand::{prelude::SmallRng, Rng};
 
-use vek::Clamp;
 use vek::Vec2;
+use vek::{Clamp, Mat2};
 
 /// Position in world or screen space.
 ///
@@ -19,6 +19,8 @@ use vek::Vec2;
 /// The result of having `y` down is that the unit circle in mirrored around the X axis.
 /// As a result, **angles are clockwise**, in radians and 0 is pointing right.
 pub type Vec2f = Vec2<f64>;
+
+pub type Mat2f = Mat2<f64>;
 
 /// Position of a tile in the map.
 ///
@@ -38,12 +40,20 @@ impl VecExt for Vec2f {
 }
 
 pub trait F64Ext {
+    /// Rotated unit vector
     fn to_vec2f(self) -> Vec2f;
+
+    /// 2D rotation matrix
+    fn to_mat2f(self) -> Mat2f;
 }
 
 impl F64Ext for f64 {
     fn to_vec2f(self) -> Vec2f {
         Vec2f::new(self.cos(), self.sin())
+    }
+
+    fn to_mat2f(self) -> Mat2f {
+        Mat2f::rotation_z(self)
     }
 }
 
