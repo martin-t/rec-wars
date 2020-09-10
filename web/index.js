@@ -116,6 +116,8 @@ async function run() {
     // or better yet, figure out how webpack works
 
     const canvas = document.getElementById("canvas");
+    // It appears disabling alpha just means that the canvas itself won't be transparent to show other elements behind it.
+    // Transparency can still be used within the canvas e.g. when drawing overlapping images.
     const ctx = canvas.getContext("2d", { alpha: false });
 
     const log_time_checkbox = document.getElementById("log-time-checkbox");
