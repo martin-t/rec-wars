@@ -53,7 +53,7 @@
 //          [ ] weapons
 //          [ ] vehicles + skins
 //          [ ] cow, stolen effects
-//          [ ] wrecks
+//          [x] wrecks
 //      [ ] sounds
 //          [ ] weapons, explosions, self destruct
 //          [ ] cow
