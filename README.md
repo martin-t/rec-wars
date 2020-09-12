@@ -35,7 +35,7 @@ Compiling
 ---------
 
 - build with `wasm-pack build --target web --dev`
-    - you can replace `--dev` with `--profiling` or `--release` if perf is an issue
+    - you can replace `--dev` with `--profiling` or `--release` if perf is an issue (see [Cargo.toml](Cargo.toml) for more info)
 - host with `python3 -m http.server` (or any other web server, simply opening `index.html` will *not* work though)
 - open http://localhost:8000/web/
 
