@@ -26,6 +26,11 @@ note to self:
     - https://stackoverflow.com/questions/16151018/npm-throws-error-without-sudo/24404451#24404451
     - prefix path or it uses old debian npm which breaks everything
 
+Dependencies
+------------
+
+- [wasm-pack](https://github.com/rustwasm/wasm-pack) - use the [installer](https://rustwasm.github.io/wasm-pack/installer/)
+
 Compiling
 ---------
 
