@@ -36,8 +36,7 @@ vek = "0.11.2"
 wasm-bindgen = "0.2.65"
 
 [dependencies.legion]
-git = "https://github.com/TomGillen/legion"
-rev = "546fc5a8fe52c0dcd01223ecb7116cc7613e0dd2"
+version = "0.3"
 default-features = false
 
 [dependencies.rand]
