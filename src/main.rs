@@ -214,6 +214,9 @@
 // [ ] figure out what webpack is and how to create a static site
 //      probably best template: https://github.com/rustwasm/rust-webpack-template
 //      alternative: https://github.com/thedodd/trunk
+//      note to self for dealing with npm on debian:
+//          https://stackoverflow.com/questions/16151018/npm-throws-error-without-sudo/24404451#24404451
+//          prefix path or it uses old debian npm which breaks everything
 // [ ] native binary
 //      [ ] SmallRng might be platform dependant: https://docs.rs/rand/0.7.3/rand/rngs/index.html
 // [ ] make parsing return errors instead of crashing

@@ -21,11 +21,6 @@ TODOs
 
 - Rec Wars vs RecWars
 
-note to self:
-- fix npm
-    - https://stackoverflow.com/questions/16151018/npm-throws-error-without-sudo/24404451#24404451
-    - prefix path or it uses old debian npm which breaks everything
-
 Dependencies
 ------------
 
