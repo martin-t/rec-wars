@@ -600,7 +600,6 @@ impl Game {
         let offset_chassis =
             tank.angle.to_mat2f() * cvars.g_vehicle_turret_offset_chassis(Vehicle::Tank);
         let turret_scr_pos = tank_scr_pos + offset_chassis;
-        dbg_cross!(turret_scr_pos + top_left);
         let offset_turret = cvars.g_vehicle_turret_offset_turret(Vehicle::Tank);
         self.draw_img(
             &self.imgs_vehicles[1],
