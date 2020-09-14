@@ -273,7 +273,7 @@ impl Game {
                             // TODO move to MG
                             let pos = Pos(self.gs.tank.pos);
                             let mut vel = Vec2f::new(cvars.g_machine_gun_speed, 0.0)
-                                .rotated_z(self.gs.tank.angle);
+                                .rotated_z(self.gs.tank.angle + self.gs.tank.turret_angle);
                             if cvars.g_machine_gun_add_vehicle_velocity {
                                 vel += self.gs.tank.vel;
                             }
@@ -282,7 +282,8 @@ impl Game {
                         }
                         WEAP_RAIL => {
                             let begin = self.gs.tank.pos;
-                            let end = begin + self.gs.tank.angle.to_vec2f() * 100_000.0;
+                            let dir = (self.gs.tank.angle + self.gs.tank.turret_angle).to_vec2f();
+                            let end = begin + dir * 100_000.0;
                             let hit = self.map.collision_between(begin, end);
                             if let Some(hit) = hit {
                                 self.gs.railguns.push((begin, hit));
@@ -310,7 +311,7 @@ impl Game {
                                 }
 
                                 let mut vel = Vec2f::new(speed + spread_forward, spread_sideways)
-                                    .rotated_z(self.gs.tank.angle);
+                                    .rotated_z(self.gs.tank.angle + self.gs.tank.turret_angle);
                                 if cvars.g_cluster_bomb_add_vehicle_velocity {
                                     vel += self.gs.tank.vel;
                                 }
@@ -327,7 +328,7 @@ impl Game {
                             // TODO move to turret end
                             let pos = Pos(self.gs.tank.pos);
                             let mut vel = Vec2f::new(cvars.g_rockets_speed, 0.0)
-                                .rotated_z(self.gs.tank.angle);
+                                .rotated_z(self.gs.tank.angle + self.gs.tank.turret_angle);
                             if cvars.g_rockets_add_vehicle_velocity {
                                 vel += self.gs.tank.vel;
                             }
@@ -336,8 +337,11 @@ impl Game {
                         }
                         WEAP_HM => {}
                         WEAP_GM => {
-                            self.gs.gm =
-                                GuidedMissile::spawn(cvars, self.gs.tank.pos, self.gs.tank.angle);
+                            self.gs.gm = GuidedMissile::spawn(
+                                cvars,
+                                self.gs.tank.pos,
+                                self.gs.tank.angle + self.gs.tank.turret_angle,
+                            );
                             self.gs.pe = PlayerEntity::GuidedMissile;
                         }
                         WEAP_BFG => {}
