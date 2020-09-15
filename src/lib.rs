@@ -337,10 +337,14 @@ impl Game {
                         }
                         WEAP_HM => {}
                         WEAP_GM => {
+                            let offset = Vec2f::new(
+                                cvars.g_guided_missile_hardpoint_x,
+                                cvars.g_guided_missile_hardpoint_y,
+                            ).rotated_z(self.gs.tank.angle);
                             self.gs.gm = GuidedMissile::spawn(
                                 cvars,
-                                self.gs.tank.pos,
-                                self.gs.tank.angle + self.gs.tank.turret_angle,
+                                self.gs.tank.pos + offset,
+                                self.gs.tank.angle,
                             );
                             self.gs.pe = PlayerEntity::GuidedMissile;
                         }

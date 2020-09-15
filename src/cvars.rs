@@ -59,6 +59,9 @@ pub struct Cvars {
     pub g_machine_gun_speed: f64,
     pub g_machine_gun_trail_length: f64,
 
+    pub g_guided_missile_hardpoint: Hardpoint,
+    pub g_guided_missile_hardpoint_x: f64,
+    pub g_guided_missile_hardpoint_y: f64,
     pub g_guided_missile_reload_ammo: u32,
     pub g_guided_missile_reload_time: f64,
     pub g_guided_missile_speed_change: f64,
@@ -242,6 +245,9 @@ impl Default for Cvars {
             g_machine_gun_speed: 1000.0,
             g_machine_gun_trail_length: 10.0,
 
+            g_guided_missile_hardpoint: Hardpoint::Chassis,
+            g_guided_missile_hardpoint_x: 0.0,
+            g_guided_missile_hardpoint_y: -15.0,
             g_guided_missile_reload_ammo: 1,
             g_guided_missile_reload_time: 1.5,
             g_guided_missile_speed_change: 600.0,
@@ -317,6 +323,13 @@ impl Default for Cvars {
             sv_gamelogic_fixed_fps: 150.0,
         }
     }
+}
+
+#[wasm_bindgen]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Hardpoint {
+    Chassis,
+    Turret,
 }
 
 /// Various options how to handle different physics/gamelogic and rendering framerates.
