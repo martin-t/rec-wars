@@ -936,8 +936,7 @@ impl Game {
         Ok(())
     }
 
-    /// Place the image's *center* at `screen_pos`,
-    /// rotate it clockwise around its center.
+    /// Place the image's *center* at `scr_pos`, rotate it clockwise by `angle`.
     fn draw_img_center(
         &self,
         img: &HtmlImageElement,
@@ -947,8 +946,8 @@ impl Game {
         self.draw_img_offset(img, scr_pos, angle, Vec2f::zero())
     }
 
-    /// Center of rotation is `img`'s center + `offset`.
-    /// Draw `img` rotated by `angle` so that its center of rotation is at `scr_pos`.
+    /// Place the `img`'s *center of rotation* at `scr_pos`, rotate it clockwise by `angle`.
+    /// The center of rotation is `img`'s center + `offset`.
     fn draw_img_offset(
         &self,
         img: &HtmlImageElement,
