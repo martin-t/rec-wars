@@ -937,6 +937,8 @@ impl Game {
     }
 
     /// Place the image's *center* at `scr_pos`, rotate it clockwise by `angle`.
+    ///
+    /// See Vec2f for more about the coord system and rotations.
     fn draw_img_center(
         &self,
         img: &HtmlImageElement,
@@ -948,6 +950,8 @@ impl Game {
 
     /// Place the `img`'s *center of rotation* at `scr_pos`, rotate it clockwise by `angle`.
     /// The center of rotation is `img`'s center + `offset`.
+    ///
+    /// See Vec2f for more about the coord system and rotations.
     fn draw_img_offset(
         &self,
         img: &HtmlImageElement,
