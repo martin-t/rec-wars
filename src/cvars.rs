@@ -165,6 +165,61 @@ impl Cvars {
         Self::default()
     }
 
+    pub(crate) fn g_hardpoint(&self, vehicle: Vehicle, weapon: usize) -> (Hardpoint, Vec2f) {
+        match vehicle {
+            Vehicle::Tank => match weapon {
+                WEAP_MG => (
+                    self.g_hardpoint_tank_machine_gun,
+                    Vec2f::new(
+                        self.g_hardpoint_tank_machine_gun_x,
+                        self.g_hardpoint_tank_machine_gun_y,
+                    ),
+                ),
+                WEAP_RAIL => (
+                    self.g_hardpoint_tank_railgun,
+                    Vec2f::new(
+                        self.g_hardpoint_tank_railgun_x,
+                        self.g_hardpoint_tank_railgun_y,
+                    ),
+                ),
+                WEAP_CB => (
+                    self.g_hardpoint_tank_cluster_bomb,
+                    Vec2f::new(
+                        self.g_hardpoint_tank_cluster_bomb_x,
+                        self.g_hardpoint_tank_cluster_bomb_y,
+                    ),
+                ),
+                WEAP_ROCKETS => (
+                    self.g_hardpoint_tank_rockets,
+                    Vec2f::new(
+                        self.g_hardpoint_tank_rockets_x,
+                        self.g_hardpoint_tank_rockets_y,
+                    ),
+                ),
+                WEAP_HM => (
+                    self.g_hardpoint_tank_homing_missile,
+                    Vec2f::new(
+                        self.g_hardpoint_tank_homing_missile_x,
+                        self.g_hardpoint_tank_homing_missile_y,
+                    ),
+                ),
+                WEAP_GM => (
+                    self.g_hardpoint_tank_guided_missile,
+                    Vec2f::new(
+                        self.g_hardpoint_tank_guided_missile_x,
+                        self.g_hardpoint_tank_guided_missile_y,
+                    ),
+                ),
+                WEAP_BFG => (
+                    self.g_hardpoint_tank_bfg,
+                    Vec2f::new(self.g_hardpoint_tank_bfg_x, self.g_hardpoint_tank_bfg_y),
+                ),
+                _ => unreachable!()
+            },
+            _ => unimplemented!(),
+        }
+    }
+
     pub(crate) fn g_vehicle_turret_offset_chassis(&self, vehicle: Vehicle) -> Vec2f {
         match vehicle {
             Vehicle::Tank => Vec2f::new(
@@ -276,8 +331,8 @@ impl Default for Cvars {
             g_guided_missile_turn_rate_max: 3.15,
 
             g_hardpoint_tank_machine_gun: Hardpoint::Turret,
-            g_hardpoint_tank_machine_gun_x: 0.0,
-            g_hardpoint_tank_machine_gun_y: 0.0,
+            g_hardpoint_tank_machine_gun_x: 12.0,
+            g_hardpoint_tank_machine_gun_y: -5.0,
             g_hardpoint_tank_railgun: Hardpoint::Turret,
             g_hardpoint_tank_railgun_x: 0.0,
             g_hardpoint_tank_railgun_y: 0.0,

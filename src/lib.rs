@@ -39,7 +39,7 @@ use wasm_bindgen::JsCast;
 use web_sys::{CanvasRenderingContext2d, HtmlImageElement, Performance};
 
 use components::{Angle, Cb, Hitbox, Pos, Rocket, Time, Vehicle, Vel};
-use cvars::{Cvars, TickrateMode};
+use cvars::{Cvars, Hardpoint, TickrateMode};
 use debugging::{DEBUG_CROSSES, DEBUG_LINES, DEBUG_TEXTS};
 use entities::{Ammo, GuidedMissile, Tank};
 use game_state::{Explosion, GameState, Input, PlayerEntity};
@@ -268,12 +268,32 @@ impl Game {
                         *ammo = Ammo::Reloading(frame_time, frame_time + 1.0);
                     }
 
+                    let (hardpoint, offset) = cvars.g_hardpoint(Vehicle::Tank, self.gs.cur_weapon);
+                    let angle;
+                    let origin;
+                    match hardpoint {
+                        Hardpoint::Chassis => {
+                            angle = self.gs.tank.angle;
+                            origin = self.gs.tank.pos + offset.rotated_z(angle);
+                        }
+                        Hardpoint::Turret => {
+                            angle = self.gs.tank.angle + self.gs.tank.turret_angle;
+                            let turret_offset = Vec2f::new(
+                                cvars.g_tank_turret_offset_chassis_x,
+                                cvars.g_tank_turret_offset_chassis_y,
+                            );
+                            origin = self.gs.tank.pos
+                                + turret_offset.rotated_z(self.gs.tank.angle)
+                                + offset.rotated_z(angle);
+                        }
+                    }
+                    dbg_cross!(origin);
                     match self.gs.cur_weapon {
                         WEAP_MG => {
                             // TODO move to MG
-                            let pos = Pos(self.gs.tank.pos);
-                            let mut vel = Vec2f::new(cvars.g_machine_gun_speed, 0.0)
-                                .rotated_z(self.gs.tank.angle + self.gs.tank.turret_angle);
+                            let pos = Pos(origin);
+                            let mut vel =
+                                Vec2f::new(cvars.g_machine_gun_speed, 0.0).rotated_z(angle);
                             if cvars.g_machine_gun_add_vehicle_velocity {
                                 vel += self.gs.tank.vel;
                             }
@@ -337,16 +357,7 @@ impl Game {
                         }
                         WEAP_HM => {}
                         WEAP_GM => {
-                            let offset = Vec2f::new(
-                                cvars.g_hardpoint_tank_guided_missile_x,
-                                cvars.g_hardpoint_tank_guided_missile_y,
-                            )
-                            .rotated_z(self.gs.tank.angle);
-                            self.gs.gm = GuidedMissile::spawn(
-                                cvars,
-                                self.gs.tank.pos + offset,
-                                self.gs.tank.angle,
-                            );
+                            self.gs.gm = GuidedMissile::spawn(cvars, origin, angle);
                             self.gs.pe = PlayerEntity::GuidedMissile;
                         }
                         WEAP_BFG => {}
