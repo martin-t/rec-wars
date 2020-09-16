@@ -24,12 +24,6 @@ pub struct Hitbox {
     pub maxs: Vec2f,
 }
 
-impl Hitbox {
-    pub fn new(mins: Vec2f, maxs: Vec2f) -> Self {
-        Self { mins, maxs }
-    }
-}
-
 #[allow(unused)]
 #[derive(Debug, Clone, Copy)]
 pub enum Vehicle {

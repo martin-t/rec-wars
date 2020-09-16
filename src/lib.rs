@@ -141,7 +141,7 @@ impl Game {
             let mins = Vec2f::new(cvars.g_tank_mins_x, cvars.g_tank_mins_y);
             let maxs = Vec2f::new(cvars.g_tank_maxs_x, cvars.g_tank_maxs_y);
             let angle = gs.rng.gen_range(0.0, 2.0 * PI);
-            legion.push((Pos(pos), Angle(angle), Hitbox::new(mins, maxs)));
+            legion.push((Pos(pos), Angle(angle), Hitbox { mins, maxs }));
         }
 
         Self {
