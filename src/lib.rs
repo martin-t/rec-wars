@@ -340,7 +340,8 @@ impl Game {
                             let offset = Vec2f::new(
                                 cvars.g_guided_missile_hardpoint_x,
                                 cvars.g_guided_missile_hardpoint_y,
-                            ).rotated_z(self.gs.tank.angle);
+                            )
+                            .rotated_z(self.gs.tank.angle);
                             self.gs.gm = GuidedMissile::spawn(
                                 cvars,
                                 self.gs.tank.pos + offset,
@@ -495,7 +496,7 @@ impl Game {
 
                 if self.map.surface_of(tile).kind != Kind::Wall {
                     let img = &self.imgs_tiles[tile.surface_index];
-                    self.draw_img_top_left(img, Vec2::new(x, y), tile.angle)?;
+                    self.draw_tile(img, Vec2::new(x, y), tile.angle)?;
                 }
 
                 c += 1;
@@ -609,7 +610,7 @@ impl Game {
             tank.angle.to_mat2f() * cvars.g_vehicle_turret_offset_chassis(Vehicle::Tank);
         let turret_scr_pos = tank_scr_pos + offset_chassis;
         let offset_turret = cvars.g_vehicle_turret_offset_turret(Vehicle::Tank);
-        self.draw_img(
+        self.draw_img_offset(
             &self.imgs_vehicles[1],
             turret_scr_pos,
             tank.angle + tank.turret_angle,
@@ -678,7 +679,7 @@ impl Game {
 
                 if self.map.surface_of(tile).kind == Kind::Wall {
                     let img = &self.imgs_tiles[tile.surface_index];
-                    self.draw_img_top_left(img, Vec2::new(x, y), tile.angle)?;
+                    self.draw_tile(img, Vec2::new(x, y), tile.angle)?;
                 }
 
                 c += 1;
@@ -911,9 +912,9 @@ impl Game {
         self.context.line_to(point.x, point.y);
     }
 
-    /// Place the image's *top-left corner* at `screen_pos`,
+    /// Place the image's *top-left corner* (after rotation) at `screen_pos`,
     /// rotate it clockwise around its center.
-    fn draw_img_top_left(
+    fn draw_tile(
         &self,
         img: &HtmlImageElement,
         screen_pos: Vec2f,
@@ -940,26 +941,15 @@ impl Game {
     fn draw_img_center(
         &self,
         img: &HtmlImageElement,
-        screen_pos: Vec2f,
+        scr_pos: Vec2f,
         angle: f64,
     ) -> Result<(), JsValue> {
-        let half_size = Vec2::new(img.natural_width(), img.natural_height()).as_() / 2.0;
-        self.context.translate(screen_pos.x, screen_pos.y)?;
-        self.context.rotate(angle)?;
-
-        // Now back off to the img's corner and draw it.
-        // This can be done either by translating -half_size, then drawing at 0,0
-        // or at once by drawing at -half_size which his perhaps marginally more efficient.
-        self.context
-            .draw_image_with_html_image_element(img, -half_size.x, -half_size.y)?;
-
-        self.context.reset_transform()?;
-
-        Ok(())
+        self.draw_img_offset(img, scr_pos, angle, Vec2f::zero())
     }
 
-    /// FIXME
-    fn draw_img(
+    /// Center of rotation is `img`'s center + `offset`.
+    /// Draw `img` rotated by `angle` so that its center of rotation is at `scr_pos`.
+    fn draw_img_offset(
         &self,
         img: &HtmlImageElement,
         scr_pos: Vec2f,
@@ -970,6 +960,7 @@ impl Game {
         let offset = offset + half_size;
         self.context.translate(scr_pos.x, scr_pos.y)?;
         self.context.rotate(angle)?;
+        // This is the same as translating by -offset, then drawing at 0,0.
         self.context
             .draw_image_with_html_image_element(img, -offset.x, -offset.y)?;
         self.context.reset_transform()?;
