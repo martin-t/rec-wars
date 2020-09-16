@@ -912,31 +912,19 @@ impl Game {
         self.context.line_to(point.x, point.y);
     }
 
-    /// Place the image's *top-left corner* (after rotation) at `screen_pos`,
+    /// Place the `tile`'s *top-left corner* at `scr_pos`,
     /// rotate it clockwise around its center.
     fn draw_tile(
         &self,
-        img: &HtmlImageElement,
-        screen_pos: Vec2f,
+        tile: &HtmlImageElement,
+        scr_pos: Vec2f,
         angle: f64,
     ) -> Result<(), JsValue> {
-        let half_size = Vec2::new(img.natural_width(), img.natural_height()).as_() / 2.0;
-        self.context
-            .translate(screen_pos.x + half_size.x, screen_pos.y + half_size.y)?;
-        self.context.rotate(angle)?;
-
-        // Now back off to the img's corner and draw it.
-        // This can be done either by translating -half_size, then drawing at 0,0
-        // or at once by drawing at -half_size which is perhaps marginally more efficient.
-        self.context
-            .draw_image_with_html_image_element(img, -half_size.x, -half_size.y)?;
-
-        self.context.reset_transform()?;
-
-        Ok(())
+        self.draw_img_offset(tile, scr_pos + TILE_SIZE / 2.0, angle, Vec2f::zero())
     }
 
-    /// Place the image's *center* at `scr_pos`, rotate it clockwise by `angle`.
+    /// Place the image's *center* at `scr_pos`,
+    /// rotate it clockwise by `angle`.
     ///
     /// See Vec2f for more about the coord system and rotations.
     fn draw_img_center(
@@ -948,7 +936,8 @@ impl Game {
         self.draw_img_offset(img, scr_pos, angle, Vec2f::zero())
     }
 
-    /// Place the `img`'s *center of rotation* at `scr_pos`, rotate it clockwise by `angle`.
+    /// Place the `img`'s *center of rotation* at `scr_pos`,
+    /// rotate it clockwise by `angle`.
     /// The center of rotation is `img`'s center + `offset`.
     ///
     /// See Vec2f for more about the coord system and rotations.
