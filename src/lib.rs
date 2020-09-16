@@ -338,8 +338,8 @@ impl Game {
                         WEAP_HM => {}
                         WEAP_GM => {
                             let offset = Vec2f::new(
-                                cvars.g_guided_missile_hardpoint_x,
-                                cvars.g_guided_missile_hardpoint_y,
+                                cvars.g_tank_hardpoint_guided_missile_x,
+                                cvars.g_tank_hardpoint_guided_missile_y,
                             )
                             .rotated_z(self.gs.tank.angle);
                             self.gs.gm = GuidedMissile::spawn(
