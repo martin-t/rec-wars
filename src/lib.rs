@@ -290,7 +290,6 @@ impl Game {
                     dbg_cross!(origin);
                     match self.gs.cur_weapon {
                         WEAP_MG => {
-                            // TODO move to MG
                             let pos = Pos(origin);
                             let mut vel =
                                 Vec2f::new(cvars.g_machine_gun_speed, 0.0).rotated_z(angle);
