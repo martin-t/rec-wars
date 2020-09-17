@@ -300,16 +300,15 @@ impl Game {
                             self.hecs.spawn((pos, vel));
                         }
                         WEAP_RAIL => {
-                            let begin = self.gs.tank.pos;
-                            let dir = (self.gs.tank.angle + self.gs.tank.turret_angle).to_vec2f();
-                            let end = begin + dir * 100_000.0;
-                            let hit = self.map.collision_between(begin, end);
+                            let dir = angle.to_vec2f();
+                            let end = origin + dir * 100_000.0;
+                            let hit = self.map.collision_between(origin, end);
                             if let Some(hit) = hit {
-                                self.gs.railguns.push((begin, hit));
+                                self.gs.railguns.push((origin, hit));
                             }
                         }
                         WEAP_CB => {
-                            let pos = Pos(self.gs.tank.pos);
+                            let pos = Pos(origin);
                             for _ in 0..cvars.g_cluster_bomb_count {
                                 let speed = cvars.g_cluster_bomb_speed;
                                 let spread_forward;
@@ -330,7 +329,7 @@ impl Game {
                                 }
 
                                 let mut vel = Vec2f::new(speed + spread_forward, spread_sideways)
-                                    .rotated_z(self.gs.tank.angle + self.gs.tank.turret_angle);
+                                    .rotated_z(angle);
                                 if cvars.g_cluster_bomb_add_vehicle_velocity {
                                     vel += self.gs.tank.vel;
                                 }
@@ -344,10 +343,8 @@ impl Game {
                             }
                         }
                         WEAP_ROCKETS => {
-                            // TODO move to turret end
-                            let pos = Pos(self.gs.tank.pos);
-                            let mut vel = Vec2f::new(cvars.g_rockets_speed, 0.0)
-                                .rotated_z(self.gs.tank.angle + self.gs.tank.turret_angle);
+                            let pos = Pos(origin);
+                            let mut vel = Vec2f::new(cvars.g_rockets_speed, 0.0).rotated_z(angle);
                             if cvars.g_rockets_add_vehicle_velocity {
                                 vel += self.gs.tank.vel;
                             }
