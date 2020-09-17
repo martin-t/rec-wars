@@ -354,7 +354,10 @@ impl Game {
                             let vel = Vel(vel);
                             self.legion.push((Rocket, pos, vel));
                         }
-                        WEAP_HM => {}
+                        WEAP_HM => {
+                            // TODO homing missile
+                            self.gs.gm = GuidedMissile::spawn(cvars, origin, angle);
+                        }
                         WEAP_GM => {
                             self.gs.gm = GuidedMissile::spawn(cvars, origin, angle);
                             self.gs.pe = PlayerEntity::GuidedMissile;
