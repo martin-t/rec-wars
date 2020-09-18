@@ -288,6 +288,7 @@ impl Game {
                         }
                     }
                     dbg_cross!(origin, 1.0);
+                    dbg_line!(origin, origin + angle.to_vec2f() * 10.0);
                     match self.gs.cur_weapon {
                         WEAP_MG => {
                             let pos = Pos(origin);
@@ -700,12 +701,11 @@ impl Game {
         }
 
         // Draw debug lines and crosses
-        // TODO clear in logic frames
         if cvars.d_debug_draw {
             let dt = self.gs.frame_time - self.gs_prev.frame_time;
             DEBUG_LINES.with(|lines| {
                 let mut lines = lines.borrow_mut();
-                for line in lines.iter() {
+                for line in lines.iter_mut() {
                     self.context.set_stroke_style(&line.color.into());
                     let scr_begin = line.begin - top_left;
                     let scr_end = line.end - top_left;
@@ -713,8 +713,9 @@ impl Game {
                     self.move_to(scr_begin);
                     self.line_to(scr_end);
                     self.context.stroke();
+                    line.time -= dt;
                 }
-                lines.clear();
+                lines.retain(|line| line.time > 0.0);
             });
             DEBUG_CROSSES.with(|crosses| {
                 let mut crosses = crosses.borrow_mut();

@@ -1,3 +1,8 @@
+//! Debugging tools for logging and visualizing what is going on.
+//! Use the `dbg_*` macros since they don't need to be imported explicitly
+//! and they allow a primitive version of overloading.
+//! The fns and structs are only public because the macros need them.
+
 #![allow(unused)]
 
 use std::cell::RefCell;
@@ -7,6 +12,7 @@ use crate::map::Vec2f;
 pub struct Line {
     pub begin: Vec2f,
     pub end: Vec2f,
+    pub time: f64,
     pub color: &'static str,
 }
 
@@ -84,30 +90,30 @@ macro_rules! __print_pairs {
     };
 }
 
-// Macros are more convenient:
-//  - no need to rename when adding color
-//  - can be used without importing this module
-
-/// Draw line between world coordinates.
+/// Draw a line between world coordinates which lasts `time` seconds.
+/// If `time` is 0, it'll last 1 frame.
 #[macro_export]
 macro_rules! dbg_line {
-    ($begin:expr, $end:expr, $color:expr) => {
-        $crate::debugging::debug_line_color($begin, $end, $color);
+    ($begin:expr, $end:expr, $time:expr, $color:expr) => {
+        $crate::debugging::debug_line($begin, $end, $time, $color);
+    };
+    ($begin:expr, $end:expr, $time:expr) => {
+        dbg_line!($begin, $end, $time, "red");
     };
     ($begin:expr, $end:expr) => {
-        $crate::debugging::debug_line($begin, $end);
+        dbg_line!($begin, $end, 0.0);
     };
 }
 
-/// Draw line between world coordinates.
-pub fn debug_line(begin: Vec2f, end: Vec2f) {
-    debug_line_color(begin, end, "red");
-}
-
-/// Draw line between world coordinates.
-pub fn debug_line_color(begin: Vec2f, end: Vec2f, color: &'static str) {
+/// Draw a line between world coordinates.
+pub fn debug_line(begin: Vec2f, end: Vec2f, time: f64, color: &'static str) {
     DEBUG_LINES.with(|lines| {
-        let line = Line { begin, end, color };
+        let line = Line {
+            begin,
+            end,
+            time,
+            color,
+        };
         lines.borrow_mut().push(line);
     });
 }
