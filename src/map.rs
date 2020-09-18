@@ -5,6 +5,8 @@ use std::ops::Index;
 
 use approx::AbsDiffEq;
 
+use enumn::N;
+
 use rand::{prelude::SmallRng, Rng};
 
 use vek::Vec2;
@@ -327,7 +329,8 @@ impl Surface {
 /// Special behavior of some tiles.
 ///
 /// Reverse engineered by modifying RecWar's TextureList.txt and seeing what happens.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[repr(u8)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, N)]
 pub enum Kind {
     /// No special behavior beyond the normal surface properties
     Normal = 0,
@@ -341,20 +344,6 @@ pub enum Kind {
     Snow = 4,
     /// Base for Capture the Cow
     Base = 5,
-}
-
-impl Kind {
-    pub fn new(n: i32) -> Option<Self> {
-        match n {
-            0 => Some(Kind::Normal),
-            1 => Some(Kind::Spawn),
-            2 => Some(Kind::Wall),
-            3 => Some(Kind::Water),
-            4 => Some(Kind::Snow),
-            5 => Some(Kind::Base),
-            _ => None,
-        }
-    }
 }
 
 pub fn load_map(text: &str, surfaces: Vec<Surface>) -> Map {
@@ -396,7 +385,7 @@ pub fn load_tex_list(text: &str) -> Vec<Surface> {
             let friction = parts.next().unwrap().parse().unwrap();
             let speed = parts.next().unwrap().parse().unwrap();
 
-            let kind = Kind::new(kind_num).unwrap();
+            let kind = Kind::n(kind_num).unwrap();
             Surface::new(name.to_owned(), kind, friction, speed)
         })
         .collect()
