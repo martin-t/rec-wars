@@ -12,6 +12,8 @@ pub struct Line {
 
 pub struct Cross {
     pub point: Vec2f,
+    /// Time left (decreases every frame)
+    pub time: f64,
     pub color: &'static str,
 }
 
@@ -110,26 +112,26 @@ pub fn debug_line_color(begin: Vec2f, end: Vec2f, color: &'static str) {
     });
 }
 
-/// Draw a small cross at world coordinates.
+/// Draw a small cross at world coordinates which lasts `time` seconds.
+/// If `time` is 0, it'll last 1 frame.
 #[macro_export]
 macro_rules! dbg_cross {
-    ($point:expr, $color:expr) => {
-        $crate::debugging::debug_cross_color($point, $color);
+    ($point:expr, $time:expr, $color:expr) => {
+        $crate::debugging::debug_cross($point, $time, $color);
+    };
+    ($point:expr, $time:expr) => {
+        dbg_cross!($point, $time, "red");
     };
     ($point:expr) => {
-        $crate::debugging::debug_cross($point);
+        dbg_cross!($point, 0.0);
     };
 }
 
-/// Draw a small cross at world coordinates.
-pub fn debug_cross(point: Vec2f) {
-    debug_cross_color(point, "red");
-}
-
-/// Draw a small cross at world coordinates.
-pub fn debug_cross_color(point: Vec2f, color: &'static str) {
+/// Draw a small cross at world coordinates which lasts `time` seconds.
+/// If `time` is 0, it'll last 1 frame.
+pub fn debug_cross(point: Vec2f, time: f64, color: &'static str) {
     DEBUG_CROSSES.with(|crosses| {
-        let cross = Cross { point, color };
+        let cross = Cross { point, time, color };
         crosses.borrow_mut().push(cross);
     });
 }
