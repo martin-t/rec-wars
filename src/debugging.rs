@@ -108,7 +108,7 @@ macro_rules! dbg_line {
     };
 }
 
-/// Draw a line between world coordinates.
+/// Helper function, prefer `dbg_line!()` instead.
 pub fn debug_line(begin: Vec2f, end: Vec2f, time: f64, color: &'static str) {
     DEBUG_LINES.with(|lines| {
         let line = Line {
@@ -138,8 +138,7 @@ macro_rules! dbg_cross {
     };
 }
 
-/// Draw a small cross at world coordinates which lasts `time` seconds.
-/// If `time` is 0, it'll last 1 frame.
+/// Helper function, prefer `dbg_cross!()` instead.
 pub fn debug_cross(point: Vec2f, time: f64, color: &'static str) {
     DEBUG_CROSSES.with(|crosses| {
         let cross = Cross { point, time, color };
