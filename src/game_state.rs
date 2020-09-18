@@ -8,28 +8,28 @@ use crate::map::Vec2f;
 /// Everyting that changes during the game
 /// and might need to be taken back during frame interpolation / reconciliation.
 #[derive(Debug, Clone)]
-pub struct GameState {
-    pub rng: SmallRng,
+pub(crate) struct GameState {
+    pub(crate) rng: SmallRng,
     /// This frame's time in seconds
-    pub frame_time: f64,
-    pub input: Input,
-    pub cur_weapon: Weapon,
-    pub railguns: Vec<(Vec2f, Vec2f)>,
-    pub gm: GuidedMissile,
-    pub tank: Tank,
-    pub pe: PlayerEntity,
-    pub explosions: Vec<Explosion>,
+    pub(crate) frame_time: f64,
+    pub(crate) input: Input,
+    pub(crate) cur_weapon: Weapon,
+    pub(crate) railguns: Vec<(Vec2f, Vec2f)>,
+    pub(crate) gm: GuidedMissile,
+    pub(crate) tank: Tank,
+    pub(crate) pe: PlayerEntity,
+    pub(crate) explosions: Vec<Explosion>,
 }
 
 #[derive(Debug, Clone)]
-pub struct Explosion {
-    pub pos: Vec2f,
-    pub scale: f64,
-    pub start_time: f64,
+pub(crate) struct Explosion {
+    pub(crate) pos: Vec2f,
+    pub(crate) scale: f64,
+    pub(crate) start_time: f64,
 }
 
 impl Explosion {
-    pub fn new(pos: Vec2f, scale: f64, start_time: f64) -> Self {
+    pub(crate) fn new(pos: Vec2f, scale: f64, start_time: f64) -> Self {
         Self {
             pos,
             scale,
@@ -39,7 +39,7 @@ impl Explosion {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum PlayerEntity {
+pub(crate) enum PlayerEntity {
     GuidedMissile,
     Tank,
 }

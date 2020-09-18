@@ -20,18 +20,18 @@ use vek::{Clamp, Mat2};
 /// (although I believe it's more common for world coords to start in bottom-left so that `y` is up).
 /// The result of having `y` down is that the unit circle in mirrored around the X axis.
 /// As a result, **angles are clockwise**, in radians and 0 is pointing right.
-pub type Vec2f = Vec2<f64>;
+pub(crate) type Vec2f = Vec2<f64>;
 
-pub type Mat2f = Mat2<f64>;
+pub(crate) type Mat2f = Mat2<f64>;
 
 /// Position of a tile in the map.
 ///
 /// To avoid confusion with world positions,
 /// it's sometimes referred to as tile index since it's a pair of indices.
 /// `x` is column, `y` is row to match the order of `Vec2f`.
-pub type Vec2u = Vec2<usize>;
+pub(crate) type Vec2u = Vec2<usize>;
 
-pub trait VecExt {
+pub(crate) trait VecExt {
     fn to_angle(self) -> f64;
 }
 
@@ -41,7 +41,7 @@ impl VecExt for Vec2f {
     }
 }
 
-pub trait F64Ext {
+pub(crate) trait F64Ext {
     /// Rotated unit vector
     fn to_vec2f(self) -> Vec2f;
 
@@ -59,11 +59,11 @@ impl F64Ext for f64 {
     }
 }
 
-pub const TILE_SIZE: f64 = 64.0;
+pub(crate) const TILE_SIZE: f64 = 64.0;
 
 /// A rectangular tile based map with origin in the top-left corner.
 #[derive(Debug, Clone)]
-pub struct Map {
+pub(crate) struct Map {
     surfaces: Vec<Surface>,
     tiles: Vec<Vec<Tile>>,
     spawns: Vec<Vec2u>,
@@ -92,16 +92,16 @@ impl Map {
         }
     }
 
-    pub fn height(&self) -> usize {
+    pub(crate) fn height(&self) -> usize {
         self.tiles.len()
     }
 
-    pub fn width(&self) -> usize {
+    pub(crate) fn width(&self) -> usize {
         self.tiles[0].len()
     }
 
     /// Returns (width, height) / (cols, rows) / (x, y)
-    pub fn size(&self) -> Vec2u {
+    pub(crate) fn size(&self) -> Vec2u {
         Vec2u::new(self.width(), self.height())
     }
 
@@ -109,25 +109,25 @@ impl Map {
     ///
     /// Currently for simplicity always 0,0.
     /// Might change in the future e.g. if symmetry is easier with 0,0 in the center.
-    pub fn mins(&self) -> Vec2f {
+    pub(crate) fn mins(&self) -> Vec2f {
         // NOTE: if changing mins to be negative, check all uses of the modulo operator
         Vec2::new(0.0, 0.0)
     }
 
     /// Highest possible coordinates / bottom right
-    pub fn maxs(&self) -> Vec2f {
+    pub(crate) fn maxs(&self) -> Vec2f {
         self.size().as_() * TILE_SIZE
     }
 
     /// Returns tile at (c,r). Col is x, row is y
-    pub fn col_row(&self, c: usize, r: usize) -> Tile {
+    pub(crate) fn col_row(&self, c: usize, r: usize) -> Tile {
         self[Vec2::new(c, r)]
     }
 
     /// Converts world coords into tile position and offset within it.
     ///
     /// The returned index will always be within bounds.
-    pub fn tile_pos(&self, pos: Vec2f) -> TilePos {
+    pub(crate) fn tile_pos(&self, pos: Vec2f) -> TilePos {
         let epsilon = self.maxs() * Vec2f::default_epsilon();
         let pos = pos.clamped(self.mins(), self.maxs() - epsilon);
         let index = (pos / TILE_SIZE).as_();
@@ -137,26 +137,26 @@ impl Map {
         TilePos { index, offset }
     }
 
-    pub fn tile_center(&self, tile_index: Vec2u) -> Vec2f {
+    pub(crate) fn tile_center(&self, tile_index: Vec2u) -> Vec2f {
         tile_index.as_() * TILE_SIZE + TILE_SIZE / 2.0
     }
 
-    pub fn surface_of(&self, tile: Tile) -> &Surface {
+    pub(crate) fn surface_of(&self, tile: Tile) -> &Surface {
         &self.surfaces[tile.surface_index]
     }
 
-    pub fn surface_at_pos(&self, pos: Vec2f) -> &Surface {
+    pub(crate) fn surface_at_pos(&self, pos: Vec2f) -> &Surface {
         let tile_pos = self.tile_pos(pos);
         self.surface_at_index(tile_pos.index)
     }
 
-    pub fn surface_at_index(&self, index: Vec2u) -> &Surface {
+    pub(crate) fn surface_at_index(&self, index: Vec2u) -> &Surface {
         let surface_index = self[index].surface_index;
         &self.surfaces[surface_index]
     }
 
     /// Is `pos` outside the map or inside a wall?
-    pub fn collision(&self, pos: Vec2f) -> bool {
+    pub(crate) fn collision(&self, pos: Vec2f) -> bool {
         if pos.x <= 0.0 {
             return true;
         }
@@ -181,7 +181,7 @@ impl Map {
 
     /// Find first wall collision when traveling from `begin` to `end`.
     /// The returned point is nudged slightly inside the wall.
-    pub fn collision_between(&self, begin: Vec2f, end: Vec2f) -> Option<Vec2f> {
+    pub(crate) fn collision_between(&self, begin: Vec2f, end: Vec2f) -> Option<Vec2f> {
         if self.collision(begin) {
             return Some(begin);
         }
@@ -248,17 +248,17 @@ impl Map {
         }
     }
 
-    pub fn spawns(&self) -> &Vec<Vec2u> {
+    pub(crate) fn spawns(&self) -> &Vec<Vec2u> {
         &self.spawns
     }
 
     #[allow(unused)] // TODO remove after CTC works
-    pub fn bases(&self) -> &Vec<Vec2u> {
+    pub(crate) fn bases(&self) -> &Vec<Vec2u> {
         &self.bases
     }
 
     /// Returns (pos, angle).
-    pub fn random_spawn(&self, rng: &mut SmallRng) -> (Vec2f, f64) {
+    pub(crate) fn random_spawn(&self, rng: &mut SmallRng) -> (Vec2f, f64) {
         // TODO maps with no spawns (or even all walls)
         let i = rng.gen_range(0, self.spawns().len());
         let index = self.spawns()[i];
@@ -268,7 +268,7 @@ impl Map {
     }
 
     /// Returns (pos, angle).
-    pub fn random_nonwall(&self, rng: &mut SmallRng) -> (Vec2f, f64) {
+    pub(crate) fn random_nonwall(&self, rng: &mut SmallRng) -> (Vec2f, f64) {
         loop {
             let c = rng.gen_range(0, self.width());
             let r = rng.gen_range(0, self.height());
@@ -290,29 +290,29 @@ impl Index<Vec2u> for Map {
 }
 
 #[derive(Debug, Clone, Copy)]
-pub struct TilePos {
+pub(crate) struct TilePos {
     /// Position of the tile in the map
-    pub index: Vec2u,
+    pub(crate) index: Vec2u,
     /// Offset inside the tile
-    pub offset: Vec2f,
+    pub(crate) offset: Vec2f,
 }
 
 #[derive(Debug, Clone, Copy)]
-pub struct Tile {
+pub(crate) struct Tile {
     /// Index into texture_list.txt
-    pub surface_index: usize,
+    pub(crate) surface_index: usize,
     /// Rotation in radians - see Vec2f for how the coord system and angles work.
-    pub angle: f64,
+    pub(crate) angle: f64,
 }
 
 #[derive(Debug, Clone)]
-pub struct Surface {
-    pub name: String,
-    pub kind: Kind,
+pub(crate) struct Surface {
+    pub(crate) name: String,
+    pub(crate) kind: Kind,
     /// Seems to affect both turning and acceleration
-    pub friction: f32,
+    pub(crate) friction: f32,
     /// Maybe a multiplier for speed
-    pub speed: f32,
+    pub(crate) speed: f32,
 }
 
 impl Surface {
@@ -331,7 +331,7 @@ impl Surface {
 /// Reverse engineered by modifying RecWar's TextureList.txt and seeing what happens.
 #[repr(u8)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, N)]
-pub enum Kind {
+pub(crate) enum Kind {
     /// No special behavior beyond the normal surface properties
     Normal = 0,
     /// Vehicles spawn on it
@@ -346,7 +346,7 @@ pub enum Kind {
     Base = 5,
 }
 
-pub fn load_map(text: &str, surfaces: Vec<Surface>) -> Map {
+pub(crate) fn load_map(text: &str, surfaces: Vec<Surface>) -> Map {
     // TODO handle both CRLF and LF properly
     let tiles = text
         .split_terminator("\r\n")
@@ -373,7 +373,7 @@ pub fn load_map(text: &str, surfaces: Vec<Surface>) -> Map {
     Map::new(tiles, surfaces)
 }
 
-pub fn load_tex_list(text: &str) -> Vec<Surface> {
+pub(crate) fn load_tex_list(text: &str) -> Vec<Surface> {
     // TODO handle both CRLF and LF properly OR use cvars instead
     // if using cvars, update load_map docs
     text.split_terminator("\r\n")

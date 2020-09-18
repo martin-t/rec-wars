@@ -1,35 +1,35 @@
 use crate::map::Vec2f;
 
 #[derive(Debug, Clone, Copy)]
-pub struct Pos(pub Vec2f);
+pub(crate) struct Pos(pub(crate) Vec2f);
 
 #[derive(Debug, Clone, Copy)]
-pub struct Vel(pub Vec2f);
+pub(crate) struct Vel(pub(crate) Vec2f);
 
 #[derive(Debug, Clone, Copy)]
-pub struct Angle(pub f64);
+pub(crate) struct Angle(pub(crate) f64);
 
 #[derive(Debug, Clone, Copy)]
-pub struct Time(pub f64);
+pub(crate) struct Time(pub(crate) f64);
 
 #[derive(Debug, Clone, Copy)]
-pub struct Mg;
+pub(crate) struct Mg;
 
 #[derive(Debug, Clone, Copy)]
-pub struct Cb;
+pub(crate) struct Cb;
 
 #[derive(Debug, Clone, Copy)]
-pub struct Rocket;
+pub(crate) struct Rocket;
 
 #[derive(Debug, Clone, Copy)]
-pub struct Hitbox {
-    pub mins: Vec2f,
-    pub maxs: Vec2f,
+pub(crate) struct Hitbox {
+    pub(crate) mins: Vec2f,
+    pub(crate) maxs: Vec2f,
 }
 
 #[allow(unused)]
 #[derive(Debug, Clone, Copy)]
-pub enum Vehicle {
+pub(crate) enum Vehicle {
     Tank,
     Hovercraft,
     Hummer,

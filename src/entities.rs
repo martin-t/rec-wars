@@ -7,17 +7,17 @@ use crate::{
 };
 
 #[derive(Debug, Clone)]
-pub struct GuidedMissile {
-    pub pos: Vec2f,
-    pub vel: Vec2f,
+pub(crate) struct GuidedMissile {
+    pub(crate) pos: Vec2f,
+    pub(crate) vel: Vec2f,
     /// Kinda like angular momentum, except more special-casey.
     /// TODO Might wanna revisit when i have proper physics.
-    pub turn_rate: f64,
+    pub(crate) turn_rate: f64,
 }
 
 impl GuidedMissile {
     #[must_use]
-    pub fn spawn(cvars: &Cvars, pos: Vec2f, angle: f64) -> GuidedMissile {
+    pub(crate) fn spawn(cvars: &Cvars, pos: Vec2f, angle: f64) -> GuidedMissile {
         // example of GM pasing through wall:
         // pos: Vec2f::new(640.0, 640.0),
         // vel: Vec2f::new(0.3, 0.2),
@@ -30,7 +30,7 @@ impl GuidedMissile {
     }
 
     /// Returns if it hit something.
-    pub fn tick(&mut self, dt: f64, cvars: &Cvars, input: &Input, map: &Map) -> bool {
+    pub(crate) fn tick(&mut self, dt: f64, cvars: &Cvars, input: &Input, map: &Map) -> bool {
         // Accel / decel
         let accel_input = input.up * cvars.g_guided_missile_speed_change
             - input.down * cvars.g_guided_missile_speed_change;
@@ -85,22 +85,22 @@ impl GuidedMissile {
 }
 
 #[derive(Debug, Clone)]
-pub struct Tank {
-    pub pos: Vec2f,
-    pub vel: Vec2f,
-    pub angle: f64,
-    pub turn_rate: f64,
-    pub turret_angle: f64,
+pub(crate) struct Tank {
+    pub(crate) pos: Vec2f,
+    pub(crate) vel: Vec2f,
+    pub(crate) angle: f64,
+    pub(crate) turn_rate: f64,
+    pub(crate) turret_angle: f64,
     /// Fraction of full
-    pub hp: f64,
+    pub(crate) hp: f64,
     /// Each weapon has a separate reload status even if they all reload at the same time.
     /// I plan to generalize this and have a cvar to choose between multiple reload mechanisms.
-    pub ammos: Vec<Ammo>,
+    pub(crate) ammos: Vec<Ammo>,
 }
 
 impl Tank {
     #[must_use]
-    pub fn spawn(cvars: &Cvars, pos: Vec2f, angle: f64) -> Tank {
+    pub(crate) fn spawn(cvars: &Cvars, pos: Vec2f, angle: f64) -> Tank {
         let ammos = vec![
             Ammo::Loaded(0.0, cvars.g_weapon_reload_ammo(Weapon::Mg)),
             Ammo::Loaded(0.0, cvars.g_weapon_reload_ammo(Weapon::Rail)),
@@ -122,7 +122,7 @@ impl Tank {
         }
     }
 
-    pub fn tick(&mut self, dt: f64, cvars: &Cvars, input: &Input, map: &Map) {
+    pub(crate) fn tick(&mut self, dt: f64, cvars: &Cvars, input: &Input, map: &Map) {
         // Turn rate
         dbg_textf!("tank orig tr: {}", self.turn_rate);
         let tr_input = cvars.g_tank_turn_rate_increase * input.right
@@ -194,7 +194,7 @@ impl Tank {
         }
     }
 
-    pub fn corners(cvars: &Cvars, pos: Vec2f, angle: f64) -> [Vec2f; 4] {
+    pub(crate) fn corners(cvars: &Cvars, pos: Vec2f, angle: f64) -> [Vec2f; 4] {
         let back_left = pos + Vec2f::new(cvars.g_tank_mins_x, cvars.g_tank_mins_y).rotated_z(angle);
         let front_left =
             pos + Vec2f::new(cvars.g_tank_maxs_x, cvars.g_tank_mins_y).rotated_z(angle);
@@ -207,7 +207,7 @@ impl Tank {
 }
 
 #[derive(Debug, Clone)]
-pub enum Ammo {
+pub(crate) enum Ammo {
     /// Refire delay end time, ammo count remaining
     Loaded(f64, u32),
     /// Start time, end time

@@ -9,26 +9,26 @@ use std::cell::RefCell;
 
 use crate::map::Vec2f;
 
-pub struct Line {
-    pub begin: Vec2f,
-    pub end: Vec2f,
+pub(crate) struct Line {
+    pub(crate) begin: Vec2f,
+    pub(crate) end: Vec2f,
     /// Time left (decreases every frame)
-    pub time: f64,
-    pub color: &'static str,
+    pub(crate) time: f64,
+    pub(crate) color: &'static str,
 }
 
-pub struct Cross {
-    pub point: Vec2f,
+pub(crate) struct Cross {
+    pub(crate) point: Vec2f,
     /// Time left (decreases every frame)
-    pub time: f64,
-    pub color: &'static str,
+    pub(crate) time: f64,
+    pub(crate) color: &'static str,
 }
 
 thread_local! {
     /// Lines of text to be printed onto the screen, cleared after printing.
-    pub static DEBUG_TEXTS: RefCell<Vec<String>> = RefCell::new(Vec::new());
-    pub static DEBUG_LINES: RefCell<Vec<Line>> = RefCell::new(Vec::new());
-    pub static DEBUG_CROSSES: RefCell<Vec<Cross>> = RefCell::new(Vec::new());
+    pub(crate) static DEBUG_TEXTS: RefCell<Vec<String>> = RefCell::new(Vec::new());
+    pub(crate) static DEBUG_LINES: RefCell<Vec<Line>> = RefCell::new(Vec::new());
+    pub(crate) static DEBUG_CROSSES: RefCell<Vec<Cross>> = RefCell::new(Vec::new());
 }
 
 /// Print text into the console. Uses `println!(..)`-style formatting.
@@ -109,7 +109,7 @@ macro_rules! dbg_line {
 }
 
 /// Helper function, prefer `dbg_line!()` instead.
-pub fn debug_line(begin: Vec2f, end: Vec2f, time: f64, color: &'static str) {
+pub(crate) fn debug_line(begin: Vec2f, end: Vec2f, time: f64, color: &'static str) {
     DEBUG_LINES.with(|lines| {
         let line = Line {
             begin,
@@ -139,7 +139,7 @@ macro_rules! dbg_cross {
 }
 
 /// Helper function, prefer `dbg_cross!()` instead.
-pub fn debug_cross(point: Vec2f, time: f64, color: &'static str) {
+pub(crate) fn debug_cross(point: Vec2f, time: f64, color: &'static str) {
     DEBUG_CROSSES.with(|crosses| {
         let cross = Cross { point, time, color };
         crosses.borrow_mut().push(cross);
