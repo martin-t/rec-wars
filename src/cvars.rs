@@ -165,56 +165,55 @@ impl Cvars {
         Self::default()
     }
 
-    pub(crate) fn g_hardpoint(&self, vehicle: Vehicle, weapon: usize) -> (Hardpoint, Vec2f) {
+    pub(crate) fn g_hardpoint(&self, vehicle: Vehicle, weapon: Weapon) -> (Hardpoint, Vec2f) {
         match vehicle {
             Vehicle::Tank => match weapon {
-                WEAP_MG => (
+                Weapon::Mg => (
                     self.g_hardpoint_tank_machine_gun,
                     Vec2f::new(
                         self.g_hardpoint_tank_machine_gun_x,
                         self.g_hardpoint_tank_machine_gun_y,
                     ),
                 ),
-                WEAP_RAIL => (
+                Weapon::Rail => (
                     self.g_hardpoint_tank_railgun,
                     Vec2f::new(
                         self.g_hardpoint_tank_railgun_x,
                         self.g_hardpoint_tank_railgun_y,
                     ),
                 ),
-                WEAP_CB => (
+                Weapon::Cb => (
                     self.g_hardpoint_tank_cluster_bomb,
                     Vec2f::new(
                         self.g_hardpoint_tank_cluster_bomb_x,
                         self.g_hardpoint_tank_cluster_bomb_y,
                     ),
                 ),
-                WEAP_ROCKETS => (
+                Weapon::Rockets => (
                     self.g_hardpoint_tank_rockets,
                     Vec2f::new(
                         self.g_hardpoint_tank_rockets_x,
                         self.g_hardpoint_tank_rockets_y,
                     ),
                 ),
-                WEAP_HM => (
+                Weapon::Hm => (
                     self.g_hardpoint_tank_homing_missile,
                     Vec2f::new(
                         self.g_hardpoint_tank_homing_missile_x,
                         self.g_hardpoint_tank_homing_missile_y,
                     ),
                 ),
-                WEAP_GM => (
+                Weapon::Gm => (
                     self.g_hardpoint_tank_guided_missile,
                     Vec2f::new(
                         self.g_hardpoint_tank_guided_missile_x,
                         self.g_hardpoint_tank_guided_missile_y,
                     ),
                 ),
-                WEAP_BFG => (
+                Weapon::Bfg => (
                     self.g_hardpoint_tank_bfg,
                     Vec2f::new(self.g_hardpoint_tank_bfg_x, self.g_hardpoint_tank_bfg_y),
                 ),
-                _ => unreachable!()
             },
             _ => unimplemented!(),
         }
@@ -240,42 +239,39 @@ impl Cvars {
         }
     }
 
-    pub fn g_weapon_refire(&self, weap_index: usize) -> f64 {
-        match weap_index {
-            WEAP_MG => self.g_machine_gun_refire,
-            WEAP_RAIL => 0.0,
-            WEAP_CB => 0.0,
-            WEAP_ROCKETS => self.g_rockets_refire,
-            WEAP_HM => 0.0,
-            WEAP_GM => 0.0,
-            WEAP_BFG => 0.0,
-            _ => unreachable!(),
+    pub(crate) fn g_weapon_refire(&self, weapon: Weapon) -> f64 {
+        match weapon {
+            Weapon::Mg => self.g_machine_gun_refire,
+            Weapon::Rail => 0.0,
+            Weapon::Cb => 0.0,
+            Weapon::Rockets => self.g_rockets_refire,
+            Weapon::Hm => 0.0,
+            Weapon::Gm => 0.0,
+            Weapon::Bfg => 0.0,
         }
     }
 
-    pub fn g_weapon_reload_ammo(&self, weap_index: usize) -> u32 {
-        match weap_index {
-            WEAP_MG => self.g_machine_gun_reload_ammo,
-            WEAP_RAIL => self.g_railgun_reload_ammo,
-            WEAP_CB => self.g_cluster_bomb_reload_ammo,
-            WEAP_ROCKETS => self.g_rockets_reload_ammo,
-            WEAP_HM => self.g_homing_missile_reload_ammo,
-            WEAP_GM => self.g_guided_missile_reload_ammo,
-            WEAP_BFG => self.g_bfg_reload_ammo,
-            _ => unreachable!(),
+    pub(crate) fn g_weapon_reload_ammo(&self, weapon: Weapon) -> u32 {
+        match weapon {
+            Weapon::Mg => self.g_machine_gun_reload_ammo,
+            Weapon::Rail => self.g_railgun_reload_ammo,
+            Weapon::Cb => self.g_cluster_bomb_reload_ammo,
+            Weapon::Rockets => self.g_rockets_reload_ammo,
+            Weapon::Hm => self.g_homing_missile_reload_ammo,
+            Weapon::Gm => self.g_guided_missile_reload_ammo,
+            Weapon::Bfg => self.g_bfg_reload_ammo,
         }
     }
 
-    pub fn g_weapon_reload_time(&self, weap_index: usize) -> f64 {
-        match weap_index {
-            WEAP_MG => self.g_machine_gun_reload_time,
-            WEAP_RAIL => self.g_railgun_reload_time,
-            WEAP_CB => self.g_cluster_bomb_reload_time,
-            WEAP_ROCKETS => self.g_rockets_reload_time,
-            WEAP_HM => self.g_homing_missile_reload_time,
-            WEAP_GM => self.g_guided_missile_reload_time,
-            WEAP_BFG => self.g_bfg_reload_time,
-            _ => unreachable!(),
+    pub(crate) fn g_weapon_reload_time(&self, weapon: Weapon) -> f64 {
+        match weapon {
+            Weapon::Mg => self.g_machine_gun_reload_time,
+            Weapon::Rail => self.g_railgun_reload_time,
+            Weapon::Cb => self.g_cluster_bomb_reload_time,
+            Weapon::Rockets => self.g_rockets_reload_time,
+            Weapon::Hm => self.g_homing_missile_reload_time,
+            Weapon::Gm => self.g_guided_missile_reload_time,
+            Weapon::Bfg => self.g_bfg_reload_time,
         }
     }
 }

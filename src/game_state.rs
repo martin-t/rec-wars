@@ -2,7 +2,7 @@ use rand::prelude::*;
 
 use wasm_bindgen::prelude::*;
 
-use crate::entities::{GuidedMissile, Tank};
+use crate::{entities::{GuidedMissile, Tank}, weapons::Weapon};
 use crate::map::Vec2f;
 
 /// Everyting that changes during the game
@@ -13,7 +13,7 @@ pub struct GameState {
     /// This frame's time in seconds
     pub frame_time: f64,
     pub input: Input,
-    pub cur_weapon: usize,
+    pub cur_weapon: Weapon,
     pub railguns: Vec<(Vec2f, Vec2f)>,
     pub gm: GuidedMissile,
     pub tank: Tank,

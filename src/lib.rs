@@ -126,7 +126,7 @@ impl Game {
             rng,
             frame_time: 0.0,
             input: Input::default(),
-            cur_weapon: 5,
+            cur_weapon: Weapon::Mg,
             railguns: Vec::new(),
             gm,
             tank,
@@ -242,15 +242,17 @@ impl Game {
 
         // Change weapon
         if self.gs.input.prev_weapon && !self.gs_prev.input.prev_weapon {
-            self.gs.cur_weapon = (self.gs.cur_weapon + WEAPS_CNT - 1) % WEAPS_CNT;
+            let prev = (self.gs.cur_weapon as u8 + WEAPS_CNT - 1) % WEAPS_CNT;
+            self.gs.cur_weapon = Weapon::n(prev).unwrap();
         }
         if self.gs.input.next_weapon && !self.gs_prev.input.next_weapon {
-            self.gs.cur_weapon = (self.gs.cur_weapon + 1) % WEAPS_CNT;
+            let next = (self.gs.cur_weapon as u8 + 1) % WEAPS_CNT;
+            self.gs.cur_weapon = Weapon::n(next).unwrap();
         }
 
         // Reloading
         let cur_weap = self.gs.cur_weapon;
-        let ammo = &mut self.gs.tank.ammos[cur_weap];
+        let ammo = &mut self.gs.tank.ammos[cur_weap as usize];
         if let Ammo::Reloading(_, end) = ammo {
             if frame_time >= *end {
                 *ammo = Ammo::Loaded(frame_time, cvars.g_weapon_reload_ammo(cur_weap));
@@ -289,7 +291,7 @@ impl Game {
                     dbg_cross!(origin, 1.0);
                     dbg_line!(origin, origin + angle.to_vec2f() * 10.0);
                     match self.gs.cur_weapon {
-                        WEAP_MG => {
+                        Weapon::Mg => {
                             let pos = Pos(origin);
                             let mut vel =
                                 Vec2f::new(cvars.g_machine_gun_speed, 0.0).rotated_z(angle);
@@ -299,7 +301,7 @@ impl Game {
                             let vel = Vel(vel);
                             self.hecs.spawn((Mg, pos, vel));
                         }
-                        WEAP_RAIL => {
+                        Weapon::Rail => {
                             let dir = angle.to_vec2f();
                             let end = origin + dir * 100_000.0;
                             let hit = self.map.collision_between(origin, end);
@@ -307,7 +309,7 @@ impl Game {
                                 self.gs.railguns.push((origin, hit));
                             }
                         }
-                        WEAP_CB => {
+                        Weapon::Cb => {
                             let pos = Pos(origin);
                             for _ in 0..cvars.g_cluster_bomb_count {
                                 let speed = cvars.g_cluster_bomb_speed;
@@ -342,7 +344,7 @@ impl Game {
                                 self.legion.push((Cb, pos, vel, time));
                             }
                         }
-                        WEAP_ROCKETS => {
+                        Weapon::Rockets => {
                             let pos = Pos(origin);
                             let mut vel = Vec2f::new(cvars.g_rockets_speed, 0.0).rotated_z(angle);
                             if cvars.g_rockets_add_vehicle_velocity {
@@ -351,15 +353,15 @@ impl Game {
                             let vel = Vel(vel);
                             self.legion.push((Rocket, pos, vel));
                         }
-                        WEAP_HM => {
+                        Weapon::Hm => {
                             // TODO homing missile
                             self.gs.gm = GuidedMissile::spawn(cvars, origin, angle);
                         }
-                        WEAP_GM => {
+                        Weapon::Gm => {
                             self.gs.gm = GuidedMissile::spawn(cvars, origin, angle);
                             self.gs.pe = PlayerEntity::GuidedMissile;
                         }
-                        WEAP_BFG => {
+                        Weapon::Bfg => {
                             let pos = Pos(origin);
                             for _ in 0..cvars.g_cluster_bomb_count {
                                 let speed = cvars.g_cluster_bomb_speed;
@@ -862,7 +864,7 @@ impl Game {
 
         // Ammo
         self.context.set_fill_style(&"yellow".into());
-        let fraction = match self.gs.tank.ammos[self.gs.cur_weapon] {
+        let fraction = match self.gs.tank.ammos[self.gs.cur_weapon as usize] {
             Ammo::Loaded(_, count) => {
                 let max = cvars.g_weapon_reload_ammo(self.gs.cur_weapon);
                 count as f64 / max as f64
@@ -889,7 +891,7 @@ impl Game {
         self.context
             .set_shadow_offset_y(cvars.hud_weapon_icon_shadow_y);
         self.draw_img_center(
-            &self.imgs_weapon_icons[self.gs.cur_weapon],
+            &self.imgs_weapon_icons[self.gs.cur_weapon as usize],
             Vec2f::new(cvars.hud_weapon_icon_x, cvars.hud_weapon_icon_y),
             0.0,
         )?;

@@ -1,6 +1,6 @@
 use vek::Clamp;
 
-use crate::cvars::Cvars;
+use crate::{cvars::Cvars, weapons::Weapon};
 use crate::{
     map::{Map, Vec2f},
     Input,
@@ -102,13 +102,13 @@ impl Tank {
     #[must_use]
     pub fn spawn(cvars: &Cvars, pos: Vec2f, angle: f64) -> Tank {
         let ammos = vec![
-            Ammo::Loaded(0.0, cvars.g_weapon_reload_ammo(0)),
-            Ammo::Loaded(0.0, cvars.g_weapon_reload_ammo(1)),
-            Ammo::Loaded(0.0, cvars.g_weapon_reload_ammo(2)),
-            Ammo::Loaded(0.0, cvars.g_weapon_reload_ammo(3)),
-            Ammo::Loaded(0.0, cvars.g_weapon_reload_ammo(4)),
-            Ammo::Loaded(0.0, cvars.g_weapon_reload_ammo(5)),
-            Ammo::Loaded(0.0, cvars.g_weapon_reload_ammo(6)),
+            Ammo::Loaded(0.0, cvars.g_weapon_reload_ammo(Weapon::Mg)),
+            Ammo::Loaded(0.0, cvars.g_weapon_reload_ammo(Weapon::Rail)),
+            Ammo::Loaded(0.0, cvars.g_weapon_reload_ammo(Weapon::Cb)),
+            Ammo::Loaded(0.0, cvars.g_weapon_reload_ammo(Weapon::Rockets)),
+            Ammo::Loaded(0.0, cvars.g_weapon_reload_ammo(Weapon::Hm)),
+            Ammo::Loaded(0.0, cvars.g_weapon_reload_ammo(Weapon::Gm)),
+            Ammo::Loaded(0.0, cvars.g_weapon_reload_ammo(Weapon::Bfg)),
         ];
 
         Tank {
