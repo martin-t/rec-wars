@@ -13,6 +13,9 @@ pub struct Angle(pub f64);
 pub struct Time(pub f64);
 
 #[derive(Debug, Clone, Copy)]
+pub struct Mg;
+
+#[derive(Debug, Clone, Copy)]
 pub struct Cb;
 
 #[derive(Debug, Clone, Copy)]

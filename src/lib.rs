@@ -38,7 +38,7 @@ use wasm_bindgen::JsCast;
 
 use web_sys::{CanvasRenderingContext2d, HtmlImageElement, Performance};
 
-use components::{Angle, Cb, Hitbox, Pos, Rocket, Time, Vehicle, Vel};
+use components::{Angle, Cb, Hitbox, Mg, Pos, Rocket, Time, Vehicle, Vel};
 use cvars::{Cvars, Hardpoint, TickrateMode};
 use debugging::{DEBUG_CROSSES, DEBUG_LINES, DEBUG_TEXTS};
 use entities::{Ammo, GuidedMissile, Tank};
@@ -269,8 +269,7 @@ impl Game {
                     }
 
                     let (hardpoint, offset) = cvars.g_hardpoint(Vehicle::Tank, self.gs.cur_weapon);
-                    let angle;
-                    let origin;
+                    let (angle, origin);
                     match hardpoint {
                         Hardpoint::Chassis => {
                             angle = self.gs.tank.angle;
@@ -298,7 +297,7 @@ impl Game {
                                 vel += self.gs.tank.vel;
                             }
                             let vel = Vel(vel);
-                            self.hecs.spawn((pos, vel));
+                            self.hecs.spawn((Mg, pos, vel));
                         }
                         WEAP_RAIL => {
                             let dir = angle.to_vec2f();
@@ -360,7 +359,41 @@ impl Game {
                             self.gs.gm = GuidedMissile::spawn(cvars, origin, angle);
                             self.gs.pe = PlayerEntity::GuidedMissile;
                         }
-                        WEAP_BFG => {}
+                        WEAP_BFG => {
+                            let pos = Pos(origin);
+                            for _ in 0..cvars.g_cluster_bomb_count {
+                                let speed = cvars.g_cluster_bomb_speed;
+                                let spread_forward;
+                                let spread_sideways;
+                                if cvars.g_cluster_bomb_speed_spread_gaussian {
+                                    // Broken type inference (works with rand crate but distributions are deprecated).
+                                    let r: f64 = self.gs.rng.sample(StandardNormal);
+                                    spread_forward = cvars.g_cluster_bomb_speed_spread_forward * r;
+                                    let r: f64 = self.gs.rng.sample(StandardNormal);
+                                    spread_sideways =
+                                        cvars.g_cluster_bomb_speed_spread_sideways * r;
+                                } else {
+                                    let r = self.gs.rng.gen_range(-1.5, 1.5);
+                                    spread_forward = cvars.g_cluster_bomb_speed_spread_forward * r;
+                                    let r = self.gs.rng.gen_range(-1.5, 1.5);
+                                    spread_sideways =
+                                        cvars.g_cluster_bomb_speed_spread_sideways * r;
+                                }
+
+                                let mut vel = Vec2f::new(speed + spread_forward, spread_sideways)
+                                    .rotated_z(angle);
+                                if cvars.g_cluster_bomb_add_vehicle_velocity {
+                                    vel += self.gs.tank.vel;
+                                }
+                                let vel = Vel(vel);
+                                let time = frame_time
+                                    + cvars.g_cluster_bomb_time
+                                    + self.gs.rng.gen_range(-1.0, 1.0)
+                                        * cvars.g_cluster_bomb_time_spread;
+                                let time = Time(time);
+                                self.hecs.spawn((Cb, pos, vel, time));
+                            }
+                        }
                         _ => unreachable!("current weapon index out of range"),
                     }
                 }
@@ -369,7 +402,7 @@ impl Game {
 
         // MG
         let mut to_remove = Vec::new();
-        for (entity, (pos, vel)) in self.hecs.query::<(&mut Pos, &Vel)>().iter() {
+        for (entity, (_, pos, vel)) in self.hecs.query::<(&Mg, &mut Pos, &Vel)>().iter() {
             pos.0 += vel.0 * dt;
 
             if self.map.collision(pos.0) {
@@ -433,6 +466,28 @@ impl Game {
 
         for entity in to_remove {
             self.legion.remove(entity);
+        }
+
+        let mut to_remove = Vec::new();
+
+        // fake BFG (TODO)
+        for (entity, (_, pos, vel, time)) in
+            self.hecs.query::<(&Cb, &mut Pos, &Vel, &Time)>().iter()
+        {
+            pos.0 += vel.0 * dt;
+
+            if frame_time > time.0 {
+                self.gs.explosions.push(Explosion::new(
+                    pos.0,
+                    cvars.g_cluster_bomb_explosion_scale,
+                    time.0,
+                ));
+                to_remove.push(entity);
+            }
+        }
+
+        for entity in to_remove {
+            self.hecs.despawn(entity).unwrap();
         }
 
         // Movement
@@ -520,7 +575,7 @@ impl Game {
         // Draw MGs
         self.context.set_stroke_style(&"yellow".into());
         let mut mg_cnt = 0;
-        for (_, (pos, vel)) in self.hecs.query::<(&Pos, &Vel)>().iter() {
+        for (_, (_, pos, vel)) in self.hecs.query::<(&Mg, &Pos, &Vel)>().iter() {
             mg_cnt += 1;
             let scr_pos = pos.0 - top_left;
             self.context.begin_path();
@@ -596,6 +651,31 @@ impl Game {
         if cvars.d_debug_draw {
             self.context
                 .fill_rect(player_scr_pos.x, player_scr_pos.y, 1.0, 1.0);
+        }
+
+        // Draw fake BFG (TODO)
+        if cvars.r_draw_cluster_bombs {
+            self.context.set_fill_style(&"rgb(100, 255, 0)".into());
+            let shadow_rgba = format!("rgba(0, 0, 0, {})", cvars.g_cluster_bomb_shadow_alpha);
+            self.context.set_shadow_color(&shadow_rgba);
+            self.context
+                .set_shadow_offset_x(cvars.g_cluster_bomb_shadow_x);
+            self.context
+                .set_shadow_offset_y(cvars.g_cluster_bomb_shadow_y);
+            let mut bfg_cnt = 0;
+            for (_, (_, pos)) in self.hecs.query::<(&Cb, &Pos)>().iter() {
+                bfg_cnt += 1;
+                let scr_pos = pos.0 - top_left;
+                self.context.fill_rect(
+                    scr_pos.x - cvars.g_cluster_bomb_size / 2.0,
+                    scr_pos.y - cvars.g_cluster_bomb_size / 2.0,
+                    cvars.g_cluster_bomb_size,
+                    cvars.g_cluster_bomb_size,
+                );
+            }
+            self.context.set_shadow_offset_x(0.0);
+            self.context.set_shadow_offset_y(0.0);
+            dbg_textd!(bfg_cnt);
         }
 
         // Draw player vehicle chassis
