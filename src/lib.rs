@@ -396,7 +396,6 @@ impl Game {
                                 self.hecs.spawn((Cb, pos, vel, time));
                             }
                         }
-                        _ => unreachable!("current weapon index out of range"),
                     }
                 }
             }
