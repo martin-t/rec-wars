@@ -267,7 +267,8 @@ impl Game {
                     *ready_time = frame_time + cvars.g_weapon_refire(cur_weap);
                     *count -= 1;
                     if *count == 0 {
-                        *ammo = Ammo::Reloading(frame_time, frame_time + 1.0);
+                        let reload_time = cvars.g_weapon_reload_time(cur_weap);
+                        *ammo = Ammo::Reloading(frame_time, frame_time + reload_time);
                     }
 
                     let (hardpoint, offset) = cvars.g_hardpoint(Vehicle::Tank, self.gs.cur_weapon);
