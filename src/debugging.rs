@@ -12,6 +12,7 @@ use crate::map::Vec2f;
 pub struct Line {
     pub begin: Vec2f,
     pub end: Vec2f,
+    /// Time left (decreases every frame)
     pub time: f64,
     pub color: &'static str,
 }
@@ -90,18 +91,20 @@ macro_rules! __print_pairs {
     };
 }
 
-/// Draw a line between world coordinates which lasts `time` seconds.
-/// If `time` is 0, it'll last 1 frame.
+/// Draw a line between world coordinates.
+/// Optionally specify
+/// - how long it lasts in seconds (default 1 frame)
+/// - color
 #[macro_export]
 macro_rules! dbg_line {
     ($begin:expr, $end:expr, $time:expr, $color:expr) => {
         $crate::debugging::debug_line($begin, $end, $time, $color);
     };
     ($begin:expr, $end:expr, $time:expr) => {
-        dbg_line!($begin, $end, $time, "red");
+        $crate::dbg_line!($begin, $end, $time, "red");
     };
     ($begin:expr, $end:expr) => {
-        dbg_line!($begin, $end, 0.0);
+        $crate::dbg_line!($begin, $end, 0.0);
     };
 }
 
@@ -118,18 +121,20 @@ pub fn debug_line(begin: Vec2f, end: Vec2f, time: f64, color: &'static str) {
     });
 }
 
-/// Draw a small cross at world coordinates which lasts `time` seconds.
-/// If `time` is 0, it'll last 1 frame.
+/// Draw a small cross at world coordinates.
+/// Optionally specify
+/// - how long it lasts in seconds (default 1 frame)
+/// - color
 #[macro_export]
 macro_rules! dbg_cross {
     ($point:expr, $time:expr, $color:expr) => {
         $crate::debugging::debug_cross($point, $time, $color);
     };
     ($point:expr, $time:expr) => {
-        dbg_cross!($point, $time, "red");
+        $crate::dbg_cross!($point, $time, "red");
     };
     ($point:expr) => {
-        dbg_cross!($point, 0.0);
+        $crate::dbg_cross!($point, 0.0);
     };
 }
 
