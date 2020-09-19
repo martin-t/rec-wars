@@ -22,6 +22,9 @@ pub(crate) struct Cb;
 pub(crate) struct Rocket;
 
 #[derive(Debug, Clone, Copy)]
+pub(crate) struct Bfg;
+
+#[derive(Debug, Clone, Copy)]
 pub(crate) struct Hitbox {
     pub(crate) mins: Vec2f,
     pub(crate) maxs: Vec2f,

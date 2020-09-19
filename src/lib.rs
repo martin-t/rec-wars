@@ -36,7 +36,7 @@ use wasm_bindgen::JsCast;
 
 use web_sys::{CanvasRenderingContext2d, HtmlImageElement, Performance};
 
-use components::{Angle, Cb, Hitbox, Mg, Pos, Rocket, Time, Vehicle, Vel};
+use components::{Angle, Bfg, Cb, Hitbox, Mg, Pos, Rocket, Time, Vehicle, Vel};
 use cvars::{Cvars, Hardpoint, TickrateMode};
 use debugging::{DEBUG_CROSSES, DEBUG_LINES, DEBUG_TEXTS};
 use entities::{Ammo, GuidedMissile, Tank};
@@ -362,7 +362,15 @@ impl Game {
                             self.gs.gm = GuidedMissile::spawn(cvars, origin, angle);
                             self.gs.pe = PlayerEntity::GuidedMissile;
                         }
-                        Weapon::Bfg => {}
+                        Weapon::Bfg => {
+                            let pos = Pos(origin);
+                            let mut vel = Vec2f::new(cvars.g_bfg_speed, 0.0).rotated_z(angle);
+                            if cvars.g_bfg_add_vehicle_velocity {
+                                vel += self.gs.tank.vel;
+                            }
+                            let vel = Vel(vel);
+                            self.legion.push((Bfg, pos, vel));
+                        }
                     }
                 }
             }
@@ -429,11 +437,20 @@ impl Game {
             }
         }
 
+        // BFG
+        let mut query = <(legion::Entity, &Bfg, &mut Pos, &Vel)>::query();
+        for (&entity, _, pos, vel) in query.iter_mut(&mut self.legion) {
+            pos.0 += vel.0 * dt;
+
+            if self.map.collision(pos.0) {
+                // TODO BFG explosion
+                to_remove.push(entity);
+            }
+        }
+
         for entity in to_remove {
             self.legion.remove(entity);
         }
-
-        // fake BFG (TODO)
 
         // Movement
         if self.gs.pe == PlayerEntity::Tank {
@@ -598,7 +615,19 @@ impl Game {
                 .fill_rect(player_scr_pos.x, player_scr_pos.y, 1.0, 1.0);
         }
 
-        // Draw fake BFG (TODO)
+        // Draw BFG
+        self.context.set_fill_style(&"lime".into());
+        let mut bfg_cnt = 0;
+        let mut query = <(&Bfg, &Pos)>::query();
+        for (_, pos) in query.iter(&self.legion) {
+            bfg_cnt += 1;
+            let scr_pos = pos.0 - top_left;
+            self.context.begin_path();
+            self.context
+                .arc(scr_pos.x, scr_pos.y, cvars.g_bfg_radius, 0.0, 2.0 * PI)?;
+            self.context.fill();
+        }
+        dbg_textd!(bfg_cnt);
 
         // Draw player vehicle chassis
         let tank = &self.gs.tank;
