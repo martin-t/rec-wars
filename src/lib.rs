@@ -467,7 +467,7 @@ impl Game {
     pub fn draw(&mut self, cvars: &Cvars) -> Result<(), JsValue> {
         let start = self.performance.now();
 
-        // Nicer rockets (more like original RW).
+        // No smoothing makes nicer rockets (more like original RW).
         // This also means everything is aligned to pixels
         // without the need to explicitly round x and y in draw calls to whole numbers.
         // TODO revisit when drawing tanks - maybe make configurable per drawn object
@@ -494,7 +494,6 @@ impl Game {
         } else {
             top_left_tp.offset
         };
-        // TODO align player? other?
 
         // Draw non-walls
         let mut r = top_left_index.y;
