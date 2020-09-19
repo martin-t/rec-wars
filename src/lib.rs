@@ -366,41 +366,7 @@ impl Game {
                             self.gs.gm = GuidedMissile::spawn(cvars, origin, angle);
                             self.gs.pe = PlayerEntity::GuidedMissile;
                         }
-                        Weapon::Bfg => {
-                            let pos = Pos(origin);
-                            for _ in 0..cvars.g_cluster_bomb_count {
-                                let speed = cvars.g_cluster_bomb_speed;
-                                let spread_forward;
-                                let spread_sideways;
-                                if cvars.g_cluster_bomb_speed_spread_gaussian {
-                                    // Broken type inference (works with rand crate but distributions are deprecated).
-                                    let r: f64 = self.gs.rng.sample(StandardNormal);
-                                    spread_forward = cvars.g_cluster_bomb_speed_spread_forward * r;
-                                    let r: f64 = self.gs.rng.sample(StandardNormal);
-                                    spread_sideways =
-                                        cvars.g_cluster_bomb_speed_spread_sideways * r;
-                                } else {
-                                    let r = self.gs.rng.gen_range(-1.5, 1.5);
-                                    spread_forward = cvars.g_cluster_bomb_speed_spread_forward * r;
-                                    let r = self.gs.rng.gen_range(-1.5, 1.5);
-                                    spread_sideways =
-                                        cvars.g_cluster_bomb_speed_spread_sideways * r;
-                                }
-
-                                let mut vel = Vec2f::new(speed + spread_forward, spread_sideways)
-                                    .rotated_z(angle);
-                                if cvars.g_cluster_bomb_add_vehicle_velocity {
-                                    vel += self.gs.tank.vel;
-                                }
-                                let vel = Vel(vel);
-                                let time = frame_time
-                                    + cvars.g_cluster_bomb_time
-                                    + self.gs.rng.gen_range(-1.0, 1.0)
-                                        * cvars.g_cluster_bomb_time_spread;
-                                let time = Time(time);
-                                self.hecs.spawn((Cb, pos, vel, time));
-                            }
-                        }
+                        Weapon::Bfg => {}
                     }
                 }
             }
@@ -474,27 +440,7 @@ impl Game {
             self.legion.remove(entity);
         }
 
-        let mut to_remove = Vec::new();
-
         // fake BFG (TODO)
-        for (entity, (_, pos, vel, time)) in
-            self.hecs.query::<(&Cb, &mut Pos, &Vel, &Time)>().iter()
-        {
-            pos.0 += vel.0 * dt;
-
-            if frame_time > time.0 {
-                self.gs.explosions.push(Explosion::new(
-                    pos.0,
-                    cvars.g_cluster_bomb_explosion_scale,
-                    time.0,
-                ));
-                to_remove.push(entity);
-            }
-        }
-
-        for entity in to_remove {
-            self.hecs.despawn(entity).unwrap();
-        }
 
         // Movement
         if self.gs.pe == PlayerEntity::Tank {
@@ -660,29 +606,6 @@ impl Game {
         }
 
         // Draw fake BFG (TODO)
-        if cvars.r_draw_cluster_bombs {
-            self.context.set_fill_style(&"rgb(100, 255, 0)".into());
-            let shadow_rgba = format!("rgba(0, 0, 0, {})", cvars.g_cluster_bomb_shadow_alpha);
-            self.context.set_shadow_color(&shadow_rgba);
-            self.context
-                .set_shadow_offset_x(cvars.g_cluster_bomb_shadow_x);
-            self.context
-                .set_shadow_offset_y(cvars.g_cluster_bomb_shadow_y);
-            let mut bfg_cnt = 0;
-            for (_, (_, pos)) in self.hecs.query::<(&Cb, &Pos)>().iter() {
-                bfg_cnt += 1;
-                let scr_pos = pos.0 - top_left;
-                self.context.fill_rect(
-                    scr_pos.x - cvars.g_cluster_bomb_size / 2.0,
-                    scr_pos.y - cvars.g_cluster_bomb_size / 2.0,
-                    cvars.g_cluster_bomb_size,
-                    cvars.g_cluster_bomb_size,
-                );
-            }
-            self.context.set_shadow_offset_x(0.0);
-            self.context.set_shadow_offset_y(0.0);
-            dbg_textd!(bfg_cnt);
-        }
 
         // Draw player vehicle chassis
         let tank = &self.gs.tank;
