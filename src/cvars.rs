@@ -53,6 +53,7 @@ pub struct Cvars {
     pub g_homing_missile_reload_time: f64,
 
     pub g_machine_gun_add_vehicle_velocity: bool,
+    pub g_machine_gun_angle_spread: f64,
     pub g_machine_gun_refire: f64,
     pub g_machine_gun_reload_ammo: u32,
     pub g_machine_gun_reload_time: f64,
@@ -309,6 +310,7 @@ impl Default for Cvars {
             g_homing_missile_reload_time: 1.5,
 
             g_machine_gun_add_vehicle_velocity: true,
+            g_machine_gun_angle_spread: 0.015,
             g_machine_gun_refire: 0.050,
             g_machine_gun_reload_ammo: 50,
             g_machine_gun_reload_time: 1.0,

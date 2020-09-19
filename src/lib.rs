@@ -294,8 +294,12 @@ impl Game {
                     match self.gs.cur_weapon {
                         Weapon::Mg => {
                             let pos = Pos(origin);
-                            let mut vel =
-                                Vec2f::new(cvars.g_machine_gun_speed, 0.0).rotated_z(angle);
+                            let r: f64 = self.gs.rng.sample(StandardNormal);
+                            let spread = cvars.g_machine_gun_angle_spread * r;
+                            // Using spread as y would mean the resulting spread depends on speed
+                            // so it's better to use spread on angle.
+                            let mut vel = Vec2f::new(cvars.g_machine_gun_speed, 0.0)
+                                .rotated_z(angle + spread);
                             if cvars.g_machine_gun_add_vehicle_velocity {
                                 vel += self.gs.tank.vel;
                             }
