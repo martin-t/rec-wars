@@ -103,6 +103,8 @@ async function run() {
 
     let img_explosion = new Image();
     img_explosion.src = "../assets/explosion.png";
+    let img_explosion_cyan = new Image();
+    img_explosion_cyan.src = "../assets/explosion_cyan.png";
     let img_rocket = new Image();
     img_rocket.src = "../assets/weapons/rocket.png";
     let img_gm = new Image();
@@ -258,7 +260,7 @@ async function run() {
         // - LATER try returning Rc/Arc
         const cvars = new Cvars();
         const game = new Game(cvars, ctx, canvas.width, canvas.height,
-            imgs_tiles, imgs_vehicles, imgs_weapon_icons, img_rocket, img_gm, img_tank_green, img_tank_red, img_explosion,
+            imgs_tiles, imgs_vehicles, imgs_weapon_icons, img_rocket, img_gm, img_tank_green, img_tank_red, img_explosion, img_explosion_cyan,
             tex_list_text, map_text);
 
         // Make some things available on window for easier debugging.

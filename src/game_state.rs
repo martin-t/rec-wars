@@ -2,8 +2,11 @@ use rand::prelude::*;
 
 use wasm_bindgen::prelude::*;
 
-use crate::{entities::{GuidedMissile, Tank}, weapons::Weapon};
 use crate::map::Vec2f;
+use crate::{
+    entities::{GuidedMissile, Tank},
+    weapons::Weapon,
+};
 
 /// Everyting that changes during the game
 /// and might need to be taken back during frame interpolation / reconciliation.
@@ -26,14 +29,16 @@ pub(crate) struct Explosion {
     pub(crate) pos: Vec2f,
     pub(crate) scale: f64,
     pub(crate) start_time: f64,
+    pub(crate) bfg: bool,
 }
 
 impl Explosion {
-    pub(crate) fn new(pos: Vec2f, scale: f64, start_time: f64) -> Self {
+    pub(crate) fn new(pos: Vec2f, scale: f64, start_time: f64, bfg: bool) -> Self {
         Self {
             pos,
             scale,
             start_time,
+            bfg,
         }
     }
 }

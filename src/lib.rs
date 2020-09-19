@@ -60,6 +60,7 @@ pub struct Game {
     img_tank_green: HtmlImageElement,
     img_tank_red: HtmlImageElement,
     img_explosion: HtmlImageElement,
+    img_explosion_cyan: HtmlImageElement,
     /// Saved frame times in seconds over some period of time to measure FPS
     frame_times: VecDeque<f64>,
     update_durations: VecDeque<f64>,
@@ -86,6 +87,7 @@ impl Game {
         img_tank_green: HtmlImageElement,
         img_tank_red: HtmlImageElement,
         img_explosion: HtmlImageElement,
+        img_explosion_cyan: HtmlImageElement,
         tex_list_text: &str,
         map_text: &str,
     ) -> Self {
@@ -153,6 +155,7 @@ impl Game {
             img_tank_green,
             img_tank_red,
             img_explosion,
+            img_explosion_cyan,
             frame_times: VecDeque::new(),
             update_durations: VecDeque::new(),
             draw_durations: VecDeque::new(),
@@ -398,6 +401,7 @@ impl Game {
                     pos.0,
                     cvars.g_cluster_bomb_explosion_scale,
                     time.0,
+                    false,
                 ));
                 to_remove.push(entity);
             }
@@ -419,6 +423,7 @@ impl Game {
                     pos.0,
                     cvars.g_rockets_explosion_scale,
                     self.gs.frame_time,
+                    false,
                 ));
                 to_remove.push(entity);
                 continue;
@@ -430,6 +435,7 @@ impl Game {
                         pos.0,
                         cvars.g_rockets_explosion_scale,
                         self.gs.frame_time,
+                        false,
                     ));
                     to_remove.push(entity);
                     break;
@@ -443,7 +449,12 @@ impl Game {
             pos.0 += vel.0 * dt;
 
             if self.map.collision(pos.0) {
-                // TODO BFG explosion
+                self.gs.explosions.push(Explosion::new(
+                    pos.0,
+                    cvars.g_bfg_explosion_scale,
+                    self.gs.frame_time,
+                    true,
+                ));
                 to_remove.push(entity);
             }
         }
@@ -465,7 +476,7 @@ impl Game {
             self.gs.gm.tick(dt, cvars, &Input::default(), &self.map)
         };
         if hit_something {
-            let explosion = Explosion::new(self.gs.gm.pos, 1.0, self.gs.frame_time);
+            let explosion = Explosion::new(self.gs.gm.pos, 1.0, self.gs.frame_time, false);
             self.gs.explosions.push(explosion);
             self.gs.pe = PlayerEntity::Tank;
             let (pos, angle) = self.map.random_spawn(&mut self.gs.rng);
@@ -698,11 +709,19 @@ impl Game {
             let progress = (self.gs.frame_time - explosion.start_time) / cvars.r_explosion_duration;
             // 13 sprites in the sheet, 100x100 pixels per sprite
             let frame = (progress * 13.0).floor();
-            let offset = frame * 100.0;
+            let (offset, img);
+            if explosion.bfg {
+                offset = (12.0 - frame) * 100.0;
+                img = &self.img_explosion_cyan;
+            } else {
+                offset = frame * 100.0;
+                img = &self.img_explosion;
+            };
+            dbg_textd!(frame, offset);
             let scr_pos = explosion.pos - top_left;
             self.context
                 .draw_image_with_html_image_element_and_sw_and_sh_and_dx_and_dy_and_dw_and_dh(
-                    &self.img_explosion,
+                    img,
                     offset,
                     0.0,
                     100.0,
