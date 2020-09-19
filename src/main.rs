@@ -70,12 +70,16 @@
 //          - can't delete while iterating
 //          - no clone / snapshots
 //          + ffa example
-//          + nested queries
+//          + nested queries (takes &World even for write access)
+//          + slightly faster in WASM, especially debug mode
+//          - no resources, commands
 //      legion
 //          - can't delete while iterating
-//          + should be able to make a clone of the world manually
+//          + should be able to make a clone of the world (clone_from)
 //          - bad docs / no examples / 0.3 transition
-//          - how to do nested queries without copying?
+//          - how to do nested queries without copying? split world? maybe systems make this easier?
+//          + slightly slower in WASM, especially debug mode
+//          + resources, commands?
 // [ ] render vehicles
 //      [x] basic tank
 //      [ ] skins, colors
@@ -111,11 +115,11 @@
 //          [ ] origins: tank: gun, hummer: chassis
 //          [x] reload: 1 s
 //      [ ] CB
-//          [ ] explosions happen on walls, just partially obscured
+//          [x] explosions happen on walls, just partially obscured
 //          [ ] reflect off map edge
 //          [x] reload: 1.5 s
 //          [x] 40 per shot
-//          [ ] next shot starts a few frames after last explosion disappears
+//          [x] next shot starts a few frames after last explosion disappears
 //          orig RW:
 //              size 1, shadow offset 1
 //              40 frames to first explosion, 58 to last
@@ -130,8 +134,9 @@
 //      [ ] guided missile
 //          [x] reload: 1.5 s
 //      [ ] BFG - delay? speed change? range? random dir when dead? explosion range (through wall)?
-//          explosion animation goes backwards
+//          [x] explosion animation goes backwards
 //          [x] reload: 2.5 s
+//          [ ] flashing color
 //      [ ] entity culling? faster to render?
 //      [ ] check collision detection works if gun is inside another vehicle
 // [ ] mines
@@ -143,7 +148,10 @@
 //      [ ] HUD
 //      [ ] vehicles (is turret "higher"?)
 //      [ ] CB
-// [ ] self destruct - bigger exposion, countdown, sounds
+// [ ] self destruct
+//      [ ] bigger exposion
+//      [ ] countdown
+//      [ ] sounds
 //      works through walls
 // [ ] player separate from vehicle
 // [ ] what happens to Entity handles after player disconnect
