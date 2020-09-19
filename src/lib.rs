@@ -714,7 +714,11 @@ impl Game {
         let mut query = <(&Pos, &Angle, &Hitbox)>::query();
         for (pos, angle, _hitbox) in query.iter(&self.legion) {
             let scr_pos = pos.0 - top_left;
-            self.draw_img_center(&self.img_tank_red, scr_pos, angle.0)?;
+            if (pos.0.x + pos.0.y) % 256.0 > 128.0 {
+                self.draw_img_center(&self.img_tank_red, scr_pos, angle.0)?;
+            } else {
+                self.draw_img_center(&self.img_tank_green, scr_pos, angle.0)?;
+            }
             if cvars.d_debug_draw {
                 self.context.set_stroke_style(&"yellow".into());
                 self.context.begin_path();
