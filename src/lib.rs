@@ -42,7 +42,7 @@ use debugging::{DEBUG_CROSSES, DEBUG_LINES, DEBUG_TEXTS};
 use entities::{Ammo, GuidedMissile, Tank};
 use game_state::{Explosion, GameState, Input, PlayerEntity};
 use map::{F64Ext, Kind, Map, Vec2f, VecExt, TILE_SIZE};
-use weapons::*;
+use weapons::{Weapon, WEAPS_CNT};
 
 #[wasm_bindgen]
 pub struct Game {

@@ -4,7 +4,7 @@ use std::default::Default;
 
 use wasm_bindgen::prelude::*;
 
-use crate::{components::Vehicle, map::Vec2f, weapons::*};
+use crate::{components::Vehicle, map::Vec2f, weapons::Weapon};
 
 /// Console variables - configuration options for anything and everything.
 ///
