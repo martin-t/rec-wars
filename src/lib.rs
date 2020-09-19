@@ -20,8 +20,6 @@ mod weapons;
 use std::collections::VecDeque;
 use std::f64::consts::PI;
 
-use hecs;
-
 use legion;
 use legion::query::IntoQuery;
 
@@ -69,7 +67,6 @@ pub struct Game {
     map: Map,
     gs: GameState,
     gs_prev: GameState,
-    hecs: hecs::World,
     legion: legion::World,
 }
 
@@ -162,7 +159,6 @@ impl Game {
             map,
             gs,
             gs_prev,
-            hecs: hecs::World::new(),
             legion,
         }
     }
@@ -304,7 +300,7 @@ impl Game {
                                 vel += self.gs.tank.vel;
                             }
                             let vel = Vel(vel);
-                            self.hecs.spawn((Mg, pos, vel));
+                            self.legion.push((Mg, pos, vel));
                         }
                         Weapon::Rail => {
                             let dir = angle.to_vec2f();
@@ -372,20 +368,17 @@ impl Game {
             }
         }
 
-        // MG
         let mut to_remove = Vec::new();
-        for (entity, (_, pos, vel)) in self.hecs.query::<(&Mg, &mut Pos, &Vel)>().iter() {
+
+        // MG
+        let mut query = <(legion::Entity, &Mg, &mut Pos, &Vel)>::query();
+        for (&entity, _, pos, vel) in query.iter_mut(&mut self.legion) {
             pos.0 += vel.0 * dt;
 
             if self.map.collision(pos.0) {
                 to_remove.push(entity);
             }
         }
-        for entity in to_remove {
-            self.hecs.despawn(entity).unwrap();
-        }
-
-        let mut to_remove = Vec::new();
 
         // CBs
         let mut query = <(legion::Entity, &Cb, &mut Pos, &Vel, &Time)>::query();
@@ -527,7 +520,8 @@ impl Game {
         // Draw MGs
         self.context.set_stroke_style(&"yellow".into());
         let mut mg_cnt = 0;
-        for (_, (_, pos, vel)) in self.hecs.query::<(&Mg, &Pos, &Vel)>().iter() {
+        let mut query = <(&Mg, &Pos, &Vel)>::query();
+        for (_, pos, vel) in query.iter(&self.legion) {
             mg_cnt += 1;
             let scr_pos = pos.0 - top_left;
             self.context.begin_path();
