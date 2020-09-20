@@ -642,15 +642,37 @@ impl Game {
 
         // Draw BFG
         self.context.set_fill_style(&"lime".into());
+        self.context.set_stroke_style(&"lime".into());
         let mut bfg_cnt = 0;
         let mut query = <(&Bfg, &Pos)>::query();
-        for (_, pos) in query.iter(&self.legion) {
+        for (_, bfg_pos) in query.iter(&self.legion) {
             bfg_cnt += 1;
-            let scr_pos = pos.0 - top_left;
+            let bfg_scr_pos = bfg_pos.0 - top_left;
             self.context.begin_path();
-            self.context
-                .arc(scr_pos.x, scr_pos.y, cvars.g_bfg_radius, 0.0, 2.0 * PI)?;
+            self.context.arc(
+                bfg_scr_pos.x,
+                bfg_scr_pos.y,
+                cvars.g_bfg_radius,
+                0.0,
+                2.0 * PI,
+            )?;
             self.context.fill();
+
+            let mut query_vehicles = <(&Vehicle, &Destroyed, &Pos)>::query();
+            for (_, destroyed, vehicle_pos) in query_vehicles.iter(&self.legion) {
+                if destroyed.0
+                    || (bfg_pos.0).distance_squared(vehicle_pos.0) > cvars.g_bfg_beam_range.powi(2)
+                {
+                    continue;
+                }
+
+                let vehicle_scr_pos = vehicle_pos.0 - top_left;
+
+                self.context.begin_path();
+                self.move_to(bfg_scr_pos);
+                self.line_to(vehicle_scr_pos);
+                self.context.stroke();
+            }
         }
         dbg_textd!(bfg_cnt);
 

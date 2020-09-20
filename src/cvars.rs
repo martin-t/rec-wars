@@ -31,6 +31,7 @@ pub struct Cvars {
     pub d_speed: f64,
 
     pub g_bfg_add_vehicle_velocity: bool,
+    pub g_bfg_beam_range: f64,
     pub g_bfg_explosion_scale: f64,
     pub g_bfg_radius: f64,
     pub g_bfg_reload_ammo: u32,
@@ -292,6 +293,7 @@ impl Default for Cvars {
             d_speed: 1.0,
 
             g_bfg_add_vehicle_velocity: true,
+            g_bfg_beam_range: 125.0,
             g_bfg_explosion_scale: 1.0,
             g_bfg_radius: 4.0,
             g_bfg_reload_ammo: 1,
