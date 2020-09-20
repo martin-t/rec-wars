@@ -22,9 +22,10 @@ pub struct Cvars {
     // Would be nice to keep alphabetically.
     //  |
     //  v
-    pub d_debug_draw: bool,
-    pub d_debug_text: bool,
-    pub d_debug_text_line_height: f64,
+    pub d_draw: bool,
+    pub d_draw_hitboxes: bool,
+    pub d_text: bool,
+    pub d_text_line_height: f64,
     pub d_rockets_image: bool,
     pub d_seed: u64,
     /// Change speed of everything in the game
@@ -285,9 +286,10 @@ impl Cvars {
 impl Default for Cvars {
     fn default() -> Self {
         Self {
-            d_debug_draw: true,
-            d_debug_text: true,
-            d_debug_text_line_height: 11.0,
+            d_draw: true,
+            d_draw_hitboxes: false,
+            d_text: true,
+            d_text_line_height: 12.0,
             d_rockets_image: true,
             d_seed: 0,
             d_speed: 1.0,

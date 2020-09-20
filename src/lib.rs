@@ -635,7 +635,7 @@ impl Game {
         let gm = &self.gs.gm;
         let player_scr_pos = gm.pos - top_left;
         self.draw_img_center(&self.img_gm, player_scr_pos, gm.vel.to_angle())?;
-        if cvars.d_debug_draw {
+        if cvars.d_draw {
             self.context
                 .fill_rect(player_scr_pos.x, player_scr_pos.y, 1.0, 1.0);
         }
@@ -680,7 +680,7 @@ impl Game {
         let tank = &self.gs.tank;
         let tank_scr_pos = tank.pos - top_left;
         self.draw_img_center(&self.imgs_vehicles[0], tank_scr_pos, tank.angle)?;
-        if cvars.d_debug_draw {
+        if cvars.d_draw && cvars.d_draw_hitboxes {
             self.context.set_stroke_style(&"yellow".into());
             self.context.begin_path();
             let corners = Tank::corners(cvars, tank_scr_pos, tank.angle);
@@ -717,7 +717,7 @@ impl Game {
             } else {
                 self.draw_img_center(&self.img_tank_green, scr_pos, angle.0)?;
             }
-            if cvars.d_debug_draw {
+            if cvars.d_draw && cvars.d_draw_hitboxes {
                 self.context.set_stroke_style(&"yellow".into());
                 self.context.begin_path();
                 let corners = Tank::corners(cvars, scr_pos, angle.0);
@@ -793,7 +793,7 @@ impl Game {
         }
 
         // Draw debug lines and crosses
-        if cvars.d_debug_draw {
+        if cvars.d_draw {
             let dt = self.gs.frame_time - self.gs_prev.frame_time;
             DEBUG_LINES.with(|lines| {
                 let mut lines = lines.borrow_mut();
@@ -991,10 +991,10 @@ impl Game {
         let mut y = 20.0;
         DEBUG_TEXTS.with(|texts| {
             let mut texts = texts.borrow_mut();
-            if cvars.d_debug_text {
+            if cvars.d_text {
                 for line in texts.iter() {
                     self.context.fill_text(line, 20.0, y).unwrap();
-                    y += cvars.d_debug_text_line_height;
+                    y += cvars.d_text_line_height;
                 }
             }
             texts.clear();
