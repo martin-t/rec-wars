@@ -87,6 +87,16 @@ async function run() {
         return img;
     });
 
+    let imgs_wrecks = [
+        "../assets/wrecks/tank.png",
+        "../assets/wrecks/hovercraft.png",
+        "../assets/wrecks/hummer.png",
+    ].map((path) => {
+        let img = new Image();
+        img.src = path;
+        return img;
+    });
+
     let imgs_weapon_icons = [
         "../assets/weapon_icons/mg.png",
         "../assets/weapon_icons/rail.png",
@@ -254,7 +264,8 @@ async function run() {
         // - LATER try returning Rc/Arc
         const cvars = new Cvars();
         const game = new Game(cvars, ctx, canvas.width, canvas.height,
-            imgs_tiles, imgs_vehicles, imgs_weapon_icons, img_rocket, img_gm, img_tank_green, img_tank_red, img_explosion, img_explosion_cyan,
+            imgs_tiles, imgs_vehicles, imgs_wrecks, imgs_weapon_icons,
+            img_rocket, img_gm, img_tank_green, img_tank_red, img_explosion, img_explosion_cyan,
             tex_list_text, map_text);
 
         // Make some things available on window for easier debugging.

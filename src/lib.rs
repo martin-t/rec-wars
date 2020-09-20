@@ -36,7 +36,7 @@ use wasm_bindgen::JsCast;
 
 use web_sys::{CanvasRenderingContext2d, HtmlImageElement, Performance};
 
-use components::{Angle, Bfg, Cb, Hitbox, Mg, Pos, Rocket, Time, Vehicle, Vel};
+use components::{Angle, Bfg, Cb, Destroyed, Hitbox, Mg, Pos, Rocket, Time, Vehicle, Vel};
 use cvars::{Cvars, Hardpoint, TickrateMode};
 use debugging::{DEBUG_CROSSES, DEBUG_LINES, DEBUG_TEXTS};
 use entities::{Ammo, GuidedMissile, Tank};
@@ -54,6 +54,7 @@ pub struct Game {
     canvas_size: Vec2f,
     imgs_tiles: Vec<HtmlImageElement>,
     imgs_vehicles: Vec<HtmlImageElement>,
+    imgs_wrecks: Vec<HtmlImageElement>,
     imgs_weapon_icons: Vec<HtmlImageElement>,
     img_rocket: HtmlImageElement,
     img_gm: HtmlImageElement,
@@ -81,6 +82,7 @@ impl Game {
         height: f64,
         array_tiles: Array,
         array_vehicles: Array,
+        array_wrecks: Array,
         array_weapon_icons: Array,
         img_rocket: HtmlImageElement,
         img_gm: HtmlImageElement,
@@ -105,6 +107,10 @@ impl Game {
             .map(|tile| tile.dyn_into().unwrap())
             .collect();
         let imgs_vehicles = array_vehicles
+            .iter()
+            .map(|js_val| js_val.dyn_into().unwrap())
+            .collect();
+        let imgs_wrecks = array_wrecks
             .iter()
             .map(|js_val| js_val.dyn_into().unwrap())
             .collect();
@@ -136,11 +142,18 @@ impl Game {
 
         let mut legion = legion::World::default();
         for _ in 0..50 {
+            let vehicle = Vehicle::Tank;
             let pos = map.random_nonwall(&mut gs.rng).0;
             let mins = Vec2f::new(cvars.g_tank_mins_x, cvars.g_tank_mins_y);
             let maxs = Vec2f::new(cvars.g_tank_maxs_x, cvars.g_tank_maxs_y);
             let angle = gs.rng.gen_range(0.0, 2.0 * PI);
-            legion.push((Pos(pos), Angle(angle), Hitbox { mins, maxs }));
+            legion.push((
+                vehicle,
+                Destroyed(gs.rng.gen_bool(0.2)),
+                Pos(pos),
+                Angle(angle),
+                Hitbox { mins, maxs },
+            ));
         }
 
         Self {
@@ -149,6 +162,7 @@ impl Game {
             canvas_size: Vec2f::new(width, height),
             imgs_tiles,
             imgs_vehicles,
+            imgs_wrecks,
             imgs_weapon_icons,
             img_rocket,
             img_gm,
@@ -671,10 +685,12 @@ impl Game {
         )?;
 
         // Draw other tanks
-        let mut query = <(&Pos, &Angle, &Hitbox)>::query();
-        for (pos, angle, _hitbox) in query.iter(&self.legion) {
+        let mut query = <(&Vehicle, &Destroyed, &Pos, &Angle)>::query();
+        for (_vehicle, destroyed, pos, angle) in query.iter(&self.legion) {
             let scr_pos = pos.0 - top_left;
-            if (pos.0.x + pos.0.y) % 256.0 > 128.0 {
+            if destroyed.0 {
+                self.draw_img_center(&self.imgs_wrecks[0], scr_pos, angle.0)?;
+            } else if (pos.0.x + pos.0.y) % 256.0 > 128.0 {
                 self.draw_img_center(&self.img_tank_red, scr_pos, angle.0)?;
             } else {
                 self.draw_img_center(&self.img_tank_green, scr_pos, angle.0)?;
