@@ -110,6 +110,7 @@
 //          [x] reload: 1 s
 //          [x] 50 per reload
 //          [x] about 2.5 s to empty magazine -> refire 50 ms
+//          [ ] shooting to the side while moving looks awful
 //      [ ] rail
 //          [ ] push
 //          [ ] origins: tank: gun, hummer: chassis
