@@ -119,10 +119,6 @@ async function run() {
     img_rocket.src = "../assets/weapons/rocket.png";
     let img_gm = new Image();
     img_gm.src = "../assets/weapons/guided_missile.png";
-    let img_tank_green = new Image();
-    img_tank_green.src = "../assets/tank_green.png";
-    let img_tank_red = new Image();
-    img_tank_red.src = "../assets/tank_red.png";
     // https://stackoverflow.com/questions/46399223/async-await-in-image-loading
     // https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/createImageBitmap
     // or better yet, figure out how webpack works
@@ -265,7 +261,7 @@ async function run() {
         const cvars = new Cvars();
         const game = new Game(cvars, ctx, canvas.width, canvas.height,
             imgs_tiles, imgs_vehicles, imgs_wrecks, imgs_weapon_icons,
-            img_rocket, img_gm, img_tank_green, img_tank_red, img_explosion, img_explosion_cyan,
+            img_rocket, img_gm, img_explosion, img_explosion_cyan,
             tex_list_text, map_text);
 
         // Make some things available on window for easier debugging.
