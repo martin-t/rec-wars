@@ -32,12 +32,10 @@ impl GuidedMissile {
     /// Returns if it hit something.
     pub(crate) fn tick(&mut self, dt: f64, cvars: &Cvars, input: &Input, map: &Map) -> bool {
         // Accel / decel
-        let accel_input = input.up * cvars.g_guided_missile_speed_change
-            - input.down * cvars.g_guided_missile_speed_change;
-        let accel = accel_input * dt;
+        let accel_input = input.up_down() * cvars.g_guided_missile_speed_change * dt;
         let dir = self.vel.normalized();
         let speed_old = self.vel.magnitude();
-        let speed_new = (speed_old + accel).clamped(
+        let speed_new = (speed_old + accel_input).clamped(
             cvars.g_guided_missile_speed_min,
             cvars.g_guided_missile_speed_max,
         );
@@ -45,8 +43,7 @@ impl GuidedMissile {
 
         // Turning
         // TODO this doesn't feel like flying a missile - probably needs to carry some sideways momentum
-        let tr_input: f64 = input.right * cvars.g_guided_missile_turn_rate_increase * dt
-            - input.left * cvars.g_guided_missile_turn_rate_increase * dt;
+        let tr_input: f64 = input.right_left() * cvars.g_guided_missile_turn_rate_increase * dt;
 
         // Without input, turn rate should gradually decrease towards 0.
         let tr_old = self.turn_rate;
@@ -125,9 +122,7 @@ impl Tank {
     pub(crate) fn tick(&mut self, dt: f64, cvars: &Cvars, input: &Input, map: &Map) {
         // Turn rate
         dbg_textf!("tank orig tr: {}", self.turn_rate);
-        let tr_input = cvars.g_tank_turn_rate_increase * input.right
-            - cvars.g_tank_turn_rate_increase * input.left;
-        let tr_change = tr_input * dt;
+        let tr_change = input.right_left() * cvars.g_tank_turn_rate_increase * dt;
         dbg_textd!(tr_change);
         self.turn_rate += tr_change;
 
@@ -147,9 +142,7 @@ impl Tank {
         // Accel / decel
         // TODO lateral friction
         dbg_textf!("tank orig speed: {}", self.vel.magnitude());
-        let vel_input =
-            cvars.g_tank_accel_forward * input.up - cvars.g_tank_accel_backward * input.down;
-        let vel_change = vel_input * dt;
+        let vel_change = input.up_down() * cvars.g_tank_accel_forward * dt;
         dbg_textd!(vel_change);
         self.vel += Vec2f::unit_x().rotated_z(self.angle) * vel_change;
 

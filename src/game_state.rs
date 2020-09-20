@@ -52,15 +52,19 @@ pub(crate) enum PlayerEntity {
 #[wasm_bindgen]
 #[derive(Debug, Clone, Default)]
 pub struct Input {
-    pub left: f64,
-    pub right: f64,
-    pub up: f64,
-    pub down: f64,
+    pub left: bool,
+    pub right: bool,
+    pub up: bool,
+    pub down: bool,
     pub turret_left: bool,
     pub turret_right: bool,
     pub prev_weapon: bool,
     pub next_weapon: bool,
     pub fire: bool,
+    pub mine: bool,
+    pub self_destruct: bool,
+    pub horn: bool,
+    pub chat: bool,
 }
 
 #[wasm_bindgen]
@@ -68,5 +72,13 @@ impl Input {
     #[wasm_bindgen(constructor)]
     pub fn new() -> Self {
         Self::default()
+    }
+
+    pub(crate) fn right_left(&self) -> f64 {
+        self.right as i32 as f64 - self.left as i32 as f64
+    }
+
+    pub(crate) fn up_down(&self) -> f64 {
+        self.up as i32 as f64 - self.down as i32 as f64
     }
 }

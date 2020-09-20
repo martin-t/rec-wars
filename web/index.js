@@ -131,35 +131,43 @@ async function run() {
     const input = new Input();
     let paused = false;
 
+    // This can't be part of Cvars - there is no way to expose rust's String to JS as a struct field.
+    // It's a good idea to avoid Ctrl and Alt:
+    // - it's not possible to disable some browser shortcuts like Ctrl+W
+    // - Alt shows/hides the menu bar on linux
+    // TODO IE/edge?
+    //  https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key
+    //  https://www.w3.org/TR/uievents-key
+    const binds = {
+        left: ["arrowleft", "a"],
+        right: ["arrowright", "d"],
+        up: ["arrowup", "w"],
+        down: ["arrowdown", "s"],
+        turret_left: ["q", "n"],
+        turret_right: ["e", "m"],
+        prev_weapon: ["v", "."],
+        next_weapon: ["shift", "b", ","],
+        fire: [" "],
+        mine: ["j", "x"],
+        self_destruct: ["l"],
+        horn: ["h"],
+        chat: [],
+        pause: ["pause", "p"],
+    };
+
     document.addEventListener("keydown", event => {
         if (log_time_checkbox.checked) {
             console.log(performance.now(), "down", event.key);
         }
 
-        // TODO IE/edge?
-        //  https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key
-        //  https://www.w3.org/TR/uievents-key
-        // TODO possible to disable shortcuts like CTRL+W? binds without modifiers?
         // Single letters need toLowerCase to be detected when shift is held.
-        if (event.key === "ArrowLeft" || event.key.toLowerCase() === "a") {
-            input.left = 1;
-        } else if (event.key === "ArrowRight" || event.key.toLowerCase() === "d") {
-            input.right = 1;
-        } else if (event.key === "ArrowUp" || event.key.toLowerCase() === "w") {
-            input.up = 1;
-        } else if (event.key === "ArrowDown" || event.key.toLowerCase() === "s") {
-            input.down = 1;
-        } else if (event.key.toLowerCase() === "n") {
-            input.turret_left = true;
-        } else if (event.key.toLowerCase() === "m") {
-            input.turret_right = true;
-        } else if (event.key.toLowerCase() === "v" || event.key === ".") {
-            input.prev_weapon = true;
-        } else if (event.key === "Shift" || event.key.toLowerCase() === "b" || event.key === ",") {
-            input.next_weapon = true;
-        } else if (event.key === " ") {
-            input.fire = true;
-        } else if (event.key == "Pause" || event.key.toLowerCase() === "p") {
+        for (const action in binds) {
+            if (binds[action].includes(event.key.toLowerCase())) {
+                input[action] = true;
+            }
+        }
+
+        if (binds.pause.includes(event.key.toLowerCase())) {
             paused = !paused;
         }
     });
@@ -169,24 +177,10 @@ async function run() {
             console.log(performance.now(), "up", event.key);
         }
 
-        if (event.key === "ArrowLeft" || event.key.toLowerCase() === "a") {
-            input.left = 0;
-        } else if (event.key === "ArrowRight" || event.key.toLowerCase() === "d") {
-            input.right = 0;
-        } else if (event.key === "ArrowUp" || event.key.toLowerCase() === "w") {
-            input.up = 0;
-        } else if (event.key === "ArrowDown" || event.key.toLowerCase() === "s") {
-            input.down = 0;
-        } else if (event.key.toLowerCase() === "n") {
-            input.turret_left = false;
-        } else if (event.key.toLowerCase() === "m") {
-            input.turret_right = false;
-        } else if (event.key.toLowerCase() === "v" || event.key === ".") {
-            input.prev_weapon = false;
-        } else if (event.key === "Shift" || event.key.toLowerCase() === "b" || event.key === ",") {
-            input.next_weapon = false;
-        } else if (event.key === " ") {
-            input.fire = false;
+        for (const action in binds) {
+            if (binds[action].includes(event.key.toLowerCase())) {
+                input[action] = false;
+            }
         }
     });
 
