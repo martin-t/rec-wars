@@ -706,32 +706,19 @@ impl Game {
             offset_turret,
         )?;
 
-        // Draw other tanks
+        // Draw other vehicles
         let mut vehicle_cnt = 0;
         let mut query = <(&Vehicle, &Destroyed, &Pos, &Angle)>::query();
-        for (vehicle, destroyed, pos, angle) in query.iter(&self.legion) {
+        for (&vehicle, destroyed, pos, angle) in query.iter(&self.legion) {
             vehicle_cnt += 1;
             let scr_pos = pos.0 - top_left;
             let img;
             if destroyed.0 {
-                img = &self.imgs_wrecks[*vehicle as usize];
-            } else if (pos.0.x + pos.0.y) % 256.0 > 128.0 {
-                img = &self.img_tank_red;
+                img = &self.imgs_wrecks[vehicle as usize];
             } else {
-                img = &self.img_tank_green;
+                img = &self.imgs_vehicles[vehicle as usize * 2];
             }
             self.draw_img_center(img, scr_pos, angle.0)?;
-            if cvars.d_draw && cvars.d_draw_hitboxes {
-                self.context.set_stroke_style(&"yellow".into());
-                self.context.begin_path();
-                let corners = Tank::corners(cvars, scr_pos, angle.0);
-                self.move_to(corners[0]);
-                self.line_to(corners[1]);
-                self.line_to(corners[2]);
-                self.line_to(corners[3]);
-                self.context.close_path();
-                self.context.stroke();
-            }
         }
         dbg_textd!(vehicle_cnt);
 
