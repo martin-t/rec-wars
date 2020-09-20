@@ -142,7 +142,7 @@ impl Game {
 
         let mut legion = legion::World::default();
         for _ in 0..50 {
-            let vehicle = Vehicle::Tank;
+            let vehicle = Vehicle::n(gs.rng.gen_range(0, 3)).unwrap();
             let pos = map.random_nonwall(&mut gs.rng).0;
             let mins = Vec2f::new(cvars.g_tank_mins_x, cvars.g_tank_mins_y);
             let maxs = Vec2f::new(cvars.g_tank_maxs_x, cvars.g_tank_maxs_y);
@@ -707,16 +707,20 @@ impl Game {
         )?;
 
         // Draw other tanks
+        let mut vehicle_cnt = 0;
         let mut query = <(&Vehicle, &Destroyed, &Pos, &Angle)>::query();
-        for (_vehicle, destroyed, pos, angle) in query.iter(&self.legion) {
+        for (vehicle, destroyed, pos, angle) in query.iter(&self.legion) {
+            vehicle_cnt += 1;
             let scr_pos = pos.0 - top_left;
+            let img;
             if destroyed.0 {
-                self.draw_img_center(&self.imgs_wrecks[0], scr_pos, angle.0)?;
+                img = &self.imgs_wrecks[*vehicle as usize];
             } else if (pos.0.x + pos.0.y) % 256.0 > 128.0 {
-                self.draw_img_center(&self.img_tank_red, scr_pos, angle.0)?;
+                img = &self.img_tank_red;
             } else {
-                self.draw_img_center(&self.img_tank_green, scr_pos, angle.0)?;
+                img = &self.img_tank_green;
             }
+            self.draw_img_center(img, scr_pos, angle.0)?;
             if cvars.d_draw && cvars.d_draw_hitboxes {
                 self.context.set_stroke_style(&"yellow".into());
                 self.context.begin_path();
@@ -729,6 +733,7 @@ impl Game {
                 self.context.stroke();
             }
         }
+        dbg_textd!(vehicle_cnt);
 
         // Draw explosions
         let iter: Box<dyn Iterator<Item = &Explosion>> = if cvars.r_explosions_reverse {

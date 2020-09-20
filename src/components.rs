@@ -1,3 +1,5 @@
+use enumn::N;
+
 use crate::map::Vec2f;
 
 #[derive(Debug, Clone, Copy)]
@@ -31,7 +33,7 @@ pub(crate) struct Hitbox {
 }
 
 #[allow(unused)]
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, N)]
 pub(crate) enum Vehicle {
     Tank,
     Hovercraft,
