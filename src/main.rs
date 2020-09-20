@@ -136,6 +136,8 @@
 //          [x] reload: 1.5 s
 //      [ ] BFG - delay? speed change? range? random dir when dead? explosion range (through wall)?
 //          [x] explosion animation goes backwards
+//          My explosion spritesheet is slightly different from original RW, i experimented with GIMP and this is the closest i got.
+//          Would be nice to figure out what exactly it did.
 //          [x] reload: 2.5 s
 //          [ ] flashing color
 //      [ ] entity culling? faster to render?
