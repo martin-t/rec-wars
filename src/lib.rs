@@ -326,7 +326,8 @@ impl Game {
                         *ammo = Ammo::Reloading(frame_time, frame_time + reload_time);
                     }
 
-                    let (hardpoint, weapon_offset) = cvars.g_hardpoint(*vehicle, self.gs.cur_weapon);
+                    let (hardpoint, weapon_offset) =
+                        cvars.g_hardpoint(*vehicle, self.gs.cur_weapon);
                     let (shot_angle, shot_origin);
                     match hardpoint {
                         Hardpoint::Chassis => {
@@ -540,7 +541,7 @@ impl Game {
         // No smoothing makes nicer rockets (more like original RW).
         // This also means everything is aligned to pixels
         // without the need to explicitly round x and y in draw calls to whole numbers.
-        // TODO revisit when drawing tanks - maybe make configurable per drawn object
+        // TODO revisit when drawing vehicles - maybe make configurable per drawn object
         //      if disabling, try changing quality
         self.context.set_image_smoothing_enabled(cvars.r_smoothing);
 
@@ -738,10 +739,10 @@ impl Game {
         // TODO Draw cow
 
         // Draw player vehicle turret
-        let tank_scr_pos = player_pos.0 - top_left;
+        let player_scr_pos = player_pos.0 - top_left;
         let offset_chassis =
             player_angle.0.to_mat2f() * cvars.g_vehicle_turret_offset_chassis(*player_vehicle);
-        let turret_scr_pos = tank_scr_pos + offset_chassis;
+        let turret_scr_pos = player_scr_pos + offset_chassis;
         let offset_turret = cvars.g_vehicle_turret_offset_turret(*player_vehicle);
         self.draw_img_offset(
             &self.imgs_vehicles[*player_vehicle as usize * 2 + 1],
@@ -859,15 +860,15 @@ impl Game {
         self.context.set_line_dash(&dash_pattern)?;
         self.context.begin_path();
         self.context.arc(
-            tank_scr_pos.x,
-            tank_scr_pos.y,
+            player_scr_pos.x,
+            player_scr_pos.y,
             cvars.hud_missile_indicator_radius,
             0.0,
             2.0 * PI,
         )?;
-        self.context.move_to(tank_scr_pos.x, tank_scr_pos.y);
+        self.context.move_to(player_scr_pos.x, player_scr_pos.y);
         let dir = (self.gs.gm.pos - player_pos.0).normalized();
-        let end = tank_scr_pos + dir * cvars.hud_missile_indicator_radius;
+        let end = player_scr_pos + dir * cvars.hud_missile_indicator_radius;
         self.line_to(end);
         self.context.stroke();
         self.context.set_line_dash(&Array::new())?;
@@ -926,26 +927,6 @@ impl Game {
         )?;
         self.context.set_shadow_offset_x(0.0);
         self.context.set_shadow_offset_y(0.0);
-
-        // let mut scr_pos = Vec2f::new(50.0, 50.0);
-        // self.draw_img_top_left(&self.img_tank, scr_pos, 0.0f64.to_radians())?;
-        // self.context.stroke_rect(scr_pos.x, scr_pos.y, 50.0, 30.0);
-        // scr_pos.y += 100.0;
-        // self.draw_img_top_left(&self.img_tank, scr_pos, 45.0f64.to_radians())?;
-        // self.context.stroke_rect(scr_pos.x, scr_pos.y, 50.0, 30.0);
-        // scr_pos.y += 100.0;
-        // self.draw_img_top_left(&self.img_tank, scr_pos, 90.0f64.to_radians())?;
-        // self.context.stroke_rect(scr_pos.x, scr_pos.y, 50.0, 30.0);
-
-        // let mut scr_pos = Vec2f::new(150.0, 50.0);
-        // self.draw_img_center(&self.img_tank, scr_pos, 0.0f64.to_radians())?;
-        // self.context.stroke_rect(scr_pos.x, scr_pos.y, 50.0, 30.0);
-        // scr_pos.y += 100.0;
-        // self.draw_img_center(&self.img_tank, scr_pos, 45.0f64.to_radians())?;
-        // self.context.stroke_rect(scr_pos.x, scr_pos.y, 50.0, 30.0);
-        // scr_pos.y += 100.0;
-        // self.draw_img_center(&self.img_tank, scr_pos, 90.0f64.to_radians())?;
-        // self.context.stroke_rect(scr_pos.x, scr_pos.y, 50.0, 30.0);
 
         self.context.set_fill_style(&"red".into());
 
