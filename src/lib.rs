@@ -225,7 +225,6 @@ impl Game {
                 self.tick(cvars);
             },
             TickrateMode::FixedOrSmaller => todo!(),
-            TickrateMode::FixedWithInterpolation => todo!(),
         }
 
         let end = self.performance.now();
@@ -296,7 +295,7 @@ impl Game {
         }
         pv.tick(dt, cvars, input, &self.map, pos, vel, angle, turn_rate);
 
-        let vel = *vel; // TOCO borrow checker hack
+        let vel = *vel; // TODO borrow checker hack
 
         // Turret turning
         if self.gs.input.turret_left {

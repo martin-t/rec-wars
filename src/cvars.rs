@@ -445,17 +445,22 @@ pub enum TickrateMode {
     /// Same FPS as rendering unless the step would be too large or too small.
     /// Too large steps are split into smaller ones.
     /// Too small steps are skipped and the time carries over to the next render frame,
-    /// this means simulation can be slightly behind what should be rendered.
+    /// this means simulation can be very slightly behind what should be rendered.
     SynchronizedBounded,
     /// Fixed FPS - always the same timestep, leftover time carries over to the next render frame.
-    /// This means simulation can be up to almost a frame behind what should be rendered.
+    /// This means simulation can be only very slightly or up to almost a full frame
+    /// behind what should be rendered *and* this delay varries.
+    /// As i understand, this can cause a specific kind of stutter called judder.
     Fixed,
     /// Simulation runs in fixed steps as long as it can, the last step is smaller
     /// to catch up to rendering exactly. The last step is then thrown away and simulation
-    /// resumes from the last full step so it's deterministic.
-    /// TODO what with too small steps?
-    /// TODO link to john blow vid
+    /// resumes from the last full step so it's deterministic. Too small steps are skipped.
+    /// This is described by Jonathan Blow here: https://youtu.be/fdAOPHgW7qM?t=7149
     FixedOrSmaller,
-    /// TODO doc
-    FixedWithInterpolation,
+    // There is another option - FixedWithInterpolation:
+    // Instead of running with shorter dt to create the intermediate frame whic his thrown away,
+    // we'd wait till the next full simulation frame and interpolate to get the intermediate render frame.
+    // This would however introduce latency.
+    // Also note I believe this would require special handling of events like respawning
+    // to avoid interpolating between death and spawn location.
 }
