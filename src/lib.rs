@@ -729,36 +729,7 @@ impl Game {
         }
         dbg_textd!(bfg_cnt);
 
-        // Draw player vehicle chassis
-        let tank_scr_pos = player_pos.0 - top_left;
-        self.draw_img_center(&self.imgs_vehicles[0], tank_scr_pos, player_angle.0)?;
-        if cvars.d_draw && cvars.d_draw_hitboxes {
-            self.context.set_stroke_style(&"yellow".into());
-            self.context.begin_path();
-            let corners = PlayerVehicle::corners(cvars, tank_scr_pos, player_angle.0);
-            self.move_to(corners[0]);
-            self.line_to(corners[1]);
-            self.line_to(corners[2]);
-            self.line_to(corners[3]);
-            self.context.close_path();
-            self.context.stroke();
-        }
-
-        // TODO Draw cow
-
-        // Draw player vehicle turret
-        let offset_chassis =
-            player_angle.0.to_mat2f() * cvars.g_vehicle_turret_offset_chassis(Vehicle::Tank);
-        let turret_scr_pos = tank_scr_pos + offset_chassis;
-        let offset_turret = cvars.g_vehicle_turret_offset_turret(Vehicle::Tank);
-        self.draw_img_offset(
-            &self.imgs_vehicles[1],
-            turret_scr_pos,
-            player_angle.0 + pv.turret_angle,
-            offset_turret,
-        )?;
-
-        // Draw other vehicles
+        // Draw chassis
         let mut vehicle_cnt = 0;
         let mut query = <(&Vehicle, &Destroyed, &Pos, &Angle)>::query();
         for (&vehicle, destroyed, pos, angle) in query.iter(&self.legion) {
@@ -771,8 +742,34 @@ impl Game {
                 img = &self.imgs_vehicles[vehicle as usize * 2];
             }
             self.draw_img_center(img, scr_pos, angle.0)?;
+            if cvars.d_draw && cvars.d_draw_hitboxes {
+                self.context.set_stroke_style(&"yellow".into());
+                self.context.begin_path();
+                let corners = PlayerVehicle::corners(cvars, scr_pos, player_angle.0);
+                self.move_to(corners[0]);
+                self.line_to(corners[1]);
+                self.line_to(corners[2]);
+                self.line_to(corners[3]);
+                self.context.close_path();
+                self.context.stroke();
+            }
         }
         dbg_textd!(vehicle_cnt);
+
+        // TODO Draw cow
+
+        // Draw player vehicle turret
+        let tank_scr_pos = player_pos.0 - top_left;
+        let offset_chassis =
+            player_angle.0.to_mat2f() * cvars.g_vehicle_turret_offset_chassis(Vehicle::Tank);
+        let turret_scr_pos = tank_scr_pos + offset_chassis;
+        let offset_turret = cvars.g_vehicle_turret_offset_turret(Vehicle::Tank);
+        self.draw_img_offset(
+            &self.imgs_vehicles[1],
+            turret_scr_pos,
+            player_angle.0 + pv.turret_angle,
+            offset_turret,
+        )?;
 
         // Draw explosions
         let iter: Box<dyn Iterator<Item = &Explosion>> = if cvars.r_explosions_reverse {
