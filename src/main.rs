@@ -30,19 +30,19 @@
 //              no WASM: https://github.com/PistonDevelopers/piston/issues/1131
 //          https://crates.io/crates/quicksilver
 //              win/lin/max + WASM
-//              no audio?
+//              no audio in 0.4?
 //                  https://github.com/ryanisaacg/quicksilver/issues/552
-//                  https://github.com/RustyVolley/RustyVolleySrc has sound
+//                  https://github.com/RustyVolley/RustyVolleySrc in 0.3 has sound
 //              8 example games in readme (mostly bad)
 //          macroquad - no docs?
 //      rendering only
 //          https://crates.io/crates/luminance - mentions webgl/canvas
 //          https://crates.io/crates/miniquad - should support WASM
+//          wgpu?
 //      profiling
 //          https://github.com/EmbarkStudios/puffin
 //          https://github.com/bombomby/optick-rs
 //          list of tools: Instruction counts @ https://blog.mozilla.org/nnethercote/2020/09/08/how-to-speed-up-the-rust-compiler-one-last-time/
-// [ ] solve tearing - maybe only align to pixels at high speeds?
 // [x] image fails to draw the first time after opening browser
 //      bug in python server maybe? - doesn't happen with rhino
 // [ ] server framerate when minimized - https://developer.mozilla.org/en-US/docs/Web/API/Window/setImmediate#Notes
@@ -65,7 +65,7 @@
 //      https://crates.io/crates/cvar
 //          no tab completion in js console
 //          https://crates.io/crates/amethyst-console - uses cvar and imgui
-// [ ] ECS
+// [x] ECS
 //      hecs
 //          - can't delete while iterating
 //          - no clone / snapshots
@@ -84,7 +84,7 @@
 //      [x] basic tank
 //      [ ] skins, colors
 //              canvas imageData?
-//      [ ] vehicle types
+//      [x] vehicle types
 // [x] explosions
 //      [x] sizes
 // [ ] movement
@@ -105,48 +105,49 @@
 //      [ ] configurable
 // [ ] weapons
 //      [ ] MG
-//          [ ] more on hovercraft
-//          [ ] origins: tank: MG
-//          [x] reload: 1 s
 //          [x] 50 per reload
 //          [x] about 2.5 s to empty magazine -> refire 50 ms
+//          [ ] shoot faster on hovercraft, more ammo too?
 //          [ ] shooting to the side while moving looks awful
 //      [ ] rail
 //          [ ] push
-//          [ ] origins: tank: gun, hummer: chassis
-//          [x] reload: 1 s
 //      [ ] CB
-//          [x] explosions happen on walls, just partially obscured
-//          [ ] reflect off map edge
-//          [x] reload: 1.5 s
 //          [x] 40 per shot
 //          [x] next shot starts a few frames after last explosion disappears
+//          [x] explosions happen on walls, just partially obscured
+//          [ ] reflect off map edge
+//          [ ] hummer - originate from entire width of turret
 //          orig RW:
 //              size 1, shadow offset 1
 //              40 frames to first explosion, 58 to last
 //              distance - 80-300 while moving slowly backwards
 //      [ ] rockets
 //          [ ] acceleration (judging by changing distance between them)
-//          [x] reload: 1.5 s
 //          [x] 6 per reload
 //          [x] about 1 s between first and last rocket -> refire 200 ms
+//          [ ] hummer more + refire + entire width
 //      [ ] homing missile
-//          [x] reload: 1.5 s
 //      [ ] guided missile
-//          [x] reload: 1.5 s
-//      [ ] BFG - delay? speed change? range? random dir when dead? explosion range (through wall)?
+//      [ ] BFG
+//          [ ] shot delay + random dir when dead
+//          [ ] beam range
 //          [x] explosion animation goes backwards
 //          My explosion spritesheet is slightly different from original RW, i experimented with GIMP and this is the closest i got.
-//          Would be nice to figure out what exactly it did.
-//          [x] reload: 2.5 s
+//              Would be nice to figure out what exactly it did.
+//          In orig RW, shooting at a wall could kill enemy on the other side but only if low hp - probably clipped into wall and beam killed him.
 //          [ ] flashing color
+//      [x] proper shot origins
+//      [x] proper reload times
+//      [ ] rockets?, missiles and bfg seem to have terminal velocity - force+friction?
+//      [ ] avoid hitting self (orig RW had hummer chassis hardpoint more forward)
 //      [ ] entity culling? faster to render?
 //      [ ] check collision detection works if gun is inside another vehicle
 // [ ] mines
-//      [ ] not within radius of base/cow
-// [ ] turrets
-//      original RW has a bug: quick left,left,right would result in turning the longer way around
-//      better control scheme - changing direction cancels the queue, starts counting from current position
+//      [ ] not within radius of base and/or cow
+// [x] turrets
+//      [ ] 8 angles
+//          original RW has a bug: quick left,left,right would result in turning the longer way around
+//          better control scheme - changing direction cancels the queue, starts counting from current position
 // [ ] shadows
 //      [ ] HUD
 //      [ ] vehicles (is turret "higher"?)
@@ -155,7 +156,7 @@
 //      [ ] bigger exposion
 //      [ ] countdown
 //      [ ] sounds
-//      works through walls
+//      [ ] works through walls
 // [ ] player separate from vehicle
 // [ ] what happens to Entity handles after player disconnect
 // [ ] UI
@@ -217,6 +218,7 @@
 // [ ] FAQ - stuttering/tearing due to compositor - Alt+Shift+f12 - somehow this doesn't work anymore
 // [ ] version info
 // nice to have:
+// [ ] allow MG to shoot down missiles
 // [ ] make driving feel more real - simulate terrain unevenness? mild speed/angle changes?
 // [ ] map editor - sharing maps, voting, recommended mode / number of bots
 //      [ ] bots say hi/gg/sry/n1
