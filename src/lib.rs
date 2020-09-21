@@ -326,7 +326,7 @@ impl Game {
                         *ammo = Ammo::Reloading(frame_time, frame_time + reload_time);
                     }
 
-                    let (hardpoint, offset) = cvars.g_hardpoint(Vehicle::Tank, self.gs.cur_weapon); // FIXME not tank
+                    let (hardpoint, offset) = cvars.g_hardpoint(*vehicle, self.gs.cur_weapon);
                     let (shot_angle, shot_origin);
                     match hardpoint {
                         Hardpoint::Chassis => {
