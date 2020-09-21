@@ -326,22 +326,19 @@ impl Game {
                         *ammo = Ammo::Reloading(frame_time, frame_time + reload_time);
                     }
 
-                    let (hardpoint, offset) = cvars.g_hardpoint(*vehicle, self.gs.cur_weapon);
+                    let (hardpoint, weapon_offset) = cvars.g_hardpoint(*vehicle, self.gs.cur_weapon);
                     let (shot_angle, shot_origin);
                     match hardpoint {
                         Hardpoint::Chassis => {
                             shot_angle = angle.0;
-                            shot_origin = pos.0 + offset.rotated_z(shot_angle);
+                            shot_origin = pos.0 + weapon_offset.rotated_z(shot_angle);
                         }
                         Hardpoint::Turret => {
                             shot_angle = angle.0 + pv.turret_angle;
-                            let turret_offset = Vec2f::new(
-                                cvars.g_tank_turret_offset_chassis_x,
-                                cvars.g_tank_turret_offset_chassis_y,
-                            );
+                            let turret_offset = cvars.g_vehicle_turret_offset_chassis(*vehicle);
                             shot_origin = pos.0
                                 + turret_offset.rotated_z(angle.0)
-                                + offset.rotated_z(shot_angle);
+                                + weapon_offset.rotated_z(shot_angle);
                         }
                     }
                     dbg_cross!(shot_origin, 1.0);
