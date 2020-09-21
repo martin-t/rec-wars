@@ -156,12 +156,11 @@ impl Game {
         };
         let gs_prev = gs.clone();
 
-        let mut player_vehicle;
-        for i in 0..50 {
+        for _ in 0..50 {
             let vehicle = Vehicle::n(gs.rng.gen_range(0, 3)).unwrap();
             let pos = map.random_nonwall(&mut gs.rng).0;
             let angle = gs.rng.gen_range(0.0, 2.0 * PI);
-            let entity = legion.push((
+            legion.push((
                 vehicle,
                 Destroyed(gs.rng.gen_bool(0.2)),
                 Pos(pos),
@@ -170,9 +169,6 @@ impl Game {
                 TurnRate(0.0),
                 Hitbox { mins, maxs },
             ));
-            if i == 0 {
-                player_vehicle = entity;
-            }
         }
 
         Self {

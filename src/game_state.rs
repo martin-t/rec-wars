@@ -5,10 +5,7 @@ use rand::prelude::*;
 use wasm_bindgen::prelude::*;
 
 use crate::map::Vec2f;
-use crate::{
-    entities::{GuidedMissile, PlayerVehicle},
-    weapons::Weapon,
-};
+use crate::{entities::GuidedMissile, weapons::Weapon};
 
 /// Everyting that changes during the game
 /// and might need to be taken back during frame interpolation / reconciliation.
