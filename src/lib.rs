@@ -3,7 +3,7 @@
 //#![warn(missing_debug_implementations)]
 #![warn(trivial_casts)]
 #![warn(trivial_numeric_casts)]
-//#![warn(unreachable_pub)]
+#![warn(unreachable_pub)]
 #![warn(unused)]
 #![warn(clippy::all)]
 
