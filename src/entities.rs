@@ -1,6 +1,9 @@
 use vek::Clamp;
 
-use crate::{cvars::Cvars, weapons::Weapon};
+use crate::{
+    components::Angle, components::Pos, components::TurnRate, components::Vel, cvars::Cvars,
+    weapons::Weapon,
+};
 use crate::{
     map::{Map, Vec2f},
     Input,
@@ -82,11 +85,7 @@ impl GuidedMissile {
 }
 
 #[derive(Debug, Clone)]
-pub(crate) struct Tank {
-    pub(crate) pos: Vec2f,
-    pub(crate) vel: Vec2f,
-    pub(crate) angle: f64,
-    pub(crate) turn_rate: f64,
+pub(crate) struct PlayerVehicle {
     pub(crate) turret_angle: f64,
     /// Fraction of full
     pub(crate) hp: f64,
@@ -95,9 +94,9 @@ pub(crate) struct Tank {
     pub(crate) ammos: Vec<Ammo>,
 }
 
-impl Tank {
+impl PlayerVehicle {
     #[must_use]
-    pub(crate) fn spawn(cvars: &Cvars, pos: Vec2f, angle: f64) -> Tank {
+    pub(crate) fn new(cvars: &Cvars) -> PlayerVehicle {
         let ammos = vec![
             Ammo::Loaded(0.0, cvars.g_weapon_reload_ammo(Weapon::Mg)),
             Ammo::Loaded(0.0, cvars.g_weapon_reload_ammo(Weapon::Rail)),
@@ -108,82 +107,88 @@ impl Tank {
             Ammo::Loaded(0.0, cvars.g_weapon_reload_ammo(Weapon::Bfg)),
         ];
 
-        Tank {
-            pos,
-            vel: Vec2f::zero(),
-            angle,
-            turn_rate: 0.0,
+        PlayerVehicle {
             turret_angle: 0.0,
             hp: 1.0,
             ammos,
         }
     }
 
-    pub(crate) fn tick(&mut self, dt: f64, cvars: &Cvars, input: &Input, map: &Map) {
+    pub(crate) fn tick(
+        &mut self,
+        dt: f64,
+        cvars: &Cvars,
+        input: &Input,
+        map: &Map,
+        pos: &mut Pos,
+        vel: &mut Vel,
+        angle: &mut Angle,
+        turn_rate: &mut TurnRate,
+    ) {
         // Turn rate
-        dbg_textf!("tank orig tr: {}", self.turn_rate);
+        dbg_textf!("tank orig tr: {}", turn_rate.0);
         let tr_change = input.right_left() * cvars.g_tank_turn_rate_increase * dt;
         dbg_textd!(tr_change);
-        self.turn_rate += tr_change;
+        turn_rate.0 += tr_change;
 
         let tr_fric_const = cvars.g_tank_turn_rate_friction_const * dt;
         dbg_textd!(tr_fric_const);
-        if self.turn_rate >= 0.0 {
-            self.turn_rate = (self.turn_rate - tr_fric_const).max(0.0);
+        if turn_rate.0 >= 0.0 {
+            turn_rate.0 = (turn_rate.0 - tr_fric_const).max(0.0);
         } else {
-            self.turn_rate = (self.turn_rate + tr_fric_const).min(0.0);
+            turn_rate.0 = (turn_rate.0 + tr_fric_const).min(0.0);
         }
 
-        let tr_new = self.turn_rate * (1.0 - cvars.g_tank_turn_rate_friction_linear).powf(dt);
-        dbg_textf!("diff: {:?}", self.turn_rate - tr_new);
-        self.turn_rate = tr_new.clamped(-cvars.g_tank_turn_rate_max, cvars.g_tank_turn_rate_max);
-        dbg_textd!(self.turn_rate);
+        let tr_new = turn_rate.0 * (1.0 - cvars.g_tank_turn_rate_friction_linear).powf(dt);
+        dbg_textf!("diff: {:?}", turn_rate.0 - tr_new);
+        turn_rate.0 = tr_new.clamped(-cvars.g_tank_turn_rate_max, cvars.g_tank_turn_rate_max);
+        dbg_textd!(turn_rate.0);
 
         // Accel / decel
         // TODO lateral friction
-        dbg_textf!("tank orig speed: {}", self.vel.magnitude());
+        dbg_textf!("tank orig speed: {}", vel.0.magnitude());
         let vel_change = input.up_down() * cvars.g_tank_accel_forward * dt;
         dbg_textd!(vel_change);
-        self.vel += Vec2f::unit_x().rotated_z(self.angle) * vel_change;
+        vel.0 += Vec2f::unit_x().rotated_z(angle.0) * vel_change;
 
         let vel_fric_const = cvars.g_tank_friction_const * dt;
         dbg_textd!(vel_fric_const);
-        let vel_norm = self.vel.try_normalized().unwrap_or_default();
-        self.vel -= (vel_fric_const).min(self.vel.magnitude()) * vel_norm;
+        let vel_norm = vel.0.try_normalized().unwrap_or_default();
+        vel.0 -= (vel_fric_const).min(vel.0.magnitude()) * vel_norm;
 
-        let vel_new = self.vel * (1.0 - cvars.g_tank_friction_linear).powf(dt);
-        dbg_textf!("diff: {:?}", (self.vel - vel_new).magnitude());
-        self.vel = vel_new;
-        if self.vel.magnitude_squared() > cvars.g_tank_speed_max.powi(2) {
-            self.vel = vel_norm * cvars.g_tank_speed_max;
+        let vel_new = vel.0 * (1.0 - cvars.g_tank_friction_linear).powf(dt);
+        dbg_textf!("diff: {:?}", (vel.0 - vel_new).magnitude());
+        vel.0 = vel_new;
+        if vel.0.magnitude_squared() > cvars.g_tank_speed_max.powi(2) {
+            vel.0 = vel_norm * cvars.g_tank_speed_max;
         }
-        dbg_textd!(self.vel.magnitude());
+        dbg_textd!(vel.0.magnitude());
 
         // Turning - part of vel gets rotated to simulate steering
         // TODO cvar to set turning origin - original RW turned around turret center
-        let vel_rotation = self.turn_rate * cvars.g_tank_turn_effectiveness;
-        self.vel.rotate_z(vel_rotation);
-        let new_angle = self.angle + self.turn_rate; // TODO * dt
-        if Self::corners(cvars, self.pos, new_angle)
+        let vel_rotation = turn_rate.0 * cvars.g_tank_turn_effectiveness;
+        vel.0.rotate_z(vel_rotation);
+        let new_angle = angle.0 + turn_rate.0; // TODO * dt
+        if Self::corners(cvars, pos.0, new_angle)
             .iter()
             .any(|&corner| map.collision(corner))
         {
-            self.turn_rate = 0.0;
+            turn_rate.0 = 0.0;
         } else {
-            self.angle = new_angle;
+            angle.0 = new_angle;
         }
 
         // TODO unify order with missile / input
 
         // Moving
-        let new_pos = self.pos + self.vel * dt;
-        if Self::corners(cvars, new_pos, self.angle)
+        let new_pos = pos.0 + vel.0 * dt;
+        if Self::corners(cvars, new_pos, angle.0)
             .iter()
             .any(|&corner| map.collision(corner))
         {
-            self.vel = Vec2f::zero();
+            vel.0 = Vec2f::zero();
         } else {
-            self.pos = new_pos;
+            pos.0 = new_pos;
         }
     }
 

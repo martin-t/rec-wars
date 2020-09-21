@@ -36,11 +36,13 @@ use wasm_bindgen::JsCast;
 
 use web_sys::{CanvasRenderingContext2d, HtmlImageElement, Performance};
 
-use components::{Angle, Bfg, Cb, Destroyed, Hitbox, Mg, Pos, Rocket, Time, Vehicle, Vel};
+use components::{
+    Angle, Bfg, Cb, Destroyed, Hitbox, Mg, Pos, Rocket, Time, TurnRate, Vehicle, Vel,
+};
 use cvars::{Cvars, Hardpoint, TickrateMode};
 use debugging::{DEBUG_CROSSES, DEBUG_LINES, DEBUG_TEXTS};
-use entities::{Ammo, GuidedMissile, Tank};
-use game_state::{Explosion, GameState, Input, PlayerEntity};
+use entities::{Ammo, GuidedMissile, PlayerVehicle};
+use game_state::{ControlledEntity, Explosion, GameState, Input};
 use map::{F64Ext, Kind, Map, Vec2f, VecExt, TILE_SIZE};
 use weapons::{Weapon, WEAPS_CNT};
 
@@ -117,11 +119,29 @@ impl Game {
 
         let surfaces = map::load_tex_list(tex_list_text);
         let map = map::load_map(map_text, surfaces);
-        let (pos, angle) = map.random_spawn(&mut rng);
+        let (spawn_pos, spawn_angle) = map.random_spawn(&mut rng);
 
-        let gm = GuidedMissile::spawn(cvars, pos, angle);
-        let tank = Tank::spawn(cvars, pos, angle);
-        let pe = PlayerEntity::Tank;
+        let gm = GuidedMissile::spawn(cvars, spawn_pos, spawn_angle);
+
+        let mut legion = legion::World::default();
+
+        let mins = Vec2f::new(cvars.g_tank_mins_x, cvars.g_tank_mins_y);
+        let maxs = Vec2f::new(cvars.g_tank_maxs_x, cvars.g_tank_maxs_y);
+
+        let pv = PlayerVehicle::new(cvars);
+        let vehicle = Vehicle::n(rng.gen_range(0, 3)).unwrap();
+
+        let entity = legion.push((
+            pv,
+            vehicle,
+            Destroyed(false),
+            Pos(spawn_pos),
+            Vel(Vec2f::zero()),
+            Angle(spawn_angle),
+            TurnRate(0.0),
+            Hitbox { mins, maxs },
+        ));
+        let ce = ControlledEntity::Vehicle;
 
         let mut gs = GameState {
             rng,
@@ -129,27 +149,30 @@ impl Game {
             input: Input::default(),
             cur_weapon: Weapon::Mg,
             railguns: Vec::new(),
+            pe: entity,
             gm,
-            tank,
-            pe,
+            ce,
             explosions: Vec::new(),
         };
         let gs_prev = gs.clone();
 
-        let mut legion = legion::World::default();
-        for _ in 0..50 {
+        let mut player_vehicle;
+        for i in 0..50 {
             let vehicle = Vehicle::n(gs.rng.gen_range(0, 3)).unwrap();
             let pos = map.random_nonwall(&mut gs.rng).0;
-            let mins = Vec2f::new(cvars.g_tank_mins_x, cvars.g_tank_mins_y);
-            let maxs = Vec2f::new(cvars.g_tank_maxs_x, cvars.g_tank_maxs_y);
             let angle = gs.rng.gen_range(0.0, 2.0 * PI);
-            legion.push((
+            let entity = legion.push((
                 vehicle,
                 Destroyed(gs.rng.gen_bool(0.2)),
                 Pos(pos),
+                Vel(Vec2f::zero()),
                 Angle(angle),
+                TurnRate(0.0),
                 Hitbox { mins, maxs },
             ));
+            if i == 0 {
+                player_vehicle = entity;
+            }
         }
 
         Self {
@@ -257,9 +280,54 @@ impl Game {
             self.gs.cur_weapon = Weapon::n(next).unwrap();
         }
 
+        let mut query = <(
+            &mut PlayerVehicle,
+            &Vehicle,
+            &mut Pos,
+            &mut Vel,
+            &mut Angle,
+            &mut TurnRate,
+        )>::query();
+        let (pv, vehicle, pos, vel, angle, turn_rate) =
+            query.get_mut(&mut self.legion, self.gs.pe).unwrap();
+
+        // Player vehicle movement TODO move after shooting again
+        if self.gs.ce == ControlledEntity::Vehicle {
+            pv.tick(
+                dt,
+                cvars,
+                &self.gs.input,
+                &self.map,
+                pos,
+                vel,
+                angle,
+                turn_rate,
+            );
+        } else {
+            pv.tick(
+                dt,
+                cvars,
+                &Input::default(),
+                &self.map,
+                pos,
+                vel,
+                angle,
+                turn_rate,
+            );
+        };
+        let vel = *vel; // TOCO borrow checker hack
+
+        // Turret turning
+        if self.gs.input.turret_left {
+            pv.turret_angle -= cvars.g_turret_turn_speed * dt;
+        }
+        if self.gs.input.turret_right {
+            pv.turret_angle += cvars.g_turret_turn_speed * dt;
+        }
+
         // Reloading
         let cur_weap = self.gs.cur_weapon;
-        let ammo = &mut self.gs.tank.ammos[cur_weap as usize];
+        let ammo = &mut pv.ammos[cur_weap as usize];
         if let Ammo::Reloading(_, end) = ammo {
             if frame_time >= *end {
                 *ammo = Ammo::Loaded(frame_time, cvars.g_weapon_reload_ammo(cur_weap));
@@ -278,51 +346,51 @@ impl Game {
                         *ammo = Ammo::Reloading(frame_time, frame_time + reload_time);
                     }
 
-                    let (hardpoint, offset) = cvars.g_hardpoint(Vehicle::Tank, self.gs.cur_weapon);
-                    let (angle, origin);
+                    let (hardpoint, offset) = cvars.g_hardpoint(Vehicle::Tank, self.gs.cur_weapon); // FIXME not tank
+                    let (shot_angle, shot_origin);
                     match hardpoint {
                         Hardpoint::Chassis => {
-                            angle = self.gs.tank.angle;
-                            origin = self.gs.tank.pos + offset.rotated_z(angle);
+                            shot_angle = angle.0;
+                            shot_origin = pos.0 + offset.rotated_z(shot_angle);
                         }
                         Hardpoint::Turret => {
-                            angle = self.gs.tank.angle + self.gs.tank.turret_angle;
+                            shot_angle = angle.0 + pv.turret_angle;
                             let turret_offset = Vec2f::new(
                                 cvars.g_tank_turret_offset_chassis_x,
                                 cvars.g_tank_turret_offset_chassis_y,
                             );
-                            origin = self.gs.tank.pos
-                                + turret_offset.rotated_z(self.gs.tank.angle)
-                                + offset.rotated_z(angle);
+                            shot_origin = pos.0
+                                + turret_offset.rotated_z(angle.0)
+                                + offset.rotated_z(shot_angle);
                         }
                     }
-                    dbg_cross!(origin, 1.0);
-                    dbg_line!(origin, origin + angle.to_vec2f() * 10.0);
+                    dbg_cross!(shot_origin, 1.0);
+                    dbg_line!(shot_origin, shot_origin + shot_angle.to_vec2f() * 10.0);
                     match self.gs.cur_weapon {
                         Weapon::Mg => {
-                            let pos = Pos(origin);
+                            let pos = Pos(shot_origin);
                             let r: f64 = self.gs.rng.sample(StandardNormal);
                             let spread = cvars.g_machine_gun_angle_spread * r;
                             // Using spread as y would mean the resulting spread depends on speed
                             // so it's better to use spread on angle.
-                            let mut vel = Vec2f::new(cvars.g_machine_gun_speed, 0.0)
-                                .rotated_z(angle + spread);
+                            let mut shot_vel = Vec2f::new(cvars.g_machine_gun_speed, 0.0)
+                                .rotated_z(shot_angle + spread);
                             if cvars.g_machine_gun_add_vehicle_velocity {
-                                vel += self.gs.tank.vel;
+                                shot_vel += vel.0;
                             }
-                            let vel = Vel(vel);
+                            let vel = Vel(shot_vel);
                             self.legion.push((Mg, pos, vel));
                         }
                         Weapon::Rail => {
-                            let dir = angle.to_vec2f();
-                            let end = origin + dir * 100_000.0;
-                            let hit = self.map.collision_between(origin, end);
+                            let dir = shot_angle.to_vec2f();
+                            let end = shot_origin + dir * 100_000.0;
+                            let hit = self.map.collision_between(shot_origin, end);
                             if let Some(hit) = hit {
-                                self.gs.railguns.push((origin, hit));
+                                self.gs.railguns.push((shot_origin, hit));
                             }
                         }
                         Weapon::Cb => {
-                            let pos = Pos(origin);
+                            let pos = Pos(shot_origin);
                             for _ in 0..cvars.g_cluster_bomb_count {
                                 let speed = cvars.g_cluster_bomb_speed;
                                 let spread_forward;
@@ -342,12 +410,13 @@ impl Game {
                                         cvars.g_cluster_bomb_speed_spread_sideways * r;
                                 }
 
-                                let mut vel = Vec2f::new(speed + spread_forward, spread_sideways)
-                                    .rotated_z(angle);
+                                let mut shot_vel =
+                                    Vec2f::new(speed + spread_forward, spread_sideways)
+                                        .rotated_z(shot_angle);
                                 if cvars.g_cluster_bomb_add_vehicle_velocity {
-                                    vel += self.gs.tank.vel;
+                                    shot_vel += vel.0;
                                 }
-                                let vel = Vel(vel);
+                                let vel = Vel(shot_vel);
                                 let time = frame_time
                                     + cvars.g_cluster_bomb_time
                                     + self.gs.rng.gen_range(-1.0, 1.0)
@@ -357,29 +426,31 @@ impl Game {
                             }
                         }
                         Weapon::Rockets => {
-                            let pos = Pos(origin);
-                            let mut vel = Vec2f::new(cvars.g_rockets_speed, 0.0).rotated_z(angle);
+                            let pos = Pos(shot_origin);
+                            let mut shot_vel =
+                                Vec2f::new(cvars.g_rockets_speed, 0.0).rotated_z(shot_angle);
                             if cvars.g_rockets_add_vehicle_velocity {
-                                vel += self.gs.tank.vel;
+                                shot_vel += vel.0;
                             }
-                            let vel = Vel(vel);
+                            let vel = Vel(shot_vel);
                             self.legion.push((Rocket, pos, vel));
                         }
                         Weapon::Hm => {
                             // TODO homing missile
-                            self.gs.gm = GuidedMissile::spawn(cvars, origin, angle);
+                            self.gs.gm = GuidedMissile::spawn(cvars, shot_origin, shot_angle);
                         }
                         Weapon::Gm => {
-                            self.gs.gm = GuidedMissile::spawn(cvars, origin, angle);
-                            self.gs.pe = PlayerEntity::GuidedMissile;
+                            self.gs.gm = GuidedMissile::spawn(cvars, shot_origin, shot_angle);
+                            self.gs.ce = ControlledEntity::GuidedMissile;
                         }
                         Weapon::Bfg => {
-                            let pos = Pos(origin);
-                            let mut vel = Vec2f::new(cvars.g_bfg_speed, 0.0).rotated_z(angle);
+                            let pos = Pos(shot_origin);
+                            let mut shot_vel =
+                                Vec2f::new(cvars.g_bfg_speed, 0.0).rotated_z(shot_angle);
                             if cvars.g_bfg_add_vehicle_velocity {
-                                vel += self.gs.tank.vel;
+                                shot_vel += vel.0;
                             }
-                            let vel = Vel(vel);
+                            let vel = Vel(shot_vel);
                             self.legion.push((Bfg, pos, vel));
                         }
                     }
@@ -471,14 +542,8 @@ impl Game {
             self.legion.remove(entity);
         }
 
-        // Movement
-        if self.gs.pe == PlayerEntity::Tank {
-            self.gs.tank.tick(dt, cvars, &self.gs.input, &self.map);
-        } else {
-            self.gs.tank.tick(dt, cvars, &Input::default(), &self.map);
-        };
-
-        let hit_something = if self.gs.pe == PlayerEntity::GuidedMissile {
+        // Guided missile movement
+        let hit_something = if self.gs.ce == ControlledEntity::GuidedMissile {
             self.gs.gm.tick(dt, cvars, &self.gs.input, &self.map)
         } else {
             self.gs.gm.tick(dt, cvars, &Input::default(), &self.map)
@@ -486,17 +551,9 @@ impl Game {
         if hit_something {
             let explosion = Explosion::new(self.gs.gm.pos, 1.0, self.gs.frame_time, false);
             self.gs.explosions.push(explosion);
-            self.gs.pe = PlayerEntity::Tank;
+            self.gs.ce = ControlledEntity::Vehicle;
             let (pos, angle) = self.map.random_spawn(&mut self.gs.rng);
             self.gs.gm = GuidedMissile::spawn(cvars, pos, angle);
-        }
-
-        // Turret turning
-        if self.gs.input.turret_left {
-            self.gs.tank.turret_angle -= cvars.g_turret_turn_speed * dt;
-        }
-        if self.gs.input.turret_right {
-            self.gs.tank.turret_angle += cvars.g_turret_turn_speed * dt;
         }
     }
 
@@ -510,9 +567,11 @@ impl Game {
         //      if disabling, try changing quality
         self.context.set_image_smoothing_enabled(cvars.r_smoothing);
 
-        let pe_pos = match self.gs.pe {
-            PlayerEntity::Tank => self.gs.tank.pos,
-            PlayerEntity::GuidedMissile => self.gs.gm.pos,
+        let mut query = <(&PlayerVehicle, &Pos, &Angle)>::query();
+        let (pv, player_pos, player_angle) = query.get(&self.legion, self.gs.pe).unwrap();
+        let pe_pos = match self.gs.ce {
+            ControlledEntity::Vehicle => player_pos.0,
+            ControlledEntity::GuidedMissile => self.gs.gm.pos,
         };
 
         // Don't put the camera so close to the edge that it would render area outside the map.
@@ -671,13 +730,12 @@ impl Game {
         dbg_textd!(bfg_cnt);
 
         // Draw player vehicle chassis
-        let tank = &self.gs.tank;
-        let tank_scr_pos = tank.pos - top_left;
-        self.draw_img_center(&self.imgs_vehicles[0], tank_scr_pos, tank.angle)?;
+        let tank_scr_pos = player_pos.0 - top_left;
+        self.draw_img_center(&self.imgs_vehicles[0], tank_scr_pos, player_angle.0)?;
         if cvars.d_draw && cvars.d_draw_hitboxes {
             self.context.set_stroke_style(&"yellow".into());
             self.context.begin_path();
-            let corners = Tank::corners(cvars, tank_scr_pos, tank.angle);
+            let corners = PlayerVehicle::corners(cvars, tank_scr_pos, player_angle.0);
             self.move_to(corners[0]);
             self.line_to(corners[1]);
             self.line_to(corners[2]);
@@ -690,13 +748,13 @@ impl Game {
 
         // Draw player vehicle turret
         let offset_chassis =
-            tank.angle.to_mat2f() * cvars.g_vehicle_turret_offset_chassis(Vehicle::Tank);
+            player_angle.0.to_mat2f() * cvars.g_vehicle_turret_offset_chassis(Vehicle::Tank);
         let turret_scr_pos = tank_scr_pos + offset_chassis;
         let offset_turret = cvars.g_vehicle_turret_offset_turret(Vehicle::Tank);
         self.draw_img_offset(
             &self.imgs_vehicles[1],
             turret_scr_pos,
-            tank.angle + tank.turret_angle,
+            player_angle.0 + pv.turret_angle,
             offset_turret,
         )?;
 
@@ -832,14 +890,13 @@ impl Game {
             2.0 * PI,
         )?;
         self.context.move_to(tank_scr_pos.x, tank_scr_pos.y);
-        let dir = (self.gs.gm.pos - self.gs.tank.pos).normalized();
+        let dir = (self.gs.gm.pos - player_pos.0).normalized();
         let end = tank_scr_pos + dir * cvars.hud_missile_indicator_radius;
         self.line_to(end);
         self.context.stroke();
         self.context.set_line_dash(&Array::new())?;
 
         // Hit points (goes from green to red)
-        let hp = self.gs.tank.hp;
         // Might wanna use https://crates.io/crates/colorsys if I need more color operations.
         // Hit points to color (poor man's HSV):
         // 0.0 = red
@@ -847,20 +904,20 @@ impl Game {
         // 0.5 = yellow
         // 0.5..1.0 -> decrease red channel
         // 1.0 = green
-        let r = 1.0 - (hp.clamped(0.5, 1.0) - 0.5) * 2.0;
-        let g = hp.clamped(0.0, 0.5) * 2.0;
+        let r = 1.0 - (pv.hp.clamped(0.5, 1.0) - 0.5) * 2.0;
+        let g = pv.hp.clamped(0.0, 0.5) * 2.0;
         let rgb = format!("rgb({}, {}, 0)", r * 255.0, g * 255.0);
         self.context.set_fill_style(&rgb.into());
         self.context.fill_rect(
             cvars.hud_hp_x,
             cvars.hud_hp_y,
-            cvars.hud_hp_width * hp,
+            cvars.hud_hp_width * pv.hp,
             cvars.hud_hp_height,
         );
 
         // Ammo
         self.context.set_fill_style(&"yellow".into());
-        let fraction = match self.gs.tank.ammos[self.gs.cur_weapon as usize] {
+        let fraction = match pv.ammos[self.gs.cur_weapon as usize] {
             Ammo::Loaded(_, count) => {
                 let max = cvars.g_weapon_reload_ammo(self.gs.cur_weapon);
                 count as f64 / max as f64

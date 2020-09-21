@@ -1,10 +1,12 @@
+use legion::Entity;
+
 use rand::prelude::*;
 
 use wasm_bindgen::prelude::*;
 
 use crate::map::Vec2f;
 use crate::{
-    entities::{GuidedMissile, Tank},
+    entities::{GuidedMissile, PlayerVehicle},
     weapons::Weapon,
 };
 
@@ -18,9 +20,11 @@ pub(crate) struct GameState {
     pub(crate) input: Input,
     pub(crate) cur_weapon: Weapon,
     pub(crate) railguns: Vec<(Vec2f, Vec2f)>,
+    /// Player entity - the vehicle
+    // TODO better names if these are kept
+    pub(crate) pe: Entity,
     pub(crate) gm: GuidedMissile,
-    pub(crate) tank: Tank,
-    pub(crate) pe: PlayerEntity,
+    pub(crate) ce: ControlledEntity,
     pub(crate) explosions: Vec<Explosion>,
 }
 
@@ -44,9 +48,9 @@ impl Explosion {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub(crate) enum PlayerEntity {
+pub(crate) enum ControlledEntity {
     GuidedMissile,
-    Tank,
+    Vehicle,
 }
 
 #[wasm_bindgen]

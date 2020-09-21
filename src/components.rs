@@ -12,6 +12,9 @@ pub(crate) struct Vel(pub(crate) Vec2f);
 pub(crate) struct Angle(pub(crate) f64);
 
 #[derive(Debug, Clone, Copy)]
+pub(crate) struct TurnRate(pub(crate) f64);
+
+#[derive(Debug, Clone, Copy)]
 pub(crate) struct Time(pub(crate) f64);
 
 #[derive(Debug, Clone, Copy)]
