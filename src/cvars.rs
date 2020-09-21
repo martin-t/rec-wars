@@ -101,6 +101,16 @@ pub struct Cvars {
     pub g_hardpoint_tank_bfg_x: f64,
     pub g_hardpoint_tank_bfg_y: f64,
 
+    pub g_hovercraft_turret_offset_chassis_x: f64,
+    pub g_hovercraft_turret_offset_chassis_y: f64,
+    pub g_hovercraft_turret_offset_turret_x: f64,
+    pub g_hovercraft_turret_offset_turret_y: f64,
+
+    pub g_hummer_turret_offset_chassis_x: f64,
+    pub g_hummer_turret_offset_chassis_y: f64,
+    pub g_hummer_turret_offset_turret_x: f64,
+    pub g_hummer_turret_offset_turret_y: f64,
+
     pub g_railgun_reload_ammo: u32,
     pub g_railgun_reload_time: f64,
 
@@ -232,7 +242,14 @@ impl Cvars {
                 self.g_tank_turret_offset_chassis_x,
                 self.g_tank_turret_offset_chassis_y,
             ),
-            _ => unimplemented!(),
+            Vehicle::Hovercraft => Vec2f::new(
+                self.g_hovercraft_turret_offset_chassis_x,
+                self.g_hovercraft_turret_offset_chassis_y,
+            ),
+            Vehicle::Hummer => Vec2f::new(
+                self.g_hummer_turret_offset_chassis_x,
+                self.g_hummer_turret_offset_chassis_y,
+            ),
         }
     }
 
@@ -242,7 +259,14 @@ impl Cvars {
                 self.g_tank_turret_offset_turret_x,
                 self.g_tank_turret_offset_turret_y,
             ),
-            _ => unimplemented!(),
+            Vehicle::Hovercraft => Vec2f::new(
+                self.g_hovercraft_turret_offset_turret_x,
+                self.g_hovercraft_turret_offset_turret_y,
+            ),
+            Vehicle::Hummer => Vec2f::new(
+                self.g_hummer_turret_offset_turret_x,
+                self.g_hummer_turret_offset_turret_y,
+            ),
         }
     }
 
@@ -361,6 +385,16 @@ impl Default for Cvars {
             g_hardpoint_tank_bfg: Hardpoint::Turret,
             g_hardpoint_tank_bfg_x: 35.0,
             g_hardpoint_tank_bfg_y: 0.0,
+
+            g_hovercraft_turret_offset_chassis_x: -9.0,
+            g_hovercraft_turret_offset_chassis_y: 5.0,
+            g_hovercraft_turret_offset_turret_x: -8.0,
+            g_hovercraft_turret_offset_turret_y: 0.0,
+
+            g_hummer_turret_offset_chassis_x: -12.0,
+            g_hummer_turret_offset_chassis_y: 0.0,
+            g_hummer_turret_offset_turret_x: 0.0,
+            g_hummer_turret_offset_turret_y: 0.0,
 
             g_railgun_reload_ammo: 1,
             g_railgun_reload_time: 1.0,

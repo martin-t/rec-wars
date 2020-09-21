@@ -547,8 +547,10 @@ impl Game {
         //      if disabling, try changing quality
         self.context.set_image_smoothing_enabled(cvars.r_smoothing);
 
-        let mut query = <(&PlayerVehicle, &Pos, &Angle)>::query();
-        let (pv, player_pos, player_angle) = query.get(&self.legion, self.gs.pe).unwrap();
+        let mut query = <(&PlayerVehicle, &Vehicle, &Pos, &Angle)>::query();
+        // TODO player_pv is dumb
+        let (player_pv, player_vehicle, player_pos, player_angle) =
+            query.get(&self.legion, self.gs.pe).unwrap();
         let pe_pos = match self.gs.ce {
             ControlledEntity::Vehicle => player_pos.0,
             ControlledEntity::GuidedMissile => self.gs.gm.pos,
@@ -741,13 +743,13 @@ impl Game {
         // Draw player vehicle turret
         let tank_scr_pos = player_pos.0 - top_left;
         let offset_chassis =
-            player_angle.0.to_mat2f() * cvars.g_vehicle_turret_offset_chassis(Vehicle::Tank);
+            player_angle.0.to_mat2f() * cvars.g_vehicle_turret_offset_chassis(*player_vehicle);
         let turret_scr_pos = tank_scr_pos + offset_chassis;
-        let offset_turret = cvars.g_vehicle_turret_offset_turret(Vehicle::Tank);
+        let offset_turret = cvars.g_vehicle_turret_offset_turret(*player_vehicle);
         self.draw_img_offset(
-            &self.imgs_vehicles[1],
+            &self.imgs_vehicles[*player_vehicle as usize * 2 + 1],
             turret_scr_pos,
-            player_angle.0 + pv.turret_angle,
+            player_angle.0 + player_pv.turret_angle,
             offset_turret,
         )?;
 
@@ -881,20 +883,20 @@ impl Game {
         // 0.5 = yellow
         // 0.5..1.0 -> decrease red channel
         // 1.0 = green
-        let r = 1.0 - (pv.hp.clamped(0.5, 1.0) - 0.5) * 2.0;
-        let g = pv.hp.clamped(0.0, 0.5) * 2.0;
+        let r = 1.0 - (player_pv.hp.clamped(0.5, 1.0) - 0.5) * 2.0;
+        let g = player_pv.hp.clamped(0.0, 0.5) * 2.0;
         let rgb = format!("rgb({}, {}, 0)", r * 255.0, g * 255.0);
         self.context.set_fill_style(&rgb.into());
         self.context.fill_rect(
             cvars.hud_hp_x,
             cvars.hud_hp_y,
-            cvars.hud_hp_width * pv.hp,
+            cvars.hud_hp_width * player_pv.hp,
             cvars.hud_hp_height,
         );
 
         // Ammo
         self.context.set_fill_style(&"yellow".into());
-        let fraction = match pv.ammos[self.gs.cur_weapon as usize] {
+        let fraction = match player_pv.ammos[self.gs.cur_weapon as usize] {
             Ammo::Loaded(_, count) => {
                 let max = cvars.g_weapon_reload_ammo(self.gs.cur_weapon);
                 count as f64 / max as f64
