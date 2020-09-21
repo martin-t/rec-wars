@@ -291,7 +291,7 @@ impl Game {
         let (pv, vehicle, pos, vel, angle, turn_rate) =
             query.get_mut(&mut self.legion, self.gs.pe).unwrap();
 
-        // Player vehicle movement TODO move after shooting again
+        // Player vehicle movement TODO move after shooting again (though this might look better when shooting MG sideways)
         if self.gs.ce == ControlledEntity::Vehicle {
             pv.tick(
                 dt,
