@@ -218,6 +218,7 @@
 // [ ] FAQ - stuttering/tearing due to compositor - Alt+Shift+f12 - somehow this doesn't work anymore
 // [ ] version info
 // nice to have:
+// [ ] record seed+input (WASM should be reproducible when avoiding NaNs) - replay, debugging
 // [ ] allow MG to shoot down missiles
 // [ ] make driving feel more real - simulate terrain unevenness? mild speed/angle changes?
 // [ ] map editor - sharing maps, voting, recommended mode / number of bots
@@ -229,7 +230,7 @@
 //      alternative: https://github.com/thedodd/trunk
 //      note to self for dealing with npm on debian:
 //          https://stackoverflow.com/questions/16151018/npm-throws-error-without-sudo/24404451#24404451
-//          prefix path or it uses old debian npm which breaks everything
+//          put in the *beginning* of PATH or it uses old debian npm which breaks everything
 // [ ] native binary
 //      [ ] SmallRng might be platform dependant: https://docs.rs/rand/0.7.3/rand/rngs/index.html
 // [ ] make parsing return errors instead of crashing
