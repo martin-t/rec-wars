@@ -83,3 +83,20 @@ impl Input {
         self.up as i32 as f64 - self.down as i32 as f64
     }
 }
+
+pub(crate) const EMPTY_INPUT: Input = Input {
+    // Can't use Input::default() in constants.
+    left: false,
+    right: false,
+    up: false,
+    down: false,
+    turret_left: false,
+    turret_right: false,
+    prev_weapon: false,
+    next_weapon: false,
+    fire: false,
+    mine: false,
+    self_destruct: false,
+    horn: false,
+    chat: false,
+};
