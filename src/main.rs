@@ -252,7 +252,7 @@
 //          [ ] tank could shoot through a wall tile by putting the turret inside
 // [ ] cleanup unused stuff from assets
 // [ ] code cleanup
-//      [ ] replace `as` with safer conversions
+//      [ ] replace `as` with safer conversions (https://docs.rs/num_enum/0.5.1/num_enum/ instead of enumn?)
 //      [ ] `unwrap` - they are all temporary from the prototyping phase
 //              - review all of them and eliminate or replace with `except` (to mark as reviewed)
 // [ ] all the LATERs - they mean something can be done better but marking it as a todo would be just noise when grepping
