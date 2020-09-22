@@ -20,8 +20,8 @@ mod weapons;
 use std::collections::VecDeque;
 use std::f64::consts::PI;
 
-use legion::query::IntoQuery;
 use legion::{self, World};
+use legion::{query::IntoQuery, Entity};
 
 use js_sys::Array;
 
@@ -686,8 +686,8 @@ impl Game {
         self.context.set_fill_style(&"lime".into());
         self.context.set_stroke_style(&"lime".into());
         let mut bfg_cnt = 0;
-        let mut query = <(&Bfg, &Pos)>::query();
-        for (_, bfg_pos) in query.iter(&self.legion) {
+        let mut query = <(&Bfg, &Pos, &Owner)>::query();
+        for (_, bfg_pos, bfg_owner) in query.iter(&self.legion) {
             bfg_cnt += 1;
             let bfg_scr_pos = bfg_pos.0 - top_left;
             self.context.begin_path();
@@ -700,9 +700,10 @@ impl Game {
             )?;
             self.context.fill();
 
-            let mut query_vehicles = <(&Vehicle, &Destroyed, &Pos)>::query();
-            for (_, destroyed, vehicle_pos) in query_vehicles.iter(&self.legion) {
+            let mut query_vehicles = <(Entity, &Vehicle, &Destroyed, &Pos)>::query();
+            for (&vehicle_entity, _, destroyed, vehicle_pos) in query_vehicles.iter(&self.legion) {
                 if destroyed.0
+                    || bfg_owner.0 == vehicle_entity
                     || (bfg_pos.0).distance_squared(vehicle_pos.0) > cvars.g_bfg_beam_range.powi(2)
                 {
                     continue;
