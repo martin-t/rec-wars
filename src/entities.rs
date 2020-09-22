@@ -1,3 +1,4 @@
+use legion::{query::IntoQuery, Entity, World};
 use vek::Clamp;
 
 use crate::{
@@ -200,6 +201,14 @@ pub(crate) fn corners(hitbox: Hitbox, pos: Vec2f, angle: f64) -> [Vec2f; 4] {
     let front_right = pos + Vec2f::new(hitbox.maxs.x, hitbox.maxs.y).rotated_z(angle);
     let back_right = pos + Vec2f::new(hitbox.mins.x, hitbox.maxs.y).rotated_z(angle);
     [back_left, front_left, front_right, back_right]
+}
+
+pub(crate) fn all_vehicles(world: &World) -> Vec<(Entity, Pos, Angle, Hitbox)> {
+    let mut query_vehicles = <(Entity, &Pos, &Angle, &Hitbox)>::query();
+    query_vehicles
+        .iter(world)
+        .map(|(&entity, &pos, &angle, &hitbox)| (entity, pos, angle, hitbox))
+        .collect()
 }
 
 #[derive(Debug, Clone)]

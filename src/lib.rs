@@ -20,8 +20,8 @@ mod weapons;
 use std::collections::VecDeque;
 use std::f64::consts::PI;
 
-use legion;
 use legion::query::IntoQuery;
+use legion::{self, World};
 
 use js_sys::Array;
 
@@ -69,7 +69,7 @@ pub struct Game {
     map: Map,
     gs: GameState,
     gs_prev: GameState,
-    legion: legion::World,
+    legion: World,
 }
 
 #[wasm_bindgen]
@@ -438,7 +438,9 @@ impl Game {
             }
         }
 
+        let vehicles = entities::all_vehicles(&self.legion);
         let mut to_remove = Vec::new();
+        let mut to_kill = Vec::new();
 
         // MG
         let mut query = <(legion::Entity, &Mg, &mut Pos, &Vel)>::query();
@@ -467,14 +469,8 @@ impl Game {
         }
 
         // Rockets
-        let mut query_vehicles = <(&Pos, &Angle, &Hitbox)>::query();
-        let vehicles: Vec<_> = query_vehicles
-            .iter(&self.legion)
-            .map(|(&pos, &angle, &hitbox)| (pos, angle, hitbox))
-            .collect();
-
         let mut query = <(legion::Entity, &Rocket, &mut Pos, &Vel)>::query();
-        for (&entity, _, pos, vel) in query.iter_mut(&mut self.legion) {
+        for (&projectile, _, pos, vel) in query.iter_mut(&mut self.legion) {
             pos.0 += vel.0 * dt;
 
             if self.map.collision(pos.0) {
@@ -484,11 +480,11 @@ impl Game {
                     self.gs.frame_time,
                     false,
                 ));
-                to_remove.push(entity);
+                to_remove.push(projectile);
                 continue;
             }
 
-            for (veh_pos, _veh_angle, _veh_hitbox) in &vehicles {
+            for (vehicle, veh_pos, _veh_angle, _veh_hitbox) in &vehicles {
                 if (pos.0 - veh_pos.0).magnitude_squared() <= 24.0 * 24.0 {
                     self.gs.explosions.push(Explosion::new(
                         pos.0,
@@ -496,7 +492,8 @@ impl Game {
                         self.gs.frame_time,
                         false,
                     ));
-                    to_remove.push(entity);
+                    to_remove.push(projectile);
+                    to_kill.push(*vehicle);
                     break;
                 }
             }
@@ -520,6 +517,12 @@ impl Game {
 
         for entity in to_remove {
             self.legion.remove(entity);
+        }
+
+        for vehicle in to_kill {
+            let mut entry = self.legion.entry(vehicle).unwrap();
+            let destroyed = entry.get_component_mut::<Destroyed>().unwrap();
+            destroyed.0 = true;
         }
 
         // Guided missile movement
