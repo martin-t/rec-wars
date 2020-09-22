@@ -484,7 +484,7 @@ impl Game {
                 continue;
             }
 
-            for (vehicle, veh_pos, _veh_angle, _veh_hitbox) in &vehicles {
+            for &(vehicle, veh_pos, _veh_angle, _veh_hitbox) in &vehicles {
                 if (pos.0 - veh_pos.0).magnitude_squared() <= 24.0 * 24.0 {
                     self.gs.explosions.push(Explosion::new(
                         pos.0,
@@ -493,7 +493,7 @@ impl Game {
                         false,
                     ));
                     to_remove.push(projectile);
-                    to_kill.push(*vehicle);
+                    to_kill.push(vehicle);
                     break;
                 }
             }
