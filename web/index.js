@@ -259,6 +259,8 @@ async function run() {
         // - owned pub cvars in Game need to be copy -> can't be changed from JS (changing will have no effect)
         // - LATER try returning Rc/Arc
         const cvars = new Cvars();
+        // Some cvars need to be changed before creating Game - e.g.:
+        //cvars.d_seed = 5n;
         const game = new Game(cvars, ctx, canvas.width, canvas.height,
             imgs_tiles, imgs_vehicles, imgs_wrecks, imgs_weapon_icons,
             img_rocket, img_gm, img_explosion, img_explosion_cyan,
