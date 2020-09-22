@@ -37,7 +37,7 @@ use wasm_bindgen::JsCast;
 use web_sys::{CanvasRenderingContext2d, HtmlImageElement, Performance};
 
 use components::{
-    Angle, Bfg, Cb, Destroyed, Hitbox, Mg, Pos, Rocket, Time, TurnRate, Vehicle, Vel,
+    Angle, Bfg, Cb, Destroyed, Hitbox, Mg, Owner, Pos, Rocket, Time, TurnRate, Vehicle, Vel,
 };
 use cvars::{Cvars, Hardpoint, TickrateMode};
 use debugging::{DEBUG_CROSSES, DEBUG_LINES, DEBUG_TEXTS};
@@ -346,6 +346,7 @@ impl Game {
                     }
                     dbg_cross!(shot_origin, 1.0);
                     dbg_line!(shot_origin, shot_origin + shot_angle.to_vec2f() * 10.0);
+                    let owner = Owner(self.gs.pe);
                     match self.gs.cur_weapon {
                         Weapon::Mg => {
                             let pos = Pos(shot_origin);
@@ -359,7 +360,7 @@ impl Game {
                                 shot_vel += vel.0;
                             }
                             let vel = Vel(shot_vel);
-                            self.legion.push((Mg, pos, vel));
+                            self.legion.push((Mg, pos, vel, owner));
                         }
                         Weapon::Rail => {
                             let dir = shot_angle.to_vec2f();
@@ -402,7 +403,7 @@ impl Game {
                                     + self.gs.rng.gen_range(-1.0, 1.0)
                                         * cvars.g_cluster_bomb_time_spread;
                                 let time = Time(time);
-                                self.legion.push((Cb, pos, vel, time));
+                                self.legion.push((Cb, pos, vel, time, owner));
                             }
                         }
                         Weapon::Rockets => {
@@ -413,7 +414,7 @@ impl Game {
                                 shot_vel += vel.0;
                             }
                             let vel = Vel(shot_vel);
-                            self.legion.push((Rocket, pos, vel));
+                            self.legion.push((Rocket, pos, vel, owner));
                         }
                         Weapon::Hm => {
                             // TODO homing missile
@@ -431,7 +432,7 @@ impl Game {
                                 shot_vel += vel.0;
                             }
                             let vel = Vel(shot_vel);
-                            self.legion.push((Bfg, pos, vel));
+                            self.legion.push((Bfg, pos, vel, owner));
                         }
                     }
                 }
@@ -469,8 +470,8 @@ impl Game {
         }
 
         // Rockets
-        let mut query = <(legion::Entity, &Rocket, &mut Pos, &Vel)>::query();
-        for (&projectile, _, pos, vel) in query.iter_mut(&mut self.legion) {
+        let mut query = <(legion::Entity, &Rocket, &mut Pos, &Vel, &Owner)>::query();
+        for (&projectile, _, pos, vel, owner) in query.iter_mut(&mut self.legion) {
             pos.0 += vel.0 * dt;
 
             if self.map.collision(pos.0) {
@@ -485,7 +486,7 @@ impl Game {
             }
 
             for &(vehicle, veh_pos, _veh_angle, _veh_hitbox) in &vehicles {
-                if (pos.0 - veh_pos.0).magnitude_squared() <= 24.0 * 24.0 {
+                if vehicle != owner.0 && (pos.0 - veh_pos.0).magnitude_squared() <= 24.0 * 24.0 {
                     self.gs.explosions.push(Explosion::new(
                         pos.0,
                         cvars.g_rockets_explosion_scale,

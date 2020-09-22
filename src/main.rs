@@ -140,6 +140,7 @@
 //      [x] proper reload times
 //      [ ] rockets?, missiles and bfg seem to have terminal velocity - force+friction?
 //      [ ] avoid hitting self (orig RW had hummer chassis hardpoint more forward)
+//          [ ] allow hitting self if missile comes back after clearing the hitbox
 //      [ ] entity culling? faster to render?
 //      [ ] check collision detection works if gun is inside another vehicle
 // [ ] mines

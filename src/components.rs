@@ -1,4 +1,5 @@
 use enumn::N;
+use legion::Entity;
 
 use crate::map::Vec2f;
 
@@ -28,6 +29,9 @@ pub(crate) struct Rocket;
 
 #[derive(Debug, Clone, Copy)]
 pub(crate) struct Bfg;
+
+#[derive(Debug, Clone, Copy)]
+pub(crate) struct Owner(pub(crate) Entity);
 
 #[derive(Debug, Clone, Copy)]
 pub(crate) struct Hitbox {
