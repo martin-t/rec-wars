@@ -41,7 +41,7 @@ pub(crate) struct Hitbox {
 
 #[allow(unused)]
 #[derive(Debug, Clone, Copy, N)]
-pub(crate) enum Vehicle {
+pub(crate) enum VehicleType {
     Tank,
     Hovercraft,
     Hummer,

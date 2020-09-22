@@ -37,11 +37,11 @@ use wasm_bindgen::JsCast;
 use web_sys::{CanvasRenderingContext2d, HtmlImageElement, Performance};
 
 use components::{
-    Angle, Bfg, Cb, Destroyed, Hitbox, Mg, Owner, Pos, Rocket, Time, TurnRate, Vehicle, Vel,
+    Angle, Bfg, Cb, Destroyed, Hitbox, Mg, Owner, Pos, Rocket, Time, TurnRate, VehicleType, Vel,
 };
 use cvars::{Cvars, Hardpoint, TickrateMode};
 use debugging::{DEBUG_CROSSES, DEBUG_LINES, DEBUG_TEXTS};
-use entities::{Ammo, GuidedMissile, PlayerVehicle};
+use entities::{Ammo, GuidedMissile, Vehicle};
 use game_state::{ControlledEntity, Explosion, GameState, Input, EMPTY_INPUT};
 use map::{F64Ext, Kind, Map, Vec2f, VecExt, TILE_SIZE};
 use weapons::{Weapon, WEAPS_CNT};
@@ -125,13 +125,13 @@ impl Game {
 
         let mut legion = legion::World::default();
 
-        let pv = PlayerVehicle::new(cvars);
-        let vehicle = Vehicle::n(rng.gen_range(0, 3)).unwrap();
-        let hitbox = cvars.g_vehicle_hitbox(vehicle);
+        let plyer_vehicle = Vehicle::new(cvars);
+        let veh_type = VehicleType::n(rng.gen_range(0, 3)).unwrap();
+        let hitbox = cvars.g_vehicle_hitbox(veh_type);
 
         let entity = legion.push((
-            pv,
-            vehicle,
+            plyer_vehicle,
+            veh_type,
             Destroyed(false),
             Pos(spawn_pos),
             Vel(Vec2f::zero()),
@@ -155,12 +155,12 @@ impl Game {
         let gs_prev = gs.clone();
 
         for _ in 0..50 {
-            let vehicle = Vehicle::n(gs.rng.gen_range(0, 3)).unwrap();
+            let veh_type = VehicleType::n(gs.rng.gen_range(0, 3)).unwrap();
             let pos = map.random_nonwall(&mut gs.rng).0;
             let angle = gs.rng.gen_range(0.0, 2.0 * PI);
-            let hitbox = cvars.g_vehicle_hitbox(vehicle);
+            let hitbox = cvars.g_vehicle_hitbox(veh_type);
             legion.push((
-                vehicle,
+                veh_type,
                 Destroyed(gs.rng.gen_bool(0.2)),
                 Pos(pos),
                 Vel(Vec2f::zero()),
@@ -275,15 +275,15 @@ impl Game {
         }
 
         let mut query = <(
-            &mut PlayerVehicle,
-            &Vehicle,
+            &mut Vehicle,
+            &VehicleType,
             &mut Pos,
             &mut Vel,
             &mut Angle,
             &mut TurnRate,
             &Hitbox,
         )>::query();
-        let (pv, vehicle, pos, vel, angle, turn_rate, hitbox) =
+        let (vehicle, veh_type, pos, vel, angle, turn_rate, hitbox) =
             query.get_mut(&mut self.legion, self.gs.pe).unwrap();
 
         // Player vehicle movement TODO move after shooting again (though this might look better when shooting MG sideways)
@@ -293,7 +293,7 @@ impl Game {
         } else {
             input = &EMPTY_INPUT;
         }
-        pv.tick(
+        vehicle.tick(
             dt, cvars, input, &self.map, pos, vel, angle, turn_rate, hitbox,
         );
 
@@ -301,15 +301,15 @@ impl Game {
 
         // Turret turning
         if self.gs.input.turret_left {
-            pv.turret_angle -= cvars.g_turret_turn_speed * dt;
+            vehicle.turret_angle -= cvars.g_turret_turn_speed * dt;
         }
         if self.gs.input.turret_right {
-            pv.turret_angle += cvars.g_turret_turn_speed * dt;
+            vehicle.turret_angle += cvars.g_turret_turn_speed * dt;
         }
 
         // Reloading
         let cur_weap = self.gs.cur_weapon;
-        let ammo = &mut pv.ammos[cur_weap as usize];
+        let ammo = &mut vehicle.ammos[cur_weap as usize];
         if let Ammo::Reloading(_, end) = ammo {
             if frame_time >= *end {
                 *ammo = Ammo::Loaded(frame_time, cvars.g_weapon_reload_ammo(cur_weap));
@@ -329,7 +329,7 @@ impl Game {
                     }
 
                     let (hardpoint, weapon_offset) =
-                        cvars.g_hardpoint(*vehicle, self.gs.cur_weapon);
+                        cvars.g_hardpoint(*veh_type, self.gs.cur_weapon);
                     let (shot_angle, shot_origin);
                     match hardpoint {
                         Hardpoint::Chassis => {
@@ -337,8 +337,8 @@ impl Game {
                             shot_origin = pos.0 + weapon_offset.rotated_z(shot_angle);
                         }
                         Hardpoint::Turret => {
-                            shot_angle = angle.0 + pv.turret_angle;
-                            let turret_offset = cvars.g_vehicle_turret_offset_chassis(*vehicle);
+                            shot_angle = angle.0 + vehicle.turret_angle;
+                            let turret_offset = cvars.g_vehicle_turret_offset_chassis(*veh_type);
                             shot_origin = pos.0
                                 + turret_offset.rotated_z(angle.0)
                                 + weapon_offset.rotated_z(shot_angle);
@@ -485,9 +485,9 @@ impl Game {
                 continue;
             }
 
-            for &(vehicle, destroyed, veh_pos, _veh_angle, _veh_hitbox) in &vehicles {
-                if !destroyed.0
-                    && vehicle != owner.0
+            for &(veh_id, veh_destroyed, veh_pos, _veh_angle, _veh_hitbox) in &vehicles {
+                if !veh_destroyed.0
+                    && veh_id != owner.0
                     && (pos.0 - veh_pos.0).magnitude_squared() <= 24.0 * 24.0
                 {
                     self.gs.explosions.push(Explosion::new(
@@ -497,7 +497,7 @@ impl Game {
                         false,
                     ));
                     to_remove.push(projectile);
-                    to_kill.push(vehicle);
+                    to_kill.push(veh_id);
                     break;
                 }
             }
@@ -523,8 +523,8 @@ impl Game {
             self.legion.remove(entity);
         }
 
-        for vehicle in to_kill {
-            let mut entry = self.legion.entry(vehicle).unwrap();
+        for veh_id in to_kill {
+            let mut entry = self.legion.entry(veh_id).unwrap();
             let destroyed = entry.get_component_mut::<Destroyed>().unwrap();
             destroyed.0 = true;
         }
@@ -554,9 +554,8 @@ impl Game {
         //      if disabling, try changing quality
         self.context.set_image_smoothing_enabled(cvars.r_smoothing);
 
-        let mut query = <(&PlayerVehicle, &Vehicle, &Pos, &Angle)>::query();
-        // TODO player_pv is dumb
-        let (player_pv, player_vehicle, player_pos, player_angle) =
+        let mut query = <(&Vehicle, &VehicleType, &Pos, &Angle)>::query();
+        let (player_vehicle, player_veh_type, player_pos, player_angle) =
             query.get(&self.legion, self.gs.pe).unwrap();
         let pe_pos = match self.gs.ce {
             ControlledEntity::Vehicle => player_pos.0,
@@ -700,10 +699,12 @@ impl Game {
             )?;
             self.context.fill();
 
-            let mut query_vehicles = <(Entity, &Vehicle, &Destroyed, &Pos)>::query();
-            for (&vehicle_entity, _, destroyed, vehicle_pos) in query_vehicles.iter(&self.legion) {
-                if destroyed.0
-                    || bfg_owner.0 == vehicle_entity
+            let mut query_vehicles = <(Entity, &VehicleType, &Destroyed, &Pos)>::query();
+            for (&vehicle_id, _, vehicle_destroyed, vehicle_pos) in
+                query_vehicles.iter(&self.legion)
+            {
+                if vehicle_destroyed.0
+                    || bfg_owner.0 == vehicle_id
                     || (bfg_pos.0).distance_squared(vehicle_pos.0) > cvars.g_bfg_beam_range.powi(2)
                 {
                     continue;
@@ -721,15 +722,15 @@ impl Game {
 
         // Draw chassis
         let mut vehicle_cnt = 0;
-        let mut query = <(&Vehicle, &Destroyed, &Pos, &Angle, &Hitbox)>::query();
-        for (&vehicle, destroyed, pos, angle, hitbox) in query.iter(&self.legion) {
+        let mut query = <(&VehicleType, &Destroyed, &Pos, &Angle, &Hitbox)>::query();
+        for (&veh_type, destroyed, pos, angle, hitbox) in query.iter(&self.legion) {
             vehicle_cnt += 1;
             let scr_pos = pos.0 - top_left;
             let img;
             if destroyed.0 {
-                img = &self.imgs_wrecks[vehicle as usize];
+                img = &self.imgs_wrecks[veh_type as usize];
             } else {
-                img = &self.imgs_vehicles[vehicle as usize * 2];
+                img = &self.imgs_vehicles[veh_type as usize * 2];
             }
             self.draw_img_center(img, scr_pos, angle.0)?;
             if cvars.d_draw && cvars.d_draw_hitboxes {
@@ -751,13 +752,13 @@ impl Game {
         // Draw player vehicle turret
         let player_scr_pos = player_pos.0 - top_left;
         let offset_chassis =
-            player_angle.0.to_mat2f() * cvars.g_vehicle_turret_offset_chassis(*player_vehicle);
+            player_angle.0.to_mat2f() * cvars.g_vehicle_turret_offset_chassis(*player_veh_type);
         let turret_scr_pos = player_scr_pos + offset_chassis;
-        let offset_turret = cvars.g_vehicle_turret_offset_turret(*player_vehicle);
+        let offset_turret = cvars.g_vehicle_turret_offset_turret(*player_veh_type);
         self.draw_img_offset(
-            &self.imgs_vehicles[*player_vehicle as usize * 2 + 1],
+            &self.imgs_vehicles[*player_veh_type as usize * 2 + 1],
             turret_scr_pos,
-            player_angle.0 + player_pv.turret_angle,
+            player_angle.0 + player_vehicle.turret_angle,
             offset_turret,
         )?;
 
@@ -891,20 +892,20 @@ impl Game {
         // 0.5 = yellow
         // 0.5..1.0 -> decrease red channel
         // 1.0 = green
-        let r = 1.0 - (player_pv.hp.clamped(0.5, 1.0) - 0.5) * 2.0;
-        let g = player_pv.hp.clamped(0.0, 0.5) * 2.0;
+        let r = 1.0 - (player_vehicle.hp.clamped(0.5, 1.0) - 0.5) * 2.0;
+        let g = player_vehicle.hp.clamped(0.0, 0.5) * 2.0;
         let rgb = format!("rgb({}, {}, 0)", r * 255.0, g * 255.0);
         self.context.set_fill_style(&rgb.into());
         self.context.fill_rect(
             cvars.hud_hp_x,
             cvars.hud_hp_y,
-            cvars.hud_hp_width * player_pv.hp,
+            cvars.hud_hp_width * player_vehicle.hp,
             cvars.hud_hp_height,
         );
 
         // Ammo
         self.context.set_fill_style(&"yellow".into());
-        let fraction = match player_pv.ammos[self.gs.cur_weapon as usize] {
+        let fraction = match player_vehicle.ammos[self.gs.cur_weapon as usize] {
             Ammo::Loaded(_, count) => {
                 let max = cvars.g_weapon_reload_ammo(self.gs.cur_weapon);
                 count as f64 / max as f64

@@ -86,7 +86,7 @@ impl GuidedMissile {
 }
 
 #[derive(Debug, Clone)]
-pub(crate) struct PlayerVehicle {
+pub(crate) struct Vehicle {
     pub(crate) turret_angle: f64,
     /// Fraction of full
     pub(crate) hp: f64,
@@ -95,9 +95,9 @@ pub(crate) struct PlayerVehicle {
     pub(crate) ammos: Vec<Ammo>,
 }
 
-impl PlayerVehicle {
+impl Vehicle {
     #[must_use]
-    pub(crate) fn new(cvars: &Cvars) -> PlayerVehicle {
+    pub(crate) fn new(cvars: &Cvars) -> Vehicle {
         let ammos = vec![
             Ammo::Loaded(0.0, cvars.g_weapon_reload_ammo(Weapon::Mg)),
             Ammo::Loaded(0.0, cvars.g_weapon_reload_ammo(Weapon::Rail)),
@@ -108,7 +108,7 @@ impl PlayerVehicle {
             Ammo::Loaded(0.0, cvars.g_weapon_reload_ammo(Weapon::Bfg)),
         ];
 
-        PlayerVehicle {
+        Vehicle {
             turret_angle: 0.0,
             hp: 1.0,
             ammos,

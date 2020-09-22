@@ -4,7 +4,7 @@ use std::default::Default;
 
 use wasm_bindgen::prelude::*;
 
-use crate::{components::Hitbox, components::Vehicle, map::Vec2f, weapons::Weapon};
+use crate::{components::Hitbox, components::VehicleType, map::Vec2f, weapons::Weapon};
 
 /// Console variables - configuration options for anything and everything.
 ///
@@ -239,9 +239,9 @@ impl Cvars {
         Self::default()
     }
 
-    pub(crate) fn g_hardpoint(&self, vehicle: Vehicle, weapon: Weapon) -> (Hardpoint, Vec2f) {
-        match vehicle {
-            Vehicle::Tank => match weapon {
+    pub(crate) fn g_hardpoint(&self, veh_type: VehicleType, weapon: Weapon) -> (Hardpoint, Vec2f) {
+        match veh_type {
+            VehicleType::Tank => match weapon {
                 Weapon::Mg => (
                     self.g_hardpoint_tank_machine_gun,
                     Vec2f::new(
@@ -289,7 +289,7 @@ impl Cvars {
                     Vec2f::new(self.g_hardpoint_tank_bfg_x, self.g_hardpoint_tank_bfg_y),
                 ),
             },
-            Vehicle::Hovercraft => match weapon {
+            VehicleType::Hovercraft => match weapon {
                 Weapon::Mg => (
                     self.g_hardpoint_hovercraft_machine_gun,
                     Vec2f::new(
@@ -340,7 +340,7 @@ impl Cvars {
                     ),
                 ),
             },
-            Vehicle::Hummer => match weapon {
+            VehicleType::Hummer => match weapon {
                 Weapon::Mg => (
                     self.g_hardpoint_hummer_machine_gun,
                     Vec2f::new(
@@ -391,51 +391,51 @@ impl Cvars {
         }
     }
 
-    pub(crate) fn g_vehicle_hitbox(&self, vehicle: Vehicle) -> Hitbox {
-        match vehicle {
-            Vehicle::Tank => Hitbox {
+    pub(crate) fn g_vehicle_hitbox(&self, veh_type: VehicleType) -> Hitbox {
+        match veh_type {
+            VehicleType::Tank => Hitbox {
                 mins: Vec2f::new(self.g_tank_mins_x, self.g_tank_mins_y),
                 maxs: Vec2f::new(self.g_tank_maxs_x, self.g_tank_maxs_y),
             },
-            Vehicle::Hovercraft => Hitbox {
+            VehicleType::Hovercraft => Hitbox {
                 mins: Vec2f::new(self.g_hovercraft_mins_x, self.g_hovercraft_mins_y),
                 maxs: Vec2f::new(self.g_hovercraft_maxs_x, self.g_hovercraft_maxs_y),
             },
-            Vehicle::Hummer => Hitbox {
+            VehicleType::Hummer => Hitbox {
                 mins: Vec2f::new(self.g_hummer_mins_x, self.g_hummer_mins_y),
                 maxs: Vec2f::new(self.g_hummer_maxs_x, self.g_hummer_maxs_y),
             },
         }
     }
 
-    pub(crate) fn g_vehicle_turret_offset_chassis(&self, vehicle: Vehicle) -> Vec2f {
-        match vehicle {
-            Vehicle::Tank => Vec2f::new(
+    pub(crate) fn g_vehicle_turret_offset_chassis(&self, veh_type: VehicleType) -> Vec2f {
+        match veh_type {
+            VehicleType::Tank => Vec2f::new(
                 self.g_tank_turret_offset_chassis_x,
                 self.g_tank_turret_offset_chassis_y,
             ),
-            Vehicle::Hovercraft => Vec2f::new(
+            VehicleType::Hovercraft => Vec2f::new(
                 self.g_hovercraft_turret_offset_chassis_x,
                 self.g_hovercraft_turret_offset_chassis_y,
             ),
-            Vehicle::Hummer => Vec2f::new(
+            VehicleType::Hummer => Vec2f::new(
                 self.g_hummer_turret_offset_chassis_x,
                 self.g_hummer_turret_offset_chassis_y,
             ),
         }
     }
 
-    pub(crate) fn g_vehicle_turret_offset_turret(&self, vehicle: Vehicle) -> Vec2f {
+    pub(crate) fn g_vehicle_turret_offset_turret(&self, vehicle: VehicleType) -> Vec2f {
         match vehicle {
-            Vehicle::Tank => Vec2f::new(
+            VehicleType::Tank => Vec2f::new(
                 self.g_tank_turret_offset_turret_x,
                 self.g_tank_turret_offset_turret_y,
             ),
-            Vehicle::Hovercraft => Vec2f::new(
+            VehicleType::Hovercraft => Vec2f::new(
                 self.g_hovercraft_turret_offset_turret_x,
                 self.g_hovercraft_turret_offset_turret_y,
             ),
-            Vehicle::Hummer => Vec2f::new(
+            VehicleType::Hummer => Vec2f::new(
                 self.g_hummer_turret_offset_turret_x,
                 self.g_hummer_turret_offset_turret_y,
             ),
