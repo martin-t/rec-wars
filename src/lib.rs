@@ -155,11 +155,13 @@ impl Game {
         let gs_prev = gs.clone();
 
         for _ in 0..50 {
+            let vehicle = Vehicle::new(cvars);
             let veh_type = VehicleType::n(gs.rng.gen_range(0, 3)).unwrap();
             let pos = map.random_nonwall(&mut gs.rng).0;
             let angle = gs.rng.gen_range(0.0, 2.0 * PI);
             let hitbox = cvars.g_vehicle_hitbox(veh_type);
             legion.push((
+                vehicle,
                 veh_type,
                 Destroyed(gs.rng.gen_bool(0.2)),
                 Pos(pos),
