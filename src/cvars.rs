@@ -568,7 +568,7 @@ impl Default for Cvars {
             g_hardpoint_hummer_cluster_bomb_x: 0.0,
             g_hardpoint_hummer_cluster_bomb_y: 0.0,
             g_hardpoint_hummer_rockets: Hardpoint::Turret,
-            g_hardpoint_hummer_rockets_x: 35.0,
+            g_hardpoint_hummer_rockets_x: 0.0,
             g_hardpoint_hummer_rockets_y: 0.0,
             g_hardpoint_hummer_homing_missile: Hardpoint::Chassis,
             g_hardpoint_hummer_homing_missile_x: 0.0,
