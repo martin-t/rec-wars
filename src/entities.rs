@@ -1,8 +1,8 @@
 use vek::Clamp;
 
 use crate::{
-    components::Angle, components::Pos, components::TurnRate, components::Vel, cvars::Cvars,
-    weapons::Weapon,
+    components::Angle, components::Hitbox, components::Pos, components::TurnRate, components::Vel,
+    cvars::Cvars, weapons::Weapon,
 };
 use crate::{
     map::{Map, Vec2f},
@@ -124,6 +124,7 @@ impl PlayerVehicle {
         vel: &mut Vel,
         angle: &mut Angle,
         turn_rate: &mut TurnRate,
+        hitbox: &Hitbox,
     ) {
         // Turn rate
         dbg_textf!("tank orig tr: {}", turn_rate.0);
@@ -169,7 +170,7 @@ impl PlayerVehicle {
         let vel_rotation = turn_rate.0 * cvars.g_tank_turn_effectiveness;
         vel.0.rotate_z(vel_rotation);
         let new_angle = angle.0 + turn_rate.0; // TODO * dt
-        if Self::corners(cvars, pos.0, new_angle)
+        if corners(*hitbox, pos.0, new_angle)
             .iter()
             .any(|&corner| map.collision(corner))
         {
@@ -182,7 +183,7 @@ impl PlayerVehicle {
 
         // Moving
         let new_pos = pos.0 + vel.0 * dt;
-        if Self::corners(cvars, new_pos, angle.0)
+        if corners(*hitbox, new_pos, angle.0)
             .iter()
             .any(|&corner| map.collision(corner))
         {
@@ -191,17 +192,14 @@ impl PlayerVehicle {
             pos.0 = new_pos;
         }
     }
+}
 
-    pub(crate) fn corners(cvars: &Cvars, pos: Vec2f, angle: f64) -> [Vec2f; 4] {
-        let back_left = pos + Vec2f::new(cvars.g_tank_mins_x, cvars.g_tank_mins_y).rotated_z(angle);
-        let front_left =
-            pos + Vec2f::new(cvars.g_tank_maxs_x, cvars.g_tank_mins_y).rotated_z(angle);
-        let front_right =
-            pos + Vec2f::new(cvars.g_tank_maxs_x, cvars.g_tank_maxs_y).rotated_z(angle);
-        let back_right =
-            pos + Vec2f::new(cvars.g_tank_mins_x, cvars.g_tank_maxs_y).rotated_z(angle);
-        [back_left, front_left, front_right, back_right]
-    }
+pub(crate) fn corners(hitbox: Hitbox, pos: Vec2f, angle: f64) -> [Vec2f; 4] {
+    let back_left = pos + Vec2f::new(hitbox.mins.x, hitbox.mins.y).rotated_z(angle);
+    let front_left = pos + Vec2f::new(hitbox.maxs.x, hitbox.mins.y).rotated_z(angle);
+    let front_right = pos + Vec2f::new(hitbox.maxs.x, hitbox.maxs.y).rotated_z(angle);
+    let back_right = pos + Vec2f::new(hitbox.mins.x, hitbox.maxs.y).rotated_z(angle);
+    [back_left, front_left, front_right, back_right]
 }
 
 #[derive(Debug, Clone)]

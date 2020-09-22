@@ -281,8 +281,9 @@ impl Game {
             &mut Vel,
             &mut Angle,
             &mut TurnRate,
+            &Hitbox,
         )>::query();
-        let (pv, vehicle, pos, vel, angle, turn_rate) =
+        let (pv, vehicle, pos, vel, angle, turn_rate, hitbox) =
             query.get_mut(&mut self.legion, self.gs.pe).unwrap();
 
         // Player vehicle movement TODO move after shooting again (though this might look better when shooting MG sideways)
@@ -292,7 +293,9 @@ impl Game {
         } else {
             input = &EMPTY_INPUT;
         }
-        pv.tick(dt, cvars, input, &self.map, pos, vel, angle, turn_rate);
+        pv.tick(
+            dt, cvars, input, &self.map, pos, vel, angle, turn_rate, hitbox,
+        );
 
         let vel = *vel; // TODO borrow checker hack
 
@@ -710,8 +713,8 @@ impl Game {
 
         // Draw chassis
         let mut vehicle_cnt = 0;
-        let mut query = <(&Vehicle, &Destroyed, &Pos, &Angle)>::query();
-        for (&vehicle, destroyed, pos, angle) in query.iter(&self.legion) {
+        let mut query = <(&Vehicle, &Destroyed, &Pos, &Angle, &Hitbox)>::query();
+        for (&vehicle, destroyed, pos, angle, hitbox) in query.iter(&self.legion) {
             vehicle_cnt += 1;
             let scr_pos = pos.0 - top_left;
             let img;
@@ -724,7 +727,7 @@ impl Game {
             if cvars.d_draw && cvars.d_draw_hitboxes {
                 self.context.set_stroke_style(&"yellow".into());
                 self.context.begin_path();
-                let corners = PlayerVehicle::corners(cvars, scr_pos, angle.0);
+                let corners = entities::corners(*hitbox, scr_pos, angle.0);
                 self.move_to(corners[0]);
                 self.line_to(corners[1]);
                 self.line_to(corners[2]);
