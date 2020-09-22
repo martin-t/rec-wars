@@ -485,8 +485,11 @@ impl Game {
                 continue;
             }
 
-            for &(vehicle, veh_pos, _veh_angle, _veh_hitbox) in &vehicles {
-                if vehicle != owner.0 && (pos.0 - veh_pos.0).magnitude_squared() <= 24.0 * 24.0 {
+            for &(vehicle, destroyed, veh_pos, _veh_angle, _veh_hitbox) in &vehicles {
+                if !destroyed.0
+                    && vehicle != owner.0
+                    && (pos.0 - veh_pos.0).magnitude_squared() <= 24.0 * 24.0
+                {
                     self.gs.explosions.push(Explosion::new(
                         pos.0,
                         cvars.g_rockets_explosion_scale,

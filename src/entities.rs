@@ -2,8 +2,8 @@ use legion::{query::IntoQuery, Entity, World};
 use vek::Clamp;
 
 use crate::{
-    components::Angle, components::Hitbox, components::Pos, components::TurnRate, components::Vel,
-    cvars::Cvars, weapons::Weapon,
+    components::Angle, components::Destroyed, components::Hitbox, components::Pos,
+    components::TurnRate, components::Vel, cvars::Cvars, weapons::Weapon,
 };
 use crate::{
     map::{Map, Vec2f},
@@ -203,11 +203,11 @@ pub(crate) fn corners(hitbox: Hitbox, pos: Vec2f, angle: f64) -> [Vec2f; 4] {
     [back_left, front_left, front_right, back_right]
 }
 
-pub(crate) fn all_vehicles(world: &World) -> Vec<(Entity, Pos, Angle, Hitbox)> {
-    let mut query_vehicles = <(Entity, &Pos, &Angle, &Hitbox)>::query();
+pub(crate) fn all_vehicles(world: &World) -> Vec<(Entity, Destroyed, Pos, Angle, Hitbox)> {
+    let mut query_vehicles = <(Entity, &Destroyed, &Pos, &Angle, &Hitbox)>::query();
     query_vehicles
         .iter(world)
-        .map(|(&entity, &pos, &angle, &hitbox)| (entity, pos, angle, hitbox))
+        .map(|(&entity, &destroyed, &pos, &angle, &hitbox)| (entity, destroyed, pos, angle, hitbox))
         .collect()
 }
 
