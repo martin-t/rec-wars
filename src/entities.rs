@@ -174,7 +174,7 @@ impl PlayerVehicle {
             .iter()
             .any(|&corner| map.collision(corner))
         {
-            turn_rate.0 = 0.0;
+            turn_rate.0 *= -0.5;
         } else {
             angle.0 = new_angle;
         }
@@ -187,7 +187,7 @@ impl PlayerVehicle {
             .iter()
             .any(|&corner| map.collision(corner))
         {
-            vel.0 = Vec2f::zero();
+            vel.0 *= -0.5;
         } else {
             pos.0 = new_pos;
         }
