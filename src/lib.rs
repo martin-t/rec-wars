@@ -125,11 +125,9 @@ impl Game {
 
         let mut legion = legion::World::default();
 
-        let mins = Vec2f::new(cvars.g_tank_mins_x, cvars.g_tank_mins_y);
-        let maxs = Vec2f::new(cvars.g_tank_maxs_x, cvars.g_tank_maxs_y);
-
         let pv = PlayerVehicle::new(cvars);
         let vehicle = Vehicle::n(rng.gen_range(0, 3)).unwrap();
+        let hitbox = cvars.g_vehicle_hitbox(vehicle);
 
         let entity = legion.push((
             pv,
@@ -139,7 +137,7 @@ impl Game {
             Vel(Vec2f::zero()),
             Angle(spawn_angle),
             TurnRate(0.0),
-            Hitbox { mins, maxs },
+            hitbox,
         ));
         let ce = ControlledEntity::Vehicle;
 
@@ -160,6 +158,7 @@ impl Game {
             let vehicle = Vehicle::n(gs.rng.gen_range(0, 3)).unwrap();
             let pos = map.random_nonwall(&mut gs.rng).0;
             let angle = gs.rng.gen_range(0.0, 2.0 * PI);
+            let hitbox = cvars.g_vehicle_hitbox(vehicle);
             legion.push((
                 vehicle,
                 Destroyed(gs.rng.gen_bool(0.2)),
@@ -167,7 +166,7 @@ impl Game {
                 Vel(Vec2f::zero()),
                 Angle(angle),
                 TurnRate(0.0),
-                Hitbox { mins, maxs },
+                hitbox,
             ));
         }
 

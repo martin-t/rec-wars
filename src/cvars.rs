@@ -4,7 +4,7 @@ use std::default::Default;
 
 use wasm_bindgen::prelude::*;
 
-use crate::{components::Vehicle, map::Vec2f, weapons::Weapon};
+use crate::{components::Hitbox, components::Vehicle, map::Vec2f, weapons::Weapon};
 
 /// Console variables - configuration options for anything and everything.
 ///
@@ -145,11 +145,19 @@ pub struct Cvars {
     pub g_hardpoint_tank_bfg_x: f64,
     pub g_hardpoint_tank_bfg_y: f64,
 
+    pub g_hovercraft_maxs_x: f64,
+    pub g_hovercraft_maxs_y: f64,
+    pub g_hovercraft_mins_x: f64,
+    pub g_hovercraft_mins_y: f64,
     pub g_hovercraft_turret_offset_chassis_x: f64,
     pub g_hovercraft_turret_offset_chassis_y: f64,
     pub g_hovercraft_turret_offset_turret_x: f64,
     pub g_hovercraft_turret_offset_turret_y: f64,
 
+    pub g_hummer_maxs_x: f64,
+    pub g_hummer_maxs_y: f64,
+    pub g_hummer_mins_x: f64,
+    pub g_hummer_mins_y: f64,
     pub g_hummer_turret_offset_chassis_x: f64,
     pub g_hummer_turret_offset_chassis_y: f64,
     pub g_hummer_turret_offset_turret_x: f64,
@@ -378,6 +386,23 @@ impl Cvars {
         }
     }
 
+    pub(crate) fn g_vehicle_hitbox(&self, vehicle: Vehicle) -> Hitbox {
+        match vehicle {
+            Vehicle::Tank => Hitbox {
+                mins: Vec2f::new(self.g_tank_mins_x, self.g_tank_mins_y),
+                maxs: Vec2f::new(self.g_tank_maxs_x, self.g_tank_maxs_y),
+            },
+            Vehicle::Hovercraft => Hitbox {
+                mins: Vec2f::new(self.g_hovercraft_mins_x, self.g_hovercraft_mins_y),
+                maxs: Vec2f::new(self.g_hovercraft_maxs_x, self.g_hovercraft_maxs_y),
+            },
+            Vehicle::Hummer => Hitbox {
+                mins: Vec2f::new(self.g_hummer_mins_x, self.g_hummer_mins_y),
+                maxs: Vec2f::new(self.g_hummer_maxs_x, self.g_hummer_maxs_y),
+            },
+        }
+    }
+
     pub(crate) fn g_vehicle_turret_offset_chassis(&self, vehicle: Vehicle) -> Vec2f {
         match vehicle {
             Vehicle::Tank => Vec2f::new(
@@ -572,11 +597,19 @@ impl Default for Cvars {
             g_hardpoint_tank_bfg_x: 35.0,
             g_hardpoint_tank_bfg_y: 0.0,
 
+            g_hovercraft_maxs_x: 19.0,
+            g_hovercraft_maxs_y: 12.0,
+            g_hovercraft_mins_x: -19.0,
+            g_hovercraft_mins_y: -12.0,
             g_hovercraft_turret_offset_chassis_x: -9.0,
             g_hovercraft_turret_offset_chassis_y: 5.0,
             g_hovercraft_turret_offset_turret_x: -8.0,
             g_hovercraft_turret_offset_turret_y: 0.0,
 
+            g_hummer_maxs_x: 19.0,
+            g_hummer_maxs_y: 12.0,
+            g_hummer_mins_x: -19.0,
+            g_hummer_mins_y: -12.0,
             g_hummer_turret_offset_chassis_x: -12.0,
             g_hummer_turret_offset_chassis_y: 0.0,
             g_hummer_turret_offset_turret_x: 0.0,
