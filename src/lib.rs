@@ -724,7 +724,7 @@ impl Game {
             if cvars.d_draw && cvars.d_draw_hitboxes {
                 self.context.set_stroke_style(&"yellow".into());
                 self.context.begin_path();
-                let corners = PlayerVehicle::corners(cvars, scr_pos, player_angle.0);
+                let corners = PlayerVehicle::corners(cvars, scr_pos, angle.0);
                 self.move_to(corners[0]);
                 self.line_to(corners[1]);
                 self.line_to(corners[2]);
