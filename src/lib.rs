@@ -6,6 +6,7 @@
 #![warn(unreachable_pub)]
 #![warn(unused)]
 #![warn(clippy::all)]
+// TODO check clippy lints actually work - e.g. shadow_unrelated/pedantic doesn't seem to
 
 #[macro_use]
 mod debugging;
@@ -556,11 +557,10 @@ impl Game {
         //      if disabling, try changing quality
         self.context.set_image_smoothing_enabled(cvars.r_smoothing);
 
-        let mut query = <(&Vehicle, &VehicleType, &Pos, &Angle)>::query();
-        let (player_vehicle, player_veh_type, player_pos, player_angle) =
-            query.get(&self.legion, self.gs.pe).unwrap();
-        let pe_pos = match self.gs.ce {
-            ControlledEntity::Vehicle => player_pos.0,
+        let mut query = <(&Vehicle, &Pos)>::query();
+        let (player_vehicle, player_veh_pos) = query.get(&self.legion, self.gs.pe).unwrap();
+        let player_entity_pos = match self.gs.ce {
+            ControlledEntity::Vehicle => player_veh_pos.0,
             ControlledEntity::GuidedMissile => self.gs.gm.pos,
         };
 
@@ -569,7 +569,7 @@ impl Game {
         let camera_min = self.canvas_size / 2.0;
         let map_size = self.map.maxs();
         let camera_max = map_size - camera_min;
-        let camera_pos = pe_pos.clamped(camera_min, camera_max);
+        let camera_pos = player_entity_pos.clamped(camera_min, camera_max);
 
         let top_left = camera_pos - camera_min;
         let top_left_tp = self.map.tile_pos(top_left);
@@ -676,11 +676,10 @@ impl Game {
 
         // Draw missile
         let gm = &self.gs.gm;
-        let player_scr_pos = gm.pos - top_left;
-        self.draw_img_center(&self.img_gm, player_scr_pos, gm.vel.to_angle())?;
+        let gm_scr_pos = gm.pos - top_left;
+        self.draw_img_center(&self.img_gm, gm_scr_pos, gm.vel.to_angle())?;
         if cvars.d_draw {
-            self.context
-                .fill_rect(player_scr_pos.x, player_scr_pos.y, 1.0, 1.0);
+            self.context.fill_rect(gm_scr_pos.x, gm_scr_pos.y, 1.0, 1.0);
         }
 
         // Draw BFG
@@ -724,8 +723,8 @@ impl Game {
 
         // Draw chassis
         let mut vehicle_cnt = 0;
-        let mut query = <(&VehicleType, &Destroyed, &Pos, &Angle, &Hitbox)>::query();
-        for (&veh_type, destroyed, pos, angle, hitbox) in query.iter(&self.legion) {
+        let mut chassis_query = <(&VehicleType, &Destroyed, &Pos, &Angle, &Hitbox)>::query();
+        for (&veh_type, destroyed, pos, angle, hitbox) in chassis_query.iter(&self.legion) {
             vehicle_cnt += 1;
             let scr_pos = pos.0 - top_left;
             let img;
@@ -751,18 +750,26 @@ impl Game {
 
         // TODO Draw cow
 
-        // Draw player vehicle turret
-        let player_scr_pos = player_pos.0 - top_left;
-        let offset_chassis =
-            player_angle.0.to_mat2f() * cvars.g_vehicle_turret_offset_chassis(*player_veh_type);
-        let turret_scr_pos = player_scr_pos + offset_chassis;
-        let offset_turret = cvars.g_vehicle_turret_offset_turret(*player_veh_type);
-        self.draw_img_offset(
-            &self.imgs_vehicles[*player_veh_type as usize * 2 + 1],
-            turret_scr_pos,
-            player_angle.0 + player_vehicle.turret_angle,
-            offset_turret,
-        )?;
+        // Draw turrets
+        let mut turrets_query = <(&VehicleType, &Vehicle, &Destroyed, &Pos, &Angle)>::query();
+        for (&veh_type, vehicle, destroyed, pos, angle) in turrets_query.iter(&self.legion) {
+            if destroyed.0 {
+                continue;
+            }
+
+            let img = &self.imgs_vehicles[veh_type as usize * 2 + 1];
+            let scr_pos = pos.0 - top_left;
+            let offset_chassis =
+                angle.0.to_mat2f() * cvars.g_vehicle_turret_offset_chassis(veh_type);
+            let turret_scr_pos = scr_pos + offset_chassis;
+            let offset_turret = cvars.g_vehicle_turret_offset_turret(veh_type);
+            self.draw_img_offset(
+                img,
+                turret_scr_pos,
+                angle.0 + vehicle.turret_angle,
+                offset_turret,
+            )?;
+        }
 
         // Draw explosions
         let iter: Box<dyn Iterator<Item = &Explosion>> = if cvars.r_explosions_reverse {
@@ -867,21 +874,22 @@ impl Game {
         // Draw HUD:
 
         // Homing missile indicator
+        let player_veh_scr_pos = player_veh_pos.0 - top_left;
         self.context.set_stroke_style(&"rgb(0, 255, 0)".into());
         let dash_len = cvars.hud_missile_indicator_dash_length.into();
         let dash_pattern = Array::of2(&dash_len, &dash_len);
         self.context.set_line_dash(&dash_pattern)?;
         self.context.begin_path();
         self.context.arc(
-            player_scr_pos.x,
-            player_scr_pos.y,
+            player_veh_scr_pos.x,
+            player_veh_scr_pos.y,
             cvars.hud_missile_indicator_radius,
             0.0,
             2.0 * PI,
         )?;
-        self.context.move_to(player_scr_pos.x, player_scr_pos.y);
-        let dir = (self.gs.gm.pos - player_pos.0).normalized();
-        let end = player_scr_pos + dir * cvars.hud_missile_indicator_radius;
+        self.move_to(player_veh_scr_pos);
+        let dir = (self.gs.gm.pos - player_veh_pos.0).normalized();
+        let end = player_veh_scr_pos + dir * cvars.hud_missile_indicator_radius;
         self.line_to(end);
         self.context.stroke();
         self.context.set_line_dash(&Array::new())?;
