@@ -447,12 +447,24 @@ impl Game {
         let mut to_kill = Vec::new();
 
         // MG
-        let mut query = <(legion::Entity, &Mg, &mut Pos, &Vel)>::query();
-        for (&entity, _, pos, vel) in query.iter_mut(&mut self.legion) {
+        let mut query = <(legion::Entity, &Mg, &mut Pos, &Vel, &Owner)>::query();
+        for (&projectile, _, pos, vel, owner) in query.iter_mut(&mut self.legion) {
             pos.0 += vel.0 * dt;
 
             if self.map.collision(pos.0) {
-                to_remove.push(entity);
+                to_remove.push(projectile);
+                continue;
+            }
+
+            for &(veh_id, veh_destroyed, veh_pos, _veh_angle, _veh_hitbox) in &vehicles {
+                if !veh_destroyed.0
+                    && veh_id != owner.0
+                    && (pos.0 - veh_pos.0).magnitude_squared() <= 24.0 * 24.0
+                {
+                    to_remove.push(projectile);
+                    to_kill.push(veh_id);
+                    break;
+                }
             }
         }
 
