@@ -217,6 +217,7 @@
 //      [x] google analytics
 //      [ ] master server
 // [ ] FAQ - stuttering/tearing due to compositor - Alt+Shift+f12 - somehow this doesn't work anymore
+//      note to self - renderdoc for graphics debugging
 // [ ] version info
 // nice to have:
 // [ ] record seed+input (WASM should be reproducible when avoiding NaNs) - replay, debugging
