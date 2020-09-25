@@ -462,7 +462,15 @@ impl Game {
                     && (pos.0 - veh_pos.0).magnitude_squared() <= 24.0 * 24.0
                 {
                     to_remove.push(projectile);
+
+                    self.gs.explosions.push(Explosion::new(
+                        veh_pos.0,
+                        1.0,
+                        self.gs.frame_time,
+                        false,
+                    ));
                     to_kill.push(veh_id);
+
                     break;
                 }
             }
@@ -512,7 +520,15 @@ impl Game {
                         false,
                     ));
                     to_remove.push(projectile);
+
+                    self.gs.explosions.push(Explosion::new(
+                        veh_pos.0,
+                        1.0,
+                        self.gs.frame_time,
+                        false,
+                    ));
                     to_kill.push(veh_id);
+
                     break;
                 }
             }
