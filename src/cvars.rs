@@ -36,7 +36,7 @@ pub struct Cvars {
     /// Change speed of everything in the game
     pub d_speed: f64,
 
-    pub g_bfg_add_vehicle_velocity: bool,
+    pub g_bfg_vehicle_velocity_factor: f64,
     pub g_bfg_beam_range: f64,
     pub g_bfg_explosion_scale: f64,
     pub g_bfg_radius: f64,
@@ -44,7 +44,7 @@ pub struct Cvars {
     pub g_bfg_reload_time: f64,
     pub g_bfg_speed: f64,
 
-    pub g_cluster_bomb_add_vehicle_velocity: bool,
+    pub g_cluster_bomb_vehicle_velocity_factor: f64,
     pub g_cluster_bomb_count: i32,
     pub g_cluster_bomb_explosion_scale: f64,
     pub g_cluster_bomb_reload_ammo: u32,
@@ -63,7 +63,7 @@ pub struct Cvars {
     pub g_homing_missile_reload_ammo: u32,
     pub g_homing_missile_reload_time: f64,
 
-    pub g_machine_gun_add_vehicle_velocity: bool,
+    pub g_machine_gun_vehicle_velocity_factor: f64,
     pub g_machine_gun_angle_spread: f64,
     pub g_machine_gun_refire: f64,
     pub g_machine_gun_reload_ammo: u32,
@@ -171,7 +171,7 @@ pub struct Cvars {
     pub g_railgun_reload_ammo: u32,
     pub g_railgun_reload_time: f64,
 
-    pub g_rockets_add_vehicle_velocity: bool,
+    pub g_rockets_vehicle_velocity_factor: f64,
     pub g_rockets_explosion_scale: f64,
     pub g_rockets_refire: f64,
     pub g_rockets_reload_ammo: u32,
@@ -490,7 +490,7 @@ impl Default for Cvars {
             d_seed: 0,
             d_speed: 1.0,
 
-            g_bfg_add_vehicle_velocity: true,
+            g_bfg_vehicle_velocity_factor: 1.0,
             g_bfg_beam_range: 125.0,
             g_bfg_explosion_scale: 1.0,
             g_bfg_radius: 4.0,
@@ -498,7 +498,7 @@ impl Default for Cvars {
             g_bfg_reload_time: 2.5,
             g_bfg_speed: 150.0,
 
-            g_cluster_bomb_add_vehicle_velocity: true,
+            g_cluster_bomb_vehicle_velocity_factor: 1.0,
             g_cluster_bomb_count: 40,
             g_cluster_bomb_explosion_scale: 0.5,
             g_cluster_bomb_reload_ammo: 1,
@@ -517,7 +517,7 @@ impl Default for Cvars {
             g_homing_missile_reload_ammo: 1,
             g_homing_missile_reload_time: 1.5,
 
-            g_machine_gun_add_vehicle_velocity: true,
+            g_machine_gun_vehicle_velocity_factor: 1.0,
             g_machine_gun_angle_spread: 0.015,
             g_machine_gun_refire: 0.050,
             g_machine_gun_reload_ammo: 50,
@@ -623,7 +623,7 @@ impl Default for Cvars {
             g_railgun_reload_ammo: 1,
             g_railgun_reload_time: 1.0,
 
-            g_rockets_add_vehicle_velocity: true,
+            g_rockets_vehicle_velocity_factor: 1.0,
             g_rockets_explosion_scale: 0.5,
             g_rockets_refire: 0.200,
             g_rockets_reload_ammo: 6,

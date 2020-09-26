@@ -357,11 +357,9 @@ impl Game {
                             let spread = cvars.g_machine_gun_angle_spread * r;
                             // Using spread as y would mean the resulting spread depends on speed
                             // so it's better to use spread on angle.
-                            let mut shot_vel = Vec2f::new(cvars.g_machine_gun_speed, 0.0)
-                                .rotated_z(shot_angle + spread);
-                            if cvars.g_machine_gun_add_vehicle_velocity {
-                                shot_vel += vel.0;
-                            }
+                            let shot_vel = Vec2f::new(cvars.g_machine_gun_speed, 0.0)
+                                .rotated_z(shot_angle + spread)
+                                + cvars.g_machine_gun_vehicle_velocity_factor * vel.0;
                             let vel = Vel(shot_vel);
                             self.legion.push((Mg, pos, vel, owner));
                         }
@@ -393,13 +391,9 @@ impl Game {
                                     spread_sideways =
                                         cvars.g_cluster_bomb_speed_spread_sideways * r;
                                 }
-
-                                let mut shot_vel =
-                                    Vec2f::new(speed + spread_forward, spread_sideways)
-                                        .rotated_z(shot_angle);
-                                if cvars.g_cluster_bomb_add_vehicle_velocity {
-                                    shot_vel += vel.0;
-                                }
+                                let shot_vel = Vec2f::new(speed + spread_forward, spread_sideways)
+                                    .rotated_z(shot_angle)
+                                    + cvars.g_cluster_bomb_vehicle_velocity_factor * vel.0;
                                 let vel = Vel(shot_vel);
                                 let time = frame_time
                                     + cvars.g_cluster_bomb_time
@@ -411,11 +405,9 @@ impl Game {
                         }
                         Weapon::Rockets => {
                             let pos = Pos(shot_origin);
-                            let mut shot_vel =
-                                Vec2f::new(cvars.g_rockets_speed, 0.0).rotated_z(shot_angle);
-                            if cvars.g_rockets_add_vehicle_velocity {
-                                shot_vel += vel.0;
-                            }
+                            let shot_vel = Vec2f::new(cvars.g_rockets_speed, 0.0)
+                                .rotated_z(shot_angle)
+                                + cvars.g_rockets_vehicle_velocity_factor * vel.0;
                             let vel = Vel(shot_vel);
                             self.legion.push((Rocket, pos, vel, owner));
                         }
@@ -429,11 +421,9 @@ impl Game {
                         }
                         Weapon::Bfg => {
                             let pos = Pos(shot_origin);
-                            let mut shot_vel =
-                                Vec2f::new(cvars.g_bfg_speed, 0.0).rotated_z(shot_angle);
-                            if cvars.g_bfg_add_vehicle_velocity {
-                                shot_vel += vel.0;
-                            }
+                            let shot_vel = Vec2f::new(cvars.g_bfg_speed, 0.0)
+                                .rotated_z(shot_angle)
+                                + cvars.g_bfg_vehicle_velocity_factor * vel.0;
                             let vel = Vel(shot_vel);
                             self.legion.push((Bfg, pos, vel, owner));
                         }
