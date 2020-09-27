@@ -178,6 +178,9 @@ pub struct Cvars {
     pub g_rockets_reload_time: f64,
     pub g_rockets_speed: f64,
 
+    pub g_self_destruct_explosion1_scale: f64,
+    pub g_self_destruct_explosion2_scale: f64,
+
     pub g_tank_accel_backward: f64,
     pub g_tank_accel_forward: f64,
     pub g_tank_friction_const: f64,
@@ -629,6 +632,9 @@ impl Default for Cvars {
             g_rockets_reload_ammo: 6,
             g_rockets_reload_time: 1.5,
             g_rockets_speed: 600.0,
+
+            g_self_destruct_explosion1_scale: 2.0,
+            g_self_destruct_explosion2_scale: 1.0,
 
             g_tank_accel_backward: 550.0,
             g_tank_accel_forward: 550.0,

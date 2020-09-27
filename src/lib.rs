@@ -280,14 +280,31 @@ impl Game {
         let mut query = <(
             &mut Vehicle,
             &VehicleType,
+            &mut Destroyed,
             &mut Pos,
             &mut Vel,
             &mut Angle,
             &mut TurnRate,
             &Hitbox,
         )>::query();
-        let (vehicle, veh_type, pos, vel, angle, turn_rate, hitbox) =
+        let (vehicle, veh_type, destroyed, pos, vel, angle, turn_rate, hitbox) =
             query.get_mut(&mut self.legion, self.gs.pe).unwrap();
+
+        if self.gs.input.self_destruct && !self.gs_prev.input.self_destruct && !destroyed.0 {
+            destroyed.0 = true;
+            self.gs.explosions.push(Explosion::new(
+                pos.0,
+                cvars.g_self_destruct_explosion1_scale,
+                frame_time,
+                false,
+            ));
+            self.gs.explosions.push(Explosion::new(
+                pos.0,
+                cvars.g_self_destruct_explosion2_scale,
+                frame_time,
+                false,
+            ));
+        }
 
         // Player vehicle movement TODO move after shooting again (though this might look better when shooting MG sideways)
         let input;
@@ -421,8 +438,7 @@ impl Game {
                         }
                         Weapon::Bfg => {
                             let pos = Pos(shot_origin);
-                            let shot_vel = Vec2f::new(cvars.g_bfg_speed, 0.0)
-                                .rotated_z(shot_angle)
+                            let shot_vel = Vec2f::new(cvars.g_bfg_speed, 0.0).rotated_z(shot_angle)
                                 + cvars.g_bfg_vehicle_velocity_factor * vel.0;
                             let vel = Vel(shot_vel);
                             self.legion.push((Bfg, pos, vel, owner));
