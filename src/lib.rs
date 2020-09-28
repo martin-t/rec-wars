@@ -16,6 +16,7 @@ mod cvars;
 mod entities;
 mod game_state;
 mod map;
+mod systems;
 mod weapons;
 
 use std::collections::VecDeque;
@@ -261,7 +262,7 @@ impl Game {
         let frame_time = self.gs.frame_time; // borrowchk
         let dt = frame_time - self.gs_prev.frame_time;
 
-        // Cleanup old entities
+        // Cleanup old explosions
         self.gs.explosions.retain(|explosion| {
             let progress = (frame_time - explosion.start_time) / cvars.r_explosion_duration;
             progress <= 1.0
@@ -541,20 +542,7 @@ impl Game {
         }
 
         // BFG
-        let mut query = <(legion::Entity, &Bfg, &mut Pos, &Vel)>::query();
-        for (&entity, _, pos, vel) in query.iter_mut(&mut self.legion) {
-            pos.0 += vel.0 * dt;
-
-            if self.map.collision(pos.0) {
-                self.gs.explosions.push(Explosion::new(
-                    pos.0,
-                    cvars.g_bfg_explosion_scale,
-                    self.gs.frame_time,
-                    true,
-                ));
-                to_remove.push(entity);
-            }
-        }
+        systems::bfg(cvars, &mut self.legion, &self.map, &mut self.gs, dt);
 
         for entity in to_remove {
             self.legion.remove(entity);
