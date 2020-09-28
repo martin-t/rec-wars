@@ -146,6 +146,7 @@ impl Game {
         let mut gs = GameState {
             rng,
             frame_time: 0.0,
+            dt: 0.0,
             input: Input::default(),
             cur_weapon: Weapon::Mg,
             railguns: Vec::new(),
@@ -241,6 +242,7 @@ impl Game {
     fn begin_frame(&mut self, t: f64) {
         self.gs_prev = self.gs.clone();
         self.gs.frame_time = t;
+        self.gs.dt = self.gs.frame_time - self.gs_prev.frame_time;
         assert!(
             self.gs.frame_time >= self.gs_prev.frame_time,
             "frametime didn't increase: prev {}, current {}",
@@ -259,8 +261,9 @@ impl Game {
     }
 
     fn tick(&mut self, cvars: &Cvars) {
-        let frame_time = self.gs.frame_time; // borrowchk
-        let dt = frame_time - self.gs_prev.frame_time;
+        // borrowchk
+        let frame_time = self.gs.frame_time;
+        let dt = self.gs.dt;
 
         // Cleanup old explosions
         self.gs.explosions.retain(|explosion| {
@@ -542,7 +545,7 @@ impl Game {
         }
 
         // BFG
-        systems::bfg(cvars, &mut self.legion, &self.map, &mut self.gs, dt);
+        systems::bfg(cvars, &mut self.legion, &self.map, &mut self.gs);
 
         for entity in to_remove {
             self.legion.remove(entity);
@@ -857,7 +860,6 @@ impl Game {
 
         // Draw debug lines and crosses
         if cvars.d_draw {
-            let dt = self.gs.frame_time - self.gs_prev.frame_time;
             DEBUG_LINES.with(|lines| {
                 let mut lines = lines.borrow_mut();
                 for line in lines.iter_mut() {
@@ -868,7 +870,7 @@ impl Game {
                     self.move_to(scr_begin);
                     self.line_to(scr_end);
                     self.context.stroke();
-                    line.time -= dt;
+                    line.time -= self.gs.dt;
                 }
                 lines.retain(|line| line.time > 0.0);
             });
@@ -887,7 +889,7 @@ impl Game {
                     self.move_to(top_right);
                     self.line_to(bottom_left);
                     self.context.stroke();
-                    cross.time -= dt;
+                    cross.time -= self.gs.dt;
                 }
                 crosses.retain(|cross| cross.time > 0.0);
             });

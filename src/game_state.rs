@@ -14,6 +14,8 @@ pub(crate) struct GameState {
     pub(crate) rng: SmallRng,
     /// This frame's time in seconds
     pub(crate) frame_time: f64,
+    /// Delta time since last frame in seconds
+    pub(crate) dt: f64,
     pub(crate) input: Input,
     pub(crate) cur_weapon: Weapon,
     pub(crate) railguns: Vec<(Vec2f, Vec2f)>,

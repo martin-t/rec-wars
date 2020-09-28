@@ -5,12 +5,12 @@ use crate::{
     game_state::GameState, map::Map,
 };
 
-pub(crate) fn bfg(cvars: &Cvars, world: &mut World, map: &Map, gs: &mut GameState, dt: f64) {
+pub(crate) fn bfg(cvars: &Cvars, world: &mut World, map: &Map, gs: &mut GameState) {
     let mut to_remove = Vec::new();
 
     let mut query = <(legion::Entity, &Bfg, &mut Pos, &Vel)>::query();
     for (&entity, _, pos, vel) in query.iter_mut(world) {
-        pos.0 += vel.0 * dt;
+        pos.0 += vel.0 * gs.dt;
 
         if map.collision(pos.0) {
             gs.explosions.push(Explosion::new(
