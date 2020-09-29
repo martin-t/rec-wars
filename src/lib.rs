@@ -22,8 +22,7 @@ mod weapons;
 use std::collections::VecDeque;
 use std::f64::consts::PI;
 
-use legion::{self, World};
-use legion::{query::IntoQuery, Entity};
+use legion::{query::IntoQuery, Entity, World};
 
 use js_sys::Array;
 
@@ -125,7 +124,7 @@ impl Game {
 
         let gm = GuidedMissile::spawn(cvars, spawn_pos, spawn_angle);
 
-        let mut legion = legion::World::default();
+        let mut legion = World::default();
 
         let plyer_vehicle = Vehicle::new(cvars);
         let veh_type = VehicleType::n(rng.gen_range(0, 3)).unwrap();
@@ -457,7 +456,7 @@ impl Game {
         let mut to_kill = Vec::new();
 
         // MG
-        let mut query = <(legion::Entity, &Mg, &mut Pos, &Vel, &Owner)>::query();
+        let mut query = <(Entity, &Mg, &mut Pos, &Vel, &Owner)>::query();
         for (&projectile, _, pos, vel, owner) in query.iter_mut(&mut self.legion) {
             pos.0 += vel.0 * dt;
 
@@ -487,7 +486,7 @@ impl Game {
         }
 
         // CBs
-        let mut query = <(legion::Entity, &Cb, &mut Pos, &Vel, &Time)>::query();
+        let mut query = <(Entity, &Cb, &mut Pos, &Vel, &Time)>::query();
         for (&entity, _, pos, vel, time) in query.iter_mut(&mut self.legion) {
             pos.0 += vel.0 * dt;
 
@@ -503,7 +502,7 @@ impl Game {
         }
 
         // Rockets
-        let mut query = <(legion::Entity, &Rocket, &mut Pos, &Vel, &Owner)>::query();
+        let mut query = <(Entity, &Rocket, &mut Pos, &Vel, &Owner)>::query();
         for (&projectile, _, pos, vel, owner) in query.iter_mut(&mut self.legion) {
             pos.0 += vel.0 * dt;
 

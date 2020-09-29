@@ -1,3 +1,5 @@
+//! The C in ECS
+
 use enumn::N;
 use legion::Entity;
 
