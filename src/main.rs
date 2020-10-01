@@ -219,7 +219,9 @@
 // [ ] FAQ - stuttering/tearing due to compositor - Alt+Shift+f12 - somehow this doesn't work anymore
 //      note to self - renderdoc for graphics debugging
 // [ ] version info
+// [ ] focus convas on (re)load (e.g. after touching browser console and reloading)
 // nice to have:
+// [ ] GM - presing fire again switches back to tank
 // [ ] record seed+input (WASM should be reproducible when avoiding NaNs) - replay, debugging
 // [ ] allow MG to shoot down missiles
 // [ ] make driving feel more real - simulate terrain unevenness? mild speed/angle changes?
