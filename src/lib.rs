@@ -291,19 +291,27 @@ impl Game {
             &mut TurnRate,
             &Hitbox,
         )>::query();
-        let (vehicle, veh_type, destroyed, pos, vel, angle, turn_rate, hitbox) =
-            query.get_mut(&mut self.legion, self.gs.pe).unwrap();
+        let (
+            vehicle,
+            veh_type,
+            veh_destroyed,
+            veh_pos,
+            veh_vel,
+            veh_angle,
+            veh_turn_rate,
+            veh_hitbox,
+        ) = query.get_mut(&mut self.legion, self.gs.pe).unwrap();
 
-        if self.gs.input.self_destruct && !self.gs_prev.input.self_destruct && !destroyed.0 {
-            destroyed.0 = true;
+        if self.gs.input.self_destruct && !self.gs_prev.input.self_destruct && !veh_destroyed.0 {
+            veh_destroyed.0 = true;
             self.gs.explosions.push(Explosion::new(
-                pos.0,
+                veh_pos.0,
                 cvars.g_self_destruct_explosion1_scale,
                 frame_time,
                 false,
             ));
             self.gs.explosions.push(Explosion::new(
-                pos.0,
+                veh_pos.0,
                 cvars.g_self_destruct_explosion2_scale,
                 frame_time,
                 false,
@@ -318,10 +326,18 @@ impl Game {
             input = &EMPTY_INPUT;
         }
         vehicle.tick(
-            dt, cvars, input, &self.map, pos, vel, angle, turn_rate, hitbox,
+            dt,
+            cvars,
+            input,
+            &self.map,
+            veh_pos,
+            veh_vel,
+            veh_angle,
+            veh_turn_rate,
+            veh_hitbox,
         );
 
-        let vel = *vel; // TODO borrow checker hack
+        let veh_vel = *veh_vel; // TODO borrow checker hack
 
         // Turret turning
         if self.gs.input.turret_left {
@@ -357,14 +373,14 @@ impl Game {
                     let (shot_angle, shot_origin);
                     match hardpoint {
                         Hardpoint::Chassis => {
-                            shot_angle = angle.0;
-                            shot_origin = pos.0 + weapon_offset.rotated_z(shot_angle);
+                            shot_angle = veh_angle.0;
+                            shot_origin = veh_pos.0 + weapon_offset.rotated_z(shot_angle);
                         }
                         Hardpoint::Turret => {
-                            shot_angle = angle.0 + vehicle.turret_angle;
+                            shot_angle = veh_angle.0 + vehicle.turret_angle;
                             let turret_offset = cvars.g_vehicle_turret_offset_chassis(*veh_type);
-                            shot_origin = pos.0
-                                + turret_offset.rotated_z(angle.0)
+                            shot_origin = veh_pos.0
+                                + turret_offset.rotated_z(veh_angle.0)
                                 + weapon_offset.rotated_z(shot_angle);
                         }
                     }
@@ -380,7 +396,7 @@ impl Game {
                             // so it's better to use spread on angle.
                             let shot_vel = Vec2f::new(cvars.g_machine_gun_speed, 0.0)
                                 .rotated_z(shot_angle + spread)
-                                + cvars.g_machine_gun_vehicle_velocity_factor * vel.0;
+                                + cvars.g_machine_gun_vehicle_velocity_factor * veh_vel.0;
                             let vel = Vel(shot_vel);
                             self.legion.push((Weapon::Mg, pos, vel, owner));
                         }
@@ -414,7 +430,7 @@ impl Game {
                                 }
                                 let shot_vel = Vec2f::new(speed + spread_forward, spread_sideways)
                                     .rotated_z(shot_angle)
-                                    + cvars.g_cluster_bomb_vehicle_velocity_factor * vel.0;
+                                    + cvars.g_cluster_bomb_vehicle_velocity_factor * veh_vel.0;
                                 let vel = Vel(shot_vel);
                                 let time = frame_time
                                     + cvars.g_cluster_bomb_time
@@ -428,7 +444,7 @@ impl Game {
                             let pos = Pos(shot_origin);
                             let shot_vel = Vec2f::new(cvars.g_rockets_speed, 0.0)
                                 .rotated_z(shot_angle)
-                                + cvars.g_rockets_vehicle_velocity_factor * vel.0;
+                                + cvars.g_rockets_vehicle_velocity_factor * veh_vel.0;
                             let vel = Vel(shot_vel);
                             self.legion.push((Weapon::Rockets, pos, vel, owner));
                         }
@@ -436,7 +452,7 @@ impl Game {
                             let pos = Pos(shot_origin);
                             let shot_vel = Vec2f::new(cvars.g_homing_missile_speed_initial, 0.0)
                                 .rotated_z(shot_angle)
-                                + cvars.g_homing_missile_vehicle_velocity_factor * vel.0;
+                                + cvars.g_homing_missile_vehicle_velocity_factor * veh_vel.0;
                             let vel = Vel(shot_vel);
                             self.legion.push((Weapon::Hm, pos, vel, owner));
                         }
@@ -447,7 +463,7 @@ impl Game {
                         Weapon::Bfg => {
                             let pos = Pos(shot_origin);
                             let shot_vel = Vec2f::new(cvars.g_bfg_speed, 0.0).rotated_z(shot_angle)
-                                + cvars.g_bfg_vehicle_velocity_factor * vel.0;
+                                + cvars.g_bfg_vehicle_velocity_factor * veh_vel.0;
                             let vel = Vel(shot_vel);
                             self.legion.push((Weapon::Bfg, pos, vel, owner));
                         }
