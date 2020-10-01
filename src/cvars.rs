@@ -61,8 +61,10 @@ pub struct Cvars {
     pub g_cluster_bomb_time: f64,
     pub g_cluster_bomb_time_spread: f64,
 
+    pub g_homing_missile_vehicle_velocity_factor: f64,
     pub g_homing_missile_reload_ammo: u32,
     pub g_homing_missile_reload_time: f64,
+    pub g_homing_missile_speed_initial: f64,
 
     pub g_machine_gun_vehicle_velocity_factor: f64,
     pub g_machine_gun_angle_spread: f64,
@@ -531,8 +533,10 @@ impl Default for Cvars {
             g_cluster_bomb_time: 0.8,
             g_cluster_bomb_time_spread: 0.2,
 
+            g_homing_missile_vehicle_velocity_factor: 1.0,
             g_homing_missile_reload_ammo: 1,
             g_homing_missile_reload_time: 1.5,
+            g_homing_missile_speed_initial: 360.0,
 
             g_machine_gun_vehicle_velocity_factor: 1.0,
             g_machine_gun_angle_spread: 0.015,

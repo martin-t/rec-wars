@@ -58,6 +58,7 @@ pub struct Game {
     imgs_wrecks: Vec<HtmlImageElement>,
     imgs_weapon_icons: Vec<HtmlImageElement>,
     img_rocket: HtmlImageElement,
+    img_hm: HtmlImageElement,
     img_gm: HtmlImageElement,
     img_explosion: HtmlImageElement,
     img_explosion_cyan: HtmlImageElement,
@@ -84,6 +85,7 @@ impl Game {
         array_wrecks: Array,
         array_weapon_icons: Array,
         img_rocket: HtmlImageElement,
+        img_hm: HtmlImageElement,
         img_gm: HtmlImageElement,
         img_explosion: HtmlImageElement,
         img_explosion_cyan: HtmlImageElement,
@@ -181,6 +183,7 @@ impl Game {
             imgs_wrecks,
             imgs_weapon_icons,
             img_rocket,
+            img_hm,
             img_gm,
             img_explosion,
             img_explosion_cyan,
@@ -430,8 +433,12 @@ impl Game {
                             self.legion.push((Weapon::Rockets, pos, vel, owner));
                         }
                         Weapon::Hm => {
-                            // TODO homing missile
-                            self.gs.gm = GuidedMissile::spawn(cvars, shot_origin, shot_angle);
+                            let pos = Pos(shot_origin);
+                            let shot_vel = Vec2f::new(cvars.g_homing_missile_speed_initial, 0.0)
+                                .rotated_z(shot_angle)
+                                + cvars.g_homing_missile_vehicle_velocity_factor * vel.0;
+                            let vel = Vel(shot_vel);
+                            self.legion.push((Weapon::Hm, pos, vel, owner));
                         }
                         Weapon::Gm => {
                             self.gs.gm = GuidedMissile::spawn(cvars, shot_origin, shot_angle);
@@ -470,12 +477,12 @@ impl Game {
             }
         }
 
-        // MG, Rockets, BFG
-        systems::projectiles(cvars, &mut self.legion, &self.map, &mut self.gs);
-
         for entity in to_remove {
             self.legion.remove(entity);
         }
+
+        // MG, Rockets, HM, BFG
+        systems::projectiles(cvars, &mut self.legion, &self.map, &mut self.gs);
 
         // Guided missile movement
         let hit_something = if self.gs.ce == ControlledEntity::GuidedMissile {
@@ -628,12 +635,22 @@ impl Game {
         }
         dbg_textd!(rocket_cnt);
 
-        // Draw missile
+        // Draw homing missiles
+        let mut query = <(&Weapon, &Pos, &Vel)>::query();
+        for (&weap, pos, vel) in query.iter(&self.legion) {
+            if weap != Weapon::Hm {
+                continue;
+            }
+            let scr_pos = pos.0 - top_left;
+            self.draw_img_center(&self.img_hm, scr_pos, vel.0.to_angle())?;
+        }
+
+        // Draw guided missiles
         let gm = &self.gs.gm;
         let gm_scr_pos = gm.pos - top_left;
         self.draw_img_center(&self.img_gm, gm_scr_pos, gm.vel.to_angle())?;
 
-        // Draw BFG
+        // Draw BFGs
         self.context.set_fill_style(&"lime".into());
         self.context.set_stroke_style(&"lime".into());
         let mut bfg_cnt = 0;

@@ -117,6 +117,8 @@ async function run() {
     img_explosion_cyan.src = "../assets/explosion_cyan.png";
     let img_rocket = new Image();
     img_rocket.src = "../assets/weapons/rocket.png";
+    let img_hm = new Image();
+    img_hm.src = "../assets/weapons/homing_missile.png";
     let img_gm = new Image();
     img_gm.src = "../assets/weapons/guided_missile.png";
     // https://stackoverflow.com/questions/46399223/async-await-in-image-loading
@@ -263,7 +265,7 @@ async function run() {
         //cvars.d_seed = 5n;
         const game = new Game(cvars, ctx, canvas.width, canvas.height,
             imgs_tiles, imgs_vehicles, imgs_wrecks, imgs_weapon_icons,
-            img_rocket, img_gm, img_explosion, img_explosion_cyan,
+            img_rocket, img_hm, img_gm, img_explosion, img_explosion_cyan,
             tex_list_text, map_text);
 
         // Make some things available on window for easier debugging.
