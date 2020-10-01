@@ -384,8 +384,6 @@ impl Game {
                                 + weapon_offset.rotated_z(shot_angle);
                         }
                     }
-                    dbg_cross!(shot_origin, 1.0);
-                    dbg_line!(shot_origin, shot_origin + shot_angle.to_vec2f() * 10.0);
                     let owner = Owner(self.gs.pe);
                     match self.gs.cur_weapon {
                         Weapon::Mg => {
