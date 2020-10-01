@@ -632,9 +632,6 @@ impl Game {
         let gm = &self.gs.gm;
         let gm_scr_pos = gm.pos - top_left;
         self.draw_img_center(&self.img_gm, gm_scr_pos, gm.vel.to_angle())?;
-        if cvars.d_draw {
-            self.context.fill_rect(gm_scr_pos.x, gm_scr_pos.y, 1.0, 1.0);
-        }
 
         // Draw BFG
         self.context.set_fill_style(&"lime".into());
@@ -789,43 +786,6 @@ impl Game {
             y += TILE_SIZE;
         }
 
-        // Draw debug lines and crosses
-        if cvars.d_draw {
-            DEBUG_LINES.with(|lines| {
-                let mut lines = lines.borrow_mut();
-                for line in lines.iter_mut() {
-                    self.context.set_stroke_style(&line.color.into());
-                    let scr_begin = line.begin - top_left;
-                    let scr_end = line.end - top_left;
-                    self.context.begin_path();
-                    self.move_to(scr_begin);
-                    self.line_to(scr_end);
-                    self.context.stroke();
-                    line.time -= self.gs.dt;
-                }
-                lines.retain(|line| line.time > 0.0);
-            });
-            DEBUG_CROSSES.with(|crosses| {
-                let mut crosses = crosses.borrow_mut();
-                for cross in crosses.iter_mut() {
-                    self.context.set_stroke_style(&cross.color.into());
-                    let scr_point = cross.point - top_left;
-                    let top_left = scr_point - Vec2f::new(-3.0, -3.0);
-                    let bottom_right = scr_point - Vec2f::new(3.0, 3.0);
-                    let top_right = scr_point - Vec2f::new(3.0, -3.0);
-                    let bottom_left = scr_point - Vec2f::new(-3.0, 3.0);
-                    self.context.begin_path();
-                    self.move_to(top_left);
-                    self.line_to(bottom_right);
-                    self.move_to(top_right);
-                    self.line_to(bottom_left);
-                    self.context.stroke();
-                    cross.time -= self.gs.dt;
-                }
-                crosses.retain(|cross| cross.time > 0.0);
-            });
-        }
-
         // Draw HUD:
 
         // Homing missile indicator
@@ -848,6 +808,49 @@ impl Game {
         self.line_to(end);
         self.context.stroke();
         self.context.set_line_dash(&Array::new())?;
+
+        // Debug lines and crosses
+        if cvars.d_draw {
+            DEBUG_LINES.with(|lines| {
+                let mut lines = lines.borrow_mut();
+                for line in lines.iter_mut() {
+                    self.context.set_stroke_style(&line.color.into());
+                    let scr_begin = line.begin - top_left;
+                    let scr_end = line.end - top_left;
+                    self.context.begin_path();
+                    self.move_to(scr_begin);
+                    self.line_to(scr_end);
+                    self.context.stroke();
+                    line.time -= self.gs.dt;
+                }
+                lines.retain(|line| line.time > 0.0);
+            });
+            if cvars.d_draw_positions {
+                let mut query = <(&Pos,)>::query();
+                for (pos,) in query.iter(&self.legion) {
+                    dbg_cross!(pos.0);
+                }
+            }
+            DEBUG_CROSSES.with(|crosses| {
+                let mut crosses = crosses.borrow_mut();
+                for cross in crosses.iter_mut() {
+                    self.context.set_stroke_style(&cross.color.into());
+                    let scr_point = cross.point - top_left;
+                    let top_left = scr_point - Vec2f::new(-3.0, -3.0);
+                    let bottom_right = scr_point - Vec2f::new(3.0, 3.0);
+                    let top_right = scr_point - Vec2f::new(3.0, -3.0);
+                    let bottom_left = scr_point - Vec2f::new(-3.0, 3.0);
+                    self.context.begin_path();
+                    self.move_to(top_left);
+                    self.line_to(bottom_right);
+                    self.move_to(top_right);
+                    self.line_to(bottom_left);
+                    self.context.stroke();
+                    cross.time -= self.gs.dt;
+                }
+                crosses.retain(|cross| cross.time > 0.0);
+            });
+        }
 
         // Hit points (goes from green to red)
         // Might wanna use https://crates.io/crates/colorsys if I need more color operations.

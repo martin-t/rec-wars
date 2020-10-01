@@ -24,6 +24,7 @@ pub struct Cvars {
     //  v
     pub d_draw: bool,
     pub d_draw_hitboxes: bool,
+    pub d_draw_positions: bool,
     pub d_text: bool,
     pub d_text_line_height: f64,
     pub d_rockets_image: bool,
@@ -499,6 +500,7 @@ impl Default for Cvars {
         Self {
             d_draw: true,
             d_draw_hitboxes: false,
+            d_draw_positions: false,
             d_text: true,
             d_text_line_height: 12.0,
             d_rockets_image: true,
