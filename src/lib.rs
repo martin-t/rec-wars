@@ -26,7 +26,6 @@ use legion::{query::IntoQuery, Entity, World};
 use js_sys::Array;
 
 use rand::prelude::*;
-use rand_distr::StandardNormal;
 
 use vek::ops::Clamp;
 use vek::Vec2;
@@ -37,9 +36,9 @@ use wasm_bindgen::JsCast;
 use web_sys::{CanvasRenderingContext2d, HtmlImageElement, Performance};
 
 use components::{
-    Angle, Destroyed, Hitbox, Owner, Pos, Time, TurnRate, VehicleType, Vel, Weapon, WEAPS_CNT,
+    Angle, Destroyed, Hitbox, Owner, Pos, TurnRate, VehicleType, Vel, Weapon, WEAPS_CNT,
 };
-use cvars::{Cvars, Hardpoint, TickrateMode};
+use cvars::{Cvars, TickrateMode};
 use debugging::{DEBUG_CROSSES, DEBUG_LINES, DEBUG_TEXTS};
 use entities::{Ammo, GuidedMissile, Vehicle};
 use game_state::{ControlledEntity, Explosion, GameState, Input, EMPTY_INPUT};
@@ -130,7 +129,7 @@ impl Game {
         let veh_type = VehicleType::n(rng.gen_range(0, 3)).unwrap();
         let hitbox = cvars.g_vehicle_hitbox(veh_type);
 
-        let entity = legion.push((
+        let pe = legion.push((
             plyer_vehicle,
             veh_type,
             Destroyed(false),
@@ -149,7 +148,7 @@ impl Game {
             input: Input::default(),
             cur_weapon: Weapon::Mg,
             railguns: Vec::new(),
-            pe: entity,
+            pe,
             gm,
             ce,
             explosions: Vec::new(),
@@ -283,7 +282,6 @@ impl Game {
 
         let mut query = <(
             &mut Vehicle,
-            &VehicleType,
             &mut Destroyed,
             &mut Pos,
             &mut Vel,
@@ -291,16 +289,8 @@ impl Game {
             &mut TurnRate,
             &Hitbox,
         )>::query();
-        let (
-            vehicle,
-            veh_type,
-            veh_destroyed,
-            veh_pos,
-            veh_vel,
-            veh_angle,
-            veh_turn_rate,
-            veh_hitbox,
-        ) = query.get_mut(&mut self.legion, self.gs.pe).unwrap();
+        let (vehicle, veh_destroyed, veh_pos, veh_vel, veh_angle, veh_turn_rate, veh_hitbox) =
+            query.get_mut(&mut self.legion, self.gs.pe).unwrap();
 
         if self.gs.input.self_destruct && !self.gs_prev.input.self_destruct && !veh_destroyed.0 {
             veh_destroyed.0 = true;
@@ -337,8 +327,6 @@ impl Game {
             veh_hitbox,
         );
 
-        let veh_vel = *veh_vel; // TODO borrow checker hack
-
         // Turret turning
         if self.gs.input.turret_left {
             vehicle.turret_angle -= cvars.g_turret_turn_speed * dt;
@@ -356,119 +344,8 @@ impl Game {
             }
         }
 
-        // Firing
         // Note: vehicles can shoot while controlling a missile
-        if self.gs.input.fire {
-            if let Ammo::Loaded(ready_time, count) = ammo {
-                if frame_time >= *ready_time {
-                    *ready_time = frame_time + cvars.g_weapon_refire(cur_weap);
-                    *count -= 1;
-                    if *count == 0 {
-                        let reload_time = cvars.g_weapon_reload_time(cur_weap);
-                        *ammo = Ammo::Reloading(frame_time, frame_time + reload_time);
-                    }
-
-                    let (hardpoint, weapon_offset) =
-                        cvars.g_hardpoint(*veh_type, self.gs.cur_weapon);
-                    let (shot_angle, shot_origin);
-                    match hardpoint {
-                        Hardpoint::Chassis => {
-                            shot_angle = veh_angle.0;
-                            shot_origin = veh_pos.0 + weapon_offset.rotated_z(shot_angle);
-                        }
-                        Hardpoint::Turret => {
-                            shot_angle = veh_angle.0 + vehicle.turret_angle;
-                            let turret_offset = cvars.g_vehicle_turret_offset_chassis(*veh_type);
-                            shot_origin = veh_pos.0
-                                + turret_offset.rotated_z(veh_angle.0)
-                                + weapon_offset.rotated_z(shot_angle);
-                        }
-                    }
-                    let owner = Owner(self.gs.pe);
-                    match self.gs.cur_weapon {
-                        Weapon::Mg => {
-                            let pos = Pos(shot_origin);
-                            let r: f64 = self.gs.rng.sample(StandardNormal);
-                            let spread = cvars.g_machine_gun_angle_spread * r;
-                            // Using spread as y would mean the resulting spread depends on speed
-                            // so it's better to use spread on angle.
-                            let shot_vel = Vec2f::new(cvars.g_machine_gun_speed, 0.0)
-                                .rotated_z(shot_angle + spread)
-                                + cvars.g_machine_gun_vehicle_velocity_factor * veh_vel.0;
-                            let vel = Vel(shot_vel);
-                            self.legion.push((Weapon::Mg, pos, vel, owner));
-                        }
-                        Weapon::Rail => {
-                            let dir = shot_angle.to_vec2f();
-                            let end = shot_origin + dir * 100_000.0;
-                            let hit = self.map.collision_between(shot_origin, end);
-                            if let Some(hit) = hit {
-                                self.gs.railguns.push((shot_origin, hit));
-                            }
-                        }
-                        Weapon::Cb => {
-                            let pos = Pos(shot_origin);
-                            for _ in 0..cvars.g_cluster_bomb_count {
-                                let speed = cvars.g_cluster_bomb_speed;
-                                let spread_forward;
-                                let spread_sideways;
-                                if cvars.g_cluster_bomb_speed_spread_gaussian {
-                                    // Broken type inference (works with rand crate but distributions are deprecated).
-                                    let r: f64 = self.gs.rng.sample(StandardNormal);
-                                    spread_forward = cvars.g_cluster_bomb_speed_spread_forward * r;
-                                    let r: f64 = self.gs.rng.sample(StandardNormal);
-                                    spread_sideways =
-                                        cvars.g_cluster_bomb_speed_spread_sideways * r;
-                                } else {
-                                    let r = self.gs.rng.gen_range(-1.5, 1.5);
-                                    spread_forward = cvars.g_cluster_bomb_speed_spread_forward * r;
-                                    let r = self.gs.rng.gen_range(-1.5, 1.5);
-                                    spread_sideways =
-                                        cvars.g_cluster_bomb_speed_spread_sideways * r;
-                                }
-                                let shot_vel = Vec2f::new(speed + spread_forward, spread_sideways)
-                                    .rotated_z(shot_angle)
-                                    + cvars.g_cluster_bomb_vehicle_velocity_factor * veh_vel.0;
-                                let vel = Vel(shot_vel);
-                                let time = frame_time
-                                    + cvars.g_cluster_bomb_time
-                                    + self.gs.rng.gen_range(-1.0, 1.0)
-                                        * cvars.g_cluster_bomb_time_spread;
-                                let time = Time(time);
-                                self.legion.push((Weapon::Cb, pos, vel, time, owner));
-                            }
-                        }
-                        Weapon::Rockets => {
-                            let pos = Pos(shot_origin);
-                            let shot_vel = Vec2f::new(cvars.g_rockets_speed, 0.0)
-                                .rotated_z(shot_angle)
-                                + cvars.g_rockets_vehicle_velocity_factor * veh_vel.0;
-                            let vel = Vel(shot_vel);
-                            self.legion.push((Weapon::Rockets, pos, vel, owner));
-                        }
-                        Weapon::Hm => {
-                            let pos = Pos(shot_origin);
-                            let shot_vel = Vec2f::new(cvars.g_homing_missile_speed_initial, 0.0)
-                                .rotated_z(shot_angle)
-                                + cvars.g_homing_missile_vehicle_velocity_factor * veh_vel.0;
-                            let vel = Vel(shot_vel);
-                            self.legion.push((Weapon::Hm, pos, vel, owner));
-                        }
-                        Weapon::Gm => {
-                            self.gs.gm = GuidedMissile::spawn(cvars, shot_origin, shot_angle);
-                            self.gs.ce = ControlledEntity::GuidedMissile;
-                        }
-                        Weapon::Bfg => {
-                            let pos = Pos(shot_origin);
-                            let shot_vel = Vec2f::new(cvars.g_bfg_speed, 0.0).rotated_z(shot_angle)
-                                + cvars.g_bfg_vehicle_velocity_factor * veh_vel.0;
-                            let vel = Vel(shot_vel);
-                            self.legion.push((Weapon::Bfg, pos, vel, owner));
-                        }
-                    }
-                }
-            }
-        }
+        systems::shooting(cvars, &mut self.legion, &mut self.gs, &self.map);
 
         systems::projectiles(cvars, &mut self.legion, &mut self.gs, &self.map);
 

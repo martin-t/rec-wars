@@ -11,15 +11,149 @@
 //!   into separate components for vehicles and projectiles to be able to do collision detection.
 //! - Simple functions like these can return data to be passed to other systems.
 
-use legion::{query::IntoQuery, Entity, World};
+use entities::{Ammo, GuidedMissile, Vehicle};
+use legion::{query::IntoQuery, systems::CommandBuffer, Entity, World};
+use rand::Rng;
+use rand_distr::StandardNormal;
 
 use crate::{
-    components::{Destroyed, Owner, Pos, Time, Vel, Weapon},
+    components::{Angle, Destroyed, Owner, Pos, Time, VehicleType, Vel, Weapon},
     cvars::Cvars,
+    cvars::Hardpoint,
     entities,
-    game_state::{Explosion, GameState},
+    game_state::{ControlledEntity, Explosion, GameState},
+    map::F64Ext,
     map::Map,
+    map::Vec2f,
 };
+
+pub(crate) fn shooting(cvars: &Cvars, world: &mut World, gs: &mut GameState, map: &Map) {
+    let mut cmds = CommandBuffer::new(world);
+    let mut query = <(
+        Entity,
+        &mut Vehicle,
+        &VehicleType,
+        &Destroyed,
+        &Pos,
+        &Vel,
+        &Angle,
+    )>::query();
+    for (&veh_id, vehicle, veh_type, veh_destroyed, veh_pos, veh_vel, veh_angle) in
+        query.iter_mut(world)
+    {
+        if veh_destroyed.0 || !gs.input.fire {
+            continue;
+        }
+        let ammo = &mut vehicle.ammos[gs.cur_weapon as usize];
+        if let Ammo::Loaded(ready_time, count) = ammo {
+            if gs.frame_time < *ready_time {
+                continue;
+            }
+
+            *ready_time = gs.frame_time + cvars.g_weapon_refire(gs.cur_weapon);
+            *count -= 1;
+            if *count == 0 {
+                let reload_time = cvars.g_weapon_reload_time(gs.cur_weapon);
+                *ammo = Ammo::Reloading(gs.frame_time, gs.frame_time + reload_time);
+            }
+
+            let (hardpoint, weapon_offset) = cvars.g_hardpoint(*veh_type, gs.cur_weapon);
+            let (shot_angle, shot_origin);
+            match hardpoint {
+                Hardpoint::Chassis => {
+                    shot_angle = veh_angle.0;
+                    shot_origin = veh_pos.0 + weapon_offset.rotated_z(shot_angle);
+                }
+                Hardpoint::Turret => {
+                    shot_angle = veh_angle.0 + vehicle.turret_angle;
+                    let turret_offset = cvars.g_vehicle_turret_offset_chassis(*veh_type);
+                    shot_origin = veh_pos.0
+                        + turret_offset.rotated_z(veh_angle.0)
+                        + weapon_offset.rotated_z(shot_angle);
+                }
+            }
+            let owner = Owner(veh_id);
+            match gs.cur_weapon {
+                Weapon::Mg => {
+                    let pos = Pos(shot_origin);
+                    let r: f64 = gs.rng.sample(StandardNormal);
+                    let spread = cvars.g_machine_gun_angle_spread * r;
+                    // Using spread as y would mean the resulting spread depends on speed
+                    // so it's better to use spread on angle.
+                    let shot_vel = Vec2f::new(cvars.g_machine_gun_speed, 0.0)
+                        .rotated_z(shot_angle + spread)
+                        + cvars.g_machine_gun_vehicle_velocity_factor * veh_vel.0;
+                    let vel = Vel(shot_vel);
+                    cmds.push((Weapon::Mg, pos, vel, owner));
+                }
+                Weapon::Rail => {
+                    let dir = shot_angle.to_vec2f();
+                    let end = shot_origin + dir * 100_000.0;
+                    let hit = map.collision_between(shot_origin, end);
+                    if let Some(hit) = hit {
+                        gs.railguns.push((shot_origin, hit));
+                    }
+                }
+                Weapon::Cb => {
+                    let pos = Pos(shot_origin);
+                    for _ in 0..cvars.g_cluster_bomb_count {
+                        let speed = cvars.g_cluster_bomb_speed;
+                        let spread_forward;
+                        let spread_sideways;
+                        if cvars.g_cluster_bomb_speed_spread_gaussian {
+                            // Broken type inference (works with rand crate but distributions are deprecated).
+                            let r: f64 = gs.rng.sample(StandardNormal);
+                            spread_forward = cvars.g_cluster_bomb_speed_spread_forward * r;
+                            let r: f64 = gs.rng.sample(StandardNormal);
+                            spread_sideways = cvars.g_cluster_bomb_speed_spread_sideways * r;
+                        } else {
+                            let r = gs.rng.gen_range(-1.5, 1.5);
+                            spread_forward = cvars.g_cluster_bomb_speed_spread_forward * r;
+                            let r = gs.rng.gen_range(-1.5, 1.5);
+                            spread_sideways = cvars.g_cluster_bomb_speed_spread_sideways * r;
+                        }
+                        let shot_vel = Vec2f::new(speed + spread_forward, spread_sideways)
+                            .rotated_z(shot_angle)
+                            + cvars.g_cluster_bomb_vehicle_velocity_factor * veh_vel.0;
+                        let vel = Vel(shot_vel);
+                        let time = gs.frame_time
+                            + cvars.g_cluster_bomb_time
+                            + gs.rng.gen_range(-1.0, 1.0) * cvars.g_cluster_bomb_time_spread;
+                        let time = Time(time);
+                        cmds.push((Weapon::Cb, pos, vel, time, owner));
+                    }
+                }
+                Weapon::Rockets => {
+                    let pos = Pos(shot_origin);
+                    let shot_vel = Vec2f::new(cvars.g_rockets_speed, 0.0).rotated_z(shot_angle)
+                        + cvars.g_rockets_vehicle_velocity_factor * veh_vel.0;
+                    let vel = Vel(shot_vel);
+                    cmds.push((Weapon::Rockets, pos, vel, owner));
+                }
+                Weapon::Hm => {
+                    let pos = Pos(shot_origin);
+                    let shot_vel = Vec2f::new(cvars.g_homing_missile_speed_initial, 0.0)
+                        .rotated_z(shot_angle)
+                        + cvars.g_homing_missile_vehicle_velocity_factor * veh_vel.0;
+                    let vel = Vel(shot_vel);
+                    cmds.push((Weapon::Hm, pos, vel, owner));
+                }
+                Weapon::Gm => {
+                    gs.gm = GuidedMissile::spawn(cvars, shot_origin, shot_angle);
+                    gs.ce = ControlledEntity::GuidedMissile;
+                }
+                Weapon::Bfg => {
+                    let pos = Pos(shot_origin);
+                    let shot_vel = Vec2f::new(cvars.g_bfg_speed, 0.0).rotated_z(shot_angle)
+                        + cvars.g_bfg_vehicle_velocity_factor * veh_vel.0;
+                    let vel = Vel(shot_vel);
+                    cmds.push((Weapon::Bfg, pos, vel, owner));
+                }
+            }
+        }
+    }
+    cmds.flush(world);
+}
 
 pub(crate) fn projectiles(cvars: &Cvars, world: &mut World, gs: &mut GameState, map: &Map) {
     let vehicles = entities::all_vehicles(world);
