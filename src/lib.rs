@@ -753,7 +753,6 @@ impl Game {
                 offset = frame * 100.0;
                 img = &self.img_explosion;
             };
-            dbg_textd!(frame, offset);
             let scr_pos = explosion.pos - top_left;
             self.context
                 .draw_image_with_html_image_element_and_sw_and_sh_and_dx_and_dy_and_dw_and_dh(
