@@ -614,7 +614,6 @@ impl Game {
         }
 
         // Draw rockets
-        self.context.set_stroke_style(&"white".into());
         let mut rocket_cnt = 0;
         let mut query = <(&Weapon, &Pos, &Vel)>::query();
         for (&weap, pos, vel) in query.iter(&self.legion) {
@@ -623,15 +622,7 @@ impl Game {
             }
             rocket_cnt += 1;
             let scr_pos = pos.0 - top_left;
-            if cvars.d_rockets_image {
-                self.draw_img_center(&self.img_rocket, scr_pos, vel.0.to_angle())?;
-            } else {
-                self.context.begin_path();
-                self.move_to(scr_pos);
-                let scr_end = scr_pos - vel.0.normalized() * 16.0;
-                self.line_to(scr_end);
-                self.context.stroke();
-            }
+            self.draw_img_center(&self.img_rocket, scr_pos, vel.0.to_angle())?;
         }
         dbg_textd!(rocket_cnt);
 

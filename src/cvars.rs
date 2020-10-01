@@ -27,7 +27,6 @@ pub struct Cvars {
     pub d_draw_positions: bool,
     pub d_text: bool,
     pub d_text_line_height: f64,
-    pub d_rockets_image: bool,
     /// This is not very helpful by itself because by the time you can change cvars in the console,
     /// the seed has already been used.
     /// However, you can change it in index.js right after creating the cvars object
@@ -505,7 +504,6 @@ impl Default for Cvars {
             d_draw_positions: false,
             d_text: true,
             d_text_line_height: 12.0,
-            d_rockets_image: true,
             d_seed: 0,
             d_speed: 1.0,
 
