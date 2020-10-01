@@ -1,7 +1,6 @@
 //! The S in ECS.
 //!
 //! Not using legion's #[system] macro because:
-//!
 //! - Legion wants to own resources and state (cvars, map, RNG, ...).
 //!   Both #[resource] and #[state] require the data to be passed by value (into Resources or the *_system() functions).
 //!   There's no way to have them stored somewhere else and pass them as reference into the systems.
@@ -10,6 +9,7 @@
 //! - WASM currently only uses 1 thread anyway so no perf benefit from parallelism.
 //! - https://github.com/amethyst/legion/issues/199 - I'd have to to split Pos
 //!   into separate components for vehicles and projectiles to be able to do collision detection.
+//! - Simple functions like these can return data to be passed to other systems.
 
 use legion::{query::IntoQuery, Entity, World};
 
