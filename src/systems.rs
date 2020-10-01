@@ -14,25 +14,25 @@
 use legion::{query::IntoQuery, Entity, World};
 
 use crate::{
-    components::{Destroyed, Owner, Pos, Vel, Weapon},
+    components::{Destroyed, Owner, Pos, Time, Vel, Weapon},
     cvars::Cvars,
     entities,
     game_state::{Explosion, GameState},
     map::Map,
 };
 
-pub(crate) fn projectiles(cvars: &Cvars, world: &mut World, map: &Map, gs: &mut GameState) {
+pub(crate) fn projectiles(cvars: &Cvars, world: &mut World, gs: &mut GameState, map: &Map) {
     let vehicles = entities::all_vehicles(world);
     let mut to_remove = Vec::new();
     let mut to_kill = Vec::new();
 
     let mut query = <(Entity, &Weapon, &mut Pos, &Vel, &Owner)>::query();
     for (&proj_id, &proj_weap, proj_pos, proj_vel, proj_owner) in query.iter_mut(world) {
+        proj_pos.0 += proj_vel.0 * gs.dt;
+
         if proj_weap == Weapon::Cb {
             continue;
         }
-
-        proj_pos.0 += proj_vel.0 * gs.dt;
 
         if map.collision(proj_pos.0) {
             gs.explosions.push(Explosion::new(
@@ -77,5 +77,28 @@ pub(crate) fn projectiles(cvars: &Cvars, world: &mut World, map: &Map, gs: &mut 
         let mut entry = world.entry(veh_id).unwrap();
         let destroyed = entry.get_component_mut::<Destroyed>().unwrap();
         destroyed.0 = true;
+    }
+}
+
+/// Right now, CBs are the only timed projectiles, long term, might wanna add timeouts to more
+/// to avoid too many entities on huge maps..
+pub(crate) fn projectiles_timeout(cvars: &Cvars, world: &mut World, gs: &mut GameState) {
+    let mut to_remove = Vec::new();
+
+    let mut query = <(Entity, &Weapon, &mut Pos, &Time)>::query();
+    for (&entity, &weap, pos, time) in query.iter_mut(world) {
+        if gs.frame_time > time.0 {
+            gs.explosions.push(Explosion::new(
+                pos.0,
+                cvars.g_weapon_explosion_scale(weap),
+                time.0,
+                weap == Weapon::Bfg,
+            ));
+            to_remove.push(entity);
+        }
+    }
+
+    for entity in to_remove {
+        world.remove(entity);
     }
 }

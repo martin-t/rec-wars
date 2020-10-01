@@ -470,33 +470,9 @@ impl Game {
             }
         }
 
-        let mut to_remove = Vec::new();
+        systems::projectiles(cvars, &mut self.legion, &mut self.gs, &self.map);
 
-        // CBs
-        let mut query = <(Entity, &Weapon, &mut Pos, &Vel, &Time)>::query();
-        for (&entity, &weap, pos, vel, time) in query.iter_mut(&mut self.legion) {
-            if weap != Weapon::Cb {
-                continue;
-            }
-            pos.0 += vel.0 * dt;
-
-            if frame_time > time.0 {
-                self.gs.explosions.push(Explosion::new(
-                    pos.0,
-                    cvars.g_cluster_bomb_explosion_scale,
-                    time.0,
-                    false,
-                ));
-                to_remove.push(entity);
-            }
-        }
-
-        for entity in to_remove {
-            self.legion.remove(entity);
-        }
-
-        // MG, Rockets, HM, BFG
-        systems::projectiles(cvars, &mut self.legion, &self.map, &mut self.gs);
+        systems::projectiles_timeout(cvars, &mut self.legion, &mut self.gs);
 
         // Guided missile movement
         let hit_something = if self.gs.ce == ControlledEntity::GuidedMissile {
