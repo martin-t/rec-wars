@@ -20,17 +20,19 @@ pub(crate) struct TurnRate(pub(crate) f64);
 #[derive(Debug, Clone, Copy)]
 pub(crate) struct Time(pub(crate) f64);
 
-#[derive(Debug, Clone, Copy)]
-pub(crate) struct Mg;
+pub(crate) const WEAPS_CNT: u8 = 7;
 
-#[derive(Debug, Clone, Copy)]
-pub(crate) struct Cb;
-
-#[derive(Debug, Clone, Copy)]
-pub(crate) struct Rocket;
-
-#[derive(Debug, Clone, Copy)]
-pub(crate) struct Bfg;
+#[repr(u8)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, N)]
+pub(crate) enum Weapon {
+    Mg,
+    Rail,
+    Cb,
+    Rockets,
+    Hm,
+    Gm,
+    Bfg,
+}
 
 #[derive(Debug, Clone, Copy)]
 pub(crate) struct Owner(pub(crate) Entity);

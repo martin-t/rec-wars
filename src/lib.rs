@@ -17,7 +17,6 @@ mod entities;
 mod game_state;
 mod map;
 mod systems;
-mod weapons;
 
 use std::collections::VecDeque;
 use std::f64::consts::PI;
@@ -38,14 +37,13 @@ use wasm_bindgen::JsCast;
 use web_sys::{CanvasRenderingContext2d, HtmlImageElement, Performance};
 
 use components::{
-    Angle, Bfg, Cb, Destroyed, Hitbox, Mg, Owner, Pos, Rocket, Time, TurnRate, VehicleType, Vel,
+    Angle, Destroyed, Hitbox, Owner, Pos, Time, TurnRate, VehicleType, Vel, Weapon, WEAPS_CNT,
 };
 use cvars::{Cvars, Hardpoint, TickrateMode};
 use debugging::{DEBUG_CROSSES, DEBUG_LINES, DEBUG_TEXTS};
 use entities::{Ammo, GuidedMissile, Vehicle};
 use game_state::{ControlledEntity, Explosion, GameState, Input, EMPTY_INPUT};
 use map::{F64Ext, Kind, Map, Vec2f, VecExt, TILE_SIZE};
-use weapons::{Weapon, WEAPS_CNT};
 
 #[wasm_bindgen]
 pub struct Game {
@@ -381,7 +379,7 @@ impl Game {
                                 .rotated_z(shot_angle + spread)
                                 + cvars.g_machine_gun_vehicle_velocity_factor * vel.0;
                             let vel = Vel(shot_vel);
-                            self.legion.push((Mg, pos, vel, owner));
+                            self.legion.push((Weapon::Mg, pos, vel, owner));
                         }
                         Weapon::Rail => {
                             let dir = shot_angle.to_vec2f();
@@ -420,7 +418,7 @@ impl Game {
                                     + self.gs.rng.gen_range(-1.0, 1.0)
                                         * cvars.g_cluster_bomb_time_spread;
                                 let time = Time(time);
-                                self.legion.push((Cb, pos, vel, time, owner));
+                                self.legion.push((Weapon::Cb, pos, vel, time, owner));
                             }
                         }
                         Weapon::Rockets => {
@@ -429,7 +427,7 @@ impl Game {
                                 .rotated_z(shot_angle)
                                 + cvars.g_rockets_vehicle_velocity_factor * vel.0;
                             let vel = Vel(shot_vel);
-                            self.legion.push((Rocket, pos, vel, owner));
+                            self.legion.push((Weapon::Rockets, pos, vel, owner));
                         }
                         Weapon::Hm => {
                             // TODO homing missile
@@ -444,50 +442,21 @@ impl Game {
                             let shot_vel = Vec2f::new(cvars.g_bfg_speed, 0.0).rotated_z(shot_angle)
                                 + cvars.g_bfg_vehicle_velocity_factor * vel.0;
                             let vel = Vel(shot_vel);
-                            self.legion.push((Bfg, pos, vel, owner));
+                            self.legion.push((Weapon::Bfg, pos, vel, owner));
                         }
                     }
                 }
             }
         }
 
-        let vehicles = entities::all_vehicles(&self.legion);
         let mut to_remove = Vec::new();
-        let mut to_kill = Vec::new();
-
-        // MG
-        let mut query = <(Entity, &Mg, &mut Pos, &Vel, &Owner)>::query();
-        for (&projectile, _, pos, vel, owner) in query.iter_mut(&mut self.legion) {
-            pos.0 += vel.0 * dt;
-
-            if self.map.collision(pos.0) {
-                to_remove.push(projectile);
-                continue;
-            }
-
-            for &(veh_id, veh_destroyed, veh_pos, _veh_angle, _veh_hitbox) in &vehicles {
-                if !veh_destroyed.0
-                    && veh_id != owner.0
-                    && (pos.0 - veh_pos.0).magnitude_squared() <= 24.0 * 24.0
-                {
-                    to_remove.push(projectile);
-
-                    self.gs.explosions.push(Explosion::new(
-                        veh_pos.0,
-                        1.0,
-                        self.gs.frame_time,
-                        false,
-                    ));
-                    to_kill.push(veh_id);
-
-                    break;
-                }
-            }
-        }
 
         // CBs
-        let mut query = <(Entity, &Cb, &mut Pos, &Vel, &Time)>::query();
-        for (&entity, _, pos, vel, time) in query.iter_mut(&mut self.legion) {
+        let mut query = <(Entity, &Weapon, &mut Pos, &Vel, &Time)>::query();
+        for (&entity, &weap, pos, vel, time) in query.iter_mut(&mut self.legion) {
+            if weap != Weapon::Cb {
+                continue;
+            }
             pos.0 += vel.0 * dt;
 
             if frame_time > time.0 {
@@ -501,59 +470,11 @@ impl Game {
             }
         }
 
-        // Rockets
-        let mut query = <(Entity, &Rocket, &mut Pos, &Vel, &Owner)>::query();
-        for (&projectile, _, pos, vel, owner) in query.iter_mut(&mut self.legion) {
-            pos.0 += vel.0 * dt;
-
-            if self.map.collision(pos.0) {
-                self.gs.explosions.push(Explosion::new(
-                    pos.0,
-                    cvars.g_rockets_explosion_scale,
-                    self.gs.frame_time,
-                    false,
-                ));
-                to_remove.push(projectile);
-                continue;
-            }
-
-            for &(veh_id, veh_destroyed, veh_pos, _veh_angle, _veh_hitbox) in &vehicles {
-                if !veh_destroyed.0
-                    && veh_id != owner.0
-                    && (pos.0 - veh_pos.0).magnitude_squared() <= 24.0 * 24.0
-                {
-                    self.gs.explosions.push(Explosion::new(
-                        pos.0,
-                        cvars.g_rockets_explosion_scale,
-                        self.gs.frame_time,
-                        false,
-                    ));
-                    to_remove.push(projectile);
-
-                    self.gs.explosions.push(Explosion::new(
-                        veh_pos.0,
-                        1.0,
-                        self.gs.frame_time,
-                        false,
-                    ));
-                    to_kill.push(veh_id);
-
-                    break;
-                }
-            }
-        }
-
-        // BFG
-        systems::bfg(cvars, &mut self.legion, &self.map, &mut self.gs);
+        // MG, Rockets, BFG
+        systems::projectiles(cvars, &mut self.legion, &self.map, &mut self.gs);
 
         for entity in to_remove {
             self.legion.remove(entity);
-        }
-
-        for veh_id in to_kill {
-            let mut entry = self.legion.entry(veh_id).unwrap();
-            let destroyed = entry.get_component_mut::<Destroyed>().unwrap();
-            destroyed.0 = true;
         }
 
         // Guided missile movement
@@ -628,8 +549,11 @@ impl Game {
         // Draw MGs
         self.context.set_stroke_style(&"yellow".into());
         let mut mg_cnt = 0;
-        let mut query = <(&Mg, &Pos, &Vel)>::query();
-        for (_, pos, vel) in query.iter(&self.legion) {
+        let mut query = <(&Weapon, &Pos, &Vel)>::query();
+        for (&weap, pos, vel) in query.iter(&self.legion) {
+            if weap != Weapon::Mg {
+                continue;
+            }
             mg_cnt += 1;
             let scr_pos = pos.0 - top_left;
             self.context.begin_path();
@@ -663,8 +587,11 @@ impl Game {
             self.context
                 .set_shadow_offset_y(cvars.g_cluster_bomb_shadow_y);
             let mut cb_cnt = 0;
-            let mut query = <(&Cb, &Pos)>::query();
-            for (_, pos) in query.iter(&self.legion) {
+            let mut query = <(&Weapon, &Pos)>::query();
+            for (&weap, pos) in query.iter(&self.legion) {
+                if weap != Weapon::Cb {
+                    continue;
+                }
                 cb_cnt += 1;
                 let scr_pos = pos.0 - top_left;
                 self.context.fill_rect(
@@ -682,8 +609,11 @@ impl Game {
         // Draw rockets
         self.context.set_stroke_style(&"white".into());
         let mut rocket_cnt = 0;
-        let mut query = <(&Rocket, &Pos, &Vel)>::query();
-        for (_, pos, vel) in query.iter(&self.legion) {
+        let mut query = <(&Weapon, &Pos, &Vel)>::query();
+        for (&weap, pos, vel) in query.iter(&self.legion) {
+            if weap != Weapon::Rockets {
+                continue;
+            }
             rocket_cnt += 1;
             let scr_pos = pos.0 - top_left;
             if cvars.d_rockets_image {
@@ -710,8 +640,11 @@ impl Game {
         self.context.set_fill_style(&"lime".into());
         self.context.set_stroke_style(&"lime".into());
         let mut bfg_cnt = 0;
-        let mut query = <(&Bfg, &Pos, &Owner)>::query();
-        for (_, bfg_pos, bfg_owner) in query.iter(&self.legion) {
+        let mut query = <(&Weapon, &Pos, &Owner)>::query();
+        for (&weap, bfg_pos, bfg_owner) in query.iter(&self.legion) {
+            if weap != Weapon::Bfg {
+                continue;
+            }
             bfg_cnt += 1;
             let bfg_scr_pos = bfg_pos.0 - top_left;
             self.context.begin_path();

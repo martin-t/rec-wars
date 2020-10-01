@@ -14,30 +14,35 @@
 use legion::{query::IntoQuery, Entity, World};
 
 use crate::{
-    components::{Bfg, Destroyed, Owner, Pos, Vel},
+    components::{Destroyed, Owner, Pos, Vel, Weapon},
     cvars::Cvars,
     entities,
     game_state::{Explosion, GameState},
     map::Map,
 };
 
-pub(crate) fn bfg(cvars: &Cvars, world: &mut World, map: &Map, gs: &mut GameState) {
+pub(crate) fn projectiles(cvars: &Cvars, world: &mut World, map: &Map, gs: &mut GameState) {
     let vehicles = entities::all_vehicles(world);
     let mut to_remove = Vec::new();
     let mut to_kill = Vec::new();
 
-    let mut query = <(Entity, &Bfg, &mut Pos, &Vel, &Owner)>::query();
-    for (&proj_id, _, proj_pos, proj_vel, proj_owner) in query.iter_mut(world) {
+    let mut query = <(Entity, &Weapon, &mut Pos, &Vel, &Owner)>::query();
+    for (&proj_id, &proj_weap, proj_pos, proj_vel, proj_owner) in query.iter_mut(world) {
+        if proj_weap == Weapon::Cb {
+            continue;
+        }
+
         proj_pos.0 += proj_vel.0 * gs.dt;
 
         if map.collision(proj_pos.0) {
             gs.explosions.push(Explosion::new(
                 proj_pos.0,
-                cvars.g_bfg_explosion_scale,
+                cvars.g_weapon_explosion_scale(proj_weap), // TODO MG, also below
                 gs.frame_time,
-                true,
+                proj_weap == Weapon::Bfg,
             ));
             to_remove.push(proj_id);
+            continue;
         }
 
         for &(veh_id, veh_destroyed, veh_pos, _veh_angle, _veh_hitbox) in &vehicles {
@@ -47,11 +52,15 @@ pub(crate) fn bfg(cvars: &Cvars, world: &mut World, map: &Map, gs: &mut GameStat
             {
                 to_remove.push(proj_id);
 
-                // Projectile explosion above vehicle explosion because it looks better.
+                // Vehicle explosion first to it's below projectile explosion because it looks better.
                 gs.explosions
                     .push(Explosion::new(veh_pos.0, 1.0, gs.frame_time, false));
-                gs.explosions
-                    .push(Explosion::new(proj_pos.0, 1.0, gs.frame_time, true));
+                gs.explosions.push(Explosion::new(
+                    proj_pos.0,
+                    cvars.g_weapon_explosion_scale(proj_weap),
+                    gs.frame_time,
+                    proj_weap == Weapon::Bfg,
+                ));
 
                 to_kill.push(veh_id);
 

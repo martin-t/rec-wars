@@ -4,7 +4,7 @@ use std::default::Default;
 
 use wasm_bindgen::prelude::*;
 
-use crate::{components::Hitbox, components::VehicleType, map::Vec2f, weapons::Weapon};
+use crate::{components::Hitbox, components::VehicleType, components::Weapon, map::Vec2f};
 
 /// Console variables - configuration options for anything and everything.
 ///
@@ -442,6 +442,18 @@ impl Cvars {
                 self.g_hummer_turret_offset_turret_x,
                 self.g_hummer_turret_offset_turret_y,
             ),
+        }
+    }
+
+    pub(crate) fn g_weapon_explosion_scale(&self, weapon: Weapon) -> f64 {
+        match weapon {
+            Weapon::Mg => 0.0,
+            Weapon::Rail => 0.0,
+            Weapon::Cb => self.g_cluster_bomb_explosion_scale,
+            Weapon::Rockets => self.g_rockets_explosion_scale,
+            Weapon::Hm => 1.0,
+            Weapon::Gm => 1.0,
+            Weapon::Bfg => 1.0,
         }
     }
 

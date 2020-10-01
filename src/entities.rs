@@ -3,7 +3,7 @@ use vek::Clamp;
 
 use crate::{
     components::Angle, components::Destroyed, components::Hitbox, components::Pos,
-    components::TurnRate, components::Vel, cvars::Cvars, weapons::Weapon,
+    components::TurnRate, components::Vel, cvars::Cvars, components::Weapon,
 };
 use crate::{
     map::{Map, Vec2f},
