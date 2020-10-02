@@ -335,14 +335,7 @@ impl Game {
             vehicle.turret_angle += cvars.g_turret_turn_speed * dt;
         }
 
-        // Reloading
-        let cur_weap = self.gs.cur_weapon;
-        let ammo = &mut vehicle.ammos[cur_weap as usize];
-        if let Ammo::Reloading(_, end) = ammo {
-            if frame_time >= *end {
-                *ammo = Ammo::Loaded(frame_time, cvars.g_weapon_reload_ammo(cur_weap));
-            }
-        }
+        systems::reloading(cvars, &mut self.legion, &mut self.gs);
 
         // Note: vehicles can shoot while controlling a missile
         systems::shooting(cvars, &mut self.legion, &mut self.gs, &self.map);

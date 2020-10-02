@@ -27,6 +27,20 @@ use crate::{
     map::Vec2f,
 };
 
+pub(crate) fn reloading(cvars: &Cvars, world: &mut World, gs: &mut GameState) {
+    let cur_weap = gs.cur_weapon;
+
+    let mut query = <(&mut Vehicle,)>::query();
+    for (vehicle,) in query.iter_mut(world) {
+        let ammo = &mut vehicle.ammos[cur_weap as usize];
+        if let Ammo::Reloading(_, end) = ammo {
+            if gs.frame_time >= *end {
+                *ammo = Ammo::Loaded(gs.frame_time, cvars.g_weapon_reload_ammo(cur_weap));
+            }
+        }
+    }
+}
+
 pub(crate) fn shooting(cvars: &Cvars, world: &mut World, gs: &mut GameState, map: &Map) {
     let mut cmds = CommandBuffer::new(world);
     let mut query = <(
