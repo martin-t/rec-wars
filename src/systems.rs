@@ -27,11 +27,20 @@ use crate::{
     map::Vec2f,
 };
 
-pub(crate) fn reloading(cvars: &Cvars, world: &mut World, gs: &mut GameState) {
+pub(crate) fn turrets(cvars: &Cvars, world: &mut World, gs: &mut GameState) {
     let cur_weap = gs.cur_weapon;
 
     let mut query = <(&mut Vehicle,)>::query();
     for (vehicle,) in query.iter_mut(world) {
+        // Turret turning
+        if gs.input.turret_left {
+            vehicle.turret_angle -= cvars.g_turret_turn_speed * gs.dt;
+        }
+        if gs.input.turret_right {
+            vehicle.turret_angle += cvars.g_turret_turn_speed * gs.dt;
+        }
+
+        // Reloading
         let ammo = &mut vehicle.ammos[cur_weap as usize];
         if let Ammo::Reloading(_, end) = ammo {
             if gs.frame_time >= *end {

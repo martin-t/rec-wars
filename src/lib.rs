@@ -327,15 +327,7 @@ impl Game {
             veh_hitbox,
         );
 
-        // Turret turning
-        if self.gs.input.turret_left {
-            vehicle.turret_angle -= cvars.g_turret_turn_speed * dt;
-        }
-        if self.gs.input.turret_right {
-            vehicle.turret_angle += cvars.g_turret_turn_speed * dt;
-        }
-
-        systems::reloading(cvars, &mut self.legion, &mut self.gs);
+        systems::turrets(cvars, &mut self.legion, &mut self.gs);
 
         // Note: vehicles can shoot while controlling a missile
         systems::shooting(cvars, &mut self.legion, &mut self.gs, &self.map);
