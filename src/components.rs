@@ -43,6 +43,16 @@ pub(crate) struct Hitbox {
     pub(crate) maxs: Vec2f,
 }
 
+impl Hitbox {
+    pub(crate) fn corners(self, pos: Vec2f, angle: f64) -> [Vec2f; 4] {
+        let back_left = pos + Vec2f::new(self.mins.x, self.mins.y).rotated_z(angle);
+        let front_left = pos + Vec2f::new(self.maxs.x, self.mins.y).rotated_z(angle);
+        let front_right = pos + Vec2f::new(self.maxs.x, self.maxs.y).rotated_z(angle);
+        let back_right = pos + Vec2f::new(self.mins.x, self.maxs.y).rotated_z(angle);
+        [back_left, front_left, front_right, back_right]
+    }
+}
+
 #[allow(unused)]
 #[derive(Debug, Clone, Copy, N)]
 pub(crate) enum VehicleType {
