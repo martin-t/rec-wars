@@ -158,15 +158,17 @@ pub(crate) fn projectiles(cvars: &Cvars, world: &mut World, gs: &mut GameState, 
 
     let mut query = <(Entity, &Weapon, &mut Pos, &Vel, &Owner)>::query();
     for (&proj_id, &proj_weap, proj_pos, proj_vel, proj_owner) in query.iter_mut(world) {
-        proj_pos.0 += proj_vel.0 * gs.dt;
+        let new_pos = proj_pos.0 + proj_vel.0 * gs.dt;
 
         if proj_weap == Weapon::Cb {
+            proj_pos.0 = new_pos;
             continue;
         }
 
-        if map.collision(proj_pos.0) {
+        let collision = map.collision_between(proj_pos.0, new_pos);
+        if let Some(col_pos) = collision {
             gs.explosions.push(Explosion::new(
-                proj_pos.0,
+                col_pos,
                 cvars.g_weapon_explosion_scale(proj_weap), // TODO MG, also below
                 gs.frame_time,
                 proj_weap == Weapon::Bfg,
@@ -174,6 +176,8 @@ pub(crate) fn projectiles(cvars: &Cvars, world: &mut World, gs: &mut GameState, 
             to_remove.push(proj_id);
             continue;
         }
+
+        proj_pos.0 = new_pos;
 
         for &(veh_id, veh_destroyed, veh_pos, _veh_angle, _veh_hitbox) in &vehicles {
             if !veh_destroyed.0
