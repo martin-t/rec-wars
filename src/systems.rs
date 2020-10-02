@@ -72,10 +72,10 @@ pub(crate) fn shooting(cvars: &Cvars, world: &mut World, gs: &mut GameState, map
                         + weapon_offset.rotated_z(shot_angle);
                 }
             }
+            let pos = Pos(shot_origin);
             let owner = Owner(veh_id);
             match gs.cur_weapon {
                 Weapon::Mg => {
-                    let pos = Pos(shot_origin);
                     let r: f64 = gs.rng.sample(StandardNormal);
                     let spread = cvars.g_machine_gun_angle_spread * r;
                     // Using spread as y would mean the resulting spread depends on speed
@@ -95,7 +95,6 @@ pub(crate) fn shooting(cvars: &Cvars, world: &mut World, gs: &mut GameState, map
                     }
                 }
                 Weapon::Cb => {
-                    let pos = Pos(shot_origin);
                     for _ in 0..cvars.g_cluster_bomb_count {
                         let speed = cvars.g_cluster_bomb_speed;
                         let spread_forward;
@@ -124,14 +123,12 @@ pub(crate) fn shooting(cvars: &Cvars, world: &mut World, gs: &mut GameState, map
                     }
                 }
                 Weapon::Rockets => {
-                    let pos = Pos(shot_origin);
                     let shot_vel = Vec2f::new(cvars.g_rockets_speed, 0.0).rotated_z(shot_angle)
                         + cvars.g_rockets_vehicle_velocity_factor * veh_vel.0;
                     let vel = Vel(shot_vel);
                     cmds.push((Weapon::Rockets, pos, vel, owner));
                 }
                 Weapon::Hm => {
-                    let pos = Pos(shot_origin);
                     let shot_vel = Vec2f::new(cvars.g_homing_missile_speed_initial, 0.0)
                         .rotated_z(shot_angle)
                         + cvars.g_homing_missile_vehicle_velocity_factor * veh_vel.0;
@@ -143,7 +140,6 @@ pub(crate) fn shooting(cvars: &Cvars, world: &mut World, gs: &mut GameState, map
                     gs.ce = ControlledEntity::GuidedMissile;
                 }
                 Weapon::Bfg => {
-                    let pos = Pos(shot_origin);
                     let shot_vel = Vec2f::new(cvars.g_bfg_speed, 0.0).rotated_z(shot_angle)
                         + cvars.g_bfg_vehicle_velocity_factor * veh_vel.0;
                     let vel = Vel(shot_vel);

@@ -244,6 +244,7 @@ impl Cvars {
         Self::default()
     }
 
+    /// Returns whether the weapon is on the chassis or turret and where relative to that part's center.
     pub(crate) fn g_hardpoint(&self, veh_type: VehicleType, weapon: Weapon) -> (Hardpoint, Vec2f) {
         match veh_type {
             VehicleType::Tank => match weapon {
@@ -413,6 +414,8 @@ impl Cvars {
         }
     }
 
+    /// Where the turret-chassis connection is on the chassis.
+    /// E.g. (0, 0) means the turret rotates around the vehicle's origin.
     pub(crate) fn g_vehicle_turret_offset_chassis(&self, veh_type: VehicleType) -> Vec2f {
         match veh_type {
             VehicleType::Tank => Vec2f::new(
@@ -430,6 +433,8 @@ impl Cvars {
         }
     }
 
+    /// Where the turret-chassis connection is on the turret.
+    /// E.g. (0, 0) means the turret rotates around its center.
     pub(crate) fn g_vehicle_turret_offset_turret(&self, vehicle: VehicleType) -> Vec2f {
         match vehicle {
             VehicleType::Tank => Vec2f::new(
