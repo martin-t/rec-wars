@@ -1,4 +1,8 @@
 //! The C in ECS
+//!
+//! Some components have pure member functions.
+//! This is not a violation of the ECS pattern,
+//! because they don't modify game state - they're not behavior.
 
 use enumn::N;
 use legion::Entity;
