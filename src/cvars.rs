@@ -452,15 +452,15 @@ impl Cvars {
         }
     }
 
-    pub(crate) fn g_weapon_explosion_scale(&self, weapon: Weapon) -> f64 {
+    pub(crate) fn g_weapon_explosion_scale(&self, weapon: Weapon) -> Option<f64> {
         match weapon {
-            Weapon::Mg => 0.0,
-            Weapon::Rail => 0.0,
-            Weapon::Cb => self.g_cluster_bomb_explosion_scale,
-            Weapon::Rockets => self.g_rockets_explosion_scale,
-            Weapon::Hm => 1.0,
-            Weapon::Gm => 1.0,
-            Weapon::Bfg => 1.0,
+            Weapon::Mg => None,
+            Weapon::Rail => None,
+            Weapon::Cb => Some(self.g_cluster_bomb_explosion_scale),
+            Weapon::Rockets => Some(self.g_rockets_explosion_scale),
+            Weapon::Hm => Some(1.0),
+            Weapon::Gm => Some(1.0),
+            Weapon::Bfg => Some(1.0),
         }
     }
 
