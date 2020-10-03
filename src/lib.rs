@@ -313,7 +313,7 @@ impl Game {
         let (vehicle, veh_destroyed, veh_pos, veh_vel, veh_angle, veh_turn_rate, veh_hitbox) =
             query.get_mut(&mut self.legion, self.gs.pe).unwrap();
 
-        // Player vehicle movement TODO move after shooting again (though this might look better when shooting MG sideways)
+        // Player vehicle movement
         let input;
         if self.gs.ce == ControlledEntity::Vehicle {
             input = &self.gs.input;
