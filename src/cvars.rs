@@ -18,7 +18,6 @@ use crate::{components::Hitbox, components::VehicleType, components::Weapon, map
 #[derive(Debug, Clone)]
 pub struct Cvars {
     // Long-term this needs some kind of better system to reduce duplication / manual work.
-    // Veloren uses https://crates.io/crates/const-tweaker
     // Would be nice to keep alphabetically.
     //  |
     //  v
