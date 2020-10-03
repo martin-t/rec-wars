@@ -9,6 +9,7 @@ use crate::{entities::GuidedMissile, components::Weapon};
 
 /// Everyting that changes during the game
 /// and might need to be taken back during frame interpolation / reconciliation.
+/// TODO this is not accurate if ECS is outside GameState
 #[derive(Debug, Clone)]
 pub(crate) struct GameState {
     pub(crate) rng: SmallRng,
