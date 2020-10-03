@@ -2,8 +2,8 @@ use legion::{query::IntoQuery, Entity, World};
 use vek::Clamp;
 
 use crate::{
-    components::Angle, components::Destroyed, components::Hitbox, components::Pos,
-    components::TurnRate, components::Vel, components::Weapon, cvars::Cvars, map::F64Ext,
+    components::Angle, components::Hitbox, components::Pos, components::TurnRate,
+    components::VehicleType, components::Vel, components::Weapon, cvars::Cvars,
 };
 use crate::{
     map::{Map, Vec2f},
@@ -87,6 +87,8 @@ impl GuidedMissile {
 
 #[derive(Debug, Clone)]
 pub(crate) struct Vehicle {
+    pub(crate) veh_type: VehicleType,
+    pub(crate) destroyed: bool,
     pub(crate) turret_angle: f64,
     /// Fraction of full
     pub(crate) hp: f64,
@@ -97,7 +99,7 @@ pub(crate) struct Vehicle {
 
 impl Vehicle {
     #[must_use]
-    pub(crate) fn new(cvars: &Cvars) -> Vehicle {
+    pub(crate) fn new(cvars: &Cvars, veh_type: VehicleType) -> Vehicle {
         let ammos = vec![
             Ammo::Loaded(0.0, cvars.g_weapon_reload_ammo(Weapon::Mg)),
             Ammo::Loaded(0.0, cvars.g_weapon_reload_ammo(Weapon::Rail)),
@@ -109,6 +111,8 @@ impl Vehicle {
         ];
 
         Vehicle {
+            veh_type,
+            destroyed: false,
             turret_angle: 0.0,
             hp: 1.0,
             ammos,
@@ -119,7 +123,6 @@ impl Vehicle {
         &mut self,
         dt: f64,
         cvars: &Cvars,
-        input: &Input,
         map: &Map,
         pos: &mut Pos,
         vel: &mut Vel,
@@ -158,11 +161,13 @@ impl Vehicle {
     }
 }
 
-pub(crate) fn all_vehicles(world: &World) -> Vec<(Entity, Destroyed, Pos, Angle, Hitbox)> {
-    let mut query_vehicles = <(Entity, &Destroyed, &Pos, &Angle, &Hitbox)>::query();
+pub(crate) fn all_vehicles(world: &World) -> Vec<(Entity, bool, Pos, Angle, Hitbox)> {
+    let mut query_vehicles = <(Entity, &Vehicle, &Pos, &Angle, &Hitbox)>::query();
     query_vehicles
         .iter(world)
-        .map(|(&entity, &destroyed, &pos, &angle, &hitbox)| (entity, destroyed, pos, angle, hitbox))
+        .map(|(&entity, vehicle, &pos, &angle, &hitbox)| {
+            (entity, vehicle.destroyed, pos, angle, hitbox)
+        })
         .collect()
 }
 

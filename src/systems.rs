@@ -18,7 +18,7 @@ use rand_distr::StandardNormal;
 use vek::Clamp;
 
 use crate::{
-    components::{Angle, Destroyed, Owner, Pos, Time, TurnRate, VehicleType, Vel, Weapon},
+    components::{Angle, Owner, Pos, Time, TurnRate, Vel, Weapon},
     cvars::Cvars,
     cvars::Hardpoint,
     entities,
@@ -29,17 +29,14 @@ use crate::{
 };
 
 pub(crate) fn movement(cvars: &Cvars, world: &mut World, gs: &GameState) {
-    let mut query = <(
-        &VehicleType,
-        &Destroyed,
-        &mut Pos,
-        &mut Vel,
-        &mut Angle,
-        &mut TurnRate,
-    )>::query();
-    for (veh_type, destroyed, pos, vel, angle, turn_rate) in query.iter_mut(world) {
+    let mut query = <(&Vehicle, &mut Pos, &mut Vel, &mut Angle, &mut TurnRate)>::query();
+    for (vehicle, pos, vel, angle, turn_rate) in query.iter_mut(world) {
         // TODO tempoary hack to test more vehicles moving
-        let input = if destroyed.0 { &EMPTY_INPUT } else { &gs.input };
+        let input = if vehicle.destroyed {
+            &EMPTY_INPUT
+        } else {
+            &gs.input
+        };
 
         // Turn rate
         let tr_change = input.right_left() * cvars.g_tank_turn_rate_increase * gs.dt;
@@ -98,19 +95,9 @@ pub(crate) fn turrets(cvars: &Cvars, world: &mut World, gs: &mut GameState) {
 
 pub(crate) fn shooting(cvars: &Cvars, world: &mut World, gs: &mut GameState, map: &Map) {
     let mut cmds = CommandBuffer::new(world);
-    let mut query = <(
-        Entity,
-        &mut Vehicle,
-        &VehicleType,
-        &Destroyed,
-        &Pos,
-        &Vel,
-        &Angle,
-    )>::query();
-    for (&veh_id, vehicle, veh_type, veh_destroyed, veh_pos, veh_vel, veh_angle) in
-        query.iter_mut(world)
-    {
-        if veh_destroyed.0 || !gs.input.fire {
+    let mut query = <(Entity, &mut Vehicle, &Pos, &Vel, &Angle)>::query();
+    for (&veh_id, vehicle, veh_pos, veh_vel, veh_angle) in query.iter_mut(world) {
+        if vehicle.destroyed || !gs.input.fire {
             continue;
         }
         let ammo = &mut vehicle.ammos[gs.cur_weapon as usize];
@@ -126,7 +113,7 @@ pub(crate) fn shooting(cvars: &Cvars, world: &mut World, gs: &mut GameState, map
                 *ammo = Ammo::Reloading(gs.frame_time, gs.frame_time + reload_time);
             }
 
-            let (hardpoint, weapon_offset) = cvars.g_hardpoint(*veh_type, gs.cur_weapon);
+            let (hardpoint, weapon_offset) = cvars.g_hardpoint(vehicle.veh_type, gs.cur_weapon);
             let (shot_angle, shot_origin);
             match hardpoint {
                 Hardpoint::Chassis => {
@@ -135,7 +122,7 @@ pub(crate) fn shooting(cvars: &Cvars, world: &mut World, gs: &mut GameState, map
                 }
                 Hardpoint::Turret => {
                     shot_angle = veh_angle.0 + vehicle.turret_angle;
-                    let turret_offset = cvars.g_vehicle_turret_offset_chassis(*veh_type);
+                    let turret_offset = cvars.g_vehicle_turret_offset_chassis(vehicle.veh_type);
                     shot_origin = veh_pos.0
                         + turret_offset.rotated_z(veh_angle.0)
                         + weapon_offset.rotated_z(shot_angle);
@@ -251,9 +238,9 @@ pub(crate) fn projectiles(cvars: &Cvars, world: &mut World, gs: &mut GameState, 
 
         proj_pos.0 = new_pos;
 
-        for &(veh_id, veh_destroyed, veh_pos, _veh_angle, _veh_hitbox) in &vehicles {
-            if !veh_destroyed.0
-                && veh_id != proj_owner.0
+        for (veh_id, destroyed, veh_pos, _veh_angle, _veh_hitbox) in &vehicles {
+            if !destroyed
+                && *veh_id != proj_owner.0
                 && (proj_pos.0 - veh_pos.0).magnitude_squared() <= 24.0 * 24.0
             {
                 to_remove.push(proj_id);
@@ -270,7 +257,7 @@ pub(crate) fn projectiles(cvars: &Cvars, world: &mut World, gs: &mut GameState, 
                     ));
                 }
 
-                to_kill.push(veh_id);
+                to_kill.push(*veh_id);
 
                 break;
             }
@@ -283,8 +270,8 @@ pub(crate) fn projectiles(cvars: &Cvars, world: &mut World, gs: &mut GameState, 
 
     for veh_id in to_kill {
         let mut entry = world.entry(veh_id).unwrap();
-        let destroyed = entry.get_component_mut::<Destroyed>().unwrap();
-        destroyed.0 = true;
+        let vehicle = entry.get_component_mut::<Vehicle>().unwrap();
+        vehicle.destroyed = true;
     }
 }
 

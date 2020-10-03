@@ -35,9 +35,7 @@ use wasm_bindgen::JsCast;
 
 use web_sys::{CanvasRenderingContext2d, HtmlImageElement, Performance};
 
-use components::{
-    Angle, Destroyed, Hitbox, Owner, Pos, TurnRate, VehicleType, Vel, Weapon, WEAPS_CNT,
-};
+use components::{Angle, Hitbox, Owner, Pos, TurnRate, VehicleType, Vel, Weapon, WEAPS_CNT};
 use cvars::{Cvars, TickrateMode};
 use debugging::{DEBUG_CROSSES, DEBUG_LINES, DEBUG_TEXTS};
 use entities::{Ammo, GuidedMissile, Vehicle};
@@ -125,14 +123,13 @@ impl Game {
 
         let mut legion = World::default();
 
-        let plyer_vehicle = Vehicle::new(cvars);
         let veh_type = VehicleType::n(rng.gen_range(0, 3)).unwrap();
+        let plyer_vehicle = Vehicle::new(cvars, veh_type);
         let hitbox = cvars.g_vehicle_hitbox(veh_type);
 
         let pe = legion.push((
             plyer_vehicle,
             veh_type,
-            Destroyed(false),
             Pos(spawn_pos),
             Vel(Vec2f::zero()),
             Angle(spawn_angle),
@@ -156,15 +153,13 @@ impl Game {
         let gs_prev = gs.clone();
 
         for _ in 0..50 {
-            let vehicle = Vehicle::new(cvars);
             let veh_type = VehicleType::n(gs.rng.gen_range(0, 3)).unwrap();
+            let vehicle = Vehicle::new(cvars, veh_type);
             let pos = map.random_nonwall(&mut gs.rng).0;
             let angle = gs.rng.gen_range(0.0, 2.0 * PI);
             let hitbox = cvars.g_vehicle_hitbox(veh_type);
             legion.push((
                 vehicle,
-                veh_type,
-                Destroyed(gs.rng.gen_bool(0.2)),
                 Pos(pos),
                 Vel(Vec2f::zero()),
                 Angle(angle),
@@ -280,11 +275,11 @@ impl Game {
             self.gs.cur_weapon = Weapon::n(next).unwrap();
         }
 
-        let mut query = <(&mut Destroyed, &mut Pos)>::query();
-        let (veh_destroyed, veh_pos) = query.get_mut(&mut self.legion, self.gs.pe).unwrap();
+        let mut query = <(&mut Vehicle, &mut Pos)>::query();
+        let (vehicle, veh_pos) = query.get_mut(&mut self.legion, self.gs.pe).unwrap();
 
-        if self.gs.input.self_destruct && !self.gs_prev.input.self_destruct && !veh_destroyed.0 {
-            veh_destroyed.0 = true;
+        if self.gs.input.self_destruct && !self.gs_prev.input.self_destruct && !vehicle.destroyed {
+            vehicle.destroyed = true;
             self.gs.explosions.push(Explosion::new(
                 veh_pos.0,
                 cvars.g_self_destruct_explosion1_scale,
@@ -299,7 +294,7 @@ impl Game {
             ));
         }
 
-        systems::movement(cvars, &mut self.legion, & self.gs);
+        systems::movement(cvars, &mut self.legion, &self.gs);
 
         let mut query = <(
             &mut Vehicle,
@@ -313,16 +308,15 @@ impl Game {
             query.get_mut(&mut self.legion, self.gs.pe).unwrap();
 
         // Player vehicle movement
-        let input;
-        if self.gs.ce == ControlledEntity::Vehicle {
-            input = &self.gs.input;
-        } else {
-            input = &EMPTY_INPUT;
-        }
+        // let input;
+        // if self.gs.ce == ControlledEntity::Vehicle {
+        //     input = &self.gs.input;
+        // } else {
+        //     input = &EMPTY_INPUT;
+        // }
         vehicle.tick(
             dt,
             cvars,
-            input,
             &self.map,
             veh_pos,
             veh_vel,
@@ -518,11 +512,9 @@ impl Game {
             )?;
             self.context.fill();
 
-            let mut query_vehicles = <(Entity, &VehicleType, &Destroyed, &Pos)>::query();
-            for (&vehicle_id, _, vehicle_destroyed, vehicle_pos) in
-                query_vehicles.iter(&self.legion)
-            {
-                if vehicle_destroyed.0
+            let mut query_vehicles = <(Entity, &Vehicle, &Pos)>::query();
+            for (&vehicle_id, vehicle, vehicle_pos) in query_vehicles.iter(&self.legion) {
+                if vehicle.destroyed
                     || bfg_owner.0 == vehicle_id
                     || (bfg_pos.0).distance_squared(vehicle_pos.0) > cvars.g_bfg_beam_range.powi(2)
                 {
@@ -541,15 +533,15 @@ impl Game {
 
         // Draw chassis
         let mut vehicle_cnt = 0;
-        let mut chassis_query = <(&VehicleType, &Destroyed, &Pos, &Angle, &Hitbox)>::query();
-        for (&veh_type, destroyed, pos, angle, hitbox) in chassis_query.iter(&self.legion) {
+        let mut chassis_query = <(&Vehicle, &Pos, &Angle, &Hitbox)>::query();
+        for (vehicle, pos, angle, hitbox) in chassis_query.iter(&self.legion) {
             vehicle_cnt += 1;
             let scr_pos = pos.0 - top_left;
             let img;
-            if destroyed.0 {
-                img = &self.imgs_wrecks[veh_type as usize];
+            if vehicle.destroyed {
+                img = &self.imgs_wrecks[vehicle.veh_type as usize];
             } else {
-                img = &self.imgs_vehicles[veh_type as usize * 2];
+                img = &self.imgs_vehicles[vehicle.veh_type as usize * 2];
             }
             self.draw_img_center(img, scr_pos, angle.0)?;
             if cvars.d_draw && cvars.d_draw_hitboxes {
@@ -569,9 +561,9 @@ impl Game {
         // TODO Draw cow
 
         // Draw turrets
-        let mut turrets_query = <(&VehicleType, &Vehicle, &Destroyed, &Pos, &Angle)>::query();
-        for (&veh_type, vehicle, destroyed, pos, angle) in turrets_query.iter(&self.legion) {
-            if destroyed.0 {
+        let mut turrets_query = <(&VehicleType, &Vehicle, &Pos, &Angle)>::query();
+        for (&veh_type, vehicle, pos, angle) in turrets_query.iter(&self.legion) {
+            if vehicle.destroyed {
                 continue;
             }
 

@@ -64,6 +64,3 @@ pub(crate) enum VehicleType {
     Hovercraft,
     Hummer,
 }
-
-#[derive(Debug, Clone, Copy)]
-pub(crate) struct Destroyed(pub(crate) bool);
