@@ -1,4 +1,4 @@
-//! Map data and coords
+//! Map data (everything static during a match) and coordinate system
 
 use std::f64::consts::PI;
 use std::ops::Index;
