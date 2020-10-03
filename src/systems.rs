@@ -28,6 +28,27 @@ use crate::{
     map::Vec2f,
 };
 
+pub(crate) fn self_destruct(cvars: &Cvars, world: &mut World, gs: &mut GameState) {
+    let mut query = <(&mut Vehicle, &mut Pos)>::query();
+    for (vehicle, veh_pos) in query.iter_mut(world) {
+        if gs.input.self_destruct && !vehicle.destroyed {
+            vehicle.destroyed = true;
+            gs.explosions.push(Explosion::new(
+                veh_pos.0,
+                cvars.g_self_destruct_explosion1_scale,
+                gs.frame_time,
+                false,
+            ));
+            gs.explosions.push(Explosion::new(
+                veh_pos.0,
+                cvars.g_self_destruct_explosion2_scale,
+                gs.frame_time,
+                false,
+            ));
+        }
+    }
+}
+
 pub(crate) fn movement(cvars: &Cvars, world: &mut World, gs: &GameState) {
     let mut query = <(&Vehicle, &mut Pos, &mut Vel, &mut Angle, &mut TurnRate)>::query();
     for (vehicle, pos, vel, angle, turn_rate) in query.iter_mut(world) {

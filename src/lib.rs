@@ -275,24 +275,7 @@ impl Game {
             self.gs.cur_weapon = Weapon::n(next).unwrap();
         }
 
-        let mut query = <(&mut Vehicle, &mut Pos)>::query();
-        let (vehicle, veh_pos) = query.get_mut(&mut self.legion, self.gs.pe).unwrap();
-
-        if self.gs.input.self_destruct && !self.gs_prev.input.self_destruct && !vehicle.destroyed {
-            vehicle.destroyed = true;
-            self.gs.explosions.push(Explosion::new(
-                veh_pos.0,
-                cvars.g_self_destruct_explosion1_scale,
-                frame_time,
-                false,
-            ));
-            self.gs.explosions.push(Explosion::new(
-                veh_pos.0,
-                cvars.g_self_destruct_explosion2_scale,
-                frame_time,
-                false,
-            ));
-        }
+        systems::self_destruct(cvars, &mut self.legion, &mut self.gs);
 
         systems::movement(cvars, &mut self.legion, &self.gs);
 
