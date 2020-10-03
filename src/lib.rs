@@ -280,17 +280,8 @@ impl Game {
             self.gs.cur_weapon = Weapon::n(next).unwrap();
         }
 
-        let mut query = <(
-            &mut Vehicle,
-            &mut Destroyed,
-            &mut Pos,
-            &mut Vel,
-            &mut Angle,
-            &mut TurnRate,
-            &Hitbox,
-        )>::query();
-        let (vehicle, veh_destroyed, veh_pos, veh_vel, veh_angle, veh_turn_rate, veh_hitbox) =
-            query.get_mut(&mut self.legion, self.gs.pe).unwrap();
+        let mut query = <(&mut Destroyed, &mut Pos)>::query();
+        let (veh_destroyed, veh_pos) = query.get_mut(&mut self.legion, self.gs.pe).unwrap();
 
         if self.gs.input.self_destruct && !self.gs_prev.input.self_destruct && !veh_destroyed.0 {
             veh_destroyed.0 = true;
@@ -307,6 +298,20 @@ impl Game {
                 false,
             ));
         }
+
+        systems::movement(cvars, &mut self.legion, &mut self.gs);
+
+        let mut query = <(
+            &mut Vehicle,
+            &mut Destroyed,
+            &mut Pos,
+            &mut Vel,
+            &mut Angle,
+            &mut TurnRate,
+            &Hitbox,
+        )>::query();
+        let (vehicle, veh_destroyed, veh_pos, veh_vel, veh_angle, veh_turn_rate, veh_hitbox) =
+            query.get_mut(&mut self.legion, self.gs.pe).unwrap();
 
         // Player vehicle movement TODO move after shooting again (though this might look better when shooting MG sideways)
         let input;
