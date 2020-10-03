@@ -680,7 +680,7 @@ impl Default for Cvars {
             g_tank_turret_offset_chassis_y: 0.0,
             g_tank_turret_offset_turret_x: -14.0,
             g_tank_turret_offset_turret_y: 0.0,
-            g_tank_speed_max: 250.0,
+            g_tank_speed_max: f64::INFINITY,
 
             g_turret_turn_speed: 2.0,
 

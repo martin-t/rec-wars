@@ -299,18 +299,17 @@ impl Game {
             ));
         }
 
-        systems::movement(cvars, &mut self.legion, &mut self.gs);
+        systems::movement(cvars, &mut self.legion, & self.gs);
 
         let mut query = <(
             &mut Vehicle,
-            &mut Destroyed,
             &mut Pos,
             &mut Vel,
             &mut Angle,
             &mut TurnRate,
             &Hitbox,
         )>::query();
-        let (vehicle, veh_destroyed, veh_pos, veh_vel, veh_angle, veh_turn_rate, veh_hitbox) =
+        let (vehicle, veh_pos, veh_vel, veh_angle, veh_turn_rate, veh_hitbox) =
             query.get_mut(&mut self.legion, self.gs.pe).unwrap();
 
         // Player vehicle movement

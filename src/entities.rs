@@ -3,7 +3,7 @@ use vek::Clamp;
 
 use crate::{
     components::Angle, components::Destroyed, components::Hitbox, components::Pos,
-    components::TurnRate, components::Vel, components::Weapon, cvars::Cvars,
+    components::TurnRate, components::Vel, components::Weapon, cvars::Cvars, map::F64Ext,
 };
 use crate::{
     map::{Map, Vec2f},
@@ -127,26 +127,6 @@ impl Vehicle {
         turn_rate: &mut TurnRate,
         hitbox: &Hitbox,
     ) {
-        // Accel / decel
-        // TODO lateral friction
-        dbg_textf!("tank orig speed: {}", vel.0.magnitude());
-        let vel_change = input.up_down() * cvars.g_tank_accel_forward * dt;
-        dbg_textd!(vel_change);
-        vel.0 += Vec2f::unit_x().rotated_z(angle.0) * vel_change;
-
-        let vel_fric_const = cvars.g_tank_friction_const * dt;
-        dbg_textd!(vel_fric_const);
-        let vel_norm = vel.0.try_normalized().unwrap_or_default();
-        vel.0 -= (vel_fric_const).min(vel.0.magnitude()) * vel_norm;
-
-        let vel_new = vel.0 * (1.0 - cvars.g_tank_friction_linear).powf(dt);
-        dbg_textf!("diff: {:?}", (vel.0 - vel_new).magnitude());
-        vel.0 = vel_new;
-        if vel.0.magnitude_squared() > cvars.g_tank_speed_max.powi(2) {
-            vel.0 = vel_norm * cvars.g_tank_speed_max;
-        }
-        dbg_textd!(vel.0.magnitude());
-
         // Turning - part of vel gets rotated to simulate steering
         // TODO cvar to set turning origin - original RW turned around turret center
         let vel_rotation = turn_rate.0 * cvars.g_tank_turn_effectiveness;

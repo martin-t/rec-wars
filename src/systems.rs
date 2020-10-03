@@ -22,17 +22,27 @@ use crate::{
     cvars::Cvars,
     cvars::Hardpoint,
     entities,
-    game_state::{ControlledEntity, Explosion, GameState},
+    game_state::{ControlledEntity, Explosion, GameState, EMPTY_INPUT},
     map::F64Ext,
     map::Map,
     map::Vec2f,
 };
 
-pub(crate) fn movement(cvars: &Cvars, world: &mut World, gs: &mut GameState) {
-    let mut query = <(&VehicleType, &mut Pos, &mut Vel, &mut Angle, &mut TurnRate)>::query();
-    for (veh_type, pos, vel, angle, turn_rate) in query.iter_mut(world) {
+pub(crate) fn movement(cvars: &Cvars, world: &mut World, gs: &GameState) {
+    let mut query = <(
+        &VehicleType,
+        &Destroyed,
+        &mut Pos,
+        &mut Vel,
+        &mut Angle,
+        &mut TurnRate,
+    )>::query();
+    for (veh_type, destroyed, pos, vel, angle, turn_rate) in query.iter_mut(world) {
+        // TODO tempoary hack to test more vehicles moving
+        let input = if destroyed.0 { &EMPTY_INPUT } else { &gs.input };
+
         // Turn rate
-        let tr_change = gs.input.right_left() * cvars.g_tank_turn_rate_increase * gs.dt;
+        let tr_change = input.right_left() * cvars.g_tank_turn_rate_increase * gs.dt;
         turn_rate.0 += tr_change;
 
         // Friction's constant component - always the same no matter the speed
@@ -46,6 +56,20 @@ pub(crate) fn movement(cvars: &Cvars, world: &mut World, gs: &mut GameState) {
         // Friction's linear component - increases with speed
         let tr_new = turn_rate.0 * (1.0 - cvars.g_tank_turn_rate_friction_linear).powf(gs.dt);
         turn_rate.0 = tr_new.clamped(-cvars.g_tank_turn_rate_max, cvars.g_tank_turn_rate_max);
+
+        // Accel / decel
+        // TODO lateral friction
+        let vel_change = input.up_down() * cvars.g_tank_accel_forward * gs.dt;
+        vel.0 += angle.0.to_vec2f() * vel_change;
+
+        let vel_fric_const = cvars.g_tank_friction_const * gs.dt;
+        let vel_norm = vel.0.try_normalized().unwrap_or_default();
+        vel.0 -= (vel_fric_const).min(vel.0.magnitude()) * vel_norm;
+
+        vel.0 *= (1.0 - cvars.g_tank_friction_linear).powf(gs.dt);
+        if vel.0.magnitude_squared() > cvars.g_tank_speed_max.powi(2) {
+            vel.0 = vel_norm * cvars.g_tank_speed_max;
+        }
     }
 }
 
