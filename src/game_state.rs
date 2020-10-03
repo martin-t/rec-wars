@@ -5,7 +5,7 @@ use rand::prelude::*;
 use wasm_bindgen::prelude::*;
 
 use crate::map::Vec2f;
-use crate::{entities::GuidedMissile, components::Weapon};
+use crate::{components::Weapon, entities::GuidedMissile};
 
 /// Everyting that changes during the game
 /// and might need to be taken back during frame interpolation / reconciliation.
@@ -21,10 +21,9 @@ pub(crate) struct GameState {
     pub(crate) cur_weapon: Weapon,
     pub(crate) railguns: Vec<(Vec2f, Vec2f)>,
     /// Player entity - the vehicle
-    // TODO better names if these are kept
-    pub(crate) pe: Entity,
+    pub(crate) player_entity: Entity,
     pub(crate) gm: GuidedMissile,
-    pub(crate) ce: ControlledEntity,
+    pub(crate) controlled_entity: ControlledEntity,
     pub(crate) explosions: Vec<Explosion>,
 }
 

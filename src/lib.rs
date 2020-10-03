@@ -127,7 +127,7 @@ impl Game {
         let plyer_vehicle = Vehicle::new(cvars, veh_type);
         let hitbox = cvars.g_vehicle_hitbox(veh_type);
 
-        let pe = legion.push((
+        let player_entity = legion.push((
             plyer_vehicle,
             veh_type,
             Pos(spawn_pos),
@@ -136,7 +136,7 @@ impl Game {
             TurnRate(0.0),
             hitbox,
         ));
-        let ce = ControlledEntity::Vehicle;
+        let controlled_entity = ControlledEntity::Vehicle;
 
         let mut gs = GameState {
             rng,
@@ -145,9 +145,9 @@ impl Game {
             input: Input::default(),
             cur_weapon: Weapon::Mg,
             railguns: Vec::new(),
-            pe,
+            player_entity,
             gm,
-            ce,
+            controlled_entity,
             explosions: Vec::new(),
         };
         let gs_prev = gs.clone();
@@ -287,8 +287,9 @@ impl Game {
             &mut TurnRate,
             &Hitbox,
         )>::query();
-        let (vehicle, veh_pos, veh_vel, veh_angle, veh_turn_rate, veh_hitbox) =
-            query.get_mut(&mut self.legion, self.gs.pe).unwrap();
+        let (vehicle, veh_pos, veh_vel, veh_angle, veh_turn_rate, veh_hitbox) = query
+            .get_mut(&mut self.legion, self.gs.player_entity)
+            .unwrap();
 
         // Player vehicle movement
         // let input;
@@ -318,7 +319,7 @@ impl Game {
         systems::projectiles_timeout(cvars, &mut self.legion, &mut self.gs);
 
         // Guided missile movement
-        let hit_something = if self.gs.ce == ControlledEntity::GuidedMissile {
+        let hit_something = if self.gs.controlled_entity == ControlledEntity::GuidedMissile {
             self.gs.gm.tick(dt, cvars, &self.gs.input, &self.map)
         } else {
             self.gs.gm.tick(dt, cvars, &Input::default(), &self.map)
@@ -326,7 +327,7 @@ impl Game {
         if hit_something {
             let explosion = Explosion::new(self.gs.gm.pos, 1.0, self.gs.frame_time, false);
             self.gs.explosions.push(explosion);
-            self.gs.ce = ControlledEntity::Vehicle;
+            self.gs.controlled_entity = ControlledEntity::Vehicle;
             let (pos, angle) = self.map.random_spawn(&mut self.gs.rng);
             self.gs.gm = GuidedMissile::spawn(cvars, pos, angle);
         }
@@ -343,8 +344,9 @@ impl Game {
         self.context.set_image_smoothing_enabled(cvars.r_smoothing);
 
         let mut query = <(&Vehicle, &Pos)>::query();
-        let (player_vehicle, player_veh_pos) = query.get(&self.legion, self.gs.pe).unwrap();
-        let player_entity_pos = match self.gs.ce {
+        let (player_vehicle, player_veh_pos) =
+            query.get(&self.legion, self.gs.player_entity).unwrap();
+        let player_entity_pos = match self.gs.controlled_entity {
             ControlledEntity::Vehicle => player_veh_pos.0,
             ControlledEntity::GuidedMissile => self.gs.gm.pos,
         };

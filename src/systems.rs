@@ -214,7 +214,7 @@ pub(crate) fn shooting(cvars: &Cvars, world: &mut World, gs: &mut GameState, map
                 }
                 Weapon::Gm => {
                     gs.gm = GuidedMissile::spawn(cvars, shot_origin, shot_angle);
-                    gs.ce = ControlledEntity::GuidedMissile;
+                    gs.controlled_entity = ControlledEntity::GuidedMissile;
                 }
                 Weapon::Bfg => {
                     let shot_vel = Vec2f::new(cvars.g_bfg_speed, 0.0).rotated_z(shot_angle)
