@@ -14,6 +14,13 @@ use crate::{components::Hitbox, components::VehicleType, components::Weapon, map
 /// hud_ is the heads-up display
 /// r_ is rendering
 /// sv_ is server administration + performance
+///
+/// This struct is shared with the JS side so it has some limitations:
+/// - fields have to be Copy
+/// - only C-like enums
+/// - avoid fields that are structs
+///     - they compile but can't be changed from JS (the change is thrown away)
+///     - e.g. `cvars.g_tank.speed` wouldn't work
 #[wasm_bindgen]
 #[derive(Debug, Clone)]
 pub struct Cvars {
