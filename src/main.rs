@@ -244,6 +244,7 @@
 // [ ] horn
 //      [ ] sound, bind
 //      [ ] make AI move out of the way
+// [ ] cvar to set origin - tank in original RW turned around turret center
 // [ ] easter eggs
 //      [ ] server say for 0 deaths
 //      [ ] bugfeatures from original RW:
