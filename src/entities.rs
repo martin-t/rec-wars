@@ -1,3 +1,5 @@
+//! Helpers for manipulating entities.
+
 use legion::{query::IntoQuery, Entity, World};
 
 use crate::map::Map;
