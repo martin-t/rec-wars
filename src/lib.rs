@@ -326,7 +326,7 @@ impl Game {
             vel.0.rotate_z(vel_rotation);
         }
 
-        systems::turrets(cvars, &mut self.legion, &mut self.gs);
+        systems::turrets_and_reloading(cvars, &mut self.legion, &mut self.gs);
 
         // Note: vehicles can shoot while controlling a missile
         systems::shooting(cvars, &mut self.legion, &mut self.gs, &self.map);

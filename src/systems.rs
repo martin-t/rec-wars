@@ -88,7 +88,7 @@ pub(crate) fn movement(cvars: &Cvars, world: &mut World, gs: &GameState) {
     dbg_textd!(cnt);
 }
 
-pub(crate) fn turrets(cvars: &Cvars, world: &mut World, gs: &mut GameState) {
+pub(crate) fn turrets_and_reloading(cvars: &Cvars, world: &mut World, gs: &mut GameState) {
     let cur_weap = gs.cur_weapon;
 
     let mut query = <(&mut Vehicle,)>::query();
