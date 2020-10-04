@@ -79,6 +79,7 @@ pub struct Cvars {
     pub g_machine_gun_speed: f64,
     pub g_machine_gun_trail_length: f64,
 
+    pub g_guided_missile_vehicle_velocity_factor: f64,
     pub g_guided_missile_reload_ammo: u32,
     pub g_guided_missile_reload_time: f64,
     pub g_guided_missile_speed_change: f64,
@@ -555,6 +556,7 @@ impl Default for Cvars {
             g_machine_gun_speed: 1000.0,
             g_machine_gun_trail_length: 10.0,
 
+            g_guided_missile_vehicle_velocity_factor: 1.0,
             g_guided_missile_reload_ammo: 1,
             g_guided_missile_reload_time: 1.5,
             g_guided_missile_speed_change: 600.0,

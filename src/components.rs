@@ -1,5 +1,7 @@
 //! The C in ECS
 //!
+//! Some structs/enums here are not components but their members.
+//!
 //! Some components have pure member functions.
 //! This is not a violation of the ECS pattern,
 //! because they don't modify game state - they're not behavior.

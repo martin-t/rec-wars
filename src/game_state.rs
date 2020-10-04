@@ -4,8 +4,8 @@ use rand::prelude::*;
 
 use wasm_bindgen::prelude::*;
 
+use crate::components::Weapon;
 use crate::map::Vec2f;
-use crate::{components::Weapon, entities::GuidedMissile};
 
 /// Everyting that changes during the game
 /// and might need to be taken back during frame interpolation / reconciliation.
@@ -22,8 +22,7 @@ pub(crate) struct GameState {
     pub(crate) railguns: Vec<(Vec2f, Vec2f)>,
     /// Player entity - the vehicle
     pub(crate) player_entity: Entity,
-    pub(crate) gm: GuidedMissile,
-    pub(crate) controlled_entity: ControlledEntity,
+    pub(crate) guided_missile: Option<Entity>,
     pub(crate) explosions: Vec<Explosion>,
 }
 
@@ -44,12 +43,6 @@ impl Explosion {
             bfg,
         }
     }
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub(crate) enum ControlledEntity {
-    GuidedMissile,
-    Vehicle,
 }
 
 #[wasm_bindgen]
@@ -83,6 +76,26 @@ impl Input {
 
     pub(crate) fn up_down(&self) -> f64 {
         self.up as i32 as f64 - self.down as i32 as f64
+    }
+
+    /// Subset of inputs to control the missile
+    pub(crate) fn guided_missile(&self) -> Self {
+        Self {
+            up: true,
+            down: false,
+            ..*self
+        }
+    }
+
+    /// Subset of inputs to control the vehicle while guiding a missile.
+    pub(crate) fn vehicle_while_guiding(&self) -> Self {
+        Self {
+            left: false,
+            right: false,
+            up: false,
+            down: false,
+            ..*self
+        }
     }
 }
 

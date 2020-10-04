@@ -22,10 +22,11 @@ use crate::{
     cvars::Cvars,
     cvars::Hardpoint,
     entities,
-    game_state::{ControlledEntity, Explosion, GameState, EMPTY_INPUT},
+    game_state::{Explosion, GameState, Input, EMPTY_INPUT},
     map::F64Ext,
     map::Map,
     map::Vec2f,
+    map::VecExt,
 };
 
 pub(crate) fn self_destruct(cvars: &Cvars, world: &mut World, gs: &mut GameState) {
@@ -50,15 +51,10 @@ pub(crate) fn self_destruct(cvars: &Cvars, world: &mut World, gs: &mut GameState
 }
 
 pub(crate) fn movement(cvars: &Cvars, world: &mut World, gs: &GameState) {
-    let mut query = <(&Vehicle, &mut Pos, &mut Vel, &mut Angle, &mut TurnRate)>::query();
-    for (vehicle, pos, vel, angle, turn_rate) in query.iter_mut(world) {
-        // TODO tempoary hack to test more vehicles moving
-        let input = if vehicle.destroyed {
-            &EMPTY_INPUT
-        } else {
-            &gs.input
-        };
-
+    let mut query = <(&mut Pos, &mut Vel, &mut Angle, &mut TurnRate, &Input)>::query();
+    let mut cnt = 0;
+    for (pos, vel, angle, turn_rate, input) in query.iter_mut(world) {
+        cnt += 1;
         // Turn rate
         let tr_change = input.right_left() * cvars.g_tank_turn_rate_increase * gs.dt;
         turn_rate.0 += tr_change;
@@ -89,6 +85,7 @@ pub(crate) fn movement(cvars: &Cvars, world: &mut World, gs: &GameState) {
             vel.0 = vel_norm * cvars.g_tank_speed_max;
         }
     }
+    dbg_textd!(cnt);
 }
 
 pub(crate) fn turrets(cvars: &Cvars, world: &mut World, gs: &mut GameState) {
@@ -213,8 +210,20 @@ pub(crate) fn shooting(cvars: &Cvars, world: &mut World, gs: &mut GameState, map
                     cmds.push((Weapon::Hm, pos, vel, owner));
                 }
                 Weapon::Gm => {
-                    gs.gm = GuidedMissile::spawn(cvars, shot_origin, shot_angle);
-                    gs.controlled_entity = ControlledEntity::GuidedMissile;
+                    if veh_id != gs.player_entity {
+                        // TODO let everyone shoot GMs
+                        continue;
+                    }
+                    let gm = GuidedMissile;
+                    let shot_vel = Vec2f::new(cvars.g_guided_missile_speed_min, 0.0)
+                        .rotated_z(shot_angle)
+                        + cvars.g_guided_missile_vehicle_velocity_factor * veh_vel.0;
+                    let vel = Vel(shot_vel);
+                    let angle = Angle(vel.0.to_angle());
+                    let tr = TurnRate(0.0);
+                    let gm_entity =
+                        cmds.push((Weapon::Gm, gm, pos, vel, angle, tr, owner, EMPTY_INPUT));
+                    gs.guided_missile = Some(gm_entity);
                 }
                 Weapon::Bfg => {
                     let shot_vel = Vec2f::new(cvars.g_bfg_speed, 0.0).rotated_z(shot_angle)
@@ -252,7 +261,9 @@ pub(crate) fn projectiles(cvars: &Cvars, world: &mut World, gs: &mut GameState, 
                     proj_weap == Weapon::Bfg,
                 ));
             }
-
+            if proj_weap == Weapon::Gm {
+                gs.guided_missile = None;
+            }
             to_remove.push(proj_id);
             continue;
         }
@@ -264,8 +275,6 @@ pub(crate) fn projectiles(cvars: &Cvars, world: &mut World, gs: &mut GameState, 
                 && *veh_id != proj_owner.0
                 && (proj_pos.0 - veh_pos.0).magnitude_squared() <= 24.0 * 24.0
             {
-                to_remove.push(proj_id);
-
                 // Vehicle explosion first to it's below projectile explosion because it looks better.
                 gs.explosions
                     .push(Explosion::new(veh_pos.0, 1.0, gs.frame_time, false));
@@ -277,9 +286,11 @@ pub(crate) fn projectiles(cvars: &Cvars, world: &mut World, gs: &mut GameState, 
                         proj_weap == Weapon::Bfg,
                     ));
                 }
-
+                if proj_weap == Weapon::Gm {
+                    gs.guided_missile = None;
+                }
+                to_remove.push(proj_id);
                 to_kill.push(*veh_id);
-
                 break;
             }
         }
@@ -311,6 +322,9 @@ pub(crate) fn projectiles_timeout(cvars: &Cvars, world: &mut World, gs: &mut Gam
                     time.0,
                     weap == Weapon::Bfg,
                 ));
+            }
+            if weap == Weapon::Gm {
+                gs.guided_missile = None;
             }
             to_remove.push(entity);
         }

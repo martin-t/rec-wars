@@ -1,89 +1,13 @@
 use legion::{query::IntoQuery, Entity, World};
-use vek::Clamp;
 
+use crate::map::Map;
 use crate::{
     components::Angle, components::Hitbox, components::Pos, components::TurnRate,
     components::VehicleType, components::Vel, components::Weapon, cvars::Cvars,
 };
-use crate::{
-    map::{Map, Vec2f},
-    Input,
-};
 
 #[derive(Debug, Clone)]
-pub(crate) struct GuidedMissile {
-    pub(crate) pos: Vec2f,
-    pub(crate) vel: Vec2f,
-    /// Kinda like angular momentum, except more special-casey.
-    /// TODO Might wanna revisit when i have proper physics.
-    pub(crate) turn_rate: f64,
-}
-
-impl GuidedMissile {
-    #[must_use]
-    pub(crate) fn spawn(cvars: &Cvars, pos: Vec2f, angle: f64) -> GuidedMissile {
-        // example of GM pasing through wall:
-        // pos: Vec2f::new(640.0, 640.0),
-        // vel: Vec2f::new(0.3, 0.2),
-
-        GuidedMissile {
-            pos,
-            vel: Vec2f::new(cvars.g_guided_missile_speed_initial, 0.0).rotated_z(angle),
-            turn_rate: 0.0,
-        }
-    }
-
-    /// Returns if it hit something.
-    pub(crate) fn tick(&mut self, dt: f64, cvars: &Cvars, input: &Input, map: &Map) -> bool {
-        // Accel / decel
-        let accel_input = input.up_down() * cvars.g_guided_missile_speed_change * dt;
-        let dir = self.vel.normalized();
-        let speed_old = self.vel.magnitude();
-        let speed_new = (speed_old + accel_input).clamped(
-            cvars.g_guided_missile_speed_min,
-            cvars.g_guided_missile_speed_max,
-        );
-        self.vel = speed_new * dir;
-
-        // Turning
-        // TODO this doesn't feel like flying a missile - probably needs to carry some sideways momentum
-        let tr_input: f64 = input.right_left() * cvars.g_guided_missile_turn_rate_increase * dt;
-
-        // Without input, turn rate should gradually decrease towards 0.
-        let tr_old = self.turn_rate;
-        let tr = if tr_input == 0.0 {
-            // With a fixed timestep, this would multiply tr_old each frame.
-            let tr_after_friction =
-                tr_old * (1.0 - cvars.g_guided_missile_turn_rate_friction).powf(dt);
-            let linear = (tr_old - tr_after_friction).abs();
-            // With a fixed timestep, this would subtract from tr_old each frame.
-            let constant = cvars.g_guided_missile_turn_rate_decrease * dt;
-            // Don't auto-decay faster than turning in the other dir would.
-            let max_change = cvars.g_guided_missile_turn_rate_increase * dt;
-            let decrease = (linear + constant).min(max_change);
-            // Don't cross 0 and start turning in the other dir
-            let tr_new = if tr_old > 0.0 {
-                (tr_old - decrease).max(0.0)
-            } else {
-                (tr_old + decrease).min(0.0)
-            };
-
-            tr_new
-        } else {
-            (tr_old + tr_input).clamped(
-                -cvars.g_guided_missile_turn_rate_max,
-                cvars.g_guided_missile_turn_rate_max,
-            )
-        };
-
-        self.vel.rotate_z(tr * dt);
-        self.turn_rate = tr;
-
-        // TODO this is broken when minimized (collision detection, etc.)
-        self.pos += self.vel * dt;
-        map.collision(self.pos)
-    }
-}
+pub(crate) struct GuidedMissile;
 
 #[derive(Debug, Clone)]
 pub(crate) struct Vehicle {

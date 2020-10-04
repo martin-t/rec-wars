@@ -39,7 +39,7 @@ use components::{Angle, Hitbox, Owner, Pos, TurnRate, VehicleType, Vel, Weapon, 
 use cvars::{Cvars, TickrateMode};
 use debugging::{DEBUG_CROSSES, DEBUG_LINES, DEBUG_TEXTS};
 use entities::{Ammo, GuidedMissile, Vehicle};
-use game_state::{ControlledEntity, Explosion, GameState, Input, EMPTY_INPUT};
+use game_state::{Explosion, GameState, Input, EMPTY_INPUT};
 use map::{F64Ext, Kind, Map, Vec2f, VecExt, TILE_SIZE};
 
 #[wasm_bindgen]
@@ -117,26 +117,22 @@ impl Game {
 
         let surfaces = map::load_tex_list(tex_list_text);
         let map = map::load_map(map_text, surfaces);
-        let (spawn_pos, spawn_angle) = map.random_spawn(&mut rng);
-
-        let gm = GuidedMissile::spawn(cvars, spawn_pos, spawn_angle);
-
         let mut legion = World::default();
 
         let veh_type = VehicleType::n(rng.gen_range(0, 3)).unwrap();
-        let plyer_vehicle = Vehicle::new(cvars, veh_type);
+        let player_vehicle = Vehicle::new(cvars, veh_type);
+        let (spawn_pos, spawn_angle) = map.random_spawn(&mut rng);
         let hitbox = cvars.g_vehicle_hitbox(veh_type);
 
         let player_entity = legion.push((
-            plyer_vehicle,
-            veh_type,
+            player_vehicle,
             Pos(spawn_pos),
             Vel(Vec2f::zero()),
             Angle(spawn_angle),
             TurnRate(0.0),
             hitbox,
+            EMPTY_INPUT.clone(),
         ));
-        let controlled_entity = ControlledEntity::Vehicle;
 
         let mut gs = GameState {
             rng,
@@ -146,8 +142,7 @@ impl Game {
             cur_weapon: Weapon::Mg,
             railguns: Vec::new(),
             player_entity,
-            gm,
-            controlled_entity,
+            guided_missile: None,
             explosions: Vec::new(),
         };
         let gs_prev = gs.clone();
@@ -165,6 +160,7 @@ impl Game {
                 Angle(angle),
                 TurnRate(0.0),
                 hitbox,
+                EMPTY_INPUT.clone(),
             ));
         }
 
@@ -265,6 +261,24 @@ impl Game {
             progress <= 1.0
         });
 
+        let mut query = <(&Vehicle, &mut Input)>::query();
+        for (vehicle, input) in query.iter_mut(&mut self.legion) {
+            if vehicle.destroyed {
+                *input = EMPTY_INPUT.clone();
+            } else if self.gs.guided_missile.is_some() {
+                *input = self.gs.input.vehicle_while_guiding();
+            } else {
+                // for now all vehicles move together
+                *input = self.gs.input.clone();
+            }
+        }
+
+        let mut query = <(&GuidedMissile, &mut Input)>::query();
+        for (_, input) in query.iter_mut(&mut self.legion) {
+            // for now all guided missiles move together
+            *input = self.gs.input.guided_missile();
+        }
+
         // Change weapon
         if self.gs.input.prev_weapon && !self.gs_prev.input.prev_weapon {
             let prev = (self.gs.cur_weapon as u8 + WEAPS_CNT - 1) % WEAPS_CNT;
@@ -287,27 +301,28 @@ impl Game {
             &mut TurnRate,
             &Hitbox,
         )>::query();
-        let (vehicle, veh_pos, veh_vel, veh_angle, veh_turn_rate, veh_hitbox) = query
-            .get_mut(&mut self.legion, self.gs.player_entity)
-            .unwrap();
+        for (vehicle, veh_pos, veh_vel, veh_angle, veh_turn_rate, veh_hitbox) in
+            query.iter_mut(&mut self.legion)
+        {
+            vehicle.tick(
+                dt,
+                cvars,
+                &self.map,
+                veh_pos,
+                veh_vel,
+                veh_angle,
+                veh_turn_rate,
+                veh_hitbox,
+            );
+        }
 
-        // Player vehicle movement
-        // let input;
-        // if self.gs.ce == ControlledEntity::Vehicle {
-        //     input = &self.gs.input;
-        // } else {
-        //     input = &EMPTY_INPUT;
-        // }
-        vehicle.tick(
-            dt,
-            cvars,
-            &self.map,
-            veh_pos,
-            veh_vel,
-            veh_angle,
-            veh_turn_rate,
-            veh_hitbox,
-        );
+        let mut query = <(&GuidedMissile, &mut Vel, &mut TurnRate)>::query();
+        for (_, vel, turn_rate) in query.iter_mut(&mut self.legion) {
+            // Turning - part of vel gets rotated to simulate steering
+            // TODO turn effectivness bad for missile, also desyncs angle and vel if >1
+            let vel_rotation = turn_rate.0 * cvars.g_tank_turn_effectiveness;
+            vel.0.rotate_z(vel_rotation);
+        }
 
         systems::turrets(cvars, &mut self.legion, &mut self.gs);
 
@@ -317,20 +332,6 @@ impl Game {
         systems::projectiles(cvars, &mut self.legion, &mut self.gs, &self.map);
 
         systems::projectiles_timeout(cvars, &mut self.legion, &mut self.gs);
-
-        // Guided missile movement
-        let hit_something = if self.gs.controlled_entity == ControlledEntity::GuidedMissile {
-            self.gs.gm.tick(dt, cvars, &self.gs.input, &self.map)
-        } else {
-            self.gs.gm.tick(dt, cvars, &Input::default(), &self.map)
-        };
-        if hit_something {
-            let explosion = Explosion::new(self.gs.gm.pos, 1.0, self.gs.frame_time, false);
-            self.gs.explosions.push(explosion);
-            self.gs.controlled_entity = ControlledEntity::Vehicle;
-            let (pos, angle) = self.map.random_spawn(&mut self.gs.rng);
-            self.gs.gm = GuidedMissile::spawn(cvars, pos, angle);
-        }
     }
 
     pub fn draw(&mut self, cvars: &Cvars) -> Result<(), JsValue> {
@@ -343,13 +344,13 @@ impl Game {
         //      if disabling, try changing quality
         self.context.set_image_smoothing_enabled(cvars.r_smoothing);
 
-        let mut query = <(&Vehicle, &Pos)>::query();
-        let (player_vehicle, player_veh_pos) =
-            query.get(&self.legion, self.gs.player_entity).unwrap();
-        let player_entity_pos = match self.gs.controlled_entity {
-            ControlledEntity::Vehicle => player_veh_pos.0,
-            ControlledEntity::GuidedMissile => self.gs.gm.pos,
+        let controlled_entity_entry = if let Some(gm_entity) = self.gs.guided_missile {
+            //self.legion.entry(gm_entity).unwrap() FIXME
+            self.legion.entry(self.gs.player_entity).unwrap()
+        } else {
+            self.legion.entry(self.gs.player_entity).unwrap()
         };
+        let &Pos(player_entity_pos) = controlled_entity_entry.get_component::<Pos>().unwrap();
 
         // Don't put the camera so close to the edge that it would render area outside the map.
         // TODO handle maps smaller than canvas (currently crashes on unreachable)
@@ -448,33 +449,19 @@ impl Game {
             dbg_textd!(cb_cnt);
         }
 
-        // Draw rockets
-        let mut rocket_cnt = 0;
+        // Draw rockets, homing and guided missiles
         let mut query = <(&Weapon, &Pos, &Vel)>::query();
         for (&weap, pos, vel) in query.iter(&self.legion) {
-            if weap != Weapon::Rockets {
-                continue;
-            }
-            rocket_cnt += 1;
             let scr_pos = pos.0 - top_left;
-            self.draw_img_center(&self.img_rocket, scr_pos, vel.0.to_angle())?;
-        }
-        dbg_textd!(rocket_cnt);
-
-        // Draw homing missiles
-        let mut query = <(&Weapon, &Pos, &Vel)>::query();
-        for (&weap, pos, vel) in query.iter(&self.legion) {
-            if weap != Weapon::Hm {
-                continue;
+            match weap {
+                Weapon::Rockets => {
+                    self.draw_img_center(&self.img_rocket, scr_pos, vel.0.to_angle())?
+                }
+                Weapon::Hm => self.draw_img_center(&self.img_hm, scr_pos, vel.0.to_angle())?,
+                Weapon::Gm => self.draw_img_center(&self.img_gm, scr_pos, vel.0.to_angle())?,
+                _ => {}
             }
-            let scr_pos = pos.0 - top_left;
-            self.draw_img_center(&self.img_hm, scr_pos, vel.0.to_angle())?;
         }
-
-        // Draw guided missiles
-        let gm = &self.gs.gm;
-        let gm_scr_pos = gm.pos - top_left;
-        self.draw_img_center(&self.img_gm, gm_scr_pos, gm.vel.to_angle())?;
 
         // Draw BFGs
         self.context.set_fill_style(&"lime".into());
@@ -546,18 +533,18 @@ impl Game {
         // TODO Draw cow
 
         // Draw turrets
-        let mut turrets_query = <(&VehicleType, &Vehicle, &Pos, &Angle)>::query();
-        for (&veh_type, vehicle, pos, angle) in turrets_query.iter(&self.legion) {
+        let mut turrets_query = <(&Vehicle, &Pos, &Angle)>::query();
+        for (vehicle, pos, angle) in turrets_query.iter(&self.legion) {
             if vehicle.destroyed {
                 continue;
             }
 
-            let img = &self.imgs_vehicles[veh_type as usize * 2 + 1];
+            let img = &self.imgs_vehicles[vehicle.veh_type as usize * 2 + 1];
             let scr_pos = pos.0 - top_left;
             let offset_chassis =
-                angle.0.to_mat2f() * cvars.g_vehicle_turret_offset_chassis(veh_type);
+                angle.0.to_mat2f() * cvars.g_vehicle_turret_offset_chassis(vehicle.veh_type);
             let turret_scr_pos = scr_pos + offset_chassis;
-            let offset_turret = cvars.g_vehicle_turret_offset_turret(veh_type);
+            let offset_turret = cvars.g_vehicle_turret_offset_turret(vehicle.veh_type);
             self.draw_img_offset(
                 img,
                 turret_scr_pos,
@@ -627,6 +614,10 @@ impl Game {
             y += TILE_SIZE;
         }
 
+        let mut query = <(&Vehicle, &Pos)>::query();
+        let (player_vehicle, player_veh_pos) =
+            query.get(&self.legion, self.gs.player_entity).unwrap();
+
         // Draw HUD:
 
         // Homing missile indicator
@@ -644,7 +635,8 @@ impl Game {
             2.0 * PI,
         )?;
         self.move_to(player_veh_scr_pos);
-        let dir = (self.gs.gm.pos - player_veh_pos.0).normalized();
+        //let dir = (self.gs.gm.pos - player_veh_pos.0).normalized();
+        let dir = 0.0.to_vec2f(); // TODO
         let end = player_veh_scr_pos + dir * cvars.hud_missile_indicator_radius;
         self.line_to(end);
         self.context.stroke();
