@@ -119,7 +119,9 @@ impl Game {
         let map = map::load_map(map_text, surfaces);
         let mut legion = World::default();
 
-        let veh_type = VehicleType::n(rng.gen_range(0, 3)).unwrap();
+        // random in range 0..=1 - only tank or hovercraft until hummer backwards steering works
+        let veh_type = VehicleType::n(rng.gen_range(0, 2)).unwrap();
+
         let player_vehicle = Vehicle::new(cvars, veh_type);
         let (spawn_pos, spawn_angle) = map.random_spawn(&mut rng);
         let hitbox = cvars.g_vehicle_hitbox(veh_type);
