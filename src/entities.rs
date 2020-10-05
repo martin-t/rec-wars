@@ -57,9 +57,10 @@ impl Vehicle {
         hitbox: &Hitbox,
     ) {
         // Turning - part of vel gets rotated to simulate steering
-        let vel_rotation = turn_rate.0 * cvars.g_tank_turn_effectiveness;
+        let turn = turn_rate.0 * dt;
+        let vel_rotation = turn * cvars.g_tank_turn_effectiveness;
         vel.0.rotate_z(vel_rotation);
-        let new_angle = angle.0 + turn_rate.0; // TODO * dt
+        let new_angle = angle.0 + turn;
         if hitbox
             .corners(pos.0, new_angle)
             .iter()
@@ -69,8 +70,6 @@ impl Vehicle {
         } else {
             angle.0 = new_angle;
         }
-
-        // TODO unify order with missile / input
 
         // Moving
         let new_pos = pos.0 + vel.0 * dt;
