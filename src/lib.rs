@@ -293,7 +293,7 @@ impl Game {
 
         systems::self_destruct(cvars, &mut self.legion, &mut self.gs);
 
-        systems::movement(cvars, &mut self.legion, &self.gs);
+        systems::vehicle_movement(cvars, &mut self.legion, &self.gs);
 
         let mut query = <(
             &mut Vehicle,
