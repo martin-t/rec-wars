@@ -13,7 +13,6 @@ mod debugging;
 
 mod components;
 mod cvars;
-mod entities;
 mod game_state;
 mod map;
 mod systems;

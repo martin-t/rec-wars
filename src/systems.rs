@@ -25,7 +25,6 @@ use crate::{
     },
     cvars::Cvars,
     cvars::Hardpoint,
-    entities,
     game_state::{Explosion, GameState, Input, EMPTY_INPUT},
     map::F64Ext,
     map::Map,
@@ -300,7 +299,18 @@ pub(crate) fn shooting(cvars: &Cvars, world: &mut World, gs: &mut GameState, map
 }
 
 pub(crate) fn projectiles(cvars: &Cvars, world: &mut World, gs: &mut GameState, map: &Map) {
-    let vehicles = entities::all_vehicles(world);
+    let mut query_vehicles = <(Entity, &Vehicle, &Pos, &Angle, &Hitbox)>::query();
+    let vehicles: Vec<(Entity, _, _, _)> = query_vehicles
+        .iter(world)
+        .filter_map(|(&entity, vehicle, &pos, &angle, &hitbox)| {
+            if !vehicle.destroyed {
+                Some((entity, pos, angle, hitbox))
+            } else {
+                None
+            }
+        })
+        .collect();
+
     let mut to_remove = Vec::new();
     let mut to_kill = Vec::new();
 
@@ -321,9 +331,8 @@ pub(crate) fn projectiles(cvars: &Cvars, world: &mut World, gs: &mut GameState, 
 
         proj_pos.0 = new_pos;
 
-        for (veh_id, destroyed, veh_pos, _veh_angle, _veh_hitbox) in &vehicles {
-            if !destroyed
-                && *veh_id != proj_owner.0
+        for (veh_id, veh_pos, _veh_angle, _veh_hitbox) in &vehicles {
+            if *veh_id != proj_owner.0
                 && (proj_pos.0 - veh_pos.0).magnitude_squared() <= 24.0 * 24.0
             {
                 // Vehicle explosion first to it's below projectile explosion because it looks better.
