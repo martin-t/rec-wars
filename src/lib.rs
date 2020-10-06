@@ -454,6 +454,10 @@ impl Game {
                 if vehicle.destroyed
                     || bfg_owner.0 == vehicle_id
                     || (bfg_pos.0).distance_squared(vehicle_pos.0) > cvars.g_bfg_beam_range.powi(2)
+                    || self
+                        .map
+                        .collision_between(bfg_pos.0, vehicle_pos.0)
+                        .is_some()
                 {
                     continue;
                 }
