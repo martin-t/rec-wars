@@ -290,7 +290,7 @@ impl Game {
             self.gs.cur_weapon = Weapon::n(next).unwrap();
         }
 
-        systems::self_destruct(cvars, &mut self.legion, &mut self.gs);
+        systems::turrets_and_reloading(cvars, &mut self.legion, &mut self.gs);
 
         systems::vehicle_movement(cvars, &mut self.legion, &self.gs, &self.map);
 
@@ -302,14 +302,14 @@ impl Game {
             vel.0.rotate_z(vel_rotation);
         }
 
-        systems::turrets_and_reloading(cvars, &mut self.legion, &mut self.gs);
-
         // Note: vehicles can shoot while controlling a missile
         systems::shooting(cvars, &mut self.legion, &mut self.gs, &self.map);
 
         systems::projectiles(cvars, &mut self.legion, &mut self.gs, &self.map);
 
         systems::projectiles_timeout(cvars, &mut self.legion, &mut self.gs);
+
+        systems::self_destruct(cvars, &mut self.legion, &mut self.gs);
     }
 
     pub fn draw(&mut self, cvars: &Cvars) -> Result<(), JsValue> {
