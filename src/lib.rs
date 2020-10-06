@@ -313,8 +313,7 @@ impl Game {
         self.context.set_image_smoothing_enabled(cvars.r_smoothing);
 
         let controlled_entity_entry = if let Some(gm_entity) = self.gs.guided_missile {
-            //self.legion.entry(gm_entity).unwrap() FIXME
-            self.legion.entry(self.gs.player_entity).unwrap()
+            self.legion.entry(gm_entity).unwrap()
         } else {
             self.legion.entry(self.gs.player_entity).unwrap()
         };
