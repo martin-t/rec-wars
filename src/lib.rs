@@ -841,6 +841,8 @@ impl Game {
         Ok(())
     }
 
+    /// If x or y are negative, count them from the right or bottom respectively.
+    /// Useful to make HUD config cvars work for any canvas size.
     fn hud_pos(&self, mut x: f64, mut y: f64) -> Vec2f {
         if x < 0.0 {
             x = self.canvas_size.x + x;
