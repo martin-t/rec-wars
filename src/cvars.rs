@@ -687,12 +687,12 @@ impl Default for Cvars {
             g_turret_turn_speed: 2.0,
 
             hud_ammo_x: 30.0,
-            hud_ammo_y: 770.0,
+            hud_ammo_y: -30.0,
             hud_ammo_width: 100.0,
             hud_ammo_height: 4.0,
 
             hud_hp_x: 30.0,
-            hud_hp_y: 750.0,
+            hud_hp_y: -50.0,
             hud_hp_width: 100.0,
             hud_hp_height: 9.0,
 
@@ -703,7 +703,7 @@ impl Default for Cvars {
             hud_weapon_icon_shadow_x: 2.0,
             hud_weapon_icon_shadow_y: 2.0,
             hud_weapon_icon_x: 170.0,
-            hud_weapon_icon_y: 772.0,
+            hud_weapon_icon_y: -28.0,
 
             r_align_to_pixels_background: true,
             r_draw_cluster_bombs: true,
