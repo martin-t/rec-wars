@@ -70,6 +70,7 @@ pub(crate) fn vehicle_movement(cvars: &Cvars, world: &mut World, gs: &GameState,
         let turn = turn_rate.0 * gs.dt;
         let vel_rotation = turn * cvars.g_tank_turn_effectiveness;
         vel.0.rotate_z(vel_rotation);
+
         let new_angle = angle.0 + turn;
         if hitbox
             .corners(pos.0, new_angle)
