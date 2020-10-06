@@ -255,11 +255,8 @@ impl Game {
     }
 
     fn tick(&mut self, cvars: &Cvars) {
-        // borrowchk
-        let frame_time = self.gs.frame_time;
-        let dt = self.gs.dt;
-
         // Cleanup old explosions
+        let frame_time = self.gs.frame_time; // borrowchk
         self.gs.explosions.retain(|explosion| {
             let progress = (frame_time - explosion.start_time) / cvars.r_explosion_duration;
             progress <= 1.0
