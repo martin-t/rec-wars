@@ -17,7 +17,7 @@ use rand_distr::StandardNormal;
 use vek::Clamp;
 
 use crate::{
-    components::{Angle, GuidedMissile, Owner, Pos, Time, TurnRate, Vel, Weapon},
+    components::{Angle, GuidedMissile, Hitbox, Owner, Pos, Time, TurnRate, Vel, Weapon},
     cvars::Cvars,
     cvars::Hardpoint,
     entities::{self, Ammo, Vehicle},
@@ -83,13 +83,48 @@ pub(crate) fn accel_decel(cvars: &Cvars, vel: &mut Vel, angle: &mut Angle, input
     }
 }
 
-pub(crate) fn vehicle_movement(cvars: &Cvars, world: &mut World, gs: &GameState) {
-    let mut query = <(&mut Pos, &mut Vel, &mut Angle, &mut TurnRate, &Input)>::query();
+pub(crate) fn vehicle_movement(cvars: &Cvars, world: &mut World, gs: &GameState, map: &Map) {
+    let mut query = <(
+        &mut Pos,
+        &mut Vel,
+        &mut Angle,
+        &mut TurnRate,
+        &Hitbox,
+        &Input,
+    )>::query();
     let mut cnt = 0;
-    for (pos, vel, angle, turn_rate, input) in query.iter_mut(world) {
+    for (pos, vel, angle, turn_rate, hitbox, input) in query.iter_mut(world) {
         cnt += 1;
         turn_rate_change(cvars, turn_rate, input, gs.dt);
+
+        // Turning - part of vel gets rotated to simulate steering
+        let turn = turn_rate.0 * gs.dt;
+        let vel_rotation = turn * cvars.g_tank_turn_effectiveness;
+        vel.0.rotate_z(vel_rotation);
+        let new_angle = angle.0 + turn;
+        if hitbox
+            .corners(pos.0, new_angle)
+            .iter()
+            .any(|&corner| map.collision(corner))
+        {
+            turn_rate.0 *= -0.5;
+        } else {
+            angle.0 = new_angle;
+        }
+
         accel_decel(cvars, vel, angle, input, gs.dt);
+
+        // Moving
+        let new_pos = pos.0 + vel.0 * gs.dt;
+        if hitbox
+            .corners(new_pos, angle.0)
+            .iter()
+            .any(|&corner| map.collision(corner))
+        {
+            vel.0 *= -0.5;
+        } else {
+            pos.0 = new_pos;
+        }
     }
     dbg_textd!(cnt);
 }

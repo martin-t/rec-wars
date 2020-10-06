@@ -295,30 +295,7 @@ impl Game {
 
         systems::self_destruct(cvars, &mut self.legion, &mut self.gs);
 
-        systems::vehicle_movement(cvars, &mut self.legion, &self.gs);
-
-        let mut query = <(
-            &mut Vehicle,
-            &mut Pos,
-            &mut Vel,
-            &mut Angle,
-            &mut TurnRate,
-            &Hitbox,
-        )>::query();
-        for (vehicle, veh_pos, veh_vel, veh_angle, veh_turn_rate, veh_hitbox) in
-            query.iter_mut(&mut self.legion)
-        {
-            vehicle.tick(
-                dt,
-                cvars,
-                &self.map,
-                veh_pos,
-                veh_vel,
-                veh_angle,
-                veh_turn_rate,
-                veh_hitbox,
-            );
-        }
+        systems::vehicle_movement(cvars, &mut self.legion, &self.gs, &self.map);
 
         let mut query = <(&GuidedMissile, &mut Vel, &mut TurnRate)>::query();
         for (_, vel, turn_rate) in query.iter_mut(&mut self.legion) {
