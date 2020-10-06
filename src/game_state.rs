@@ -18,6 +18,7 @@ pub(crate) struct GameState {
     pub(crate) dt: f64,
     pub(crate) input: Input,
     pub(crate) railguns: Vec<(Vec2f, Vec2f)>,
+    pub(crate) bfg_beams: Vec<(Vec2f, Vec2f)>,
     /// Player entity - the vehicle
     pub(crate) player_entity: Entity,
     pub(crate) guided_missile: Option<Entity>,

@@ -20,7 +20,7 @@ mod systems;
 use std::collections::VecDeque;
 use std::f64::consts::PI;
 
-use legion::{query::IntoQuery, Entity, World};
+use legion::{query::IntoQuery, World};
 
 use js_sys::Array;
 
@@ -35,7 +35,7 @@ use wasm_bindgen::JsCast;
 use web_sys::{CanvasRenderingContext2d, HtmlImageElement, Performance};
 
 use components::{
-    Ammo, Angle, GuidedMissile, Hitbox, Owner, Pos, TurnRate, Vehicle, VehicleType, Vel, Weapon,
+    Ammo, Angle, GuidedMissile, Hitbox, Pos, TurnRate, Vehicle, VehicleType, Vel, Weapon,
 };
 use cvars::{Cvars, TickrateMode};
 use debugging::{DEBUG_CROSSES, DEBUG_LINES, DEBUG_TEXTS};
@@ -142,6 +142,7 @@ impl Game {
             dt: 0.0,
             input: Input::default(),
             railguns: Vec::new(),
+            bfg_beams: Vec::new(),
             player_entity,
             guided_missile: None,
             explosions: Vec::new(),
@@ -431,8 +432,8 @@ impl Game {
         self.context.set_fill_style(&"lime".into());
         self.context.set_stroke_style(&"lime".into());
         let mut bfg_cnt = 0;
-        let mut query = <(&Weapon, &Pos, &Owner)>::query();
-        for (&weap, bfg_pos, bfg_owner) in query.iter(&self.legion) {
+        let mut query = <(&Weapon, &Pos)>::query();
+        for (&weap, bfg_pos) in query.iter(&self.legion) {
             if weap != Weapon::Bfg {
                 continue;
             }
@@ -447,28 +448,14 @@ impl Game {
                 2.0 * PI,
             )?;
             self.context.fill();
-
-            let mut query_vehicles = <(Entity, &Vehicle, &Pos)>::query();
-            for (&vehicle_id, vehicle, vehicle_pos) in query_vehicles.iter(&self.legion) {
-                if vehicle.destroyed
-                    || bfg_owner.0 == vehicle_id
-                    || (bfg_pos.0).distance_squared(vehicle_pos.0) > cvars.g_bfg_beam_range.powi(2)
-                    || self
-                        .map
-                        .collision_between(bfg_pos.0, vehicle_pos.0)
-                        .is_some()
-                {
-                    continue;
-                }
-
-                let vehicle_scr_pos = vehicle_pos.0 - top_left;
-
-                self.context.begin_path();
-                self.move_to(bfg_scr_pos);
-                self.line_to(vehicle_scr_pos);
-                self.context.stroke();
-            }
         }
+        for &(src, dest) in &self.gs.bfg_beams {
+            self.context.begin_path();
+            self.move_to(src);
+            self.line_to(dest);
+            self.context.stroke();
+        }
+        self.gs.bfg_beams.clear();
         dbg_textd!(bfg_cnt);
 
         // Draw chassis

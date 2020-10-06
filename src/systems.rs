@@ -332,15 +332,23 @@ pub(crate) fn projectiles(cvars: &Cvars, world: &mut World, gs: &mut GameState, 
         proj_pos.0 = new_pos;
 
         for (veh_id, veh_pos, _veh_angle, _veh_hitbox) in &vehicles {
-            if *veh_id != proj_owner.0
-                && (proj_pos.0 - veh_pos.0).magnitude_squared() <= 24.0 * 24.0
-            {
-                // Vehicle explosion first to it's below projectile explosion because it looks better.
-                gs.explosions
-                    .push(Explosion::new(veh_pos.0, 1.0, gs.frame_time, false));
-                to_kill.push(*veh_id);
-                remove_projectile(cvars, gs, &mut to_remove, proj_id, proj_weap, proj_pos.0);
-                break;
+            if *veh_id != proj_owner.0 {
+                let dist2 = (proj_pos.0 - veh_pos.0).magnitude_squared();
+                if dist2 <= 24.0 * 24.0 {
+                    // Vehicle explosion first to it's below projectile explosion because it looks better.
+                    gs.explosions
+                        .push(Explosion::new(veh_pos.0, 1.0, gs.frame_time, false));
+                    to_kill.push(*veh_id);
+                    remove_projectile(cvars, gs, &mut to_remove, proj_id, proj_weap, proj_pos.0);
+                    break;
+                } else if dist2 <= cvars.g_bfg_beam_range * cvars.g_bfg_beam_range
+                    && map.collision_between(proj_pos.0, veh_pos.0).is_none()
+                {
+                    gs.explosions
+                        .push(Explosion::new(veh_pos.0, 1.0, gs.frame_time, false));
+                    to_kill.push(*veh_id);
+                    gs.bfg_beams.push((proj_pos.0, veh_pos.0));
+                }
             }
         }
     }
