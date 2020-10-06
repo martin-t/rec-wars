@@ -145,3 +145,59 @@ pub(crate) fn debug_cross(point: Vec2f, time: f64, color: &'static str) {
         crosses.borrow_mut().push(cross);
     });
 }
+
+/// Count how many times in iterator returned Some
+/// and print it when it's done.
+///
+/// # Examples
+/// ```ignore
+/// query.iter(world).dbg_count("entity count") { ... }
+/// ```
+pub(crate) trait DbgCount<T>
+where
+    T: Iterator,
+{
+    fn dbg_count(self, name: &'static str) -> DbgCounter<T>;
+}
+
+impl<T> DbgCount<T> for T
+where
+    T: Iterator,
+{
+    fn dbg_count(self, name: &'static str) -> DbgCounter<T> {
+        DbgCounter {
+            name,
+            iterator: self,
+            cnt: 0,
+        }
+    }
+}
+
+pub(crate) struct DbgCounter<T>
+where
+    T: Iterator,
+{
+    name: &'static str,
+    iterator: T,
+    cnt: usize,
+}
+
+impl<T> Iterator for DbgCounter<T>
+where
+    T: Iterator,
+{
+    type Item = T::Item;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        match self.iterator.next() {
+            Some(item) => {
+                self.cnt += 1;
+                Some(item)
+            }
+            None => {
+                dbg_textf!("{}: {}", self.name, self.cnt);
+                None
+            }
+        }
+    }
+}

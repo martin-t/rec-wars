@@ -359,13 +359,12 @@ impl Game {
 
         // Draw MGs
         self.context.set_stroke_style(&"yellow".into());
-        let mut mg_cnt = 0;
         let mut query = <(&Weapon, &Pos, &Vel)>::query();
-        for (&weap, pos, vel) in query.iter(&self.legion) {
+        use debugging::DbgCount;
+        for (&weap, pos, vel) in query.iter(&self.legion).dbg_count("MG count") {
             if weap != Weapon::Mg {
                 continue;
             }
-            mg_cnt += 1;
             let scr_pos = pos.0 - top_left;
             self.context.begin_path();
             self.context.move_to(scr_pos.x, scr_pos.y);
@@ -374,7 +373,6 @@ impl Game {
             self.line_to(scr_end);
             self.context.stroke();
         }
-        dbg_textd!(mg_cnt);
 
         // Draw railguns
         self.context.set_stroke_style(&"blue".into());
