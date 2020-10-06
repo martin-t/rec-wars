@@ -37,7 +37,6 @@ use web_sys::{CanvasRenderingContext2d, HtmlImageElement, Performance};
 
 use components::{
     Ammo, Angle, GuidedMissile, Hitbox, Owner, Pos, TurnRate, Vehicle, VehicleType, Vel, Weapon,
-    WEAPS_CNT,
 };
 use cvars::{Cvars, TickrateMode};
 use debugging::{DEBUG_CROSSES, DEBUG_LINES, DEBUG_TEXTS};
@@ -143,7 +142,6 @@ impl Game {
             frame_time: 0.0,
             dt: 0.0,
             input: Input::default(),
-            cur_weapon: Weapon::Mg,
             railguns: Vec::new(),
             player_entity,
             guided_missile: None,
@@ -280,17 +278,7 @@ impl Game {
             *input = self.gs.input.guided_missile();
         }
 
-        // Change weapon
-        if self.gs.input.prev_weapon && !self.gs_prev.input.prev_weapon {
-            let prev = (self.gs.cur_weapon as u8 + WEAPS_CNT - 1) % WEAPS_CNT;
-            self.gs.cur_weapon = Weapon::n(prev).unwrap();
-        }
-        if self.gs.input.next_weapon && !self.gs_prev.input.next_weapon {
-            let next = (self.gs.cur_weapon as u8 + 1) % WEAPS_CNT;
-            self.gs.cur_weapon = Weapon::n(next).unwrap();
-        }
-
-        systems::turrets_and_reloading(cvars, &mut self.legion, &mut self.gs);
+        systems::vehicle_logic(cvars, &mut self.legion, &mut self.gs, &self.gs_prev);
 
         systems::vehicle_movement(cvars, &mut self.legion, &self.gs, &self.map);
 
@@ -684,9 +672,9 @@ impl Game {
 
         // Ammo
         self.context.set_fill_style(&"yellow".into());
-        let fraction = match player_vehicle.ammos[self.gs.cur_weapon as usize] {
+        let fraction = match player_vehicle.ammos[player_vehicle.cur_weapon as usize] {
             Ammo::Loaded(_, count) => {
-                let max = cvars.g_weapon_reload_ammo(self.gs.cur_weapon);
+                let max = cvars.g_weapon_reload_ammo(player_vehicle.cur_weapon);
                 count as f64 / max as f64
             }
             Ammo::Reloading(start, end) => {
@@ -711,7 +699,7 @@ impl Game {
         self.context
             .set_shadow_offset_y(cvars.hud_weapon_icon_shadow_y);
         self.draw_img_center(
-            &self.imgs_weapon_icons[self.gs.cur_weapon as usize],
+            &self.imgs_weapon_icons[player_vehicle.cur_weapon as usize],
             Vec2f::new(cvars.hud_weapon_icon_x, cvars.hud_weapon_icon_y),
             0.0,
         )?;

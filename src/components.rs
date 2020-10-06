@@ -15,6 +15,7 @@ use crate::{cvars::Cvars, map::Vec2f};
 pub(crate) struct Vehicle {
     pub(crate) veh_type: VehicleType,
     pub(crate) destroyed: bool,
+    pub(crate) cur_weapon: Weapon,
     pub(crate) turret_angle: f64,
     /// Fraction of full
     pub(crate) hp: f64,
@@ -39,6 +40,7 @@ impl Vehicle {
         Vehicle {
             veh_type,
             destroyed: false,
+            cur_weapon: Weapon::Mg,
             turret_angle: 0.0,
             hp: 1.0,
             ammos,

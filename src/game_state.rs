@@ -4,7 +4,6 @@ use rand::prelude::*;
 
 use wasm_bindgen::prelude::*;
 
-use crate::components::Weapon;
 use crate::map::Vec2f;
 
 /// Everyting that changes during the game
@@ -18,7 +17,6 @@ pub(crate) struct GameState {
     /// Delta time since last frame in seconds
     pub(crate) dt: f64,
     pub(crate) input: Input,
-    pub(crate) cur_weapon: Weapon,
     pub(crate) railguns: Vec<(Vec2f, Vec2f)>,
     /// Player entity - the vehicle
     pub(crate) player_entity: Entity,

@@ -19,6 +19,7 @@ use vek::Clamp;
 use crate::{
     components::{
         Ammo, Angle, GuidedMissile, Hitbox, Owner, Pos, Time, TurnRate, Vehicle, Vel, Weapon,
+        WEAPS_CNT,
     },
     cvars::Cvars,
     cvars::Hardpoint,
@@ -131,11 +132,24 @@ pub(crate) fn vehicle_movement(cvars: &Cvars, world: &mut World, gs: &GameState,
     dbg_textd!(cnt);
 }
 
-pub(crate) fn turrets_and_reloading(cvars: &Cvars, world: &mut World, gs: &mut GameState) {
-    let cur_weap = gs.cur_weapon;
+pub(crate) fn vehicle_logic(
+    cvars: &Cvars,
+    world: &mut World,
+    gs: &mut GameState,
+    gs_prev: &GameState,
+) {
+    let mut query = <(&mut Vehicle, &Input)>::query();
+    for (vehicle, input) in query.iter_mut(world) {
+        // Change weapon
+        if input.prev_weapon && !gs_prev.input.prev_weapon {
+            let prev = (vehicle.cur_weapon as u8 + WEAPS_CNT - 1) % WEAPS_CNT;
+            vehicle.cur_weapon = Weapon::n(prev).unwrap();
+        }
+        if input.next_weapon && !gs_prev.input.next_weapon {
+            let next = (vehicle.cur_weapon as u8 + 1) % WEAPS_CNT;
+            vehicle.cur_weapon = Weapon::n(next).unwrap();
+        }
 
-    let mut query = <(&mut Vehicle,)>::query();
-    for (vehicle,) in query.iter_mut(world) {
         // Turret turning
         if gs.input.turret_left {
             vehicle.turret_angle -= cvars.g_turret_turn_speed * gs.dt;
@@ -145,10 +159,13 @@ pub(crate) fn turrets_and_reloading(cvars: &Cvars, world: &mut World, gs: &mut G
         }
 
         // Reloading
-        let ammo = &mut vehicle.ammos[cur_weap as usize];
+        let ammo = &mut vehicle.ammos[vehicle.cur_weapon as usize];
         if let Ammo::Reloading(_, end) = ammo {
             if gs.frame_time >= *end {
-                *ammo = Ammo::Loaded(gs.frame_time, cvars.g_weapon_reload_ammo(cur_weap));
+                *ammo = Ammo::Loaded(
+                    gs.frame_time,
+                    cvars.g_weapon_reload_ammo(vehicle.cur_weapon),
+                );
             }
         }
     }
@@ -161,20 +178,21 @@ pub(crate) fn shooting(cvars: &Cvars, world: &mut World, gs: &mut GameState, map
         if vehicle.destroyed || !gs.input.fire {
             continue;
         }
-        let ammo = &mut vehicle.ammos[gs.cur_weapon as usize];
+        let ammo = &mut vehicle.ammos[vehicle.cur_weapon as usize];
         if let Ammo::Loaded(ready_time, count) = ammo {
             if gs.frame_time < *ready_time {
                 continue;
             }
 
-            *ready_time = gs.frame_time + cvars.g_weapon_refire(gs.cur_weapon);
+            *ready_time = gs.frame_time + cvars.g_weapon_refire(vehicle.cur_weapon);
             *count -= 1;
             if *count == 0 {
-                let reload_time = cvars.g_weapon_reload_time(gs.cur_weapon);
+                let reload_time = cvars.g_weapon_reload_time(vehicle.cur_weapon);
                 *ammo = Ammo::Reloading(gs.frame_time, gs.frame_time + reload_time);
             }
 
-            let (hardpoint, weapon_offset) = cvars.g_hardpoint(vehicle.veh_type, gs.cur_weapon);
+            let (hardpoint, weapon_offset) =
+                cvars.g_hardpoint(vehicle.veh_type, vehicle.cur_weapon);
             let (shot_angle, shot_origin);
             match hardpoint {
                 Hardpoint::Chassis => {
@@ -191,7 +209,7 @@ pub(crate) fn shooting(cvars: &Cvars, world: &mut World, gs: &mut GameState, map
             }
             let pos = Pos(shot_origin);
             let owner = Owner(veh_id);
-            match gs.cur_weapon {
+            match vehicle.cur_weapon {
                 Weapon::Mg => {
                     let r: f64 = gs.rng.sample(StandardNormal);
                     let spread = cvars.g_machine_gun_angle_spread * r;
