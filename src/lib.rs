@@ -660,9 +660,10 @@ impl Game {
         let g = player_vehicle.hp.clamped(0.0, 0.5) * 2.0;
         let rgb = format!("rgb({}, {}, 0)", r * 255.0, g * 255.0);
         self.context.set_fill_style(&rgb.into());
+        let hp_pos = self.hud_pos(cvars.hud_hp_x, cvars.hud_hp_y);
         self.context.fill_rect(
-            cvars.hud_hp_x,
-            cvars.hud_hp_y,
+            hp_pos.x,
+            hp_pos.y,
             cvars.hud_hp_width * player_vehicle.hp,
             cvars.hud_hp_height,
         );
@@ -680,9 +681,10 @@ impl Game {
                 cur_diff / max_diff
             }
         };
+        let ammo_pos = self.hud_pos(cvars.hud_ammo_x, cvars.hud_ammo_y);
         self.context.fill_rect(
-            cvars.hud_ammo_x,
-            cvars.hud_ammo_y,
+            ammo_pos.x,
+            ammo_pos.y,
             cvars.hud_ammo_width * fraction,
             cvars.hud_ammo_height,
         );
@@ -697,7 +699,7 @@ impl Game {
             .set_shadow_offset_y(cvars.hud_weapon_icon_shadow_y);
         self.draw_img_center(
             &self.imgs_weapon_icons[player_vehicle.cur_weapon as usize],
-            Vec2f::new(cvars.hud_weapon_icon_x, cvars.hud_weapon_icon_y),
+            self.hud_pos(cvars.hud_weapon_icon_x, cvars.hud_weapon_icon_y),
             0.0,
         )?;
         self.context.set_shadow_offset_x(0.0);
@@ -837,5 +839,15 @@ impl Game {
             .draw_image_with_html_image_element(img, -offset.x, -offset.y)?;
         self.context.reset_transform()?;
         Ok(())
+    }
+
+    fn hud_pos(&self, mut x: f64, mut y: f64) -> Vec2f {
+        if x < 0.0 {
+            x = self.canvas_size.x + x;
+        }
+        if y < 0.0 {
+            y = self.canvas_size.y + y;
+        }
+        Vec2f::new(x, y)
     }
 }
