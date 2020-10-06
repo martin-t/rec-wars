@@ -9,9 +9,6 @@ use crate::{
 };
 
 #[derive(Debug, Clone)]
-pub(crate) struct GuidedMissile;
-
-#[derive(Debug, Clone)]
 pub(crate) struct Vehicle {
     pub(crate) veh_type: VehicleType,
     pub(crate) destroyed: bool,

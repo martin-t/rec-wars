@@ -11,17 +11,16 @@
 //!   into separate components for vehicles and projectiles to be able to do collision detection.
 //! - Simple functions like these can return data to be passed to other systems.
 
-use entities::{Ammo, GuidedMissile, Vehicle};
 use legion::{query::IntoQuery, systems::CommandBuffer, Entity, World};
 use rand::Rng;
 use rand_distr::StandardNormal;
 use vek::Clamp;
 
 use crate::{
-    components::{Angle, Owner, Pos, Time, TurnRate, Vel, Weapon},
+    components::{Angle, GuidedMissile, Owner, Pos, Time, TurnRate, Vel, Weapon},
     cvars::Cvars,
     cvars::Hardpoint,
-    entities,
+    entities::{self, Ammo, Vehicle},
     game_state::{Explosion, GameState, Input, EMPTY_INPUT},
     map::F64Ext,
     map::Map,
