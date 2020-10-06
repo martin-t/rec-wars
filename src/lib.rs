@@ -36,11 +36,11 @@ use wasm_bindgen::JsCast;
 use web_sys::{CanvasRenderingContext2d, HtmlImageElement, Performance};
 
 use components::{
-    Angle, GuidedMissile, Hitbox, Owner, Pos, TurnRate, VehicleType, Vel, Weapon, WEAPS_CNT,
+    Ammo, Angle, GuidedMissile, Hitbox, Owner, Pos, TurnRate, Vehicle, VehicleType, Vel, Weapon,
+    WEAPS_CNT,
 };
 use cvars::{Cvars, TickrateMode};
 use debugging::{DEBUG_CROSSES, DEBUG_LINES, DEBUG_TEXTS};
-use entities::{Ammo, Vehicle};
 use game_state::{Explosion, GameState, Input, EMPTY_INPUT};
 use map::{F64Ext, Kind, Map, Vec2f, VecExt, TILE_SIZE};
 

@@ -17,10 +17,12 @@ use rand_distr::StandardNormal;
 use vek::Clamp;
 
 use crate::{
-    components::{Angle, GuidedMissile, Hitbox, Owner, Pos, Time, TurnRate, Vel, Weapon},
+    components::{
+        Ammo, Angle, GuidedMissile, Hitbox, Owner, Pos, Time, TurnRate, Vehicle, Vel, Weapon,
+    },
     cvars::Cvars,
     cvars::Hardpoint,
-    entities::{self, Ammo, Vehicle},
+    entities,
     game_state::{Explosion, GameState, Input, EMPTY_INPUT},
     map::F64Ext,
     map::Map,
