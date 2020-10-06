@@ -11,6 +11,8 @@
 //!   into separate components for vehicles and projectiles to be able to do collision detection.
 //! - Simple functions like these can return data to be passed to other systems.
 
+use std::f64::consts::PI;
+
 use legion::{query::IntoQuery, systems::CommandBuffer, Entity, World};
 use rand::Rng;
 use rand_distr::StandardNormal;
@@ -112,6 +114,7 @@ pub(crate) fn vehicle_movement(cvars: &Cvars, world: &mut World, gs: &GameState,
         } else {
             angle.0 = new_angle;
         }
+        angle.0 = angle.0.rem_euclid(2.0 * PI);
 
         accel_decel(cvars, vel, angle, input, gs.dt);
 
