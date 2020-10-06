@@ -314,18 +314,7 @@ pub(crate) fn projectiles(cvars: &Cvars, world: &mut World, gs: &mut GameState, 
 
         let collision = map.collision_between(proj_pos.0, new_pos);
         if let Some(col_pos) = collision {
-            if let Some(expl_scale) = cvars.g_weapon_explosion_scale(proj_weap) {
-                gs.explosions.push(Explosion::new(
-                    col_pos,
-                    expl_scale,
-                    gs.frame_time,
-                    proj_weap == Weapon::Bfg,
-                ));
-            }
-            if proj_weap == Weapon::Gm {
-                gs.guided_missile = None;
-            }
-            to_remove.push(proj_id);
+            remove_projectile(cvars, gs, &mut to_remove, proj_id, proj_weap, col_pos);
             continue;
         }
 
@@ -339,19 +328,8 @@ pub(crate) fn projectiles(cvars: &Cvars, world: &mut World, gs: &mut GameState, 
                 // Vehicle explosion first to it's below projectile explosion because it looks better.
                 gs.explosions
                     .push(Explosion::new(veh_pos.0, 1.0, gs.frame_time, false));
-                if let Some(expl_scale) = cvars.g_weapon_explosion_scale(proj_weap) {
-                    gs.explosions.push(Explosion::new(
-                        proj_pos.0,
-                        expl_scale,
-                        gs.frame_time,
-                        proj_weap == Weapon::Bfg,
-                    ));
-                }
-                if proj_weap == Weapon::Gm {
-                    gs.guided_missile = None;
-                }
-                to_remove.push(proj_id);
                 to_kill.push(*veh_id);
+                remove_projectile(cvars, gs, &mut to_remove, proj_id, proj_weap, proj_pos.0);
                 break;
             }
         }
@@ -373,25 +351,36 @@ pub(crate) fn projectiles(cvars: &Cvars, world: &mut World, gs: &mut GameState, 
 pub(crate) fn projectiles_timeout(cvars: &Cvars, world: &mut World, gs: &mut GameState) {
     let mut to_remove = Vec::new();
 
-    let mut query = <(Entity, &Weapon, &mut Pos, &Time)>::query();
-    for (&entity, &weap, pos, time) in query.iter_mut(world) {
+    let mut query = <(Entity, &Weapon, &Pos, &Time)>::query();
+    for (&entity, &weap, pos, time) in query.iter(world) {
         if gs.frame_time > time.0 {
-            if let Some(expl_scale) = cvars.g_weapon_explosion_scale(weap) {
-                gs.explosions.push(Explosion::new(
-                    pos.0,
-                    expl_scale,
-                    time.0,
-                    weap == Weapon::Bfg,
-                ));
-            }
-            if weap == Weapon::Gm {
-                gs.guided_missile = None;
-            }
-            to_remove.push(entity);
+            remove_projectile(cvars, gs, &mut to_remove, entity, weap, pos.0);
         }
     }
 
     for entity in to_remove {
         world.remove(entity);
     }
+}
+
+fn remove_projectile(
+    cvars: &Cvars,
+    gs: &mut GameState,
+    to_remove: &mut Vec<Entity>,
+    entity: Entity,
+    weap: Weapon,
+    pos: Vec2f,
+) {
+    if let Some(expl_scale) = cvars.g_weapon_explosion_scale(weap) {
+        gs.explosions.push(Explosion::new(
+            pos,
+            expl_scale,
+            gs.frame_time,
+            weap == Weapon::Bfg,
+        ));
+    }
+    if weap == Weapon::Gm {
+        gs.guided_missile = None;
+    }
+    to_remove.push(entity);
 }
