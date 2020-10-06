@@ -54,7 +54,7 @@ pub(crate) fn self_destruct(cvars: &Cvars, world: &mut World, gs: &mut GameState
     }
 }
 
-pub(crate) fn turn_rate_change(cvars: &Cvars, turn_rate: &mut TurnRate, input: &Input, dt: f64) {
+fn turn_rate_change(cvars: &Cvars, turn_rate: &mut TurnRate, input: &Input, dt: f64) {
     let tr_change = input.right_left() * cvars.g_tank_turn_rate_increase * dt;
     turn_rate.0 += tr_change;
 
@@ -71,7 +71,7 @@ pub(crate) fn turn_rate_change(cvars: &Cvars, turn_rate: &mut TurnRate, input: &
     turn_rate.0 = tr_new.clamped(-cvars.g_tank_turn_rate_max, cvars.g_tank_turn_rate_max);
 }
 
-pub(crate) fn accel_decel(cvars: &Cvars, vel: &mut Vel, angle: &mut Angle, input: &Input, dt: f64) {
+fn accel_decel(cvars: &Cvars, vel: &mut Vel, angle: &mut Angle, input: &Input, dt: f64) {
     // TODO lateral friction
     let vel_change = input.up_down() * cvars.g_tank_accel_forward * dt;
     vel.0 += angle.0.to_vec2f() * vel_change;
