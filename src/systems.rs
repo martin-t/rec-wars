@@ -95,9 +95,7 @@ pub(crate) fn vehicle_movement(cvars: &Cvars, world: &mut World, gs: &GameState,
         &Hitbox,
         &Input,
     )>::query();
-    let mut cnt = 0;
     for (pos, vel, angle, turn_rate, hitbox, input) in query.iter_mut(world) {
-        cnt += 1;
         turn_rate_change(cvars, turn_rate, input, gs.dt);
 
         // Turning - part of vel gets rotated to simulate steering
@@ -129,7 +127,6 @@ pub(crate) fn vehicle_movement(cvars: &Cvars, world: &mut World, gs: &GameState,
             pos.0 = new_pos;
         }
     }
-    dbg_textd!(cnt);
 }
 
 pub(crate) fn vehicle_logic(

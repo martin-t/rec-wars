@@ -298,6 +298,8 @@ impl Game {
         systems::projectiles_timeout(cvars, &mut self.legion, &mut self.gs);
 
         systems::self_destruct(cvars, &mut self.legion, &mut self.gs);
+
+        dbg_textf!("entity count: {}", self.legion.len());
     }
 
     pub fn draw(&mut self, cvars: &Cvars) -> Result<(), JsValue> {
@@ -470,10 +472,8 @@ impl Game {
         dbg_textd!(bfg_cnt);
 
         // Draw chassis
-        let mut vehicle_cnt = 0;
         let mut chassis_query = <(&Vehicle, &Pos, &Angle, &Hitbox)>::query();
         for (vehicle, pos, angle, hitbox) in chassis_query.iter(&self.legion) {
-            vehicle_cnt += 1;
             let scr_pos = pos.0 - top_left;
             let img;
             if vehicle.destroyed {
@@ -494,7 +494,6 @@ impl Game {
                 self.context.stroke();
             }
         }
-        dbg_textd!(vehicle_cnt);
 
         // TODO Draw cow
 
