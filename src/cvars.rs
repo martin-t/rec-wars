@@ -159,23 +159,43 @@ pub struct Cvars {
     pub g_hardpoint_tank_bfg_x: f64,
     pub g_hardpoint_tank_bfg_y: f64,
 
+    pub g_hovercraft_accel_backward: f64,
+    pub g_hovercraft_accel_forward: f64,
+    pub g_hovercraft_friction_const: f64,
+    pub g_hovercraft_friction_linear: f64,
     pub g_hovercraft_maxs_x: f64,
     pub g_hovercraft_maxs_y: f64,
     pub g_hovercraft_mins_x: f64,
     pub g_hovercraft_mins_y: f64,
+    pub g_hovercraft_turn_effectiveness: f64,
+    pub g_hovercraft_turn_rate_friction_const: f64,
+    pub g_hovercraft_turn_rate_friction_linear: f64,
+    pub g_hovercraft_turn_rate_increase: f64,
+    pub g_hovercraft_turn_rate_max: f64,
     pub g_hovercraft_turret_offset_chassis_x: f64,
     pub g_hovercraft_turret_offset_chassis_y: f64,
     pub g_hovercraft_turret_offset_turret_x: f64,
     pub g_hovercraft_turret_offset_turret_y: f64,
+    pub g_hovercraft_speed_max: f64,
 
+    pub g_hummer_accel_backward: f64,
+    pub g_hummer_accel_forward: f64,
+    pub g_hummer_friction_const: f64,
+    pub g_hummer_friction_linear: f64,
     pub g_hummer_maxs_x: f64,
     pub g_hummer_maxs_y: f64,
     pub g_hummer_mins_x: f64,
     pub g_hummer_mins_y: f64,
+    pub g_hummer_turn_effectiveness: f64,
+    pub g_hummer_turn_rate_friction_const: f64,
+    pub g_hummer_turn_rate_friction_linear: f64,
+    pub g_hummer_turn_rate_increase: f64,
+    pub g_hummer_turn_rate_max: f64,
     pub g_hummer_turret_offset_chassis_x: f64,
     pub g_hummer_turret_offset_chassis_y: f64,
     pub g_hummer_turret_offset_turret_x: f64,
     pub g_hummer_turret_offset_turret_y: f64,
+    pub g_hummer_speed_max: f64,
 
     pub g_railgun_reload_ammo: u32,
     pub g_railgun_reload_time: f64,
@@ -442,8 +462,8 @@ impl Cvars {
 
     /// Where the turret-chassis connection is on the turret.
     /// E.g. (0, 0) means the turret rotates around its center.
-    pub(crate) fn g_vehicle_turret_offset_turret(&self, vehicle: VehicleType) -> Vec2f {
-        match vehicle {
+    pub(crate) fn g_vehicle_turret_offset_turret(&self, veh_type: VehicleType) -> Vec2f {
+        match veh_type {
             VehicleType::Tank => Vec2f::new(
                 self.g_tank_turret_offset_turret_x,
                 self.g_tank_turret_offset_turret_y,
@@ -456,6 +476,47 @@ impl Cvars {
                 self.g_hummer_turret_offset_turret_x,
                 self.g_hummer_turret_offset_turret_y,
             ),
+        }
+    }
+
+    pub(crate) fn g_vehicle_movement_cvars(&self, veh_type: VehicleType) -> MovementCvars {
+        match veh_type {
+            VehicleType::Tank => MovementCvars {
+                accel_backward: self.g_tank_accel_backward,
+                accel_forward: self.g_tank_accel_forward,
+                friction_const: self.g_tank_friction_const,
+                friction_linear: self.g_tank_friction_linear,
+                turn_effectiveness: self.g_tank_turn_effectiveness,
+                turn_rate_friction_const: self.g_tank_turn_rate_friction_const,
+                turn_rate_friction_linear: self.g_tank_turn_rate_friction_linear,
+                turn_rate_increase: self.g_tank_turn_rate_increase,
+                turn_rate_max: self.g_tank_turn_rate_max,
+                speed_max: self.g_tank_speed_max,
+            },
+            VehicleType::Hovercraft => MovementCvars {
+                accel_backward: self.g_hovercraft_accel_backward,
+                accel_forward: self.g_hovercraft_accel_forward,
+                friction_const: self.g_hovercraft_friction_const,
+                friction_linear: self.g_hovercraft_friction_linear,
+                turn_effectiveness: self.g_hovercraft_turn_effectiveness,
+                turn_rate_friction_const: self.g_hovercraft_turn_rate_friction_const,
+                turn_rate_friction_linear: self.g_hovercraft_turn_rate_friction_linear,
+                turn_rate_increase: self.g_hovercraft_turn_rate_increase,
+                turn_rate_max: self.g_hovercraft_turn_rate_max,
+                speed_max: self.g_hovercraft_speed_max,
+            },
+            VehicleType::Hummer => MovementCvars {
+                accel_backward: self.g_hummer_accel_backward,
+                accel_forward: self.g_hummer_accel_forward,
+                friction_const: self.g_hummer_friction_const,
+                friction_linear: self.g_hummer_friction_linear,
+                turn_effectiveness: self.g_hummer_turn_effectiveness,
+                turn_rate_friction_const: self.g_hummer_turn_rate_friction_const,
+                turn_rate_friction_linear: self.g_hummer_turn_rate_friction_linear,
+                turn_rate_increase: self.g_hummer_turn_rate_increase,
+                turn_rate_max: self.g_hummer_turn_rate_max,
+                speed_max: self.g_hummer_speed_max,
+            },
         }
     }
 
@@ -634,23 +695,43 @@ impl Default for Cvars {
             g_hardpoint_tank_bfg_x: 35.0,
             g_hardpoint_tank_bfg_y: 0.0,
 
+            g_hovercraft_accel_backward: 400.0,
+            g_hovercraft_accel_forward: 400.0,
+            g_hovercraft_friction_const: 10.0,
+            g_hovercraft_friction_linear: 0.7,
             g_hovercraft_maxs_x: 22.0,
             g_hovercraft_maxs_y: 14.0,
             g_hovercraft_mins_x: -22.0,
             g_hovercraft_mins_y: -14.0,
+            g_hovercraft_turn_effectiveness: 0.1,
+            g_hovercraft_turn_rate_friction_const: 0.03,
+            g_hovercraft_turn_rate_friction_linear: 0.92,
+            g_hovercraft_turn_rate_increase: 6.0,
+            g_hovercraft_turn_rate_max: f64::INFINITY,
             g_hovercraft_turret_offset_chassis_x: -9.0,
             g_hovercraft_turret_offset_chassis_y: 5.0,
             g_hovercraft_turret_offset_turret_x: -8.0,
             g_hovercraft_turret_offset_turret_y: 0.0,
+            g_hovercraft_speed_max: f64::INFINITY,
 
+            g_hummer_accel_backward: 600.0,
+            g_hummer_accel_forward: 600.0,
+            g_hummer_friction_const: 11.0,
+            g_hummer_friction_linear: 0.8,
             g_hummer_maxs_x: 20.0,
             g_hummer_maxs_y: 9.0,
             g_hummer_mins_x: -20.0,
             g_hummer_mins_y: -9.0,
+            g_hummer_turn_effectiveness: 0.7,
+            g_hummer_turn_rate_friction_const: 0.04,
+            g_hummer_turn_rate_friction_linear: 0.94,
+            g_hummer_turn_rate_increase: 7.0,
+            g_hummer_turn_rate_max: f64::INFINITY,
             g_hummer_turret_offset_chassis_x: -12.0,
             g_hummer_turret_offset_chassis_y: 0.0,
             g_hummer_turret_offset_turret_x: 0.0,
             g_hummer_turret_offset_turret_y: 0.0,
+            g_hummer_speed_max: f64::INFINITY,
 
             g_railgun_reload_ammo: 1,
             g_railgun_reload_time: 1.0,
@@ -756,4 +837,18 @@ pub enum TickrateMode {
     // This would however introduce latency.
     // Also note I believe this would require special handling of events like respawning
     // to avoid interpolating between death and spawn location.
+}
+
+#[derive(Debug, Clone)]
+pub(crate) struct MovementCvars {
+    pub(crate) accel_backward: f64,
+    pub(crate) accel_forward: f64,
+    pub(crate) friction_const: f64,
+    pub(crate) friction_linear: f64,
+    pub(crate) turn_effectiveness: f64,
+    pub(crate) turn_rate_friction_const: f64,
+    pub(crate) turn_rate_friction_linear: f64,
+    pub(crate) turn_rate_increase: f64,
+    pub(crate) turn_rate_max: f64,
+    pub(crate) speed_max: f64,
 }
