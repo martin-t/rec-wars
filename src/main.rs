@@ -190,6 +190,7 @@
 //      [ ] GH Social preview
 //      master server? cloudflare, heroku, google app engine?
 //          needs to be stateful
+//          https://github.com/Ralith/masterserve
 //      if dedicated servers, need at least 2 - EU and US
 // [x] icon
 // [ ] network
