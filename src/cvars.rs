@@ -186,7 +186,6 @@ pub struct Cvars {
     pub g_hummer_maxs_y: f64,
     pub g_hummer_mins_x: f64,
     pub g_hummer_mins_y: f64,
-
     pub g_hummer_speed_max: f64,
     pub g_hummer_turn_effectiveness: f64,
     pub g_hummer_turn_rate_friction_const: f64,
@@ -721,6 +720,7 @@ impl Default for Cvars {
             g_hovercraft_maxs_y: 14.0,
             g_hovercraft_mins_x: -22.0,
             g_hovercraft_mins_y: -14.0,
+            g_hovercraft_speed_max: f64::INFINITY,
             g_hovercraft_turn_effectiveness: 0.0,
             g_hovercraft_turn_rate_friction_const: 0.03,
             g_hovercraft_turn_rate_friction_linear: 0.92,
@@ -730,7 +730,6 @@ impl Default for Cvars {
             g_hovercraft_turret_offset_chassis_y: 5.0,
             g_hovercraft_turret_offset_turret_x: -8.0,
             g_hovercraft_turret_offset_turret_y: 0.0,
-            g_hovercraft_speed_max: f64::INFINITY,
 
             g_hummer_accel_backward: 600.0,
             g_hummer_accel_forward: 600.0,
@@ -740,6 +739,7 @@ impl Default for Cvars {
             g_hummer_maxs_y: 9.0,
             g_hummer_mins_x: -20.0,
             g_hummer_mins_y: -9.0,
+            g_hummer_speed_max: f64::INFINITY,
             g_hummer_turn_effectiveness: 1.0,
             g_hummer_turn_rate_friction_const: 0.04,
             g_hummer_turn_rate_friction_linear: 0.97,
@@ -749,7 +749,6 @@ impl Default for Cvars {
             g_hummer_turret_offset_chassis_y: 0.0,
             g_hummer_turret_offset_turret_x: 0.0,
             g_hummer_turret_offset_turret_y: 0.0,
-            g_hummer_speed_max: f64::INFINITY,
 
             g_railgun_reload_ammo: 1,
             g_railgun_reload_time: 1.0,
@@ -772,6 +771,7 @@ impl Default for Cvars {
             g_tank_maxs_y: 12.0,
             g_tank_mins_x: -19.0,
             g_tank_mins_y: -12.0,
+            g_tank_speed_max: f64::INFINITY,
             g_tank_turn_effectiveness: 1.0,
             g_tank_turn_rate_friction_const: 0.05,
             g_tank_turn_rate_friction_linear: 0.96,
@@ -781,7 +781,6 @@ impl Default for Cvars {
             g_tank_turret_offset_chassis_y: 0.0,
             g_tank_turret_offset_turret_x: -14.0,
             g_tank_turret_offset_turret_y: 0.0,
-            g_tank_speed_max: f64::INFINITY,
 
             g_turret_turn_speed: 2.0,
 
