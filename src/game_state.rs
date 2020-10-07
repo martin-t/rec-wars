@@ -73,8 +73,12 @@ impl Input {
         self.right as i32 as f64 - self.left as i32 as f64
     }
 
-    pub(crate) fn up_down(&self) -> f64 {
-        self.up as i32 as f64 - self.down as i32 as f64
+    pub(crate) fn up(&self) -> f64 {
+        self.up as i32 as f64
+    }
+
+    pub(crate) fn down(&self) -> f64 {
+        self.down as i32 as f64
     }
 
     /// Subset of inputs to control the missile
