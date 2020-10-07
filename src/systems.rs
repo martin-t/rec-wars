@@ -67,14 +67,8 @@ pub(crate) fn vehicle_movement(cvars: &Cvars, world: &mut World, gs: &GameState,
     for (vehicle, pos, vel, angle, turn_rate, hitbox, input) in query.iter_mut(world) {
         let stats = cvars.g_vehicle_movement_stats(vehicle.veh_type);
 
-        turn_rate_change(&stats, turn_rate, input, gs.dt);
+        let new_angle = turning(&stats, vel, angle, turn_rate, input, gs.dt);
 
-        // Turning - part of vel gets rotated to simulate steering
-        let turn = turn_rate.0 * gs.dt;
-        let vel_rotation = turn * stats.turn_effectiveness;
-        vel.0.rotate_z(vel_rotation);
-
-        let new_angle = angle.0 + turn;
         if hitbox
             .corners(pos.0, new_angle)
             .iter()
@@ -84,7 +78,6 @@ pub(crate) fn vehicle_movement(cvars: &Cvars, world: &mut World, gs: &GameState,
         } else {
             angle.0 = new_angle;
         }
-        angle.0 = angle.0.rem_euclid(2.0 * PI);
 
         accel_decel(&stats, vel, angle, input, gs.dt);
 
@@ -102,7 +95,14 @@ pub(crate) fn vehicle_movement(cvars: &Cvars, world: &mut World, gs: &GameState,
     }
 }
 
-fn turn_rate_change(stats: &MovementStats, turn_rate: &mut TurnRate, input: &Input, dt: f64) {
+fn turning(
+    stats: &MovementStats,
+    vel: &mut Vel,
+    angle: &Angle,
+    turn_rate: &mut TurnRate,
+    input: &Input,
+    dt: f64,
+) -> f64 {
     let tr_change = input.right_left() * stats.turn_rate_increase * dt;
     turn_rate.0 += tr_change;
 
@@ -117,6 +117,14 @@ fn turn_rate_change(stats: &MovementStats, turn_rate: &mut TurnRate, input: &Inp
     // Friction's linear component - increases with speed
     let tr_new = turn_rate.0 * (1.0 - stats.turn_rate_friction_linear).powf(dt);
     turn_rate.0 = tr_new.clamped(-stats.turn_rate_max, stats.turn_rate_max);
+
+    // Turning - part of vel gets rotated to simulate steering
+    let turn = turn_rate.0 * dt;
+    let vel_rotation = turn * stats.turn_effectiveness;
+    vel.0.rotate_z(vel_rotation);
+
+    // Normalize to 0..=360 deg
+    (angle.0 + turn).rem_euclid(2.0 * PI)
 }
 
 fn accel_decel(stats: &MovementStats, vel: &mut Vel, angle: &mut Angle, input: &Input, dt: f64) {
@@ -307,13 +315,7 @@ pub(crate) fn gm_turning(cvars: &Cvars, world: &mut World, gs: &GameState) {
     for (_, vel, angle, turn_rate, input) in query.iter_mut(world) {
         let stats = cvars.g_weapon_movement_stats();
 
-        turn_rate_change(&stats, turn_rate, input, gs.dt);
-
-        // Turning - part of vel gets rotated to simulate steering
-        let turn = turn_rate.0 * gs.dt;
-        let vel_rotation = turn * stats.turn_effectiveness;
-        vel.0.rotate_z(vel_rotation);
-        angle.0 = (angle.0 + turn).rem_euclid(2.0 * PI);
+        angle.0 = turning(&stats, vel, angle, turn_rate, input, gs.dt);
 
         accel_decel(&stats, vel, angle, input, gs.dt);
     }
