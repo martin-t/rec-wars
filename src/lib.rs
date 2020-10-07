@@ -359,8 +359,8 @@ impl Game {
 
         // Draw MGs
         self.context.set_stroke_style(&"yellow".into());
-        let mut query = <(&Weapon, &Pos, &Vel)>::query().filter(component::<Mg>());
-        for (&weap, pos, vel) in query.iter(&self.legion).dbg_count("MG count") {
+        let mut query = <(&Pos, &Vel)>::query().filter(component::<Mg>());
+        for (pos, vel) in query.iter(&self.legion).dbg_count("MG count") {
             let scr_pos = pos.0 - top_left;
             self.context.begin_path();
             self.context.move_to(scr_pos.x, scr_pos.y);
@@ -391,8 +391,8 @@ impl Game {
                 .set_shadow_offset_x(cvars.g_cluster_bomb_shadow_x);
             self.context
                 .set_shadow_offset_y(cvars.g_cluster_bomb_shadow_y);
-            let mut query = <(&Weapon, &Pos)>::query().filter(component::<Cb>());
-            for (&weap, pos) in query.iter(&self.legion).dbg_count("CB count") {
+            let mut query = <(&Pos,)>::query().filter(component::<Cb>());
+            for (pos,) in query.iter(&self.legion).dbg_count("CB count") {
                 let scr_pos = pos.0 - top_left;
                 self.context.fill_rect(
                     scr_pos.x - cvars.g_cluster_bomb_size / 2.0,
@@ -422,8 +422,8 @@ impl Game {
         // Draw BFGs
         self.context.set_fill_style(&"lime".into());
         self.context.set_stroke_style(&"lime".into());
-        let mut query = <(&Weapon, &Pos)>::query().filter(component::<Bfg>());
-        for (&weap, bfg_pos) in query.iter(&self.legion) {
+        let mut query = <(&Pos,)>::query().filter(component::<Bfg>());
+        for (bfg_pos,) in query.iter(&self.legion) {
             let bfg_scr_pos = bfg_pos.0 - top_left;
             self.context.begin_path();
             self.context.arc(
