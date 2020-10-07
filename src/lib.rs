@@ -394,13 +394,11 @@ impl Game {
                 .set_shadow_offset_x(cvars.g_cluster_bomb_shadow_x);
             self.context
                 .set_shadow_offset_y(cvars.g_cluster_bomb_shadow_y);
-            let mut cb_cnt = 0;
             let mut query = <(&Weapon, &Pos)>::query();
-            for (&weap, pos) in query.iter(&self.legion) {
+            for (&weap, pos) in query.iter(&self.legion).dbg_count("CB count") {
                 if weap != Weapon::Cb {
                     continue;
                 }
-                cb_cnt += 1;
                 let scr_pos = pos.0 - top_left;
                 self.context.fill_rect(
                     scr_pos.x - cvars.g_cluster_bomb_size / 2.0,
@@ -411,7 +409,6 @@ impl Game {
             }
             self.context.set_shadow_offset_x(0.0);
             self.context.set_shadow_offset_y(0.0);
-            dbg_textd!(cb_cnt);
         }
 
         // Draw rockets, homing and guided missiles
@@ -431,13 +428,11 @@ impl Game {
         // Draw BFGs
         self.context.set_fill_style(&"lime".into());
         self.context.set_stroke_style(&"lime".into());
-        let mut bfg_cnt = 0;
         let mut query = <(&Weapon, &Pos)>::query();
         for (&weap, bfg_pos) in query.iter(&self.legion) {
             if weap != Weapon::Bfg {
                 continue;
             }
-            bfg_cnt += 1;
             let bfg_scr_pos = bfg_pos.0 - top_left;
             self.context.begin_path();
             self.context.arc(
@@ -456,7 +451,6 @@ impl Game {
             self.context.stroke();
         }
         self.gs.bfg_beams.clear();
-        dbg_textd!(bfg_cnt);
 
         // Draw chassis
         let mut chassis_query = <(&Vehicle, &Pos, &Angle, &Hitbox)>::query();
