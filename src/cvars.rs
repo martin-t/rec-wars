@@ -79,17 +79,17 @@ pub struct Cvars {
     pub g_machine_gun_trail_length: f64,
     pub g_machine_gun_vehicle_velocity_factor: f64,
 
+    pub g_guided_missile_accel_forward: f64,
+    pub g_guided_missile_friction_const: f64,
+    pub g_guided_missile_friction_linear: f64,
     pub g_guided_missile_reload_ammo: u32,
     pub g_guided_missile_reload_time: f64,
-    pub g_guided_missile_speed_change: f64,
     pub g_guided_missile_speed_initial: f64,
     pub g_guided_missile_speed_max: f64,
-    pub g_guided_missile_speed_min: f64,
+    pub g_guided_missile_turn_effectiveness: f64,
     pub g_guided_missile_turn_rate_increase: f64,
-    /// Fraction left after 1 s. At first decreases fast, then slower.
-    pub g_guided_missile_turn_rate_friction: f64,
-    /// Linear decrease to stop completely
-    pub g_guided_missile_turn_rate_decrease: f64,
+    pub g_guided_missile_turn_rate_friction_const: f64,
+    pub g_guided_missile_turn_rate_friction_linear: f64,
     pub g_guided_missile_turn_rate_max: f64,
     pub g_guided_missile_vehicle_velocity_factor: f64,
 
@@ -533,6 +533,21 @@ impl Cvars {
         }
     }
 
+    pub(crate) fn g_weapon_movement_stats(&self) -> MovementStats {
+        MovementStats {
+            accel_backward: 0.0,
+            accel_forward: self.g_guided_missile_accel_forward,
+            friction_const: self.g_guided_missile_friction_const,
+            friction_linear: self.g_guided_missile_friction_linear,
+            speed_max: self.g_guided_missile_speed_max,
+            turn_effectiveness: self.g_guided_missile_turn_effectiveness,
+            turn_rate_friction_const: self.g_guided_missile_turn_rate_friction_const,
+            turn_rate_friction_linear: self.g_guided_missile_turn_rate_friction_linear,
+            turn_rate_increase: self.g_guided_missile_turn_rate_increase,
+            turn_rate_max: self.g_guided_missile_turn_rate_max,
+        }
+    }
+
     pub(crate) fn g_weapon_refire(&self, weapon: Weapon) -> f64 {
         match weapon {
             Weapon::Mg => self.g_machine_gun_refire,
@@ -618,16 +633,18 @@ impl Default for Cvars {
             g_machine_gun_trail_length: 10.0,
             g_machine_gun_vehicle_velocity_factor: 1.0,
 
+            g_guided_missile_accel_forward: 1000.0,
+            g_guided_missile_friction_const: 50.0,
+            g_guided_missile_friction_linear: 0.95,
             g_guided_missile_reload_ammo: 1,
             g_guided_missile_reload_time: 1.5,
-            g_guided_missile_speed_change: 600.0,
             g_guided_missile_speed_initial: 360.0,
-            g_guided_missile_speed_max: 500.0,
-            g_guided_missile_speed_min: 300.0,
+            g_guided_missile_speed_max: f64::INFINITY,
+            g_guided_missile_turn_effectiveness: 0.1,
+            g_guided_missile_turn_rate_friction_const: 0.05,
+            g_guided_missile_turn_rate_friction_linear: 0.98,
             g_guided_missile_turn_rate_increase: 12.6,
-            g_guided_missile_turn_rate_friction: 0.99,
-            g_guided_missile_turn_rate_decrease: 1.0,
-            g_guided_missile_turn_rate_max: 3.15,
+            g_guided_missile_turn_rate_max: f64::INFINITY,
             g_guided_missile_vehicle_velocity_factor: 1.0,
 
             g_hardpoint_hovercraft_machine_gun: Hardpoint::Turret,

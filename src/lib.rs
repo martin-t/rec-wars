@@ -283,16 +283,10 @@ impl Game {
 
         systems::vehicle_movement(cvars, &mut self.legion, &self.gs, &self.map);
 
-        let mut query = <(&GuidedMissile, &mut Vel, &mut TurnRate)>::query();
-        for (_, vel, turn_rate) in query.iter_mut(&mut self.legion) {
-            // Turning - part of vel gets rotated to simulate steering
-            // TODO turn effectivness bad for missile, also desyncs angle and vel if >1
-            let vel_rotation = turn_rate.0 * cvars.g_tank_turn_effectiveness;
-            vel.0.rotate_z(vel_rotation);
-        }
-
         // Note: vehicles can shoot while controlling a missile
         systems::shooting(cvars, &mut self.legion, &mut self.gs, &self.map);
+
+        systems::gm_turning(cvars, &mut self.legion, &self.gs);
 
         systems::projectiles(cvars, &mut self.legion, &mut self.gs, &self.map);
 

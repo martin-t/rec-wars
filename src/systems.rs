@@ -280,7 +280,7 @@ pub(crate) fn shooting(cvars: &Cvars, world: &mut World, gs: &mut GameState, map
                         continue;
                     }
                     let gm = GuidedMissile;
-                    let shot_vel = Vec2f::new(cvars.g_guided_missile_speed_min, 0.0)
+                    let shot_vel = Vec2f::new(cvars.g_guided_missile_speed_initial, 0.0)
                         .rotated_z(shot_angle)
                         + cvars.g_guided_missile_vehicle_velocity_factor * veh_vel.0;
                     let vel = Vel(shot_vel);
@@ -300,6 +300,23 @@ pub(crate) fn shooting(cvars: &Cvars, world: &mut World, gs: &mut GameState, map
         }
     }
     cmds.flush(world);
+}
+
+pub(crate) fn gm_turning(cvars: &Cvars, world: &mut World, gs: &GameState) {
+    let mut query = <(&GuidedMissile, &mut Vel, &mut Angle, &mut TurnRate, &Input)>::query();
+    for (_, vel, angle, turn_rate, input) in query.iter_mut(world) {
+        let stats = cvars.g_weapon_movement_stats();
+
+        turn_rate_change(&stats, turn_rate, input, gs.dt);
+
+        // Turning - part of vel gets rotated to simulate steering
+        let turn = turn_rate.0 * gs.dt;
+        let vel_rotation = turn * stats.turn_effectiveness;
+        vel.0.rotate_z(vel_rotation);
+        angle.0 = (angle.0 + turn).rem_euclid(2.0 * PI);
+
+        accel_decel(&stats, vel, angle, input, gs.dt);
+    }
 }
 
 pub(crate) fn projectiles(cvars: &Cvars, world: &mut World, gs: &mut GameState, map: &Map) {
