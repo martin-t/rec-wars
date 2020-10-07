@@ -341,7 +341,8 @@ pub(crate) fn projectiles(cvars: &Cvars, world: &mut World, gs: &mut GameState, 
                     to_kill.push(*veh_id);
                     remove_projectile(cvars, gs, &mut to_remove, proj_id, proj_weap, proj_pos.0);
                     break;
-                } else if dist2 <= cvars.g_bfg_beam_range * cvars.g_bfg_beam_range
+                } else if proj_weap == Weapon::Bfg
+                    && dist2 <= cvars.g_bfg_beam_range * cvars.g_bfg_beam_range
                     && map.collision_between(proj_pos.0, veh_pos.0).is_none()
                 {
                     gs.explosions
