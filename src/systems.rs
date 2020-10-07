@@ -128,7 +128,6 @@ fn turning(
 }
 
 fn accel_decel(stats: &MovementStats, vel: &mut Vel, angle: &mut Angle, input: &Input, dt: f64) {
-    // TODO lateral friction
     let vel_change = (input.up() * stats.accel_forward - input.down() * stats.accel_backward) * dt;
     vel.0 += angle.0.to_vec2f() * vel_change;
 

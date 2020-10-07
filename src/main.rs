@@ -225,6 +225,7 @@
 // [ ] GM - presing fire again switches back to tank
 // [ ] record seed+input (WASM should be reproducible when avoiding NaNs) - replay, debugging
 // [ ] allow MG to shoot down missiles
+// [ ] lateral friction
 // [ ] make driving feel more real - simulate terrain unevenness? mild speed/angle changes?
 // [ ] map editor - sharing maps, voting, recommended mode / number of bots
 //      [ ] bots say hi/gg/sry/n1
