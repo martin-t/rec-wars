@@ -93,8 +93,17 @@ pub(crate) enum Weapon {
     Bfg,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
+pub(crate) struct Mg;
+
+#[derive(Debug, Clone, Copy)]
+pub(crate) struct Cb;
+
+#[derive(Debug, Clone, Copy)]
 pub(crate) struct GuidedMissile;
+
+#[derive(Debug, Clone, Copy)]
+pub(crate) struct Bfg;
 
 #[derive(Debug, Clone, Copy)]
 pub(crate) struct Owner(pub(crate) Entity);

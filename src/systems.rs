@@ -20,8 +20,8 @@ use vek::Clamp;
 
 use crate::{
     components::{
-        Ammo, Angle, GuidedMissile, Hitbox, Owner, Pos, Time, TurnRate, Vehicle, Vel, Weapon,
-        WEAPS_CNT,
+        Ammo, Angle, Bfg, Cb, GuidedMissile, Hitbox, Mg, Owner, Pos, Time, TurnRate, Vehicle, Vel,
+        Weapon, WEAPS_CNT,
     },
     cvars::Cvars,
     cvars::Hardpoint,
@@ -219,7 +219,7 @@ pub(crate) fn shooting(cvars: &Cvars, world: &mut World, gs: &mut GameState, map
                         .rotated_z(shot_angle + spread)
                         + cvars.g_machine_gun_vehicle_velocity_factor * veh_vel.0;
                     let vel = Vel(shot_vel);
-                    cmds.push((Weapon::Mg, pos, vel, owner));
+                    cmds.push((Weapon::Mg, Mg, pos, vel, owner));
                 }
                 Weapon::Rail => {
                     let dir = shot_angle.to_vec2f();
@@ -254,7 +254,7 @@ pub(crate) fn shooting(cvars: &Cvars, world: &mut World, gs: &mut GameState, map
                             + cvars.g_cluster_bomb_time
                             + gs.rng.gen_range(-1.0, 1.0) * cvars.g_cluster_bomb_time_spread;
                         let time = Time(time);
-                        cmds.push((Weapon::Cb, pos, vel, time, owner));
+                        cmds.push((Weapon::Cb, Cb, pos, vel, time, owner));
                     }
                 }
                 Weapon::Rockets => {
@@ -290,7 +290,7 @@ pub(crate) fn shooting(cvars: &Cvars, world: &mut World, gs: &mut GameState, map
                     let shot_vel = Vec2f::new(cvars.g_bfg_speed, 0.0).rotated_z(shot_angle)
                         + cvars.g_bfg_vehicle_velocity_factor * veh_vel.0;
                     let vel = Vel(shot_vel);
-                    cmds.push((Weapon::Bfg, pos, vel, owner));
+                    cmds.push((Weapon::Bfg, Bfg, pos, vel, owner));
                 }
             }
         }

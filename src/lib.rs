@@ -20,7 +20,7 @@ mod systems;
 use std::collections::VecDeque;
 use std::f64::consts::PI;
 
-use legion::{query::IntoQuery, World};
+use legion::{component, query::IntoQuery, World};
 
 use js_sys::Array;
 
@@ -35,10 +35,11 @@ use wasm_bindgen::JsCast;
 use web_sys::{CanvasRenderingContext2d, HtmlImageElement, Performance};
 
 use components::{
-    Ammo, Angle, GuidedMissile, Hitbox, Pos, TurnRate, Vehicle, VehicleType, Vel, Weapon,
+    Ammo, Angle, Bfg, Cb, GuidedMissile, Hitbox, Mg, Pos, TurnRate, Vehicle, VehicleType, Vel,
+    Weapon,
 };
 use cvars::{Cvars, TickrateMode};
-use debugging::{DEBUG_CROSSES, DEBUG_LINES, DEBUG_TEXTS};
+use debugging::{DbgCount, DEBUG_CROSSES, DEBUG_LINES, DEBUG_TEXTS};
 use game_state::{Explosion, GameState, Input, EMPTY_INPUT};
 use map::{F64Ext, Kind, Map, Vec2f, VecExt, TILE_SIZE};
 
@@ -358,12 +359,8 @@ impl Game {
 
         // Draw MGs
         self.context.set_stroke_style(&"yellow".into());
-        let mut query = <(&Weapon, &Pos, &Vel)>::query();
-        use debugging::DbgCount;
+        let mut query = <(&Weapon, &Pos, &Vel)>::query().filter(component::<Mg>());
         for (&weap, pos, vel) in query.iter(&self.legion).dbg_count("MG count") {
-            if weap != Weapon::Mg {
-                continue;
-            }
             let scr_pos = pos.0 - top_left;
             self.context.begin_path();
             self.context.move_to(scr_pos.x, scr_pos.y);
@@ -394,11 +391,8 @@ impl Game {
                 .set_shadow_offset_x(cvars.g_cluster_bomb_shadow_x);
             self.context
                 .set_shadow_offset_y(cvars.g_cluster_bomb_shadow_y);
-            let mut query = <(&Weapon, &Pos)>::query();
+            let mut query = <(&Weapon, &Pos)>::query().filter(component::<Cb>());
             for (&weap, pos) in query.iter(&self.legion).dbg_count("CB count") {
-                if weap != Weapon::Cb {
-                    continue;
-                }
                 let scr_pos = pos.0 - top_left;
                 self.context.fill_rect(
                     scr_pos.x - cvars.g_cluster_bomb_size / 2.0,
@@ -428,11 +422,8 @@ impl Game {
         // Draw BFGs
         self.context.set_fill_style(&"lime".into());
         self.context.set_stroke_style(&"lime".into());
-        let mut query = <(&Weapon, &Pos)>::query();
+        let mut query = <(&Weapon, &Pos)>::query().filter(component::<Bfg>());
         for (&weap, bfg_pos) in query.iter(&self.legion) {
-            if weap != Weapon::Bfg {
-                continue;
-            }
             let bfg_scr_pos = bfg_pos.0 - top_left;
             self.context.begin_path();
             self.context.arc(
