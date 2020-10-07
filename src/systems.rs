@@ -25,6 +25,7 @@ use crate::{
     },
     cvars::Cvars,
     cvars::Hardpoint,
+    cvars::MovementStats,
     game_state::{Explosion, GameState, Input, EMPTY_INPUT},
     map::F64Ext,
     map::Map,
@@ -55,6 +56,7 @@ pub(crate) fn self_destruct(cvars: &Cvars, world: &mut World, gs: &mut GameState
 
 pub(crate) fn vehicle_movement(cvars: &Cvars, world: &mut World, gs: &GameState, map: &Map) {
     let mut query = <(
+        &Vehicle,
         &mut Pos,
         &mut Vel,
         &mut Angle,
@@ -62,12 +64,14 @@ pub(crate) fn vehicle_movement(cvars: &Cvars, world: &mut World, gs: &GameState,
         &Hitbox,
         &Input,
     )>::query();
-    for (pos, vel, angle, turn_rate, hitbox, input) in query.iter_mut(world) {
-        turn_rate_change(cvars, turn_rate, input, gs.dt);
+    for (vehicle, pos, vel, angle, turn_rate, hitbox, input) in query.iter_mut(world) {
+        let stats = cvars.g_vehicle_movement_stats(vehicle.veh_type);
+
+        turn_rate_change(&stats, turn_rate, input, gs.dt);
 
         // Turning - part of vel gets rotated to simulate steering
         let turn = turn_rate.0 * gs.dt;
-        let vel_rotation = turn * cvars.g_tank_turn_effectiveness;
+        let vel_rotation = turn * stats.turn_effectiveness;
         vel.0.rotate_z(vel_rotation);
 
         let new_angle = angle.0 + turn;
@@ -82,7 +86,7 @@ pub(crate) fn vehicle_movement(cvars: &Cvars, world: &mut World, gs: &GameState,
         }
         angle.0 = angle.0.rem_euclid(2.0 * PI);
 
-        accel_decel(cvars, vel, angle, input, gs.dt);
+        accel_decel(&stats, vel, angle, input, gs.dt);
 
         // Moving
         let new_pos = pos.0 + vel.0 * gs.dt;
@@ -98,12 +102,12 @@ pub(crate) fn vehicle_movement(cvars: &Cvars, world: &mut World, gs: &GameState,
     }
 }
 
-fn turn_rate_change(cvars: &Cvars, turn_rate: &mut TurnRate, input: &Input, dt: f64) {
-    let tr_change = input.right_left() * cvars.g_tank_turn_rate_increase * dt;
+fn turn_rate_change(stats: &MovementStats, turn_rate: &mut TurnRate, input: &Input, dt: f64) {
+    let tr_change = input.right_left() * stats.turn_rate_increase * dt;
     turn_rate.0 += tr_change;
 
     // Friction's constant component - always the same no matter the speed
-    let tr_fric_const = cvars.g_tank_turn_rate_friction_const * dt;
+    let tr_fric_const = stats.turn_rate_friction_const * dt;
     if turn_rate.0 >= 0.0 {
         turn_rate.0 = (turn_rate.0 - tr_fric_const).max(0.0);
     } else {
@@ -111,24 +115,24 @@ fn turn_rate_change(cvars: &Cvars, turn_rate: &mut TurnRate, input: &Input, dt: 
     }
 
     // Friction's linear component - increases with speed
-    let tr_new = turn_rate.0 * (1.0 - cvars.g_tank_turn_rate_friction_linear).powf(dt);
-    turn_rate.0 = tr_new.clamped(-cvars.g_tank_turn_rate_max, cvars.g_tank_turn_rate_max);
+    let tr_new = turn_rate.0 * (1.0 - stats.turn_rate_friction_linear).powf(dt);
+    turn_rate.0 = tr_new.clamped(-stats.turn_rate_max, stats.turn_rate_max);
 }
 
-fn accel_decel(cvars: &Cvars, vel: &mut Vel, angle: &mut Angle, input: &Input, dt: f64) {
+fn accel_decel(stats: &MovementStats, vel: &mut Vel, angle: &mut Angle, input: &Input, dt: f64) {
     // TODO lateral friction
-    let vel_change = input.up_down() * cvars.g_tank_accel_forward * dt;
+    let vel_change = input.up_down() * stats.accel_forward * dt;
     vel.0 += angle.0.to_vec2f() * vel_change;
 
     // Friction's constant component - always the same no matter the speed
-    let vel_fric_const = cvars.g_tank_friction_const * dt;
+    let vel_fric_const = stats.friction_const * dt;
     let vel_norm = vel.0.try_normalized().unwrap_or_default();
     vel.0 -= (vel_fric_const).min(vel.0.magnitude()) * vel_norm;
 
     // Friction's linear component - increases with speed
-    vel.0 *= (1.0 - cvars.g_tank_friction_linear).powf(dt);
-    if vel.0.magnitude_squared() > cvars.g_tank_speed_max.powi(2) {
-        vel.0 = vel_norm * cvars.g_tank_speed_max;
+    vel.0 *= (1.0 - stats.friction_linear).powf(dt);
+    if vel.0.magnitude_squared() > stats.speed_max.powi(2) {
+        vel.0 = vel_norm * stats.speed_max;
     }
 }
 

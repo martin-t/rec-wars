@@ -479,9 +479,9 @@ impl Cvars {
         }
     }
 
-    pub(crate) fn g_vehicle_movement_cvars(&self, veh_type: VehicleType) -> MovementCvars {
+    pub(crate) fn g_vehicle_movement_stats(&self, veh_type: VehicleType) -> MovementStats {
         match veh_type {
-            VehicleType::Tank => MovementCvars {
+            VehicleType::Tank => MovementStats {
                 accel_backward: self.g_tank_accel_backward,
                 accel_forward: self.g_tank_accel_forward,
                 friction_const: self.g_tank_friction_const,
@@ -493,7 +493,7 @@ impl Cvars {
                 turn_rate_max: self.g_tank_turn_rate_max,
                 speed_max: self.g_tank_speed_max,
             },
-            VehicleType::Hovercraft => MovementCvars {
+            VehicleType::Hovercraft => MovementStats {
                 accel_backward: self.g_hovercraft_accel_backward,
                 accel_forward: self.g_hovercraft_accel_forward,
                 friction_const: self.g_hovercraft_friction_const,
@@ -505,7 +505,7 @@ impl Cvars {
                 turn_rate_max: self.g_hovercraft_turn_rate_max,
                 speed_max: self.g_hovercraft_speed_max,
             },
-            VehicleType::Hummer => MovementCvars {
+            VehicleType::Hummer => MovementStats {
                 accel_backward: self.g_hummer_accel_backward,
                 accel_forward: self.g_hummer_accel_forward,
                 friction_const: self.g_hummer_friction_const,
@@ -840,7 +840,7 @@ pub enum TickrateMode {
 }
 
 #[derive(Debug, Clone)]
-pub(crate) struct MovementCvars {
+pub(crate) struct MovementStats {
     pub(crate) accel_backward: f64,
     pub(crate) accel_forward: f64,
     pub(crate) friction_const: f64,
