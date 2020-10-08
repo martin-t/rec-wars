@@ -50,7 +50,7 @@
 // [ ] extract/screenshot/record assets from RecWar or find alternatives
 //      [ ] images
 //          [x] weapon icons
-//          [ ] weapons
+//          [x] weapons
 //          [ ] vehicles + skins
 //          [ ] cow, stolen effects
 //          [x] wrecks
@@ -88,14 +88,17 @@
 // [x] explosions
 //      [x] sizes
 // [ ] movement
-//      [ ] tank
-//      [ ] hovercraft
+//      [x] tank
+//      [x] hovercraft
 //      [ ] hummer + reverse steering
 //          https://engineeringdotnet.blogspot.com/2010/04/simple-2d-car-physics-in-games.html
 //          https://www.asawicki.info/Mirror/Car%20Physics%20for%20Games/Car%20Physics%20for%20Games.html
+//      [ ] measure exact values to replicate RecWar
 // [ ] collision detection with proper traces
-//      [ ] walls
-//      [ ] vehicles
+//      [x] projectiles X walls
+//      [ ] projectiles X vehicles
+//      [ ] vehicles X walls
+//      [ ] vehicles X vehicles
 // [ ] physics
 //      [ ] surfaces
 //      [ ] pushing wrecks
@@ -152,9 +155,9 @@
 // [ ] shadows
 //      [ ] HUD
 //      [ ] vehicles (is turret "higher"?)
-//      [ ] CB
+//      [x] CB
 // [ ] self destruct
-//      [ ] bigger exposion
+//      [x] bigger explosion
 //      [ ] countdown
 //      [ ] sounds
 //      [ ] works through walls
@@ -187,7 +190,6 @@
 // [ ] hosting
 //      GH pages? - needs public repo first
 //      domain? SSL?
-//      [ ] GH Social preview
 //      master server? cloudflare, heroku, google app engine?
 //          needs to be stateful
 //          https://github.com/Ralith/masterserve
@@ -214,7 +216,6 @@
 //      [ ] map
 //      [ ] cvars
 // [ ] analytics
-//      https://simpleanalytics.com/sandspiel.club - paid only
 //      [x] google analytics
 //      [ ] master server
 // [ ] FAQ - stuttering/tearing due to compositor - Alt+Shift+f12 - somehow this doesn't work anymore

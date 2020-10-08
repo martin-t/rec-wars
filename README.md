@@ -11,15 +11,13 @@ _**[Play Online](https://martin-t.gitlab.io/gitlab-pages/rec-wars/web)**_
 TODOs
 - badges (flat like https://github.com/dtolnay/enumn ?)
     - discord? like https://github.com/not-fl3/macroquad
-   
-- logo? use in-game entities to spell out Rec Wars?
+
+- logo? use in-game entities to spell out RecWars?
 - screenshot - clicking opens game?
 - Key Features
 
 - goals - web client+server if possible, native client+server
-- describe impl basics - ecs, net, AI
-
-- Rec Wars vs RecWars
+- describe impl basics - no npm, ecs, net, AI
 
 Dependencies
 ------------
@@ -55,7 +53,7 @@ TODO look at:
 https://hupage.mypage.cz/menu/domovska-stranka/download/recwar
 https://recwar.osoba.cz/rubriky/download
 
-Rec Wars aims to have similar gameplay as the original RecWar but not identical since it would be impossible to replicate exactly without decompiling the binary (which doesn't even contain debug symbols as far as I can tell).
+RecWars aims to have similar gameplay as the original RecWar but not identical since it would be impossible to replicate exactly without decompiling the binary (which doesn't even contain debug symbols as far as I can tell).
 
 Additionally I suspect RecWar was balanced for playing against bots and might result in annoying strats when people start [playing to win](http://www.sirlin.net/articles/playing-to-win). E.g. with enough mines, the cow can be made completely inaccessible, especially to less maneuverable vehicles like the hovercraft. Experience from other poorly designed games also shows large areas will be dominated by instant-hit weapons (here the Railgun) and there might simply be no way to get across the map without getting hit.
 
