@@ -229,11 +229,11 @@ async function run() {
         request.open("GET", "../assets/texture_list.txt");
         request.onloadend = () => {
             if (request.status !== 200) {
+                alert("Failed to load texture_list");
                 console.log("Failed to load texture_list: ", request);
-                return;
+            } else {
+                load_map(request.responseText);
             }
-
-            load_map(request.responseText);
         }
         request.send();
     }
@@ -243,16 +243,28 @@ async function run() {
         request.open("GET", "../maps/Atrium.map");
         request.onloadend = () => {
             if (request.status !== 200) {
+                alert("Failed to load map");
                 console.log("Failed to load map: ", request);
-                return;
+            } else {
+                play(tex_list_text, request.responseText);
             }
-
-            play(tex_list_text, request.responseText);
         }
         request.send();
     }
 
     let play = (tex_list_text, map_text) => {
+        // Ping master server
+        let request = new XMLHttpRequest();
+        request.open("GET", "https://rec-wars-master.herokuapp.com/");
+        request.onloadend = () => {
+            if (request.status !== 200) {
+                console.log("Failed to ping master server");
+            } else {
+                console.log(request.responseText);
+            }
+        }
+        request.send();
+
         // Cvars can be changed through the browser's console.
         // For now, they need to live on the JS heap and be passed into each function that needs them.
         // I couldn't find a better way to make them mutable in JS and readable in Rust:
