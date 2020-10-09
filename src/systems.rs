@@ -118,8 +118,21 @@ fn turning(
     let tr_new = turn_rate.0 * (1.0 - stats.turn_rate_friction_linear).powf(dt);
     turn_rate.0 = tr_new.clamped(-stats.turn_rate_max, stats.turn_rate_max);
 
+    // A dirty hack to approximate car steering (i.e. no turning when still, reversed when moving backwards).
+    let steering_coef = if stats.steering_car > 0.0 {
+        let sign = angle.0.to_vec2f().dot(vel.0).signum();
+        // Steering when below this speed is less effective.
+        let steering_speed = vel
+            .0
+            .magnitude()
+            .clamped(-stats.steering_car, stats.steering_car);
+        steering_speed * sign / stats.steering_car
+    } else {
+        1.0
+    };
+
     // Turning - part of vel gets rotated to simulate steering
-    let turn = turn_rate.0 * dt;
+    let turn = turn_rate.0 * dt * steering_coef;
     let vel_rotation = turn * stats.turn_effectiveness;
     vel.0.rotate_z(vel_rotation);
 
