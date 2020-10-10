@@ -124,11 +124,13 @@
 //              size 1, shadow offset 1
 //              40 frames to first explosion, 58 to last
 //              distance - 80-300 while moving slowly backwards
+//              damage hard to measure but looks similar to rockets
 //      [ ] rockets
 //          [ ] acceleration (judging by changing distance between them)
 //          [x] 6 per reload
 //          [x] about 1 s between first and last rocket -> refire 200 ms
 //          [ ] hummer more + refire + entire width
+//          [ ] orig RW: only direct hit does dmg, not explosion
 //      [ ] homing missile
 //      [ ] guided missile
 //      [ ] BFG
@@ -139,6 +141,7 @@
 //              Would be nice to figure out what exactly it did.
 //          In orig RW, shooting at a wall could kill enemy on the other side but only if low hp - probably clipped into wall and beam killed him.
 //          [ ] flashing color
+//      [ ] missiles+BFG in orig RW: explosion range counted towards origin, not nearest, touches chassis if rotated towards explosion (origin is in turret swivel point)
 //      [x] proper shot origins
 //      [x] proper reload times
 //      [ ] rockets?, missiles and bfg seem to have terminal velocity - force+friction?
@@ -161,6 +164,9 @@
 //      [ ] countdown
 //      [ ] sounds
 //      [ ] works through walls
+//      [ ] seems damage depends on distance:
+//          ~150 at center
+//          range more than 64+64+32 with 40 health - maybe 0 dmg at ~175
 // [ ] player separate from vehicle
 // [ ] what happens to Entity handles after player disconnect
 // [ ] UI

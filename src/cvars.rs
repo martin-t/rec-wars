@@ -43,6 +43,7 @@ pub struct Cvars {
     pub d_speed: f64,
 
     pub g_bfg_beam_range: f64,
+    pub g_bfg_damage: f64,
     pub g_bfg_explosion_scale: f64,
     pub g_bfg_radius: f64,
     pub g_bfg_reload_ammo: u32,
@@ -51,6 +52,7 @@ pub struct Cvars {
     pub g_bfg_vehicle_velocity_factor: f64,
 
     pub g_cluster_bomb_count: i32,
+    pub g_cluster_bomb_damage: f64,
     pub g_cluster_bomb_explosion_scale: f64,
     pub g_cluster_bomb_reload_ammo: u32,
     pub g_cluster_bomb_reload_time: f64,
@@ -66,12 +68,14 @@ pub struct Cvars {
     pub g_cluster_bomb_time_spread: f64,
     pub g_cluster_bomb_vehicle_velocity_factor: f64,
 
+    pub g_homing_missile_damage: f64,
     pub g_homing_missile_reload_ammo: u32,
     pub g_homing_missile_reload_time: f64,
     pub g_homing_missile_speed_initial: f64,
     pub g_homing_missile_vehicle_velocity_factor: f64,
 
     pub g_machine_gun_angle_spread: f64,
+    pub g_machine_gun_damage: f64,
     pub g_machine_gun_refire: f64,
     pub g_machine_gun_reload_ammo: u32,
     pub g_machine_gun_reload_time: f64,
@@ -80,6 +84,7 @@ pub struct Cvars {
     pub g_machine_gun_vehicle_velocity_factor: f64,
 
     pub g_guided_missile_accel_forward: f64,
+    pub g_guided_missile_damage: f64,
     pub g_guided_missile_friction_const: f64,
     pub g_guided_missile_friction_linear: f64,
     pub g_guided_missile_reload_ammo: u32,
@@ -163,6 +168,7 @@ pub struct Cvars {
     pub g_hovercraft_accel_forward: f64,
     pub g_hovercraft_friction_const: f64,
     pub g_hovercraft_friction_linear: f64,
+    pub g_hovercraft_hp: f64,
     pub g_hovercraft_maxs_x: f64,
     pub g_hovercraft_maxs_y: f64,
     pub g_hovercraft_mins_x: f64,
@@ -183,6 +189,7 @@ pub struct Cvars {
     pub g_hummer_accel_forward: f64,
     pub g_hummer_friction_const: f64,
     pub g_hummer_friction_linear: f64,
+    pub g_hummer_hp: f64,
     pub g_hummer_maxs_x: f64,
     pub g_hummer_maxs_y: f64,
     pub g_hummer_mins_x: f64,
@@ -199,9 +206,11 @@ pub struct Cvars {
     pub g_hummer_turret_offset_turret_x: f64,
     pub g_hummer_turret_offset_turret_y: f64,
 
+    pub g_railgun_damage: f64,
     pub g_railgun_reload_ammo: u32,
     pub g_railgun_reload_time: f64,
 
+    pub g_rockets_damage: f64,
     pub g_rockets_explosion_scale: f64,
     pub g_rockets_refire: f64,
     pub g_rockets_reload_ammo: u32,
@@ -209,13 +218,17 @@ pub struct Cvars {
     pub g_rockets_speed: f64,
     pub g_rockets_vehicle_velocity_factor: f64,
 
+    pub g_self_destruct_damage_center: f64,
+    pub g_self_destruct_damage_edge: f64,
     pub g_self_destruct_explosion1_scale: f64,
     pub g_self_destruct_explosion2_scale: f64,
+    pub g_self_destruct_radius: f64,
 
     pub g_tank_accel_backward: f64,
     pub g_tank_accel_forward: f64,
     pub g_tank_friction_const: f64,
     pub g_tank_friction_linear: f64,
+    pub g_tank_hp: f64,
     pub g_tank_maxs_x: f64,
     pub g_tank_maxs_y: f64,
     pub g_tank_mins_x: f64,
@@ -603,6 +616,7 @@ impl Default for Cvars {
             d_speed: 1.0,
 
             g_bfg_beam_range: 125.0,
+            g_bfg_damage: 100.0, // pretty sure from orig RW testing
             g_bfg_explosion_scale: 1.0,
             g_bfg_radius: 4.0,
             g_bfg_reload_ammo: 1,
@@ -611,6 +625,7 @@ impl Default for Cvars {
             g_bfg_vehicle_velocity_factor: 1.0,
 
             g_cluster_bomb_count: 40,
+            g_cluster_bomb_damage: 25.0, // best guess - same as rockets
             g_cluster_bomb_explosion_scale: 0.5,
             g_cluster_bomb_reload_ammo: 1,
             g_cluster_bomb_reload_time: 1.5,
@@ -626,12 +641,14 @@ impl Default for Cvars {
             g_cluster_bomb_time_spread: 0.2,
             g_cluster_bomb_vehicle_velocity_factor: 1.0,
 
+            g_homing_missile_damage: 56.0, // assumed same as GM
             g_homing_missile_reload_ammo: 1,
             g_homing_missile_reload_time: 1.5,
             g_homing_missile_speed_initial: 360.0,
             g_homing_missile_vehicle_velocity_factor: 1.0,
 
             g_machine_gun_angle_spread: 0.015,
+            g_machine_gun_damage: 2.5, // exact from orig RW
             g_machine_gun_refire: 0.050,
             g_machine_gun_reload_ammo: 50,
             g_machine_gun_reload_time: 1.0,
@@ -640,6 +657,7 @@ impl Default for Cvars {
             g_machine_gun_vehicle_velocity_factor: 1.0,
 
             g_guided_missile_accel_forward: 2000.0,
+            g_guided_missile_damage: 56.0, // exact from orig RW
             g_guided_missile_friction_const: 0.0,
             g_guided_missile_friction_linear: 0.99,
             g_guided_missile_reload_ammo: 1,
@@ -723,6 +741,7 @@ impl Default for Cvars {
             g_hovercraft_accel_forward: 400.0,
             g_hovercraft_friction_const: 10.0,
             g_hovercraft_friction_linear: 0.6,
+            g_hovercraft_hp: 65.0,
             g_hovercraft_maxs_x: 22.0,
             g_hovercraft_maxs_y: 14.0,
             g_hovercraft_mins_x: -22.0,
@@ -743,6 +762,7 @@ impl Default for Cvars {
             g_hummer_accel_forward: 600.0,
             g_hummer_friction_const: 11.0,
             g_hummer_friction_linear: 0.8,
+            g_hummer_hp: 62.5,
             g_hummer_maxs_x: 20.0,
             g_hummer_maxs_y: 9.0,
             g_hummer_mins_x: -20.0,
@@ -759,9 +779,11 @@ impl Default for Cvars {
             g_hummer_turret_offset_turret_x: 0.0,
             g_hummer_turret_offset_turret_y: 0.0,
 
+            g_railgun_damage: 47.0, // exact from orig RW
             g_railgun_reload_ammo: 1,
             g_railgun_reload_time: 1.0,
 
+            g_rockets_damage: 25.0, // pretty sure from orig RW testing
             g_rockets_explosion_scale: 0.5,
             g_rockets_refire: 0.200,
             g_rockets_reload_ammo: 6,
@@ -769,13 +791,17 @@ impl Default for Cvars {
             g_rockets_speed: 600.0,
             g_rockets_vehicle_velocity_factor: 1.0,
 
+            g_self_destruct_damage_center: 150.0,
+            g_self_destruct_damage_edge: 0.0,
             g_self_destruct_explosion1_scale: 2.0,
             g_self_destruct_explosion2_scale: 1.0,
+            g_self_destruct_radius: 175.0,
 
             g_tank_accel_backward: 550.0,
             g_tank_accel_forward: 550.0,
             g_tank_friction_const: 50.0,
             g_tank_friction_linear: 0.9,
+            g_tank_hp: 100.0,
             g_tank_maxs_x: 19.0,
             g_tank_maxs_y: 12.0,
             g_tank_mins_x: -19.0,

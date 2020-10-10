@@ -14,14 +14,13 @@ use crate::{cvars::Cvars, map::Vec2f};
 #[derive(Debug, Clone)]
 pub(crate) struct Vehicle {
     pub(crate) veh_type: VehicleType,
-    pub(crate) destroyed: bool,
-    pub(crate) cur_weapon: Weapon,
     pub(crate) turret_angle: f64,
-    /// Fraction of full
     pub(crate) hp: f64,
+    pub(crate) destroyed: bool,
     /// Each weapon has a separate reload status even if they all reload at the same time.
     /// I plan to generalize this and have a cvar to choose between multiple reload mechanisms.
     pub(crate) ammos: Vec<Ammo>,
+    pub(crate) cur_weapon: Weapon,
 }
 
 impl Vehicle {
@@ -39,11 +38,11 @@ impl Vehicle {
 
         Vehicle {
             veh_type,
-            destroyed: false,
-            cur_weapon: Weapon::Mg,
             turret_angle: 0.0,
-            hp: 1.0,
+            hp: 10.0,
+            destroyed: false,
             ammos,
+            cur_weapon: Weapon::Mg,
         }
     }
 }

@@ -369,8 +369,9 @@ pub(crate) fn projectiles(cvars: &Cvars, world: &mut World, gs: &mut GameState, 
         for (veh_id, veh_pos, _veh_angle, _veh_hitbox) in &vehicles {
             if *veh_id != proj_owner.0 {
                 let dist2 = (proj_pos.0 - veh_pos.0).magnitude_squared();
+                // TODO proper hitbox
                 if dist2 <= 24.0 * 24.0 {
-                    // Vehicle explosion first to it's below projectile explosion because it looks better.
+                    // Vehicle explosion first so it's below projectile explosion because it looks better.
                     gs.explosions
                         .push(Explosion::new(veh_pos.0, 1.0, gs.frame_time, false));
                     to_kill.push(*veh_id);
