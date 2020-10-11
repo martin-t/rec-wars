@@ -624,15 +624,17 @@ impl Game {
         // 0.5 = yellow
         // 0.5..1.0 -> decrease red channel
         // 1.0 = green
-        let r = 1.0 - (player_vehicle.hp.clamped(0.5, 1.0) - 0.5) * 2.0;
-        let g = player_vehicle.hp.clamped(0.0, 0.5) * 2.0;
+        let hp_max = cvars.g_vehicle_hp(player_vehicle.veh_type);
+        let hp_fraction = player_vehicle.hp / hp_max;
+        let r = 1.0 - (hp_fraction.clamped(0.5, 1.0) - 0.5) * 2.0;
+        let g = hp_fraction.clamped(0.0, 0.5) * 2.0;
         let rgb = format!("rgb({}, {}, 0)", r * 255.0, g * 255.0);
         self.context.set_fill_style(&rgb.into());
         let hp_pos = self.hud_pos(cvars.hud_hp_x, cvars.hud_hp_y);
         self.context.fill_rect(
             hp_pos.x,
             hp_pos.y,
-            cvars.hud_hp_width * player_vehicle.hp,
+            cvars.hud_hp_width * hp_fraction,
             cvars.hud_hp_height,
         );
 

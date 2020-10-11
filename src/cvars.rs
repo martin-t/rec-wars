@@ -457,6 +457,14 @@ impl Cvars {
         }
     }
 
+    pub(crate) fn g_vehicle_hp(&self, veh_type: VehicleType) -> f64 {
+        match veh_type {
+            VehicleType::Tank => self.g_tank_hp,
+            VehicleType::Hovercraft => self.g_hovercraft_hp,
+            VehicleType::Hummer => self.g_hummer_hp,
+        }
+    }
+
     pub(crate) fn g_vehicle_movement_stats(&self, veh_type: VehicleType) -> MovementStats {
         match veh_type {
             VehicleType::Tank => MovementStats {
