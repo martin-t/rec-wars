@@ -26,6 +26,8 @@ pub(crate) struct Vehicle {
 impl Vehicle {
     #[must_use]
     pub(crate) fn new(cvars: &Cvars, veh_type: VehicleType) -> Vehicle {
+        let hp = cvars.g_vehicle_hp(veh_type);
+
         let ammos = vec![
             Ammo::Loaded(0.0, cvars.g_weapon_reload_ammo(Weapon::Mg)),
             Ammo::Loaded(0.0, cvars.g_weapon_reload_ammo(Weapon::Rail)),
@@ -39,7 +41,7 @@ impl Vehicle {
         Vehicle {
             veh_type,
             turret_angle: 0.0,
-            hp: 10.0,
+            hp,
             destroyed: false,
             ammos,
             cur_weapon: Weapon::Mg,
