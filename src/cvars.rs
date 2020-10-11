@@ -457,44 +457,6 @@ impl Cvars {
         }
     }
 
-    /// Where the turret-chassis connection is on the chassis.
-    /// E.g. (0, 0) means the turret rotates around the vehicle's origin.
-    pub(crate) fn g_vehicle_turret_offset_chassis(&self, veh_type: VehicleType) -> Vec2f {
-        match veh_type {
-            VehicleType::Tank => Vec2f::new(
-                self.g_tank_turret_offset_chassis_x,
-                self.g_tank_turret_offset_chassis_y,
-            ),
-            VehicleType::Hovercraft => Vec2f::new(
-                self.g_hovercraft_turret_offset_chassis_x,
-                self.g_hovercraft_turret_offset_chassis_y,
-            ),
-            VehicleType::Hummer => Vec2f::new(
-                self.g_hummer_turret_offset_chassis_x,
-                self.g_hummer_turret_offset_chassis_y,
-            ),
-        }
-    }
-
-    /// Where the turret-chassis connection is on the turret.
-    /// E.g. (0, 0) means the turret rotates around its center.
-    pub(crate) fn g_vehicle_turret_offset_turret(&self, veh_type: VehicleType) -> Vec2f {
-        match veh_type {
-            VehicleType::Tank => Vec2f::new(
-                self.g_tank_turret_offset_turret_x,
-                self.g_tank_turret_offset_turret_y,
-            ),
-            VehicleType::Hovercraft => Vec2f::new(
-                self.g_hovercraft_turret_offset_turret_x,
-                self.g_hovercraft_turret_offset_turret_y,
-            ),
-            VehicleType::Hummer => Vec2f::new(
-                self.g_hummer_turret_offset_turret_x,
-                self.g_hummer_turret_offset_turret_y,
-            ),
-        }
-    }
-
     pub(crate) fn g_vehicle_movement_stats(&self, veh_type: VehicleType) -> MovementStats {
         match veh_type {
             VehicleType::Tank => MovementStats {
@@ -536,6 +498,44 @@ impl Cvars {
                 turn_rate_increase: self.g_hummer_turn_rate_increase,
                 turn_rate_max: self.g_hummer_turn_rate_max,
             },
+        }
+    }
+
+    /// Where the turret-chassis connection is on the chassis.
+    /// E.g. (0, 0) means the turret rotates around the vehicle's origin.
+    pub(crate) fn g_vehicle_turret_offset_chassis(&self, veh_type: VehicleType) -> Vec2f {
+        match veh_type {
+            VehicleType::Tank => Vec2f::new(
+                self.g_tank_turret_offset_chassis_x,
+                self.g_tank_turret_offset_chassis_y,
+            ),
+            VehicleType::Hovercraft => Vec2f::new(
+                self.g_hovercraft_turret_offset_chassis_x,
+                self.g_hovercraft_turret_offset_chassis_y,
+            ),
+            VehicleType::Hummer => Vec2f::new(
+                self.g_hummer_turret_offset_chassis_x,
+                self.g_hummer_turret_offset_chassis_y,
+            ),
+        }
+    }
+
+    /// Where the turret-chassis connection is on the turret.
+    /// E.g. (0, 0) means the turret rotates around its center.
+    pub(crate) fn g_vehicle_turret_offset_turret(&self, veh_type: VehicleType) -> Vec2f {
+        match veh_type {
+            VehicleType::Tank => Vec2f::new(
+                self.g_tank_turret_offset_turret_x,
+                self.g_tank_turret_offset_turret_y,
+            ),
+            VehicleType::Hovercraft => Vec2f::new(
+                self.g_hovercraft_turret_offset_turret_x,
+                self.g_hovercraft_turret_offset_turret_y,
+            ),
+            VehicleType::Hummer => Vec2f::new(
+                self.g_hummer_turret_offset_turret_x,
+                self.g_hummer_turret_offset_turret_y,
+            ),
         }
     }
 
