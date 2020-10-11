@@ -349,8 +349,11 @@ pub(crate) fn projectiles(cvars: &Cvars, world: &mut World, gs: &mut GameState, 
     let mut to_remove = Vec::new();
     let mut to_kill = Vec::new();
 
-    let mut query = <(Entity, &Weapon, &mut Pos, &Vel, &Owner)>::query();
-    for (&proj_id, &proj_weap, proj_pos, proj_vel, proj_owner) in query.iter_mut(world) {
+    let mut query_projectiles = <(Entity, &Weapon, &mut Pos, &Vel, &Owner)>::query();
+    let (mut world_projectiles, mut world_rest) = world.split_for_query(&query_projectiles);
+    for (&proj_id, &proj_weap, proj_pos, proj_vel, proj_owner) in
+        query_projectiles.iter_mut(&mut world_projectiles)
+    {
         let new_pos = proj_pos.0 + proj_vel.0 * gs.dt;
 
         if proj_weap == Weapon::Cb {
@@ -367,14 +370,20 @@ pub(crate) fn projectiles(cvars: &Cvars, world: &mut World, gs: &mut GameState, 
         proj_pos.0 = new_pos;
 
         for (veh_id, veh_pos, _veh_angle, _veh_hitbox) in &vehicles {
-            if *veh_id != proj_owner.0 {
+            let veh_id = *veh_id;
+            if veh_id != proj_owner.0 {
                 let dist2 = (proj_pos.0 - veh_pos.0).magnitude_squared();
                 // TODO proper hitbox
                 if dist2 <= 24.0 * 24.0 {
                     // Vehicle explosion first so it's below projectile explosion because it looks better.
-                    gs.explosions
-                        .push(Explosion::new(veh_pos.0, 1.0, gs.frame_time, false));
-                    to_kill.push(*veh_id);
+                    let mut query_veh = <(&mut Vehicle,)>::query();
+                    let (vehicle,) = query_veh.get_mut(&mut world_rest, veh_id).unwrap();
+                    vehicle.hp -= cvars.g_weapon_damage(proj_weap);
+                    if vehicle.hp <= 0.0 {
+                        gs.explosions
+                            .push(Explosion::new(veh_pos.0, 1.0, gs.frame_time, false));
+                        to_kill.push(veh_id);
+                    }
                     remove_projectile(cvars, gs, &mut to_remove, proj_id, proj_weap, proj_pos.0);
                     break;
                 } else if proj_weap == Weapon::Bfg
@@ -383,7 +392,7 @@ pub(crate) fn projectiles(cvars: &Cvars, world: &mut World, gs: &mut GameState, 
                 {
                     gs.explosions
                         .push(Explosion::new(veh_pos.0, 1.0, gs.frame_time, false));
-                    to_kill.push(*veh_id);
+                    to_kill.push(veh_id);
                     gs.bfg_beams.push((proj_pos.0, veh_pos.0));
                 }
             }

@@ -547,6 +547,18 @@ impl Cvars {
         }
     }
 
+    pub(crate) fn g_weapon_damage(&self, weapon: Weapon) -> f64 {
+        match weapon {
+            Weapon::Mg => self.g_machine_gun_damage,
+            Weapon::Rail => self.g_railgun_damage,
+            Weapon::Cb => self.g_cluster_bomb_damage,
+            Weapon::Rockets => self.g_rockets_damage,
+            Weapon::Hm => self.g_homing_missile_damage,
+            Weapon::Gm => self.g_guided_missile_damage,
+            Weapon::Bfg => self.g_bfg_damage,
+        }
+    }
+
     pub(crate) fn g_weapon_explosion_scale(&self, weapon: Weapon) -> Option<f64> {
         match weapon {
             Weapon::Mg => None,
