@@ -168,7 +168,7 @@
 //          ~150 at center
 //          range more than 64+64+32 with 40 health - maybe 0 dmg at ~175
 // [ ] player separate from vehicle
-// [ ] what happens to Entity handles after player disconnect
+// [ ] what happens to Entity handles after a player disconnects
 // [ ] UI
 //      requirements
 //          minimum: select mode, map, bots, start game
@@ -234,6 +234,9 @@
 // [ ] allow MG to shoot down missiles
 // [ ] lateral friction
 // [ ] make driving feel more real - simulate terrain unevenness? mild speed/angle changes?
+// [ ] announcer
+//      [ ] killstreaks? orig RW only if fast enough
+//      [ ] other events - CTC steal/capture/return - need sounds from other games
 // [ ] map editor - sharing maps, voting, recommended mode / number of bots
 //      [ ] bots say hi/gg/sry/n1
 // [ ] log of past games (to show activity even if nobody currently online)
