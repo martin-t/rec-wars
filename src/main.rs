@@ -253,7 +253,14 @@
 // [ ] horn
 //      [ ] sound, bind
 //      [ ] make AI move out of the way
-// [ ] cvar to set origin - tank in original RW turned around turret center
+// [ ] cvar to set origin - tank in original RW turned around turret swivel point
+// [ ] better cvar system - requirements:
+//      [ ] in game console
+//          [ ] autocompletion
+//      [ ] config files - separate configs for RecWar and RecWars (one overriding just changed cvars from the other vs 2 whole configs?)
+//      [ ] allow sharing/including other config files
+//      [ ] generate struct from config?
+//          [ ] accessors generic over weap/vehicle: g_[weapon].damage
 // [ ] easter eggs
 //      [ ] server say for 0 deaths
 //      [ ] bugfeatures from original RW:
