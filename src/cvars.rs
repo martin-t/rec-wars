@@ -739,7 +739,7 @@ impl Default for Cvars {
 
             g_hovercraft_accel_backward: 400.0,
             g_hovercraft_accel_forward: 400.0,
-            g_hovercraft_friction_const: 10.0,
+            g_hovercraft_friction_const: 0.0,
             g_hovercraft_friction_linear: 0.6,
             g_hovercraft_hp: 65.0,
             g_hovercraft_maxs_x: 22.0,
