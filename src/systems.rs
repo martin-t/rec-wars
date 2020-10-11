@@ -380,6 +380,7 @@ pub(crate) fn projectiles(cvars: &Cvars, world: &mut World, gs: &mut GameState, 
                     let (vehicle,) = query_veh.get_mut(&mut world_rest, veh_id).unwrap();
                     vehicle.hp -= cvars.g_weapon_damage(proj_weap);
                     if vehicle.hp <= 0.0 {
+                        vehicle.hp = 0.0;
                         gs.explosions
                             .push(Explosion::new(veh_pos.0, 1.0, gs.frame_time, false));
                         to_kill.push(veh_id);

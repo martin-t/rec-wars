@@ -146,7 +146,6 @@ impl Game {
             player_entity,
             guided_missile: None,
             explosions: Vec::new(),
-            damage: Vec::new(),
         };
         let gs_prev = gs.clone();
 

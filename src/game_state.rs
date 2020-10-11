@@ -23,7 +23,6 @@ pub(crate) struct GameState {
     pub(crate) player_entity: Entity,
     pub(crate) guided_missile: Option<Entity>,
     pub(crate) explosions: Vec<Explosion>,
-    pub(crate) damage: Vec<Damage>,
 }
 
 #[derive(Debug, Clone)]
