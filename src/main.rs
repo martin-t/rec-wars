@@ -209,6 +209,7 @@
 //          https://gafferongames.com/post/why_cant_i_send_udp_packets_from_a_browser/
 //          https://www.html5rocks.com/en/tutorials/webrtc/datachannels/
 //          TCP
+//				reduce extra latency: https://lobste.rs/s/5qlb7z/40_milliseconds_latency_just_would_not_go (article + link to HN)
 //          webRTC
 //          crazy idea: multiple TCP streams, rotate through them
 //      https://arewegameyet.rs/ecosystem/networking/ or custom?
