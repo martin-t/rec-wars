@@ -263,14 +263,24 @@ impl Game {
         let mut query = <(&Vehicle, &mut Input)>::query();
         for (vehicle, input) in query.iter_mut(&mut self.legion) {
             if vehicle.destroyed {
+                // TODO allow changing weap while dead, maybe others
                 *input = EMPTY_INPUT.clone();
             } else if self.gs.guided_missile.is_some() {
                 *input = self.gs.input.vehicle_while_guiding();
             } else {
                 // for now all vehicles move together
-                *input = self.gs.input.clone();
+                //*input = self.gs.input.clone();
+
+                // all vehicles behave randomly
+                input.randomize(&mut self.gs.rng);
             }
         }
+        *self
+            .legion
+            .entry(self.gs.player_entity)
+            .unwrap()
+            .get_component_mut::<Input>()
+            .unwrap() = self.gs.input.clone();
 
         let mut query = <(&GuidedMissile, &mut Input)>::query();
         for (_, input) in query.iter_mut(&mut self.legion) {
