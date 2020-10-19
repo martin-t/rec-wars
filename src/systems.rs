@@ -197,9 +197,9 @@ pub(crate) fn vehicle_logic(
 
 pub(crate) fn shooting(cvars: &Cvars, world: &mut World, gs: &mut GameState, map: &Map) {
     let mut cmds = CommandBuffer::new(world);
-    let mut query = <(Entity, &mut Vehicle, &Pos, &Vel, &Angle)>::query();
-    for (&veh_id, vehicle, veh_pos, veh_vel, veh_angle) in query.iter_mut(world) {
-        if vehicle.destroyed || !gs.input.fire {
+    let mut query = <(Entity, &mut Vehicle, &Pos, &Vel, &Angle, &Input)>::query();
+    for (&veh_id, vehicle, veh_pos, veh_vel, veh_angle, input) in query.iter_mut(world) {
+        if vehicle.destroyed || !input.fire {
             continue;
         }
         let ammo = &mut vehicle.ammos[vehicle.cur_weapon as usize];

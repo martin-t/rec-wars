@@ -109,33 +109,44 @@ impl Input {
     }
 
     pub(crate) fn randomize(&mut self, rng: &mut SmallRng) {
-        if rng.gen_bool(0.01) {
+        if rng.gen_bool(0.05) {
             self.left ^= true;
         }
-        if rng.gen_bool(0.01) {
+        if rng.gen_bool(0.05) {
             self.right ^= true;
         }
-        if rng.gen_bool(0.01) {
-            self.up ^= true;
+
+        if !self.up && rng.gen_bool(0.05) {
+            self.up = true;
+        } else if !self.up && rng.gen_bool(0.01) {
+            self.up = false;
         }
-        if rng.gen_bool(0.01) {
-            self.down ^= true;
+
+        if !self.down && rng.gen_bool(0.05) {
+            self.down = true;
+        } else if !self.down && rng.gen_bool(0.01) {
+            self.down = false;
         }
+
         if rng.gen_bool(0.005) {
             self.turret_left ^= true;
         }
         if rng.gen_bool(0.005) {
             self.turret_right ^= true;
         }
-        if rng.gen_bool(0.01) {
+        if rng.gen_bool(0.001) {
             self.prev_weapon ^= true;
         }
-        if rng.gen_bool(0.01) {
+        if rng.gen_bool(0.001) {
             self.next_weapon ^= true;
         }
-        if rng.gen_bool(0.05) {
-            self.fire ^= true;
+
+        if !self.fire && rng.gen_bool(0.01) {
+            self.fire = true;
+        } else if self.fire && rng.gen_bool(0.05) {
+            self.fire = false;
         }
+
         if rng.gen_bool(0.001) {
             self.mine ^= true;
         }
