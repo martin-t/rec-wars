@@ -14,6 +14,7 @@ use crate::{cvars::Cvars, map::Vec2f};
 #[derive(Debug, Clone)]
 pub(crate) struct Vehicle {
     pub(crate) veh_type: VehicleType,
+    /// Angle from vehicle, see Coord system for more
     pub(crate) turret_angle: f64,
     /// HP between 0 and 1 - saving the fraction here so the cvars can be adjusted during a match.
     pub(crate) hp_fraction: f64,
