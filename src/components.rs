@@ -15,8 +15,8 @@ use crate::{cvars::Cvars, map::Vec2f};
 pub(crate) struct Vehicle {
     pub(crate) veh_type: VehicleType,
     pub(crate) turret_angle: f64,
-    pub(crate) hp: f64,
-    pub(crate) destroyed: bool,
+    /// HP between 0 and 1 - saving the fraction here so the cvars can be adjusted during a match.
+    pub(crate) hp_fraction: f64,
     /// Each weapon has a separate reload status even if they all reload at the same time.
     /// I plan to generalize this and have a cvar to choose between multiple reload mechanisms.
     pub(crate) ammos: Vec<Ammo>,
@@ -26,8 +26,6 @@ pub(crate) struct Vehicle {
 impl Vehicle {
     #[must_use]
     pub(crate) fn new(cvars: &Cvars, veh_type: VehicleType) -> Vehicle {
-        let hp = cvars.g_vehicle_hp(veh_type);
-
         let ammos = vec![
             Ammo::Loaded(0.0, cvars.g_weapon_reload_ammo(Weapon::Mg)),
             Ammo::Loaded(0.0, cvars.g_weapon_reload_ammo(Weapon::Rail)),
@@ -41,11 +39,21 @@ impl Vehicle {
         Vehicle {
             veh_type,
             turret_angle: 0.0,
-            hp,
-            destroyed: false,
+            hp_fraction: 1.0,
             ammos,
             cur_weapon: Weapon::Mg,
         }
+    }
+
+    pub(crate) fn damage(&mut self, cvars: &Cvars, amount: f64) {
+        self.hp_fraction -= amount / cvars.g_vehicle_hp(self.veh_type);
+        if self.hp_fraction < 0.0 {
+            self.hp_fraction = 0.0;
+        }
+    }
+
+    pub(crate) fn destroyed(&self) -> bool {
+        self.hp_fraction <= 0.0
     }
 }
 

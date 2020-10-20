@@ -270,7 +270,7 @@ impl Game {
 
         let mut query_vehicles = <(&Vehicle, &mut Input)>::query();
         for (vehicle, input) in query_vehicles.iter_mut(&mut self.legion) {
-            if vehicle.destroyed {
+            if vehicle.destroyed() {
                 // TODO allow changing weap while dead, maybe others
                 *input = EMPTY_INPUT.clone();
             } else if self.gs.guided_missile.is_some() {
@@ -456,7 +456,7 @@ impl Game {
         for (vehicle, pos, angle, hitbox) in chassis_query.iter(&self.legion) {
             let scr_pos = pos.0 - top_left;
             let img;
-            if vehicle.destroyed {
+            if vehicle.destroyed() {
                 img = &self.imgs_wrecks[vehicle.veh_type as usize];
             } else {
                 img = &self.imgs_vehicles[vehicle.veh_type as usize * 2];
@@ -480,7 +480,7 @@ impl Game {
         // Draw turrets
         let mut turrets_query = <(&Vehicle, &Pos, &Angle)>::query();
         for (vehicle, pos, angle) in turrets_query.iter(&self.legion) {
-            if vehicle.destroyed {
+            if vehicle.destroyed() {
                 continue;
             }
 
@@ -638,17 +638,15 @@ impl Game {
         // 0.5 = yellow
         // 0.5..1.0 -> decrease red channel
         // 1.0 = green
-        let hp_max = cvars.g_vehicle_hp(player_vehicle.veh_type);
-        let hp_fraction = player_vehicle.hp / hp_max;
-        let r = 1.0 - (hp_fraction.clamped(0.5, 1.0) - 0.5) * 2.0;
-        let g = hp_fraction.clamped(0.0, 0.5) * 2.0;
+        let r = 1.0 - (player_vehicle.hp_fraction.clamped(0.5, 1.0) - 0.5) * 2.0;
+        let g = player_vehicle.hp_fraction.clamped(0.0, 0.5) * 2.0;
         let rgb = format!("rgb({}, {}, 0)", r * 255.0, g * 255.0);
         self.context.set_fill_style(&rgb.into());
         let hp_pos = self.hud_pos(cvars.hud_hp_x, cvars.hud_hp_y);
         self.context.fill_rect(
             hp_pos.x,
             hp_pos.y,
-            cvars.hud_hp_width * hp_fraction,
+            cvars.hud_hp_width * player_vehicle.hp_fraction,
             cvars.hud_hp_height,
         );
 

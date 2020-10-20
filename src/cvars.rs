@@ -639,7 +639,7 @@ impl Default for Cvars {
             d_seed: 0,
             d_speed: 1.0,
 
-            g_armor: 0.5,
+            g_armor: 50.0,
 
             g_bfg_beam_range: 125.0,
             g_bfg_damage: 100.0, // pretty sure from orig RW testing
@@ -767,7 +767,7 @@ impl Default for Cvars {
             g_hovercraft_accel_forward: 400.0,
             g_hovercraft_friction_const: 0.0,
             g_hovercraft_friction_linear: 0.6,
-            g_hovercraft_base_hp: 65.0,
+            g_hovercraft_base_hp: 0.65,
             g_hovercraft_maxs_x: 22.0,
             g_hovercraft_maxs_y: 14.0,
             g_hovercraft_mins_x: -22.0,
@@ -788,7 +788,7 @@ impl Default for Cvars {
             g_hummer_accel_forward: 600.0,
             g_hummer_friction_const: 11.0,
             g_hummer_friction_linear: 0.8,
-            g_hummer_base_hp: 62.5,
+            g_hummer_base_hp: 0.625,
             g_hummer_maxs_x: 20.0,
             g_hummer_maxs_y: 9.0,
             g_hummer_mins_x: -20.0,
@@ -827,7 +827,7 @@ impl Default for Cvars {
             g_tank_accel_forward: 550.0,
             g_tank_friction_const: 50.0,
             g_tank_friction_linear: 0.9,
-            g_tank_base_hp: 100.0,
+            g_tank_base_hp: 1.0,
             g_tank_maxs_x: 19.0,
             g_tank_maxs_y: 12.0,
             g_tank_mins_x: -19.0,

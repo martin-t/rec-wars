@@ -36,8 +36,8 @@ use crate::{
 pub(crate) fn self_destruct(cvars: &Cvars, world: &mut World, gs: &mut GameState) {
     let mut query = <(&mut Vehicle, &mut Pos)>::query();
     for (vehicle, veh_pos) in query.iter_mut(world) {
-        if gs.input.self_destruct && !vehicle.destroyed {
-            vehicle.destroyed = true;
+        if gs.input.self_destruct && !vehicle.destroyed() {
+            vehicle.hp_fraction = 0.0;
             gs.explosions.push(Explosion::new(
                 veh_pos.0,
                 cvars.g_self_destruct_explosion1_scale,
@@ -199,7 +199,7 @@ pub(crate) fn shooting(cvars: &Cvars, world: &mut World, gs: &mut GameState, map
     let mut cmds = CommandBuffer::new(world);
     let mut query = <(Entity, &mut Vehicle, &Pos, &Vel, &Angle, &Input)>::query();
     for (&veh_id, vehicle, veh_pos, veh_vel, veh_angle, input) in query.iter_mut(world) {
-        if vehicle.destroyed || !input.fire {
+        if vehicle.destroyed() || !input.fire {
             continue;
         }
         let ammo = &mut vehicle.ammos[vehicle.cur_weapon as usize];
@@ -338,7 +338,7 @@ pub(crate) fn projectiles(cvars: &Cvars, world: &mut World, gs: &mut GameState, 
     let vehicles: Vec<(Entity, _, _, _)> = query_vehicles
         .iter(world)
         .filter_map(|(&entity, vehicle, &pos, &angle, &hitbox)| {
-            if !vehicle.destroyed {
+            if !vehicle.destroyed() {
                 Some((entity, pos, angle, hitbox))
             } else {
                 None
@@ -347,7 +347,6 @@ pub(crate) fn projectiles(cvars: &Cvars, world: &mut World, gs: &mut GameState, 
         .collect();
 
     let mut to_remove = Vec::new();
-    let mut to_kill = Vec::new();
 
     let mut query_projectiles = <(Entity, &Weapon, &mut Pos, &Vel, &Owner)>::query();
     let (mut world_projectiles, mut world_rest) = world.split_for_query(&query_projectiles);
@@ -378,12 +377,11 @@ pub(crate) fn projectiles(cvars: &Cvars, world: &mut World, gs: &mut GameState, 
                     // Vehicle explosion first so it's below projectile explosion because it looks better.
                     let mut query_veh = <(&mut Vehicle,)>::query();
                     let (vehicle,) = query_veh.get_mut(&mut world_rest, veh_id).unwrap();
-                    vehicle.hp -= cvars.g_weapon_damage(proj_weap);
-                    if vehicle.hp <= 0.0 {
-                        vehicle.hp = 0.0;
+                    let dmg = cvars.g_weapon_damage(proj_weap);
+                    vehicle.damage(cvars, dmg);
+                    if vehicle.destroyed() {
                         gs.explosions
                             .push(Explosion::new(veh_pos.0, 1.0, gs.frame_time, false));
-                        to_kill.push(veh_id);
                     }
                     remove_projectile(cvars, gs, &mut to_remove, proj_id, proj_weap, proj_pos.0);
                     break;
@@ -393,7 +391,6 @@ pub(crate) fn projectiles(cvars: &Cvars, world: &mut World, gs: &mut GameState, 
                 {
                     gs.explosions
                         .push(Explosion::new(veh_pos.0, 1.0, gs.frame_time, false));
-                    to_kill.push(veh_id);
                     gs.bfg_beams.push((proj_pos.0, veh_pos.0));
                 }
             }
@@ -402,12 +399,6 @@ pub(crate) fn projectiles(cvars: &Cvars, world: &mut World, gs: &mut GameState, 
 
     for entity in to_remove {
         world.remove(entity);
-    }
-
-    for veh_id in to_kill {
-        let mut entry = world.entry(veh_id).unwrap();
-        let vehicle = entry.get_component_mut::<Vehicle>().unwrap();
-        vehicle.destroyed = true;
     }
 }
 

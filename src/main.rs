@@ -103,9 +103,9 @@
 //      [ ] surfaces
 //      [ ] pushing wrecks
 //      [ ] pushing moving vehicles
-// [ ] hp/health
-//      [ ] wrecks (vehicle turned into wreck immediately on hit)
-//      [ ] configurable
+// [x] hp/health
+//      [x] wrecks (vehicle turned into wreck immediately on hit, before explosion covers it)
+//      [x] configurable
 // [ ] weapons
 //      [ ] MG
 //          [x] 50 per reload
