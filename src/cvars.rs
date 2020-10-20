@@ -45,6 +45,7 @@ pub struct Cvars {
     /// Scale hit points of all vehicles
     pub g_armor: f64,
 
+    pub g_bfg_beam_damage_per_sec: f64,
     pub g_bfg_beam_range: f64,
     pub g_bfg_damage: f64,
     pub g_bfg_explosion_scale: f64,
@@ -641,6 +642,7 @@ impl Default for Cvars {
 
             g_armor: 50.0,
 
+            g_bfg_beam_damage_per_sec: 25.0,
             g_bfg_beam_range: 125.0,
             g_bfg_damage: 100.0, // pretty sure from orig RW testing
             g_bfg_explosion_scale: 1.0,

@@ -374,11 +374,11 @@ pub(crate) fn projectiles(cvars: &Cvars, world: &mut World, gs: &mut GameState, 
                 let dist2 = (proj_pos.0 - veh_pos.0).magnitude_squared();
                 // TODO proper hitbox
                 if dist2 <= 24.0 * 24.0 {
-                    // Vehicle explosion first so it's below projectile explosion because it looks better.
                     let mut query_veh = <(&mut Vehicle,)>::query();
                     let (vehicle,) = query_veh.get_mut(&mut world_rest, veh_id).unwrap();
                     let dmg = cvars.g_weapon_damage(proj_weap);
                     vehicle.damage(cvars, dmg);
+                    // Vehicle explosion first so it's below projectile explosion because it looks better.
                     if vehicle.destroyed() {
                         gs.explosions
                             .push(Explosion::new(veh_pos.0, 1.0, gs.frame_time, false));
@@ -389,8 +389,14 @@ pub(crate) fn projectiles(cvars: &Cvars, world: &mut World, gs: &mut GameState, 
                     && dist2 <= cvars.g_bfg_beam_range * cvars.g_bfg_beam_range
                     && map.collision_between(proj_pos.0, veh_pos.0).is_none()
                 {
-                    gs.explosions
-                        .push(Explosion::new(veh_pos.0, 1.0, gs.frame_time, false));
+                    let mut query_veh = <(&mut Vehicle,)>::query();
+                    let (vehicle,) = query_veh.get_mut(&mut world_rest, veh_id).unwrap();
+                    let dmg = cvars.g_bfg_beam_damage_per_sec * gs.dt;
+                    vehicle.damage(cvars, dmg);
+                    if vehicle.destroyed() {
+                        gs.explosions
+                            .push(Explosion::new(veh_pos.0, 1.0, gs.frame_time, false));
+                    }
                     gs.bfg_beams.push((proj_pos.0, veh_pos.0));
                 }
             }
