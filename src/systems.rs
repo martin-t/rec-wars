@@ -34,9 +34,9 @@ use crate::{
 };
 
 pub(crate) fn self_destruct(cvars: &Cvars, world: &mut World, gs: &mut GameState) {
-    let mut query = <(&mut Vehicle, &mut Pos)>::query();
-    for (vehicle, veh_pos) in query.iter_mut(world) {
-        if gs.input.self_destruct && !vehicle.destroyed() {
+    let mut query = <(&mut Vehicle, &mut Pos, &Input)>::query();
+    for (vehicle, veh_pos, input) in query.iter_mut(world) {
+        if input.self_destruct && !vehicle.destroyed() {
             vehicle.hp_fraction = 0.0;
             gs.explosions.push(Explosion::new(
                 veh_pos.0,
