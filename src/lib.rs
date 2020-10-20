@@ -268,6 +268,12 @@ impl Game {
             *input = ai.input(&mut self.gs.rng);
         }
 
+        *self
+            .legion
+            .entry(self.gs.player_entity)
+            .unwrap()
+            .get_component_mut::<Input>()
+            .unwrap() = self.gs.input.clone();
         let mut query_vehicles = <(&Vehicle, &mut Input)>::query();
         for (vehicle, input) in query_vehicles.iter_mut(&mut self.legion) {
             if vehicle.destroyed() {
@@ -280,12 +286,6 @@ impl Game {
                 //*input = self.gs.input.clone();
             }
         }
-        *self
-            .legion
-            .entry(self.gs.player_entity)
-            .unwrap()
-            .get_component_mut::<Input>()
-            .unwrap() = self.gs.input.clone();
 
         let mut query = <(&GuidedMissile, &mut Input)>::query();
         for (_, input) in query.iter_mut(&mut self.legion) {
