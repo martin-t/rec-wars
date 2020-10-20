@@ -175,10 +175,10 @@ pub(crate) fn vehicle_logic(
         }
 
         // Turret turning
-        if gs.input.turret_left {
+        if input.turret_left {
             vehicle.turret_angle -= cvars.g_turret_turn_speed * gs.dt;
         }
-        if gs.input.turret_right {
+        if input.turret_right {
             vehicle.turret_angle += cvars.g_turret_turn_speed * gs.dt;
         }
 
