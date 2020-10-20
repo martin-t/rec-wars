@@ -11,6 +11,7 @@
 #[macro_use]
 mod debugging;
 
+mod ai;
 mod components;
 mod cvars;
 mod game_state;
@@ -20,6 +21,7 @@ mod systems;
 use std::collections::VecDeque;
 use std::f64::consts::PI;
 
+use ai::Ai;
 use legion::{component, query::IntoQuery, World};
 
 use js_sys::Array;
@@ -163,6 +165,7 @@ impl Game {
                 TurnRate(0.0),
                 hitbox,
                 EMPTY_INPUT.clone(),
+                Ai::default(),
             ));
         }
 
@@ -260,19 +263,21 @@ impl Game {
             progress <= 1.0
         });
 
-        let mut query = <(&Vehicle, &mut Input)>::query();
-        for (vehicle, input) in query.iter_mut(&mut self.legion) {
+        let mut query_ai = <(&mut Input, &mut Ai)>::query();
+        for (input, ai) in query_ai.iter_mut(&mut self.legion) {
+            *input = ai.input(&mut self.gs.rng);
+        }
+
+        let mut query_vehicles = <(&Vehicle, &mut Input)>::query();
+        for (vehicle, input) in query_vehicles.iter_mut(&mut self.legion) {
             if vehicle.destroyed {
                 // TODO allow changing weap while dead, maybe others
                 *input = EMPTY_INPUT.clone();
             } else if self.gs.guided_missile.is_some() {
                 *input = self.gs.input.vehicle_while_guiding();
             } else {
-                // for now all vehicles move together
+                // all vehicles move together
                 //*input = self.gs.input.clone();
-
-                // all vehicles behave randomly
-                input.randomize(&mut self.gs.rng);
             }
         }
         *self
