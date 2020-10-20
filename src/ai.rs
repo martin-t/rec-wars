@@ -11,17 +11,25 @@ pub(crate) struct Ai {
 
 impl Ai {
     pub(crate) fn input(&mut self, rng: &mut SmallRng) -> Input {
-        if rng.gen_bool(0.05) {
-            self.movement = rng.gen_range(-1, 2);
+        if rng.gen_bool(0.01) {
+            let r: f64 = rng.gen();
+            dbg_textd!(r);
+            if r < 0.5 {
+                self.movement = 1;
+            } else if r < 0.75 {
+                self.movement = 0;
+            } else {
+                self.movement = -1;
+            }
         }
 
-        if rng.gen_bool(0.05) {
+        if rng.gen_bool(0.03) {
             self.turning = rng.gen_range(-1, 2);
         }
 
         if !self.firing && rng.gen_bool(0.01) {
             self.firing = true;
-        } else if self.firing && rng.gen_bool(0.05) {
+        } else if self.firing && rng.gen_bool(0.03) {
             self.firing = false;
         }
 
@@ -32,8 +40,8 @@ impl Ai {
             right: self.turning == 1,
             turret_left: rng.gen_bool(0.001),
             turret_right: rng.gen_bool(0.001),
-            prev_weapon: rng.gen_bool(0.001),
-            next_weapon: rng.gen_bool(0.001),
+            prev_weapon: rng.gen_bool(0.02),
+            next_weapon: rng.gen_bool(0.01),
             fire: self.firing,
             mine: rng.gen_bool(0.001),
             self_destruct: rng.gen_bool(0.0001),
