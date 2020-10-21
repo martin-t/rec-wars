@@ -134,7 +134,7 @@ impl Game {
             Vel(Vec2f::zero()),
             Angle(spawn_angle),
             TurnRate(0.0),
-            hitbox,
+            hitbox, // keep hitbox a separate component, later missiles should have them too
             EMPTY_INPUT.clone(),
         ));
 
