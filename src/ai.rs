@@ -13,7 +13,6 @@ impl Ai {
     pub(crate) fn input(&mut self, rng: &mut SmallRng) -> Input {
         if rng.gen_bool(0.01) {
             let r: f64 = rng.gen();
-            dbg_textd!(r);
             if r < 0.5 {
                 self.movement = 1;
             } else if r < 0.75 {
