@@ -34,7 +34,6 @@
 //                  https://github.com/ryanisaacg/quicksilver/issues/552
 //                  https://github.com/RustyVolley/RustyVolleySrc in 0.3 has sound
 //              8 example games in readme (mostly bad)
-//          macroquad - no docs?
 //      rendering only
 //          https://crates.io/crates/luminance - mentions webgl/canvas
 //          https://crates.io/crates/miniquad - should support WASM
