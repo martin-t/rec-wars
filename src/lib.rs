@@ -256,6 +256,8 @@ impl Game {
     }
 
     fn tick(&mut self, cvars: &Cvars) {
+        dbg_textf!("{}", env!("GIT_VERSION"));
+
         // Cleanup old explosions
         let frame_time = self.gs.frame_time; // borrowchk
         self.gs.explosions.retain(|explosion| {
