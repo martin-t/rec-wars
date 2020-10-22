@@ -755,7 +755,7 @@ impl Game {
         )?;
 
         // Draw debug text
-        let mut y = 20.0;
+        let mut y = 25.0;
         DEBUG_TEXTS.with(|texts| {
             let mut texts = texts.borrow_mut();
             if cvars.d_text {
