@@ -45,6 +45,8 @@ use debugging::{DbgCount, DEBUG_CROSSES, DEBUG_LINES, DEBUG_TEXTS};
 use game_state::{Explosion, GameState, Input, EMPTY_INPUT};
 use map::{F64Ext, Kind, Map, Vec2f, VecExt, TILE_SIZE};
 
+const STATS_FRAMES: usize = 60;
+
 #[wasm_bindgen]
 pub struct Game {
     /// I want to track update and render time in Rust so i can draw the FPS counter and keep stats.
@@ -227,7 +229,7 @@ impl Game {
         }
 
         let end = self.performance.now();
-        if self.update_durations.len() >= 60 {
+        if self.update_durations.len() >= STATS_FRAMES {
             self.update_durations.pop_front();
         }
         self.update_durations.push_back(end - start);
@@ -689,9 +691,13 @@ impl Game {
         self.context.set_shadow_offset_x(0.0);
         self.context.set_shadow_offset_y(0.0);
 
-        self.context.set_fill_style(&"red".into());
-
         // Draw perf info
+        self.context.set_fill_style(&"red".into());
+        self.context.fill_text(
+            &format!("last {} frames:", STATS_FRAMES),
+            self.canvas_size.x - 150.0,
+            self.canvas_size.y - 75.0,
+        )?;
         if !self.update_durations.is_empty() {
             let mut sum = 0.0;
             let mut max = 0.0;
@@ -762,7 +768,7 @@ impl Game {
         });
 
         let end = self.performance.now();
-        if self.draw_durations.len() >= 60 {
+        if self.draw_durations.len() >= STATS_FRAMES {
             self.draw_durations.pop_front();
         }
         self.draw_durations.push_back(end - start);
