@@ -12,6 +12,23 @@ use legion::Entity;
 use crate::{cvars::Cvars, map::Vec2f};
 
 #[derive(Debug, Clone)]
+pub(crate) struct Player {
+    pub(crate) name: String,
+    pub(crate) vehicle: Entity,
+    pub(crate) guided_missile: Option<Entity>,
+}
+
+impl Player {
+    pub(crate) fn new(name: String, vehicle: Entity) -> Self {
+        Self {
+            name,
+            vehicle,
+            guided_missile: None,
+        }
+    }
+}
+
+#[derive(Debug, Clone)]
 pub(crate) struct Vehicle {
     pub(crate) veh_type: VehicleType,
     /// Angle from vehicle, see Coord system for more
@@ -115,7 +132,7 @@ pub(crate) struct GuidedMissile;
 #[derive(Debug, Clone, Copy)]
 pub(crate) struct Bfg;
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub(crate) struct Owner(pub(crate) Entity);
 
 #[derive(Debug, Clone, Copy)]

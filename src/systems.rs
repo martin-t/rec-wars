@@ -19,6 +19,7 @@ use rand_distr::StandardNormal;
 use vek::Clamp;
 
 use crate::{
+    components::Player,
     components::{
         Ammo, Angle, Bfg, Cb, GuidedMissile, Hitbox, Mg, Owner, Pos, Time, TurnRate, Vehicle, Vel,
         Weapon, WEAPS_CNT,
@@ -197,8 +198,8 @@ pub(crate) fn vehicle_logic(
 
 pub(crate) fn shooting(cvars: &Cvars, world: &mut World, gs: &mut GameState, map: &Map) {
     let mut cmds = CommandBuffer::new(world);
-    let mut query = <(Entity, &mut Vehicle, &Pos, &Vel, &Angle, &Input)>::query();
-    for (&veh_id, vehicle, veh_pos, veh_vel, veh_angle, input) in query.iter_mut(world) {
+    let mut query = <(&mut Vehicle, &Pos, &Vel, &Angle, &Input, &Owner)>::query();
+    for (vehicle, veh_pos, veh_vel, veh_angle, input, &owner) in query.iter_mut(world) {
         if vehicle.destroyed() || !input.fire {
             continue;
         }
@@ -232,7 +233,6 @@ pub(crate) fn shooting(cvars: &Cvars, world: &mut World, gs: &mut GameState, map
                 }
             }
             let pos = Pos(shot_origin);
-            let owner = Owner(veh_id);
             match vehicle.cur_weapon {
                 Weapon::Mg => {
                     let r: f64 = gs.rng.sample(StandardNormal);
@@ -295,10 +295,6 @@ pub(crate) fn shooting(cvars: &Cvars, world: &mut World, gs: &mut GameState, map
                     cmds.push((Weapon::Hm, pos, vel, owner));
                 }
                 Weapon::Gm => {
-                    if veh_id != gs.player_entity {
-                        // TODO let everyone shoot GMs
-                        continue;
-                    }
                     let gm = GuidedMissile;
                     let shot_vel = Vec2f::new(cvars.g_guided_missile_speed_initial, 0.0)
                         .rotated_z(shot_angle)
@@ -306,9 +302,17 @@ pub(crate) fn shooting(cvars: &Cvars, world: &mut World, gs: &mut GameState, map
                     let vel = Vel(shot_vel);
                     let angle = Angle(vel.0.to_angle());
                     let tr = TurnRate(0.0);
+                    let player = owner.0;
                     let gm_entity =
                         cmds.push((Weapon::Gm, gm, pos, vel, angle, tr, owner, EMPTY_INPUT));
-                    gs.guided_missile = Some(gm_entity);
+                    cmds.exec_mut(move |legion| {
+                        legion
+                            .entry(player)
+                            .unwrap()
+                            .get_component_mut::<Player>()
+                            .unwrap()
+                            .guided_missile = Some(gm_entity);
+                    });
                 }
                 Weapon::Bfg => {
                     let shot_vel = Vec2f::new(cvars.g_bfg_speed, 0.0).rotated_z(shot_angle)
@@ -334,19 +338,19 @@ pub(crate) fn gm_turning(cvars: &Cvars, world: &mut World, gs: &GameState) {
 }
 
 pub(crate) fn projectiles(cvars: &Cvars, world: &mut World, gs: &mut GameState, map: &Map) {
-    let mut query_vehicles = <(Entity, &Vehicle, &Pos, &Angle, &Hitbox)>::query();
-    let vehicles: Vec<(Entity, _, _, _)> = query_vehicles
+    let mut query_vehicles = <(Entity, &Vehicle, &Pos, &Angle, &Hitbox, &Owner)>::query();
+    let vehicles: Vec<(Entity, _, _, _, _)> = query_vehicles
         .iter(world)
-        .filter_map(|(&entity, vehicle, &pos, &angle, &hitbox)| {
+        .filter_map(|(&veh_id, vehicle, &pos, &angle, &hitbox, &owner)| {
             if !vehicle.destroyed() {
-                Some((entity, pos, angle, hitbox))
+                Some((veh_id, pos, angle, hitbox, owner))
             } else {
                 None
             }
         })
         .collect();
 
-    let mut to_remove = Vec::new();
+    let mut cmds = CommandBuffer::new(world);
 
     let mut query_projectiles = <(Entity, &Weapon, &mut Pos, &Vel, &Owner)>::query();
     let (mut world_projectiles, mut world_rest) = world.split_for_query(&query_projectiles);
@@ -361,16 +365,24 @@ pub(crate) fn projectiles(cvars: &Cvars, world: &mut World, gs: &mut GameState, 
         }
 
         let collision = map.collision_between(proj_pos.0, new_pos);
-        if let Some(col_pos) = collision {
-            remove_projectile(cvars, gs, &mut to_remove, proj_id, proj_weap, col_pos);
+        if let Some(hit_pos) = collision {
+            remove_projectile(
+                cvars,
+                gs,
+                &mut cmds,
+                proj_id,
+                proj_weap,
+                proj_owner.0,
+                hit_pos,
+            );
             continue;
         }
 
         proj_pos.0 = new_pos;
 
-        for (veh_id, veh_pos, _veh_angle, _veh_hitbox) in &vehicles {
+        for (veh_id, veh_pos, _veh_angle, _veh_hitbox, veh_owner) in &vehicles {
             let veh_id = *veh_id;
-            if veh_id != proj_owner.0 {
+            if veh_owner != proj_owner {
                 let dist2 = (proj_pos.0 - veh_pos.0).magnitude_squared();
                 // TODO proper hitbox
                 if dist2 <= 24.0 * 24.0 {
@@ -383,7 +395,15 @@ pub(crate) fn projectiles(cvars: &Cvars, world: &mut World, gs: &mut GameState, 
                         gs.explosions
                             .push(Explosion::new(veh_pos.0, 1.0, gs.frame_time, false));
                     }
-                    remove_projectile(cvars, gs, &mut to_remove, proj_id, proj_weap, proj_pos.0);
+                    remove_projectile(
+                        cvars,
+                        gs,
+                        &mut cmds,
+                        proj_id,
+                        proj_weap,
+                        proj_owner.0,
+                        proj_pos.0,
+                    );
                     break;
                 } else if proj_weap == Weapon::Bfg
                     && dist2 <= cvars.g_bfg_beam_range * cvars.g_bfg_beam_range
@@ -403,46 +423,50 @@ pub(crate) fn projectiles(cvars: &Cvars, world: &mut World, gs: &mut GameState, 
         }
     }
 
-    for entity in to_remove {
-        world.remove(entity);
-    }
+    cmds.flush(world);
 }
 
 /// Right now, CBs are the only timed projectiles, long term, might wanna add timeouts to more
 /// to avoid too many entities on huge maps..
 pub(crate) fn projectiles_timeout(cvars: &Cvars, world: &mut World, gs: &mut GameState) {
-    let mut to_remove = Vec::new();
+    let mut cmds = CommandBuffer::new(world);
 
-    let mut query = <(Entity, &Weapon, &Pos, &Time)>::query();
-    for (&entity, &weap, pos, time) in query.iter(world) {
+    let mut query = <(Entity, &Weapon, &Pos, &Time, &Owner)>::query();
+    for (&entity, &weap, pos, time, owner) in query.iter(world) {
         if gs.frame_time > time.0 {
-            remove_projectile(cvars, gs, &mut to_remove, entity, weap, pos.0);
+            remove_projectile(cvars, gs, &mut cmds, entity, weap, owner.0, pos.0);
         }
     }
 
-    for entity in to_remove {
-        world.remove(entity);
-    }
+    cmds.flush(world);
 }
 
 fn remove_projectile(
     cvars: &Cvars,
     gs: &mut GameState,
-    to_remove: &mut Vec<Entity>,
-    entity: Entity,
-    weap: Weapon,
-    pos: Vec2f,
+    cmds: &mut CommandBuffer,
+    proj: Entity,
+    proj_weap: Weapon,
+    proj_owner: Entity,
+    hit_pos: Vec2f,
 ) {
-    if let Some(expl_scale) = cvars.g_weapon_explosion_scale(weap) {
+    if let Some(expl_scale) = cvars.g_weapon_explosion_scale(proj_weap) {
         gs.explosions.push(Explosion::new(
-            pos,
+            hit_pos,
             expl_scale,
             gs.frame_time,
-            weap == Weapon::Bfg,
+            proj_weap == Weapon::Bfg,
         ));
     }
-    if weap == Weapon::Gm {
-        gs.guided_missile = None;
+    if proj_weap == Weapon::Gm {
+        cmds.exec_mut(move |world| {
+            world
+                .entry(proj_owner)
+                .unwrap()
+                .get_component_mut::<Player>()
+                .unwrap()
+                .guided_missile = None;
+        });
     }
-    to_remove.push(entity);
+    cmds.remove(proj);
 }

@@ -21,7 +21,6 @@ pub(crate) struct GameState {
     pub(crate) bfg_beams: Vec<(Vec2f, Vec2f)>,
     /// Player entity - the vehicle
     pub(crate) player_entity: Entity,
-    pub(crate) guided_missile: Option<Entity>,
     pub(crate) explosions: Vec<Explosion>,
 }
 
@@ -89,7 +88,7 @@ impl Input {
     }
 
     /// Subset of inputs to control the missile
-    pub(crate) fn guided_missile(&self) -> Self {
+    pub(crate) fn missile_while_guiding(&self) -> Self {
         Self {
             up: true,
             down: false,
@@ -97,8 +96,9 @@ impl Input {
         }
     }
 
-    /// Subset of inputs to control the vehicle while guiding a missile.
+    /// Subset of inputs to control the vehicle while guiding a missile
     pub(crate) fn vehicle_while_guiding(&self) -> Self {
+        // TODO what exactly is allowed? mines? make configurable
         Self {
             left: false,
             right: false,

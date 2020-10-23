@@ -37,8 +37,8 @@ use wasm_bindgen::JsCast;
 use web_sys::{CanvasRenderingContext2d, HtmlImageElement, Performance};
 
 use components::{
-    Ammo, Angle, Bfg, Cb, GuidedMissile, Hitbox, Mg, Pos, TurnRate, Vehicle, VehicleType, Vel,
-    Weapon,
+    Ammo, Angle, Bfg, Cb, GuidedMissile, Hitbox, Mg, Owner, Player, Pos, TurnRate, Vehicle,
+    VehicleType, Vel, Weapon,
 };
 use cvars::{Cvars, TickrateMode};
 use debugging::{DbgCount, DEBUG_CROSSES, DEBUG_LINES, DEBUG_TEXTS};
@@ -124,21 +124,36 @@ impl Game {
         let map = map::load_map(map_text, surfaces);
         let mut legion = World::default();
 
-        let veh_type = VehicleType::n(rng.gen_range(0, 3)).unwrap();
+        let dummy_entity = legion.push(());
 
-        let player_vehicle = Vehicle::new(cvars, veh_type);
+        let name = "Player 1".to_owned();
+        let player = Player::new(name, dummy_entity);
+
+        let player_entity = legion.push((player, EMPTY_INPUT.clone()));
+
+        let veh_type = VehicleType::n(rng.gen_range(0, 3)).unwrap();
+        let vehicle = Vehicle::new(cvars, veh_type);
         let (spawn_pos, spawn_angle) = map.random_spawn(&mut rng);
         let hitbox = cvars.g_vehicle_hitbox(veh_type);
+        let owner = Owner(player_entity);
 
-        let player_entity = legion.push((
-            player_vehicle,
+        let vehicle_entity = legion.push((
+            vehicle,
             Pos(spawn_pos),
             Vel(Vec2f::zero()),
             Angle(spawn_angle),
             TurnRate(0.0),
             hitbox, // keep hitbox a separate component, later missiles should have them too
             EMPTY_INPUT.clone(),
+            owner,
         ));
+
+        legion
+            .entry(player_entity)
+            .unwrap()
+            .get_component_mut::<Player>()
+            .unwrap()
+            .vehicle = vehicle_entity;
 
         let mut gs = GameState {
             rng,
@@ -148,18 +163,24 @@ impl Game {
             railguns: Vec::new(),
             bfg_beams: Vec::new(),
             player_entity,
-            guided_missile: None,
             explosions: Vec::new(),
         };
         let gs_prev = gs.clone();
 
-        for _ in 0..50 {
+        for i in 0..50 {
+            let name = format!("Bot {}", i);
+            let player = Player::new(name, dummy_entity);
+
+            let player_entity = legion.push((player, EMPTY_INPUT.clone(), Ai::default()));
+
             let veh_type = VehicleType::n(gs.rng.gen_range(0, 3)).unwrap();
             let vehicle = Vehicle::new(cvars, veh_type);
             let pos = map.random_nonwall(&mut gs.rng).0;
             let angle = gs.rng.gen_range(0.0, 2.0 * PI);
             let hitbox = cvars.g_vehicle_hitbox(veh_type);
-            legion.push((
+            let owner = Owner(player_entity);
+
+            let vehicle_entity = legion.push((
                 vehicle,
                 Pos(pos),
                 Vel(Vec2f::zero()),
@@ -167,9 +188,18 @@ impl Game {
                 TurnRate(0.0),
                 hitbox,
                 EMPTY_INPUT.clone(),
-                Ai::default(),
+                owner,
             ));
+
+            legion
+                .entry(player_entity)
+                .unwrap()
+                .get_component_mut::<Player>()
+                .unwrap()
+                .vehicle = vehicle_entity;
         }
+
+        legion.remove(dummy_entity);
 
         Self {
             performance: web_sys::window().unwrap().performance().unwrap(),
@@ -267,18 +297,63 @@ impl Game {
             progress <= 1.0
         });
 
+        // AI
         let mut query_ai = <(&mut Input, &mut Ai)>::query();
         for (input, ai) in query_ai.iter_mut(&mut self.legion) {
             *input = ai.input(&mut self.gs.rng);
         }
 
+        // Player 1 input
         *self
             .legion
             .entry(self.gs.player_entity)
             .unwrap()
             .get_component_mut::<Input>()
             .unwrap() = self.gs.input.clone();
-        let mut query_vehicles = <(&Vehicle, &mut Input)>::query();
+
+        // Copy (parts of) player input to vehicles and missiles
+        // NOTE about potential bugs when refactoring:
+        //  - vehicle can move while dead (this is a classis at this point)
+        //  - can guide missile while dead
+        //  - can guide multiple missiles (LATER make optional by cvar)
+        //  - missile input is not reset after death / launching another (results in flying in circles)
+        let mut players = Vec::new();
+        let mut query_players = <(&Player, &Input)>::query();
+        for (player, input) in query_players.iter(&self.legion) {
+            players.push((player.vehicle, player.guided_missile, input.clone()));
+        }
+        for (vehicle_entity, maybe_gm_entity, input) in players {
+            if let Some(gm_entity) = maybe_gm_entity {
+                *self
+                    .legion
+                    .entry(gm_entity)
+                    .unwrap()
+                    .get_component_mut::<Input>()
+                    .unwrap() = input.missile_while_guiding();
+                let mut vehicle_entry = self.legion.entry(vehicle_entity).unwrap();
+                let destroyed = vehicle_entry
+                    .get_component::<Vehicle>()
+                    .unwrap()
+                    .destroyed();
+                let veh_input = vehicle_entry.get_component_mut::<Input>().unwrap();
+                if destroyed {
+                    *veh_input = EMPTY_INPUT.clone();
+                } else {
+                    *veh_input = input.vehicle_while_guiding();
+                }
+            } else {
+                *self
+                    .legion
+                    .entry(vehicle_entity)
+                    .unwrap()
+                    .get_component_mut::<Input>()
+                    .unwrap() = input;
+            }
+        }
+
+        // FIXME destroyed
+
+        /*let mut query_vehicles = <(&Vehicle, &mut Input)>::query();
         for (vehicle, input) in query_vehicles.iter_mut(&mut self.legion) {
             if vehicle.destroyed() {
                 // TODO allow changing weap while dead, maybe others
@@ -287,14 +362,14 @@ impl Game {
                 *input = self.gs.input.vehicle_while_guiding();
             } else {
                 // all vehicles move together
-                //*input = self.gs.input.clone();
+                // *input = self.gs.input.clone();
             }
-        }
+        }*/
 
         let mut query = <(&GuidedMissile, &mut Input)>::query();
         for (_, input) in query.iter_mut(&mut self.legion) {
             // for now all guided missiles move together
-            *input = self.gs.input.guided_missile();
+            *input = self.gs.input.missile_while_guiding();
         }
 
         systems::vehicle_logic(cvars, &mut self.legion, &mut self.gs, &self.gs_prev);
@@ -325,10 +400,14 @@ impl Game {
         //      if disabling, try changing quality
         self.context.set_image_smoothing_enabled(cvars.r_smoothing);
 
-        let controlled_entity_entry = if let Some(gm_entity) = self.gs.guided_missile {
+        let player_entry = self.legion.entry(self.gs.player_entity).unwrap();
+        let player = player_entry.get_component::<Player>().unwrap();
+        let maybe_gm_entity = player.guided_missile;
+        let player_vehicle_entity = player.vehicle;
+        let controlled_entity_entry = if let Some(gm_entity) = maybe_gm_entity {
             self.legion.entry(gm_entity).unwrap()
         } else {
-            self.legion.entry(self.gs.player_entity).unwrap()
+            self.legion.entry(player_vehicle_entity).unwrap()
         };
         let &Pos(player_entity_pos) = controlled_entity_entry.get_component::<Pos>().unwrap();
 
@@ -565,7 +644,7 @@ impl Game {
 
         let mut query = <(&Vehicle, &Pos)>::query();
         let (player_vehicle, player_veh_pos) =
-            query.get(&self.legion, self.gs.player_entity).unwrap();
+            query.get(&self.legion, player_vehicle_entity).unwrap();
 
         // Draw HUD:
 
