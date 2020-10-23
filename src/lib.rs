@@ -317,6 +317,11 @@ impl Game {
         //  - can guide missile while dead
         //  - can guide multiple missiles (LATER make optional by cvar)
         //  - missile input is not reset after death / launching another (results in flying in circles)
+        let mut query_reset_input =
+            <(&mut Input,)>::query().filter(component::<Vehicle>() | component::<GuidedMissile>());
+        for (input,) in query_reset_input.iter_mut(&mut self.legion) {
+            *input = EMPTY_INPUT.clone();
+        }
         let mut players = Vec::new();
         let mut query_players = <(&Player, &Input)>::query();
         for (player, input) in query_players.iter(&self.legion) {
@@ -330,46 +335,22 @@ impl Game {
                     .unwrap()
                     .get_component_mut::<Input>()
                     .unwrap() = input.missile_while_guiding();
-                let mut vehicle_entry = self.legion.entry(vehicle_entity).unwrap();
-                let destroyed = vehicle_entry
-                    .get_component::<Vehicle>()
-                    .unwrap()
-                    .destroyed();
-                let veh_input = vehicle_entry.get_component_mut::<Input>().unwrap();
-                if destroyed {
-                    *veh_input = EMPTY_INPUT.clone();
-                } else {
+            }
+
+            let mut vehicle_entry = self.legion.entry(vehicle_entity).unwrap();
+            let destroyed = vehicle_entry
+                .get_component::<Vehicle>()
+                .unwrap()
+                .destroyed();
+            let veh_input = vehicle_entry.get_component_mut::<Input>().unwrap();
+
+            if !destroyed {
+                if maybe_gm_entity.is_some() {
                     *veh_input = input.vehicle_while_guiding();
+                } else {
+                    *veh_input = input.clone();
                 }
-            } else {
-                *self
-                    .legion
-                    .entry(vehicle_entity)
-                    .unwrap()
-                    .get_component_mut::<Input>()
-                    .unwrap() = input;
             }
-        }
-
-        // FIXME destroyed
-
-        /*let mut query_vehicles = <(&Vehicle, &mut Input)>::query();
-        for (vehicle, input) in query_vehicles.iter_mut(&mut self.legion) {
-            if vehicle.destroyed() {
-                // TODO allow changing weap while dead, maybe others
-                *input = EMPTY_INPUT.clone();
-            } else if self.gs.guided_missile.is_some() {
-                *input = self.gs.input.vehicle_while_guiding();
-            } else {
-                // all vehicles move together
-                // *input = self.gs.input.clone();
-            }
-        }*/
-
-        let mut query = <(&GuidedMissile, &mut Input)>::query();
-        for (_, input) in query.iter_mut(&mut self.legion) {
-            // for now all guided missiles move together
-            *input = self.gs.input.missile_while_guiding();
         }
 
         systems::vehicle_logic(cvars, &mut self.legion, &mut self.gs, &self.gs_prev);
