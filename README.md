@@ -6,14 +6,14 @@
 </div>
 <br />
 
+[![Gameplay](media/screenshot.jpg)](https://martin-t.gitlab.io/gitlab-pages/rec-wars/web)
+
 _**[Play Online](https://martin-t.gitlab.io/gitlab-pages/rec-wars/web)**_
 
 TODOs
 - badges (flat like https://github.com/dtolnay/enumn ?)
     - discord? like https://github.com/not-fl3/macroquad
 
-- logo? use in-game entities to spell out RecWars?
-- screenshot - clicking opens game?
 - Key Features
 
 - goals - web client+server if possible, native client+server
