@@ -1,16 +1,7 @@
-// TODO MVP:
-// [x] get simple.wasm working
-// [x] compile rust to WASM, load that
-// [x] canvas
-// [x] render background
-// [x] move around, check perf
-//      https://github.com/mrdoob/stats.js/
-//      [ ] make explosion sprite smaller
-//      https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Tutorial/Optimizing_canvas
-//          [x] round to whole pixels (orig RW does it)
-//          [ ] webgl
+// Master TODO list:
+// MVP:
 // [x] pick a math lib, don't overthink it
-// [ ] engine? rendering crate? nice if native and WASM backends
+// [ ] canvas 2D is slow, pick an engine or rendering crate
 //      [x] check https://arewegameyet.rs/ecosystem/engines/
 //      [x] check https://github.com/dasifefe/rust-game-development-frameworks
 //      engines
@@ -39,26 +30,12 @@
 //          https://crates.io/crates/miniquad - should support WASM
 //          wgpu?
 //      profiling
+//          [ ] make explosion sprite smaller
 //          https://github.com/EmbarkStudios/puffin
 //          https://github.com/bombomby/optick-rs
 //          list of tools: Instruction counts @ https://blog.mozilla.org/nnethercote/2020/09/08/how-to-speed-up-the-rust-compiler-one-last-time/
-// [x] image fails to draw the first time after opening browser
-//      bug in python server maybe? - doesn't happen with rhino
-// [ ] server framerate when minimized - https://developer.mozilla.org/en-US/docs/Web/API/Window/setImmediate#Notes
-//      postMessage / MessageChannel / https://github.com/YuzuJS/setImmediate polyfill
-// [ ] extract/screenshot/record assets from RecWar or find alternatives
-//      [ ] images
-//          [x] weapon icons
-//          [x] weapons
-//          [ ] vehicles + skins
-//          [ ] cow, stolen effects
-//          [x] wrecks
-//      [ ] sounds
-//          [ ] weapons, explosions, self destruct
-//          [ ] cow
-//          [ ] engine noise
-//              [ ] how does it change with speed?
-// [ ] CI - GH actions / travis, mirror to GL???
+//      note to self - renderdoc for graphics debugging
+//      [ ] FAQ - stuttering/tearing due to compositor - Alt+Shift+f12 - somehow this doesn't work anymore
 // [x] load maps
 // [x] cvars
 //      https://crates.io/crates/cvar
@@ -79,13 +56,39 @@
 //          - how to do nested queries without copying? split world? maybe systems make this easier?
 //          + slightly slower in WASM, especially debug mode
 //          + resources, commands?
+// [x] explosions
+//      [x] sizes
+// [x] hp/health
+//      [x] wrecks (vehicle turned into wreck immediately on hit, before explosion covers it)
+//      [x] configurable
+// [x] player separate from vehicle
+// [x] icon
+// [x] version info
+// [ ] mostly working weapons
+// [ ] respawning
+// [ ] scores
+// [ ] primitive bots
+// [ ] splitscreen
+//      [ ] decent default binds (2x for splitscreen)
+// 1.0:
+// [ ] CI - GH actions / travis, mirror to GL???
+// [ ] extract/screenshot/record assets from RecWar or find alternatives
+//      [ ] images
+//          [x] weapon icons
+//          [x] weapons
+//          [ ] vehicles + skins
+//          [ ] cow, stolen effects
+//          [x] wrecks
+//      [ ] sounds
+//          [ ] weapons, explosions, self destruct
+//          [ ] cow
+//          [ ] engine noise
+//              [ ] how does it change with speed?
 // [ ] render vehicles
 //      [x] basic tank
 //      [ ] skins, colors
 //              canvas imageData?
 //      [x] vehicle types
-// [x] explosions
-//      [x] sizes
 // [ ] movement
 //      [x] tank
 //      [x] hovercraft
@@ -102,9 +105,6 @@
 //      [ ] surfaces
 //      [ ] pushing wrecks
 //      [ ] pushing moving vehicles
-// [x] hp/health
-//      [x] wrecks (vehicle turned into wreck immediately on hit, before explosion covers it)
-//      [x] configurable
 // [ ] weapons
 //      [ ] MG
 //          [x] 50 per reload
@@ -166,8 +166,6 @@
 //      [ ] seems damage depends on distance:
 //          ~150 at center
 //          range more than 64+64+32 with 40 health - maybe 0 dmg at ~175
-// [ ] player separate from vehicle
-// [ ] what happens to Entity handles after a player disconnects
 // [ ] UI
 //      requirements
 //          minimum: select mode, map, bots, start game
@@ -191,7 +189,6 @@
 //          https://github.com/BezPowell/blitz-path
 //          https://github.com/Winsalot/AutumnRTS/
 //      [ ] roles / commands
-// [ ] decent default binds (2x for splitscreen)
 // [ ] hosting
 //      GH pages? - needs public repo first
 //      domain? SSL?
@@ -199,8 +196,7 @@
 //          needs to be stateful
 //          https://github.com/Ralith/masterserve
 //      if dedicated servers, need at least 2 - EU and US
-// [x] icon
-// [ ] network
+// [ ] network multiplayer
 //      https://arewegameyet.rs/ecosystem/networking/
 //          https://crates.io/crates/quinn - what is QUIC?
 //          https://crates.io/crates/laminar - mentions only UDP, not WASM
@@ -216,19 +212,17 @@
 //      [ ] prediction / reconciliation
 //          braid / jonathan blow - fps independent
 //          https://github.com/pond3r/ggpo/tree/master/doc
+//      [ ] server framerate when minimized - https://developer.mozilla.org/en-US/docs/Web/API/Window/setImmediate#Notes
+//          postMessage / MessageChannel / https://github.com/YuzuJS/setImmediate polyfill
+//      [ ] what happens to Entity handles after a player disconnects
 // [ ] chat
 // [ ] voting
 //      [ ] mode
 //      [ ] map
 //      [ ] cvars
-// [ ] analytics
-//      [x] google analytics
-//      [ ] master server
-// [ ] FAQ - stuttering/tearing due to compositor - Alt+Shift+f12 - somehow this doesn't work anymore
-//      note to self - renderdoc for graphics debugging
-// [ ] version info
-// [ ] focus convas on (re)load (e.g. after touching browser console and reloading)
+// [ ] focus canvas on (re)load (e.g. after touching browser console and reloading)
 // nice to have:
+// [ ] logo (RecWars spelled out by in-game entities?)
 // [ ] GM - presing fire again switches back to tank
 // [ ] record seed+input (WASM should be reproducible when avoiding NaNs) - replay, debugging
 // [ ] allow MG to shoot down missiles
@@ -272,7 +266,7 @@
 //                  private?
 //                  server say? (lol no collision detection?)
 //          [ ] BFG does a tiny bit of dmg when hitting a wall with a tank on the other side
-//              probably BFG briefly enters wall before collision is detected and does proximity dmg
+//              probably BFG briefly enters wall before collision is detected and does beam dmg
 //          [ ] tank could shoot through a wall tile by putting the turret inside
 // [ ] cleanup unused stuff from assets
 // [ ] code cleanup
@@ -282,5 +276,5 @@
 // [ ] all the LATERs - they mean something can be done better but marking it as a todo would be just noise when grepping
 
 fn main() {
-    println!("There is no native binary yet, compile to WASM instead (see readme)");
+    println!("There is no native binary yet, compile to WASM instead (see lib.rs and readme)");
 }
