@@ -6,9 +6,12 @@ use wasm_bindgen::prelude::*;
 
 use crate::map::Vec2f;
 
-/// Everyting that changes during the game
+/// Things that are not in ECS but change during the game
 /// and might need to be taken back during frame interpolation / reconciliation.
-/// TODO this is not accurate if ECS is outside GameState
+///
+/// TODO How to do frame interpolation / server reconcilliation? Put ECS World here too and clone each frame?
+/// Ralith (hecs author) says to make all components a Vec but that requires all code to be aware of interpolation.
+/// What does veloren do?
 #[derive(Debug, Clone)]
 pub(crate) struct GameState {
     pub(crate) rng: SmallRng,
@@ -43,6 +46,7 @@ impl Explosion {
     }
 }
 
+// TODO unused - remove if it's not needed for explosions / mutual hitscan
 #[derive(Debug, Clone)]
 pub(crate) struct Damage {
     attacker: Entity,

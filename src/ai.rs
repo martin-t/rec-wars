@@ -1,3 +1,5 @@
+/// Stub. So far bots move and shoot randomly.
+
 use rand::{prelude::SmallRng, Rng};
 
 use crate::game_state::Input;

@@ -1,3 +1,6 @@
+// this is just a couple experiments with measuring FPS, might no longer work
+// TODO remove this whole file
+
 const FPS_PERIOD_MS = 500;
 let fps_log = false;
 

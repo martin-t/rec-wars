@@ -1,3 +1,5 @@
+//! Initialization, game loop, drawing.
+
 // Additional warnings that are allow by default (`rustc -W help`)
 //#![warn(missing_copy_implementations)]
 //#![warn(missing_debug_implementations)]
@@ -231,6 +233,7 @@ impl Game {
         Ok(())
     }
 
+    /// Run gamelogic frame.
     pub fn update(&mut self, t: f64, input: &Input, cvars: &Cvars) {
         // Recommended reading: https://gafferongames.com/post/fix_your_timestep/
 
@@ -313,10 +316,11 @@ impl Game {
 
         // Copy (parts of) player input to vehicles and missiles
         // NOTE about potential bugs when refactoring:
-        //  - vehicle can move while dead (this is a classis at this point)
+        //  - vehicle can move while dead (this is a classic at this point)
         //  - can guide missile while dead
-        //  - can guide multiple missiles (LATER make optional by cvar)
+        //  - can guide multiple missiles (LATER optionally allow by cvar)
         //  - missile input is not reset after death / launching another (results in flying in circles)
+        //  - missile stops after player dies / launches another
         let mut query_reset_input =
             <(&mut Input,)>::query().filter(component::<Vehicle>() | component::<GuidedMissile>());
         for (input,) in query_reset_input.iter_mut(&mut self.legion) {
@@ -371,7 +375,13 @@ impl Game {
         dbg_textf!("entity count: {}", self.legion.len());
     }
 
+    /// Redraw the whole canvas.
     pub fn draw(&mut self, cvars: &Cvars) -> Result<(), JsValue> {
+        // This is one long function. A lot of people will tell you that's bad (TM)
+        // because they've heard it from other people who think long functions are bad (TM).
+        // Most of those people haven't written a game bigger than snake. Carmack says it's ok so it's ok:
+        // http://number-none.com/blow/blog/programming/2014/09/26/carmack-on-inlined-code.html
+
         let start = self.performance.now();
 
         // No smoothing makes nicer rockets (more like original RW).
@@ -603,6 +613,7 @@ impl Game {
         }
 
         // Draw walls
+        // They are above explosions and turrets, just like in RecWar.
         let mut r = top_left_index.y;
         let mut y = -bg_offset.y;
         while y < self.canvas_size.y {

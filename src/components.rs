@@ -1,10 +1,13 @@
 //! The C in ECS
 //!
-//! Some structs/enums here are not components but their members.
-//!
 //! Some components have pure member functions.
 //! This is not a violation of the ECS pattern,
 //! because they don't modify game state - they're not behavior.
+//!
+//! Some structs/enums here are not components but their members.
+//! E.g. VehicleType is stored in the Vehicle component instead of being a separate component.
+//! There's no need to make *everything* a component,
+//! especially if it's only gonna be used together with another component.
 
 use enumn::N;
 use legion::Entity;

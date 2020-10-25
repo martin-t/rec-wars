@@ -1,4 +1,4 @@
-//! The S in ECS.
+//! The S in ECS. Most game behavior (code that changes state) goes here.
 //!
 //! Not using legion's #[system] macro because:
 //! - Legion wants to own resources and state (cvars, map, RNG, ...).
