@@ -91,12 +91,10 @@ TODO look at:
 https://hupage.mypage.cz/menu/domovska-stranka/download/recwar
 https://recwar.osoba.cz/rubriky/download
 
-Licence
+License
 -------
 
-TODO AGPL?
-
-<!-- When updating this, also update LICENSE -->
-All code is available under [GPL-v3](GPL-3.0.txt) or newer.
+<!-- When updating this, also update LICENSE and Cargo.toml -->
+All code is available under [AGPL-v3](agpl-3.0.txt) or newer.
 
 All assets (maps, textures, sounds, etc.) are taken from the original RecWar by Willem Janssen which is freely available online.
