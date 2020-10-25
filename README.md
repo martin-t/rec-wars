@@ -6,6 +6,7 @@
 </div>
 <br />
 
+<!-- Note to my future OCD: The ideal image width for github is 838 pixels -->
 [![Gameplay](media/screenshot.jpg)](https://martin-t.gitlab.io/gitlab-pages/rec-wars/web)
 
 _**[Play Online](https://martin-t.gitlab.io/gitlab-pages/rec-wars/web)**_
@@ -24,15 +25,15 @@ TODOs
 - badges (flat like https://github.com/dtolnay/enumn ?)
     - discord? like https://github.com/not-fl3/macroquad
 
-Features
---------
+(Planned) Features
+------------------
 
 - [ ] Bots
 - [ ] Multiplayer
     - [ ] Splitscreen
     - [ ] Network
     - [ ] Combination of both (plus bots)
-- [x] Browser client
+- [x] [Browser client](https://martin-t.gitlab.io/gitlab-pages/rec-wars/web)
 - [ ] Native client
 - [ ] Game modes
     - [ ] Free For All
@@ -87,10 +88,9 @@ https://recwar.osoba.cz/rubriky/download
 Licence
 -------
 
-<!-- When updating this, also update LICENSE -->
-
 TODO AGPL?
 
+<!-- When updating this, also update LICENSE -->
 All code is available under [GPL-v3](GPL-3.0.txt) or newer.
 
 All assets (maps, textures, sounds, etc.) are taken from the original RecWar by Willem Janssen which is freely available online.
