@@ -350,6 +350,7 @@ impl Game {
 
             if !destroyed {
                 if maybe_gm_entity.is_some() {
+                    // Note: vehicles can shoot while controlling a missile
                     *veh_input = input.vehicle_while_guiding();
                 } else {
                     *veh_input = input.clone();
@@ -361,7 +362,6 @@ impl Game {
 
         systems::vehicle_movement(cvars, &mut self.legion, &self.gs, &self.map);
 
-        // Note: vehicles can shoot while controlling a missile
         systems::shooting(cvars, &mut self.legion, &mut self.gs, &self.map);
 
         systems::gm_turning(cvars, &mut self.legion, &self.gs);

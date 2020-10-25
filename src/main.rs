@@ -69,7 +69,7 @@
 // [ ] scores
 // [ ] primitive bots
 // [ ] splitscreen
-//      [ ] decent default binds (2x for splitscreen)
+// [ ] decent default binds (2x for splitscreen)
 // 1.0:
 // [ ] CI - GH actions / travis, mirror to GL???
 // [ ] extract/screenshot/record assets from RecWar or find alternatives
@@ -89,6 +89,7 @@
 //      [ ] skins, colors
 //              canvas imageData?
 //      [x] vehicle types
+// [ ] indicators for off-screen vehicles
 // [ ] movement
 //      [x] tank
 //      [x] hovercraft
@@ -197,9 +198,6 @@
 //          https://github.com/Ralith/masterserve
 //      if dedicated servers, need at least 2 - EU and US
 // [ ] network multiplayer
-//      https://arewegameyet.rs/ecosystem/networking/
-//          https://crates.io/crates/quinn - what is QUIC?
-//          https://crates.io/crates/laminar - mentions only UDP, not WASM
 //      WASM doesn't allow UDP sockets
 //          https://gafferongames.com/post/why_cant_i_send_udp_packets_from_a_browser/
 //          https://www.html5rocks.com/en/tutorials/webrtc/datachannels/
@@ -208,9 +206,9 @@
 //          webRTC
 //          crazy idea: multiple TCP streams, rotate through them
 //      https://arewegameyet.rs/ecosystem/networking/ or custom?
-//      [ ] master server hosting
+//          https://crates.io/crates/quinn - what is QUIC?
+//          https://crates.io/crates/laminar - mentions only UDP, not WASM
 //      [ ] prediction / reconciliation
-//          braid / jonathan blow - fps independent
 //          https://github.com/pond3r/ggpo/tree/master/doc
 //      [ ] server framerate when minimized - https://developer.mozilla.org/en-US/docs/Web/API/Window/setImmediate#Notes
 //          postMessage / MessageChannel / https://github.com/YuzuJS/setImmediate polyfill
@@ -227,14 +225,12 @@
 // [ ] record seed+input (WASM should be reproducible when avoiding NaNs) - replay, debugging
 // [ ] allow MG to shoot down missiles
 // [ ] lateral friction
-// [ ] make driving feel more real - simulate terrain unevenness? mild speed/angle changes?
 // [ ] announcer
 //      [ ] killstreaks? orig RW only if fast enough
 //      [ ] other events - CTC steal/capture/return - need sounds from other games
 // [ ] map editor - sharing maps, voting, recommended mode / number of bots
 //      [ ] bots say hi/gg/sry/n1
 // [ ] log of past games (to show activity even if nobody currently online)
-// [ ] splitscreen
 // [ ] figure out what webpack is and how to create a static site
 //      probably best template: https://github.com/rustwasm/rust-webpack-template
 //      alternative: https://github.com/thedodd/trunk

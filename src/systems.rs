@@ -82,7 +82,6 @@ pub(crate) fn vehicle_movement(cvars: &Cvars, world: &mut World, gs: &GameState,
 
         accel_decel(&stats, vel, angle, input, gs.dt);
 
-        // Moving
         let new_pos = pos.0 + vel.0 * gs.dt;
         if hitbox
             .corners(new_pos, angle.0)
@@ -326,6 +325,7 @@ pub(crate) fn shooting(cvars: &Cvars, world: &mut World, gs: &mut GameState, map
     cmds.flush(world);
 }
 
+/// The guided part of guided missile
 pub(crate) fn gm_turning(cvars: &Cvars, world: &mut World, gs: &GameState) {
     let mut query = <(&GuidedMissile, &mut Vel, &mut Angle, &mut TurnRate, &Input)>::query();
     for (_, vel, angle, turn_rate, input) in query.iter_mut(world) {
@@ -337,6 +337,7 @@ pub(crate) fn gm_turning(cvars: &Cvars, world: &mut World, gs: &GameState) {
     }
 }
 
+/// Movement and collisions
 pub(crate) fn projectiles(cvars: &Cvars, world: &mut World, gs: &mut GameState, map: &Map) {
     let mut query_vehicles = <(Entity, &Vehicle, &Pos, &Angle, &Hitbox, &Owner)>::query();
     let vehicles: Vec<(Entity, _, _, _, _)> = query_vehicles
@@ -427,7 +428,7 @@ pub(crate) fn projectiles(cvars: &Cvars, world: &mut World, gs: &mut GameState, 
 }
 
 /// Right now, CBs are the only timed projectiles, long term, might wanna add timeouts to more
-/// to avoid too many entities on huge maps..
+/// to avoid too many entities on huge maps.
 pub(crate) fn projectiles_timeout(cvars: &Cvars, world: &mut World, gs: &mut GameState) {
     let mut cmds = CommandBuffer::new(world);
 
