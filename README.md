@@ -6,6 +6,8 @@
 </div>
 <br />
 
+[![Discord](https://img.shields.io/discord/770013530593689620?label=discord&style=flat-square)](https://discord.gg/9BQVVgV)
+
 <!-- Note to my future OCD: The ideal image width for github is 838 pixels -->
 [![Gameplay](media/screenshot.jpg)](https://martin-t.gitlab.io/gitlab-pages/rec-wars/web)
 
