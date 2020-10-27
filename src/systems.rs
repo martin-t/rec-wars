@@ -13,16 +13,16 @@
 
 use std::f64::consts::PI;
 
-use legion::{query::IntoQuery, systems::CommandBuffer, Entity, World};
+use legion::{component, query::IntoQuery, systems::CommandBuffer, Entity, World};
 use rand::Rng;
 use rand_distr::StandardNormal;
 use vek::Clamp;
 
 use crate::{
-    components::Player,
+    ai::Ai,
     components::{
-        Ammo, Angle, Bfg, Cb, GuidedMissile, Hitbox, Mg, Owner, Pos, Time, TurnRate, Vehicle, Vel,
-        Weapon, WEAPS_CNT,
+        Ammo, Angle, Bfg, Cb, GuidedMissile, Hitbox, Mg, Owner, Player, Pos, Time, TurnRate,
+        Vehicle, Vel, Weapon, WEAPS_CNT,
     },
     cvars::Cvars,
     cvars::Hardpoint,
@@ -33,6 +33,65 @@ use crate::{
     map::Vec2f,
     map::VecExt,
 };
+
+pub(crate) fn ai(world: &mut World, gs: &mut GameState) {
+    let mut query_ai = <(&mut Input, &mut Ai)>::query();
+    for (input, ai) in query_ai.iter_mut(world) {
+        *input = ai.input(&mut gs.rng);
+    }
+}
+
+pub(crate) fn input( world: &mut World, gs: &GameState) {
+    // Player 1 input
+    *world
+        .entry(gs.player_entity)
+        .unwrap()
+        .get_component_mut::<Input>()
+        .unwrap() = gs.input.clone();
+
+    // Copy (parts of) player input to vehicles and missiles
+    // NOTE about potential bugs when refactoring:
+    //  - vehicle can move while dead (this is a classic at this point)
+    //  - can guide missile while dead
+    //  - can guide multiple missiles (LATER optionally allow by cvar)
+    //  - missile input is not reset after death / launching another (results in flying in circles)
+    //  - missile stops after player dies / launches another
+    let mut query_reset_input =
+        <(&mut Input,)>::query().filter(component::<Vehicle>() | component::<GuidedMissile>());
+    for (input,) in query_reset_input.iter_mut(world) {
+        *input = EMPTY_INPUT.clone();
+    }
+    let mut players = Vec::new();
+    let mut query_players = <(&Player, &Input)>::query();
+    for (player, input) in query_players.iter(world) {
+        players.push((player.vehicle, player.guided_missile, input.clone()));
+    }
+    for (vehicle_entity, maybe_gm_entity, input) in players {
+        if let Some(gm_entity) = maybe_gm_entity {
+            *world
+                .entry(gm_entity)
+                .unwrap()
+                .get_component_mut::<Input>()
+                .unwrap() = input.missile_while_guiding();
+        }
+
+        let mut vehicle_entry = world.entry(vehicle_entity).unwrap();
+        let destroyed = vehicle_entry
+            .get_component::<Vehicle>()
+            .unwrap()
+            .destroyed();
+        let veh_input = vehicle_entry.get_component_mut::<Input>().unwrap();
+
+        if !destroyed {
+            if maybe_gm_entity.is_some() {
+                // Note: vehicles can shoot while controlling a missile
+                *veh_input = input.vehicle_while_guiding();
+            } else {
+                *veh_input = input.clone();
+            }
+        }
+    }
+}
 
 pub(crate) fn self_destruct(cvars: &Cvars, world: &mut World, gs: &mut GameState) {
     let mut query = <(&mut Vehicle, &mut Pos, &Input)>::query();

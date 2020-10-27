@@ -39,8 +39,8 @@ use wasm_bindgen::JsCast;
 use web_sys::{CanvasRenderingContext2d, HtmlImageElement, Performance};
 
 use components::{
-    Ammo, Angle, Bfg, Cb, GuidedMissile, Hitbox, Mg, Owner, Player, Pos, TurnRate, Vehicle,
-    VehicleType, Vel, Weapon,
+    Ammo, Angle, Bfg, Cb, Hitbox, Mg, Owner, Player, Pos, TurnRate, Vehicle, VehicleType, Vel,
+    Weapon,
 };
 use cvars::{Cvars, TickrateMode};
 use debugging::{DbgCount, DEBUG_CROSSES, DEBUG_LINES, DEBUG_TEXTS};
@@ -300,63 +300,9 @@ impl Game {
             progress <= 1.0
         });
 
-        // AI
-        let mut query_ai = <(&mut Input, &mut Ai)>::query();
-        for (input, ai) in query_ai.iter_mut(&mut self.legion) {
-            *input = ai.input(&mut self.gs.rng);
-        }
+        systems::ai(&mut self.legion, &mut self.gs);
 
-        // Player 1 input
-        *self
-            .legion
-            .entry(self.gs.player_entity)
-            .unwrap()
-            .get_component_mut::<Input>()
-            .unwrap() = self.gs.input.clone();
-
-        // Copy (parts of) player input to vehicles and missiles
-        // NOTE about potential bugs when refactoring:
-        //  - vehicle can move while dead (this is a classic at this point)
-        //  - can guide missile while dead
-        //  - can guide multiple missiles (LATER optionally allow by cvar)
-        //  - missile input is not reset after death / launching another (results in flying in circles)
-        //  - missile stops after player dies / launches another
-        let mut query_reset_input =
-            <(&mut Input,)>::query().filter(component::<Vehicle>() | component::<GuidedMissile>());
-        for (input,) in query_reset_input.iter_mut(&mut self.legion) {
-            *input = EMPTY_INPUT.clone();
-        }
-        let mut players = Vec::new();
-        let mut query_players = <(&Player, &Input)>::query();
-        for (player, input) in query_players.iter(&self.legion) {
-            players.push((player.vehicle, player.guided_missile, input.clone()));
-        }
-        for (vehicle_entity, maybe_gm_entity, input) in players {
-            if let Some(gm_entity) = maybe_gm_entity {
-                *self
-                    .legion
-                    .entry(gm_entity)
-                    .unwrap()
-                    .get_component_mut::<Input>()
-                    .unwrap() = input.missile_while_guiding();
-            }
-
-            let mut vehicle_entry = self.legion.entry(vehicle_entity).unwrap();
-            let destroyed = vehicle_entry
-                .get_component::<Vehicle>()
-                .unwrap()
-                .destroyed();
-            let veh_input = vehicle_entry.get_component_mut::<Input>().unwrap();
-
-            if !destroyed {
-                if maybe_gm_entity.is_some() {
-                    // Note: vehicles can shoot while controlling a missile
-                    *veh_input = input.vehicle_while_guiding();
-                } else {
-                    *veh_input = input.clone();
-                }
-            }
-        }
+        systems::input(&mut self.legion, &self.gs);
 
         systems::vehicle_logic(cvars, &mut self.legion, &mut self.gs, &self.gs_prev);
 
