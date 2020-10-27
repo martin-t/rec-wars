@@ -1,7 +1,5 @@
 use legion::Entity;
-
 use rand::prelude::*;
-
 use wasm_bindgen::prelude::*;
 
 use crate::map::Vec2f;

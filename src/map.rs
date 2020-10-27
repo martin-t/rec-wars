@@ -4,13 +4,9 @@ use std::f64::consts::PI;
 use std::ops::Index;
 
 use approx::AbsDiffEq;
-
 use enumn::N;
-
 use rand::{prelude::SmallRng, Rng};
-
-use vek::Vec2;
-use vek::{Clamp, Mat2};
+use vek::{Clamp, Mat2, Vec2};
 
 /// Position in world or screen space.
 ///

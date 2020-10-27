@@ -11,7 +11,7 @@
 // TODO check clippy lints actually work - e.g. shadow_unrelated/pedantic doesn't seem to
 
 #[macro_use]
-mod debugging;
+mod debugging; // keep first so the macros are available everywhere
 
 mod ai;
 mod components;
@@ -23,29 +23,26 @@ mod systems;
 use std::collections::VecDeque;
 use std::f64::consts::PI;
 
-use ai::Ai;
-use legion::{component, query::IntoQuery, World};
-
 use js_sys::Array;
-
+use legion::{component, query::IntoQuery, World};
 use rand::prelude::*;
-
 use vek::ops::Clamp;
 use vek::Vec2;
-
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
-
 use web_sys::{CanvasRenderingContext2d, HtmlImageElement, Performance};
 
-use components::{
-    Ammo, Angle, Bfg, Cb, Hitbox, Mg, Owner, Player, Pos, TurnRate, Vehicle, VehicleType, Vel,
-    Weapon,
+use crate::{
+    ai::Ai,
+    components::{
+        Ammo, Angle, Bfg, Cb, Hitbox, Mg, Owner, Player, Pos, TurnRate, Vehicle, VehicleType, Vel,
+        Weapon,
+    },
+    cvars::{Cvars, TickrateMode},
+    debugging::{DbgCount, DEBUG_CROSSES, DEBUG_LINES, DEBUG_TEXTS},
+    game_state::{Explosion, GameState, Input, EMPTY_INPUT},
+    map::{F64Ext, Kind, Map, Vec2f, VecExt, TILE_SIZE},
 };
-use cvars::{Cvars, TickrateMode};
-use debugging::{DbgCount, DEBUG_CROSSES, DEBUG_LINES, DEBUG_TEXTS};
-use game_state::{Explosion, GameState, Input, EMPTY_INPUT};
-use map::{F64Ext, Kind, Map, Vec2f, VecExt, TILE_SIZE};
 
 const STATS_FRAMES: usize = 60;
 

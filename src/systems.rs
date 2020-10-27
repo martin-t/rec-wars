@@ -24,14 +24,9 @@ use crate::{
         Ammo, Angle, Bfg, Cb, GuidedMissile, Hitbox, Mg, Owner, Player, Pos, Time, TurnRate,
         Vehicle, Vel, Weapon, WEAPS_CNT,
     },
-    cvars::Cvars,
-    cvars::Hardpoint,
-    cvars::MovementStats,
+    cvars::{Cvars, Hardpoint, MovementStats},
     game_state::{Explosion, GameState, Input, EMPTY_INPUT},
-    map::F64Ext,
-    map::Map,
-    map::Vec2f,
-    map::VecExt,
+    map::{F64Ext, Map, Vec2f, VecExt},
 };
 
 pub(crate) fn ai(world: &mut World, gs: &mut GameState) {
@@ -41,7 +36,7 @@ pub(crate) fn ai(world: &mut World, gs: &mut GameState) {
     }
 }
 
-pub(crate) fn input( world: &mut World, gs: &GameState) {
+pub(crate) fn input(world: &mut World, gs: &GameState) {
     // Player 1 input
     *world
         .entry(gs.player_entity)

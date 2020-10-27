@@ -1,4 +1,4 @@
-//! Example comparing custom vs Quake friction code.
+//! This is not a real example, just a tool for comparing custom vs Quake friction code.
 //!
 //! I tried to make friction framerate independent.
 //! If you run 30 fps, you get the same resulting velocity (ignoring float rounding errors)
