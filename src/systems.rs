@@ -44,6 +44,17 @@ pub(crate) fn input(world: &mut World, gs: &GameState) {
         .get_component_mut::<Input>()
         .unwrap() = gs.input.clone();
 
+    let mut query_vehicles = <(&mut Input,)>::query().filter(component::<Vehicle>());
+    for (input,) in query_vehicles.iter_mut(world) {
+        *input = EMPTY_INPUT.clone();
+    }
+
+    let mut query_gms = <(&mut Input,)>::query().filter(component::<GuidedMissile>());
+    for (input,) in query_gms.iter_mut(world) {
+        *input = EMPTY_INPUT.clone();
+        input.up = true;
+    }
+
     // Copy (parts of) player input to vehicles and missiles
     // NOTE about potential bugs when refactoring:
     //  - vehicle can move while dead (this is a classic at this point)
@@ -51,11 +62,6 @@ pub(crate) fn input(world: &mut World, gs: &GameState) {
     //  - can guide multiple missiles (LATER optionally allow by cvar)
     //  - missile input is not reset after death / launching another (results in flying in circles)
     //  - missile stops after player dies / launches another
-    let mut query_reset_input =
-        <(&mut Input,)>::query().filter(component::<Vehicle>() | component::<GuidedMissile>());
-    for (input,) in query_reset_input.iter_mut(world) {
-        *input = EMPTY_INPUT.clone();
-    }
     let mut players = Vec::new();
     let mut query_players = <(&Player, &Input)>::query();
     for (player, input) in query_players.iter(world) {
