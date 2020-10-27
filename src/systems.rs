@@ -55,7 +55,7 @@ pub(crate) fn input(world: &mut World, gs: &GameState) {
         input.up = true;
     }
 
-    // Copy (parts of) player input to vehicles and missiles
+    // Copy (parts of) player input to vehicles and missiles.
     // NOTE about potential bugs when refactoring:
     //  - vehicle can move while dead (this is a classic at this point)
     //  - can guide missile while dead
@@ -68,28 +68,31 @@ pub(crate) fn input(world: &mut World, gs: &GameState) {
         players.push((player.vehicle, player.guided_missile, input.clone()));
     }
     for (vehicle_entity, maybe_gm_entity, input) in players {
+        let mut vehicle_entry = world.entry(vehicle_entity).unwrap();
+        let destroyed = vehicle_entry
+            .get_component::<Vehicle>()
+            .unwrap()
+            .destroyed();
+
+        if destroyed {
+            // No movement or guiding after death (this doesn't stop the camera tracking the GM).
+            continue;
+        }
+
+        let veh_input = vehicle_entry.get_component_mut::<Input>().unwrap();
+        if maybe_gm_entity.is_some() {
+            // Note: vehicles can shoot while controlling a missile
+            *veh_input = input.vehicle_while_guiding();
+        } else {
+            *veh_input = input.clone();
+        }
+
         if let Some(gm_entity) = maybe_gm_entity {
             *world
                 .entry(gm_entity)
                 .unwrap()
                 .get_component_mut::<Input>()
                 .unwrap() = input.missile_while_guiding();
-        }
-
-        let mut vehicle_entry = world.entry(vehicle_entity).unwrap();
-        let destroyed = vehicle_entry
-            .get_component::<Vehicle>()
-            .unwrap()
-            .destroyed();
-        let veh_input = vehicle_entry.get_component_mut::<Input>().unwrap();
-
-        if !destroyed {
-            if maybe_gm_entity.is_some() {
-                // Note: vehicles can shoot while controlling a missile
-                *veh_input = input.vehicle_while_guiding();
-            } else {
-                *veh_input = input.clone();
-            }
         }
     }
 }
