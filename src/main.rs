@@ -197,14 +197,15 @@
 //          needs to be stateful
 //          https://github.com/Ralith/masterserve
 //      if dedicated servers, need at least 2 - EU and US
+//          hardcoded list of servers as backup for master
 // [ ] network multiplayer
 //      WASM doesn't allow UDP sockets
 //          https://gafferongames.com/post/why_cant_i_send_udp_packets_from_a_browser/
 //          https://www.html5rocks.com/en/tutorials/webrtc/datachannels/
 //          TCP
-//				reduce extra latency: https://lobste.rs/s/5qlb7z/40_milliseconds_latency_just_would_not_go (article + link to HN)
+//              reduce extra latency: https://lobste.rs/s/5qlb7z/40_milliseconds_latency_just_would_not_go (article + link to HN)
+//              crazy idea: multiple TCP streams, rotate among them - not all will be stalled by PL
 //          webRTC
-//          crazy idea: multiple TCP streams, rotate through them
 //      https://arewegameyet.rs/ecosystem/networking/ or custom?
 //          https://crates.io/crates/quinn - what is QUIC?
 //          https://crates.io/crates/laminar - mentions only UDP, not WASM
