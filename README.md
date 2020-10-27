@@ -6,7 +6,7 @@
 </div>
 <br />
 
-[![Discord](https://img.shields.io/discord/770013530593689620?label=discord&style=flat-square)](https://discord.gg/9BQVVgV)
+[![Discord](https://img.shields.io/discord/770013530593689620?label=discord)](https://discord.gg/9BQVVgV)
 
 <!-- Note to my future OCD: The ideal image width for github is 838 pixels -->
 [![Gameplay](media/screenshot.jpg)](https://martin-t.gitlab.io/gitlab-pages/rec-wars/web)
@@ -22,10 +22,6 @@ Additionally I suspect RecWar was balanced for playing against bots and might re
 Currently this is very much a work-in-progress: only some weapons work, the driving physics don't feel right, there are no collisions between vehicles, ..., you can't respawn, etc.
 
 The ultimate goal is to create a multiplayer game playable in the browser and on Linux, Windows and macOS. This might be tricky since WASM in the browser doesn't allow UDP. I have some ideas how to solve that.
-
-TODOs
-- badges (flat like https://github.com/dtolnay/enumn ?)
-    - discord? like https://github.com/not-fl3/macroquad
 
 (Planned) Features
 ------------------
@@ -89,9 +85,6 @@ Known ways RecWars differs from RecWar:
     - Railgun - Will be a very fast projectile because hitscan weapons ruin large maps
 - Self destruct damage and range - it appears to be the only explosion in RecWar with damage decreasing by distance and it's really hard to measure exactly.
 
-TODO look at:
-https://hupage.mypage.cz/menu/domovska-stranka/download/recwar
-https://recwar.osoba.cz/rubriky/download
 
 License
 -------
