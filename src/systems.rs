@@ -276,6 +276,7 @@ pub(crate) fn shooting(cvars: &Cvars, world: &mut World, gs: &mut GameState, map
         if vehicle.destroyed() || !input.fire {
             continue;
         }
+
         let ammo = &mut vehicle.ammos[vehicle.cur_weapon as usize];
         if let Ammo::Loaded(ready_time, count) = ammo {
             if gs.frame_time < *ready_time {
@@ -457,36 +458,38 @@ pub(crate) fn projectiles(cvars: &Cvars, world: &mut World, gs: &mut GameState, 
 
         for (veh_id, veh_pos, _veh_angle, _veh_hitbox, veh_owner) in &vehicles {
             let veh_id = *veh_id;
-            if veh_owner != proj_owner {
-                let dist2 = (proj_pos.0 - veh_pos.0).magnitude_squared();
-                // TODO proper hitbox
-                if dist2 <= 24.0 * 24.0 {
-                    let mut query_veh = <(&mut Vehicle,)>::query();
-                    let (vehicle,) = query_veh.get_mut(&mut world_rest, veh_id).unwrap();
-                    let dmg = cvars.g_weapon_damage(proj_weap);
+            if veh_owner == proj_owner {
+                continue;
+            }
 
-                    // Vehicle explosion first so it's below projectile explosion because it looks better.
-                    damage(cvars, gs, &mut cmds, vehicle, veh_pos.0, veh_owner.0, dmg);
-                    projectile_impact(
-                        cvars,
-                        gs,
-                        &mut cmds,
-                        proj_id,
-                        proj_weap,
-                        proj_owner.0,
-                        proj_pos.0,
-                    );
-                    break;
-                } else if proj_weap == Weapon::Bfg
-                    && dist2 <= cvars.g_bfg_beam_range * cvars.g_bfg_beam_range
-                    && map.collision_between(proj_pos.0, veh_pos.0).is_none()
-                {
-                    let mut query_veh = <(&mut Vehicle,)>::query();
-                    let (vehicle,) = query_veh.get_mut(&mut world_rest, veh_id).unwrap();
-                    let dmg = cvars.g_bfg_beam_damage_per_sec * gs.dt;
-                    damage(cvars, gs, &mut cmds, vehicle, veh_pos.0, veh_owner.0, dmg);
-                    gs.bfg_beams.push((proj_pos.0, veh_pos.0));
-                }
+            let dist2 = (proj_pos.0 - veh_pos.0).magnitude_squared();
+            // TODO proper hitbox
+            if dist2 <= 24.0 * 24.0 {
+                let mut query_veh = <(&mut Vehicle,)>::query();
+                let (vehicle,) = query_veh.get_mut(&mut world_rest, veh_id).unwrap();
+                let dmg = cvars.g_weapon_damage(proj_weap);
+
+                // Vehicle explosion first so it's below projectile explosion because it looks better.
+                damage(cvars, gs, &mut cmds, vehicle, veh_pos.0, veh_owner.0, dmg);
+                projectile_impact(
+                    cvars,
+                    gs,
+                    &mut cmds,
+                    proj_id,
+                    proj_weap,
+                    proj_owner.0,
+                    proj_pos.0,
+                );
+                break;
+            } else if proj_weap == Weapon::Bfg
+                && dist2 <= cvars.g_bfg_beam_range * cvars.g_bfg_beam_range
+                && map.collision_between(proj_pos.0, veh_pos.0).is_none()
+            {
+                let mut query_veh = <(&mut Vehicle,)>::query();
+                let (vehicle,) = query_veh.get_mut(&mut world_rest, veh_id).unwrap();
+                let dmg = cvars.g_bfg_beam_damage_per_sec * gs.dt;
+                damage(cvars, gs, &mut cmds, vehicle, veh_pos.0, veh_owner.0, dmg);
+                gs.bfg_beams.push((proj_pos.0, veh_pos.0));
             }
         }
     }
