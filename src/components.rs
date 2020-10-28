@@ -36,7 +36,7 @@ pub(crate) struct Vehicle {
     pub(crate) veh_type: VehicleType,
     /// Angle from vehicle, see Coord system for more
     pub(crate) turret_angle: f64,
-    /// HP between 0 and 1 - saving the fraction here so the cvars can be adjusted during a match.
+    /// HP between 0 and 1 - saving the fraction here instead of absolute hit points so armor cvars can be adjusted during a match.
     pub(crate) hp_fraction: f64,
     /// Each weapon has a separate reload status even if they all reload at the same time.
     /// I plan to generalize this and have a cvar to choose between multiple reload mechanisms.
@@ -63,13 +63,6 @@ impl Vehicle {
             hp_fraction: 1.0,
             ammos,
             cur_weapon: Weapon::Mg,
-        }
-    }
-
-    pub(crate) fn damage(&mut self, cvars: &Cvars, amount: f64) {
-        self.hp_fraction -= amount / cvars.g_vehicle_hp(self.veh_type);
-        if self.hp_fraction < 0.0 {
-            self.hp_fraction = 0.0;
         }
     }
 

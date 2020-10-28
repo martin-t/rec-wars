@@ -224,8 +224,7 @@ pub struct Cvars {
 
     pub g_self_destruct_damage_center: f64,
     pub g_self_destruct_damage_edge: f64,
-    pub g_self_destruct_explosion1_scale: f64,
-    pub g_self_destruct_explosion2_scale: f64,
+    pub g_self_destruct_explosion_scale: f64,
     pub g_self_destruct_radius: f64,
 
     pub g_tank_accel_backward: f64,
@@ -821,8 +820,7 @@ impl Default for Cvars {
 
             g_self_destruct_damage_center: 150.0,
             g_self_destruct_damage_edge: 0.0,
-            g_self_destruct_explosion1_scale: 2.0,
-            g_self_destruct_explosion2_scale: 1.0,
+            g_self_destruct_explosion_scale: 2.0,
             g_self_destruct_radius: 175.0,
 
             g_tank_accel_backward: 550.0,

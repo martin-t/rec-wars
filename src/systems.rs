@@ -98,24 +98,34 @@ pub(crate) fn input(world: &mut World, gs: &GameState) {
 }
 
 pub(crate) fn self_destruct(cvars: &Cvars, world: &mut World, gs: &mut GameState) {
-    let mut query = <(&mut Vehicle, &mut Pos, &Input)>::query();
-    for (vehicle, veh_pos, input) in query.iter_mut(world) {
-        if input.self_destruct && !vehicle.destroyed() {
-            vehicle.hp_fraction = 0.0;
-            gs.explosions.push(Explosion::new(
-                veh_pos.0,
-                cvars.g_self_destruct_explosion1_scale,
-                gs.frame_time,
-                false,
-            ));
-            gs.explosions.push(Explosion::new(
-                veh_pos.0,
-                cvars.g_self_destruct_explosion2_scale,
-                gs.frame_time,
-                false,
-            ));
+    let mut cmds = CommandBuffer::new(world);
+
+    let mut query = <(&mut Vehicle, &Pos, &Owner, &Input)>::query();
+    for (vehicle, veh_pos, veh_owner, input) in query.iter_mut(world) {
+        if !input.self_destruct || vehicle.destroyed() {
+            continue;
         }
+
+        // First the big explosion
+        gs.explosions.push(Explosion::new(
+            veh_pos.0,
+            cvars.g_self_destruct_explosion_scale,
+            gs.frame_time,
+            false,
+        ));
+        // Then destroy the vehicle to create the small explosion
+        damage(
+            cvars,
+            gs,
+            &mut cmds,
+            vehicle,
+            veh_pos.0,
+            veh_owner.0,
+            f64::MAX,
+        )
     }
+
+    cmds.flush(world);
 }
 
 pub(crate) fn vehicle_movement(cvars: &Cvars, world: &mut World, gs: &GameState, map: &Map) {
@@ -260,8 +270,9 @@ pub(crate) fn vehicle_logic(
 
 pub(crate) fn shooting(cvars: &Cvars, world: &mut World, gs: &mut GameState, map: &Map) {
     let mut cmds = CommandBuffer::new(world);
-    let mut query = <(&mut Vehicle, &Pos, &Vel, &Angle, &Input, &Owner)>::query();
-    for (vehicle, veh_pos, veh_vel, veh_angle, input, &owner) in query.iter_mut(world) {
+    let mut query = <(&mut Vehicle, &Pos, &Vel, &Angle, &Owner, &Input)>::query();
+    for (vehicle, veh_pos, veh_vel, veh_angle, owner, input) in query.iter_mut(world) {
+        let owner = *owner;
         if vehicle.destroyed() || !input.fire {
             continue;
         }
@@ -430,7 +441,7 @@ pub(crate) fn projectiles(cvars: &Cvars, world: &mut World, gs: &mut GameState, 
 
         let collision = map.collision_between(proj_pos.0, new_pos);
         if let Some(hit_pos) = collision {
-            remove_projectile(
+            projectile_impact(
                 cvars,
                 gs,
                 &mut cmds,
@@ -453,13 +464,10 @@ pub(crate) fn projectiles(cvars: &Cvars, world: &mut World, gs: &mut GameState, 
                     let mut query_veh = <(&mut Vehicle,)>::query();
                     let (vehicle,) = query_veh.get_mut(&mut world_rest, veh_id).unwrap();
                     let dmg = cvars.g_weapon_damage(proj_weap);
-                    vehicle.damage(cvars, dmg);
+
                     // Vehicle explosion first so it's below projectile explosion because it looks better.
-                    if vehicle.destroyed() {
-                        gs.explosions
-                            .push(Explosion::new(veh_pos.0, 1.0, gs.frame_time, false));
-                    }
-                    remove_projectile(
+                    damage(cvars, gs, &mut cmds, vehicle, veh_pos.0, veh_owner.0, dmg);
+                    projectile_impact(
                         cvars,
                         gs,
                         &mut cmds,
@@ -476,11 +484,7 @@ pub(crate) fn projectiles(cvars: &Cvars, world: &mut World, gs: &mut GameState, 
                     let mut query_veh = <(&mut Vehicle,)>::query();
                     let (vehicle,) = query_veh.get_mut(&mut world_rest, veh_id).unwrap();
                     let dmg = cvars.g_bfg_beam_damage_per_sec * gs.dt;
-                    vehicle.damage(cvars, dmg);
-                    if vehicle.destroyed() {
-                        gs.explosions
-                            .push(Explosion::new(veh_pos.0, 1.0, gs.frame_time, false));
-                    }
+                    damage(cvars, gs, &mut cmds, vehicle, veh_pos.0, veh_owner.0, dmg);
                     gs.bfg_beams.push((proj_pos.0, veh_pos.0));
                 }
             }
@@ -488,6 +492,35 @@ pub(crate) fn projectiles(cvars: &Cvars, world: &mut World, gs: &mut GameState, 
     }
 
     cmds.flush(world);
+}
+
+pub(crate) fn damage(
+    cvars: &Cvars,
+    gs: &mut GameState,
+    cmds: &mut CommandBuffer,
+    vehicle: &mut Vehicle,
+    veh_pos: Vec2f,
+    veh_owner: Entity,
+    dmg_amount: f64,
+) {
+    vehicle.hp_fraction -= dmg_amount / cvars.g_vehicle_hp(vehicle.veh_type);
+    if vehicle.hp_fraction >= 0.0 {
+        return;
+    }
+
+    vehicle.hp_fraction = 0.0;
+
+    gs.explosions
+        .push(Explosion::new(veh_pos, 1.0, gs.frame_time, false));
+
+    cmds.exec_mut(move |world| {
+        world
+            .entry(veh_owner)
+            .unwrap()
+            .get_component_mut::<Player>()
+            .unwrap()
+            .guided_missile = None;
+    });
 }
 
 /// Right now, CBs are the only timed projectiles, long term, might wanna add timeouts to more
@@ -498,14 +531,14 @@ pub(crate) fn projectiles_timeout(cvars: &Cvars, world: &mut World, gs: &mut Gam
     let mut query = <(Entity, &Weapon, &Pos, &Time, &Owner)>::query();
     for (&entity, &weap, pos, time, owner) in query.iter(world) {
         if gs.frame_time > time.0 {
-            remove_projectile(cvars, gs, &mut cmds, entity, weap, owner.0, pos.0);
+            projectile_impact(cvars, gs, &mut cmds, entity, weap, owner.0, pos.0);
         }
     }
 
     cmds.flush(world);
 }
 
-fn remove_projectile(
+fn projectile_impact(
     cvars: &Cvars,
     gs: &mut GameState,
     cmds: &mut CommandBuffer,
