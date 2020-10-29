@@ -352,7 +352,16 @@ impl Game {
         let camera_max = map_size - camera_min;
         let camera_pos = player_entity_pos.clamped(camera_min, camera_max);
 
+        // Position of the camera's top left corner in world coords.
+        // Subtract this from world coords to get screen coords.
+        // Forgetting this is a recurring source of bugs.
+        // I've considered making a special type for screen coords (e.g. struct Vec2screen(Vec2f);)
+        // so you couldn't accidentally pass world coords to drawing fns but it turned out to be more work than expected:
+        // - The newtype had to manually impl all the needed operations of the underlying Vec2 type because ops don't autoderef.
+        // - What would be the result of ops that take one world coord and one screen coord? Lots of cases to think about.
+        // - Which type are sizes? E.g. `center = corner + size/2` makes sense in both screen and world coords.
         let top_left = camera_pos - camera_min;
+
         let top_left_tp = self.map.tile_pos(top_left);
         let top_left_index = top_left_tp.index;
         let bg_offset = if cvars.r_align_to_pixels_background {
@@ -461,9 +470,11 @@ impl Game {
             self.context.fill();
         }
         for &(src, dest) in &self.gs.bfg_beams {
+            let scr_src = src - top_left;
+            let scr_dest = dest - top_left;
             self.context.begin_path();
-            self.move_to(src);
-            self.line_to(dest);
+            self.move_to(scr_src);
+            self.line_to(scr_dest);
             self.context.stroke();
         }
         self.gs.bfg_beams.clear();
