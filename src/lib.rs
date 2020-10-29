@@ -47,6 +47,7 @@ use crate::{
 const STATS_FRAMES: usize = 60;
 
 #[wasm_bindgen]
+#[derive(Debug)]
 pub struct Game {
     /// I want to track update and render time in Rust so i can draw the FPS counter and keep stats.
     /// Unfortunately, Instant::now() panics in WASM so i have to use performance.now().
@@ -221,6 +222,12 @@ impl Game {
             gs_prev,
             legion,
         }
+    }
+
+    /// Dump entire game state to string.
+    /// Can be used from the browser console as a very crude debugging tool: `game.to_debug_string()`.
+    pub fn to_debug_string(&self) -> String {
+        format!("{:#?}", self)
     }
 
     /// Run gamelogic up to `t` (in seconds) and render.
