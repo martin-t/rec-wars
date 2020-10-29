@@ -1,0 +1,16 @@
+[package]
+name = "rec-wars"
+version = "0.0.1"
+authors = ["Martin Taibr <taibr.martin@gmail.com>"]
+edition = "2018"
+description = "A top-down vehicle shooter game playable in the browser"
+homepage = "https://github.com/martin-t/rec-wars"
+repository = "https://github.com/martin-t/rec-wars"
+license = "AGPL-3.0-or-later"
+readme = "README.md"
+keywords = ["game", "wasm"]
+categories = ["games"]
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
