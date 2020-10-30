@@ -209,6 +209,7 @@
 //      https://arewegameyet.rs/ecosystem/networking/ or custom?
 //          https://crates.io/crates/quinn - what is QUIC?
 //          https://crates.io/crates/laminar - mentions only UDP, not WASM
+//          https://crates.io/crates/naia-server
 //      [ ] prediction / reconciliation
 //          https://github.com/pond3r/ggpo/tree/master/doc
 //      [ ] server framerate when minimized - https://developer.mozilla.org/en-US/docs/Web/API/Window/setImmediate#Notes
