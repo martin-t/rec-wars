@@ -728,50 +728,52 @@ impl Game {
 
         // Draw perf info
         self.context.set_fill_style(&"red".into());
-        self.context.fill_text(
-            &format!("last {} frames:", STATS_FRAMES),
-            self.canvas_size.x - 150.0,
-            self.canvas_size.y - 75.0,
-        )?;
-        if !self.update_durations.is_empty() {
-            let mut sum = 0.0;
-            let mut max = 0.0;
-            for &dur in &self.update_durations {
-                sum += dur;
-                if dur > max {
-                    max = dur;
-                }
-            }
-
+        if cvars.d_text {
             self.context.fill_text(
-                &format!(
-                    "update avg: {:.1}, max: {:.1}",
-                    sum / self.update_durations.len() as f64,
-                    max
-                ),
+                &format!("last {} frames:", STATS_FRAMES),
                 self.canvas_size.x - 150.0,
-                self.canvas_size.y - 60.0,
+                self.canvas_size.y - 75.0,
             )?;
-        }
-        if !self.draw_durations.is_empty() {
-            let mut sum = 0.0;
-            let mut max = 0.0;
-            for &dur in &self.draw_durations {
-                sum += dur;
-                if dur > max {
-                    max = dur;
+            if !self.update_durations.is_empty() {
+                let mut sum = 0.0;
+                let mut max = 0.0;
+                for &dur in &self.update_durations {
+                    sum += dur;
+                    if dur > max {
+                        max = dur;
+                    }
                 }
-            }
 
-            self.context.fill_text(
-                &format!(
-                    "draw avg: {:.1}, max: {:.1}",
-                    sum / self.draw_durations.len() as f64,
-                    max
-                ),
-                self.canvas_size.x - 150.0,
-                self.canvas_size.y - 45.0,
-            )?;
+                self.context.fill_text(
+                    &format!(
+                        "update avg: {:.1}, max: {:.1}",
+                        sum / self.update_durations.len() as f64,
+                        max
+                    ),
+                    self.canvas_size.x - 150.0,
+                    self.canvas_size.y - 60.0,
+                )?;
+            }
+            if !self.draw_durations.is_empty() {
+                let mut sum = 0.0;
+                let mut max = 0.0;
+                for &dur in &self.draw_durations {
+                    sum += dur;
+                    if dur > max {
+                        max = dur;
+                    }
+                }
+
+                self.context.fill_text(
+                    &format!(
+                        "draw avg: {:.1}, max: {:.1}",
+                        sum / self.draw_durations.len() as f64,
+                        max
+                    ),
+                    self.canvas_size.x - 150.0,
+                    self.canvas_size.y - 45.0,
+                )?;
+            }
         }
 
         // Draw FPS
