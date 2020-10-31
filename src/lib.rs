@@ -20,11 +20,15 @@ mod game_state;
 mod map;
 mod systems;
 
-use std::collections::VecDeque;
-use std::f64::consts::PI;
+use std::{
+    any::TypeId,
+    collections::{HashSet, VecDeque},
+    f64::consts::PI,
+    fmt::Debug,
+};
 
 use js_sys::Array;
-use legion::{component, query::IntoQuery, World};
+use legion::{component, query::IntoQuery, Entity, EntityStore, World};
 use rand::prelude::*;
 use vek::ops::Clamp;
 use vek::Vec2;
@@ -47,7 +51,6 @@ use crate::{
 const STATS_FRAMES: usize = 60;
 
 #[wasm_bindgen]
-#[derive(Debug)]
 pub struct Game {
     /// I want to track update and render time in Rust so i can draw the FPS counter and keep stats.
     /// Unfortunately, Instant::now() panics in WASM so i have to use performance.now().
@@ -224,7 +227,7 @@ impl Game {
         }
     }
 
-    /// Dump entire game state to string.
+    /// Dump most of the game state to string.
     /// Can be used from the browser console as a very crude debugging tool: `game.to_debug_string()`.
     pub fn to_debug_string(&self) -> String {
         format!("{:#?}", self)
@@ -873,5 +876,84 @@ impl Game {
             y = self.canvas_size.y + y;
         }
         Vec2f::new(x, y)
+    }
+}
+
+impl Debug for Game {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        use components::*;
+
+        let mut query = <(Entity,)>::query();
+        let entities: Vec<_> = query.iter(&self.legion).map(|(&entity,)| entity).collect();
+        writeln!(f, "Entity count: {}", entities.len())?;
+
+        let archetype_indices: HashSet<_> = entities
+            .iter()
+            .map(|&entity| self.legion.entry_ref(entity).unwrap().archetype().index())
+            .collect();
+        writeln!(f, "Archetype count: {}", archetype_indices.len())?;
+
+        // For each entity, print all its components.
+        // I couldn't find a way to do this without having to list each component type manually.
+        writeln!(f, "Entities:")?;
+        for entity in entities {
+            writeln!(f, "    {:?}:", entity)?;
+            let entry = self.legion.entry_ref(entity).unwrap();
+            for comp_type in entry.archetype().layout().component_types() {
+                let mut known_type = true;
+                let type_id = comp_type.type_id();
+                let debug: &dyn Debug = if type_id == TypeId::of::<Input>() {
+                    entry.get_component::<Input>().unwrap()
+                } else if type_id == TypeId::of::<Player>() {
+                    entry.get_component::<Player>().unwrap()
+                } else if type_id == TypeId::of::<Vehicle>() {
+                    entry.get_component::<Vehicle>().unwrap()
+                } else if type_id == TypeId::of::<Pos>() {
+                    entry.get_component::<Pos>().unwrap()
+                } else if type_id == TypeId::of::<Vel>() {
+                    entry.get_component::<Vel>().unwrap()
+                } else if type_id == TypeId::of::<Angle>() {
+                    entry.get_component::<Angle>().unwrap()
+                } else if type_id == TypeId::of::<TurnRate>() {
+                    entry.get_component::<TurnRate>().unwrap()
+                } else if type_id == TypeId::of::<Time>() {
+                    entry.get_component::<Time>().unwrap()
+                } else if type_id == TypeId::of::<Weapon>() {
+                    entry.get_component::<Weapon>().unwrap()
+                } else if type_id == TypeId::of::<Mg>() {
+                    entry.get_component::<Mg>().unwrap()
+                } else if type_id == TypeId::of::<Cb>() {
+                    entry.get_component::<Cb>().unwrap()
+                } else if type_id == TypeId::of::<GuidedMissile>() {
+                    entry.get_component::<GuidedMissile>().unwrap()
+                } else if type_id == TypeId::of::<Bfg>() {
+                    entry.get_component::<Bfg>().unwrap()
+                } else if type_id == TypeId::of::<Owner>() {
+                    entry.get_component::<Owner>().unwrap()
+                } else if type_id == TypeId::of::<Hitbox>() {
+                    entry.get_component::<Hitbox>().unwrap()
+                } else {
+                    known_type = false;
+                    &0 // dummy value
+                };
+                if known_type {
+                    writeln!(f, "        {:?}", debug)?;
+                } else {
+                    writeln!(f, "        Unknown type: {}", comp_type)?;
+                }
+            }
+        }
+
+        // Override the default Debug impl - The JS types don't print anything useful at all
+        // and legion just dumps its internal state which is impossible to make sense of.
+        f.debug_struct("The rest of Game")
+            .field("gs", &self.gs)
+            .field("gs_prev", &self.gs_prev)
+            .field("map", &self.map)
+            .field("canvas_size", &self.canvas_size)
+            .field("frame_times", &self.frame_times)
+            .field("update_durations", &self.update_durations)
+            .field("draw_durations", &self.draw_durations)
+            .finish()
     }
 }
