@@ -17,7 +17,7 @@ RecWars is a free and open source clone of [RecWar](#the-original-game) - you co
 
 RecWars aims to have gameplay similar but not identical to RecWar - it would be impossible to replicate exactly without decompiling the binary (which doesn't even contain debug symbols), though if a fan of the original finds this project, I am not gonna stop them from trying.
 
-Additionally I suspect RecWar was balanced for playing against bots and might result in annoying strats when people start [playing to win](http://www.sirlin.net/articles/playing-to-win). E.g. with enough mines, the cow can be made completely inaccessible, especially to less maneuverable vehicles like the hovercraft. Experience from poorly designed games also shows large areas will be dominated by instant-hit weapons (in RecWar the railgun) and there might simply be no way to get across the map without getting hit. I might make balance changes based on how the online gameplay evolves.
+Additionally I suspect RecWar was balanced for playing against bots and might result in annoying strats when people start [playing to win](http://www.sirlin.net/articles/playing-to-win). E.g. with enough mines, the cow can be made completely inaccessible, especially to less maneuverable vehicles like the hovercraft. Experience from poorly designed games also shows large areas will be dominated by instant-hit weapons (in RecWar the railgun) and there might simply be no way to get across the map alive. I might make balance changes based on how the online gameplay evolves.
 
 Currently this is very much a work-in-progress: only some weapons work, the driving physics don't feel right, there are no collisions between vehicles, ..., you can't respawn, etc.
 
@@ -60,9 +60,9 @@ If you'd like to improve RecWars, feel free to make a [Pull Request](https://git
 
 Most of the code is commented to be understandable to anyone with a vague idea of how a game works. If it's not clear why a particular piece of code exists or needs to be written the way it is, I consider that a bug which should be fixed by either rewriting the code more clearly or adding comments explaining it.
 
-RecWars is written in Rust with a small bit of JS glue. It does *not* depend on NPM. Currently, it draws directly to an HTML5 canvas using the 2D API which turns out to be too slow to redraw the entire screen at 60Hz. I am still deciding between macroquad, luminance and wgpu-rs.
+RecWars is written in Rust with a small bit of JS glue. It does *not* depend on NPM. Currently, it draws directly to an HTML5 canvas using the 2D API which turns out to be too slow to redraw the entire screen at 60Hz. I am still deciding between [macroquad](https://github.com/not-fl3/macroquad), [luminance](https://github.com/phaazon/luminance-rs) and [wgpu-rs](https://github.com/gfx-rs/wgpu-rs).
 
-Most game state is in the legion ECS, however it's cumbersome to use and WASM doesn't get any benefits from parallelism. It might have been a better idea to use a generational arena or similar allocator - the only reason I am using ECS is so I can have references between entities and for this I am paying by having all entities dynamicly typed which leads to bugs. It's a Rust tradition to start writing a game and end up writing a game engine or ECS so I am considering creating an ECS crate that would satisfy my standards of clean API and static typing.
+Most game state is in the [legion](https://github.com/amethyst/legion) ECS, however it's cumbersome to use and WASM doesn't get any benefits from parallelism. It might have been a better idea to use a generational arena or similar allocator - the only reason I am using ECS is so I can have references between entities and for this I am paying by having all entities dynamicly typed which leads to bugs. It's a Rust tradition to start writing a game and end up writing a game engine or ECS so I am considering creating an ECS crate that would satisfy my standards of clean API and static typing.
 
 The Original Game
 -----------------
