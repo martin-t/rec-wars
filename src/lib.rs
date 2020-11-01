@@ -28,7 +28,7 @@ use std::{
 };
 
 use js_sys::Array;
-use legion::{component, query::IntoQuery, Entity, EntityStore, World};
+use legion::{component, query::IntoQuery, systems::CommandBuffer, Entity, EntityStore, World};
 use rand::prelude::*;
 use vek::ops::Clamp;
 use vek::Vec2;
@@ -99,7 +99,7 @@ impl Game {
     ) -> Self {
         console_error_panic_hook::set_once();
 
-        let mut rng = if cvars.d_seed == 0 {
+        let rng = if cvars.d_seed == 0 {
             // This requires the `wasm-bindgen` feature on `rand` or it crashes at runtime.
             SmallRng::from_entropy()
         } else {
@@ -125,36 +125,18 @@ impl Game {
 
         let surfaces = map::load_tex_list(tex_list_text);
         let map = map::load_map(map_text, surfaces);
+
         let mut legion = World::default();
 
         let name = "Player 1".to_owned();
         let player = Player::new(name);
+        let player1_entity = legion.push((player, EMPTY_INPUT.clone()));
 
-        let player_entity = legion.push((player, EMPTY_INPUT.clone()));
-
-        let veh_type = VehicleType::n(rng.gen_range(0, 3)).unwrap();
-        let vehicle = Vehicle::new(cvars, veh_type);
-        let (spawn_pos, spawn_angle) = map.random_spawn(&mut rng);
-        let hitbox = cvars.g_vehicle_hitbox(veh_type);
-        let owner = Owner(player_entity);
-
-        let vehicle_entity = legion.push((
-            vehicle,
-            Pos(spawn_pos),
-            Vel(Vec2f::zero()),
-            Angle(spawn_angle),
-            TurnRate(0.0),
-            hitbox, // keep hitbox a separate component, later missiles should have them too
-            EMPTY_INPUT.clone(),
-            owner,
-        ));
-
-        legion
-            .entry(player_entity)
-            .unwrap()
-            .get_component_mut::<Player>()
-            .unwrap()
-            .vehicle = Some(vehicle_entity);
+        for i in 1..50 {
+            let name = format!("Bot {}", i);
+            let player = Player::new(name);
+            legion.push((player, EMPTY_INPUT.clone(), Ai::default()));
+        }
 
         let mut gs = GameState {
             rng,
@@ -163,42 +145,34 @@ impl Game {
             input: Input::default(),
             railguns: Vec::new(),
             bfg_beams: Vec::new(),
-            player_entity,
+            player_entity: player1_entity,
             explosions: Vec::new(),
         };
         let gs_prev = gs.clone();
 
-        for i in 0..50 {
-            let name = format!("Bot {}", i);
-            let player = Player::new(name);
-
-            let player_entity = legion.push((player, EMPTY_INPUT.clone(), Ai::default()));
-
+        let mut cmds = CommandBuffer::new(&legion);
+        let mut players_query = <(Entity, &mut Player)>::query();
+        for (&player_entity, player) in players_query.iter_mut(&mut legion) {
             let veh_type = VehicleType::n(gs.rng.gen_range(0, 3)).unwrap();
             let vehicle = Vehicle::new(cvars, veh_type);
-            let pos = map.random_nonwall(&mut gs.rng).0;
-            let angle = gs.rng.gen_range(0.0, 2.0 * PI);
+            let (spawn_pos, spawn_angle) = map.random_nonwall(&mut gs.rng);
             let hitbox = cvars.g_vehicle_hitbox(veh_type);
             let owner = Owner(player_entity);
 
-            let vehicle_entity = legion.push((
+            let vehicle_entity = cmds.push((
                 vehicle,
-                Pos(pos),
+                Pos(spawn_pos),
                 Vel(Vec2f::zero()),
-                Angle(angle),
+                Angle(spawn_angle),
                 TurnRate(0.0),
-                hitbox,
+                hitbox, // keep hitbox a separate component, later missiles should have them too
                 EMPTY_INPUT.clone(),
                 owner,
             ));
 
-            legion
-                .entry(player_entity)
-                .unwrap()
-                .get_component_mut::<Player>()
-                .unwrap()
-                .vehicle = Some(vehicle_entity);
+            player.vehicle = Some(vehicle_entity);
         }
+        cmds.flush(&mut legion);
 
         Self {
             performance: web_sys::window().unwrap().performance().unwrap(),

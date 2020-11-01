@@ -248,12 +248,15 @@ impl Map {
         &self.spawns
     }
 
-    #[allow(unused)] // TODO remove after CTC works
+    // LATER remove all #[allow(unused)] here (or the fns if they turn out useless)
+
+    #[allow(unused)]
     pub(crate) fn bases(&self) -> &Vec<Vec2u> {
         &self.bases
     }
 
     /// Returns (pos, angle).
+    #[allow(unused)]
     pub(crate) fn random_spawn(&self, rng: &mut SmallRng) -> (Vec2f, f64) {
         // TODO maps with no spawns (or even all walls)
         let i = rng.gen_range(0, self.spawns().len());
@@ -264,6 +267,7 @@ impl Map {
     }
 
     /// Returns (pos, angle).
+    #[allow(unused)]
     pub(crate) fn random_nonwall(&self, rng: &mut SmallRng) -> (Vec2f, f64) {
         loop {
             let c = rng.gen_range(0, self.width());
