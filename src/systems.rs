@@ -65,7 +65,9 @@ pub(crate) fn input(world: &mut World, gs: &GameState) {
     let mut players = Vec::new();
     let mut query_players = <(&Player, &Input)>::query();
     for (player, input) in query_players.iter(world) {
-        players.push((player.vehicle, player.guided_missile, input.clone()));
+        if let Some(vehicle) = player.vehicle {
+            players.push((vehicle, player.guided_missile, input.clone()));
+        }
     }
     for (vehicle_entity, maybe_gm_entity, input) in players {
         let mut vehicle_entry = world.entry(vehicle_entity).unwrap();

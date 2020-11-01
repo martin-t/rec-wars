@@ -17,15 +17,15 @@ use crate::{cvars::Cvars, map::Vec2f};
 #[derive(Debug, Clone)]
 pub(crate) struct Player {
     pub(crate) name: String,
-    pub(crate) vehicle: Entity,
+    pub(crate) vehicle: Option<Entity>,
     pub(crate) guided_missile: Option<Entity>,
 }
 
 impl Player {
-    pub(crate) fn new(name: String, vehicle: Entity) -> Self {
+    pub(crate) fn new(name: String) -> Self {
         Self {
             name,
-            vehicle,
+            vehicle: None,
             guided_missile: None,
         }
     }

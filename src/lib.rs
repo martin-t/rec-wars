@@ -127,10 +127,8 @@ impl Game {
         let map = map::load_map(map_text, surfaces);
         let mut legion = World::default();
 
-        let dummy_entity = legion.push(());
-
         let name = "Player 1".to_owned();
-        let player = Player::new(name, dummy_entity);
+        let player = Player::new(name);
 
         let player_entity = legion.push((player, EMPTY_INPUT.clone()));
 
@@ -156,7 +154,7 @@ impl Game {
             .unwrap()
             .get_component_mut::<Player>()
             .unwrap()
-            .vehicle = vehicle_entity;
+            .vehicle = Some(vehicle_entity);
 
         let mut gs = GameState {
             rng,
@@ -172,7 +170,7 @@ impl Game {
 
         for i in 0..50 {
             let name = format!("Bot {}", i);
-            let player = Player::new(name, dummy_entity);
+            let player = Player::new(name);
 
             let player_entity = legion.push((player, EMPTY_INPUT.clone(), Ai::default()));
 
@@ -199,10 +197,8 @@ impl Game {
                 .unwrap()
                 .get_component_mut::<Player>()
                 .unwrap()
-                .vehicle = vehicle_entity;
+                .vehicle = Some(vehicle_entity);
         }
-
-        legion.remove(dummy_entity);
 
         Self {
             performance: web_sys::window().unwrap().performance().unwrap(),
@@ -347,7 +343,7 @@ impl Game {
         let player_entry = self.legion.entry(self.gs.player_entity).unwrap();
         let player = player_entry.get_component::<Player>().unwrap();
         let maybe_gm_entity = player.guided_missile;
-        let player_vehicle_entity = player.vehicle;
+        let player_vehicle_entity = player.vehicle.unwrap(); // TODO what if no vehicle
         let controlled_entity_entry = if let Some(gm_entity) = maybe_gm_entity {
             self.legion.entry(gm_entity).unwrap()
         } else {
