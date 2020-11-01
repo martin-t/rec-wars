@@ -38,10 +38,7 @@ use web_sys::{CanvasRenderingContext2d, HtmlImageElement, Performance};
 
 use crate::{
     ai::Ai,
-    components::{
-        Ammo, Angle, Bfg, Cb, Hitbox, Mg, Owner, Player, Pos, TurnRate, Vehicle, VehicleType, Vel,
-        Weapon,
-    },
+    components::{Ammo, Angle, Bfg, Cb, Hitbox, Mg, Player, Pos, Vehicle, Vel, Weapon},
     cvars::{Cvars, TickrateMode},
     debugging::{DbgCount, DEBUG_CROSSES, DEBUG_LINES, DEBUG_TEXTS},
     game_state::{Explosion, GameState, Input, EMPTY_INPUT},
@@ -132,7 +129,7 @@ impl Game {
         let player = Player::new(name);
         let player1_entity = legion.push((player, EMPTY_INPUT.clone()));
 
-        for i in 1..50 {
+        for i in 1..map.spawns().len() {
             let name = format!("Bot {}", i);
             let player = Player::new(name);
             legion.push((player, EMPTY_INPUT.clone(), Ai::default()));
@@ -153,24 +150,15 @@ impl Game {
         let mut cmds = CommandBuffer::new(&legion);
         let mut players_query = <(Entity, &mut Player)>::query();
         for (&player_entity, player) in players_query.iter_mut(&mut legion) {
-            let veh_type = VehicleType::n(gs.rng.gen_range(0, 3)).unwrap();
-            let vehicle = Vehicle::new(cvars, veh_type);
-            let (spawn_pos, spawn_angle) = map.random_nonwall(&mut gs.rng);
-            let hitbox = cvars.g_vehicle_hitbox(veh_type);
-            let owner = Owner(player_entity);
-
-            let vehicle_entity = cmds.push((
-                vehicle,
-                Pos(spawn_pos),
-                Vel(Vec2f::zero()),
-                Angle(spawn_angle),
-                TurnRate(0.0),
-                hitbox, // keep hitbox a separate component, later missiles should have them too
-                EMPTY_INPUT.clone(),
-                owner,
-            ));
-
-            player.vehicle = Some(vehicle_entity);
+            systems::spawn(
+                cvars,
+                &mut gs,
+                &map,
+                &mut cmds,
+                player_entity,
+                player,
+                false,
+            );
         }
         cmds.flush(&mut legion);
 
@@ -280,6 +268,8 @@ impl Game {
         systems::ai(&mut self.legion, &mut self.gs);
 
         systems::input(&mut self.legion, &self.gs);
+
+        systems::respawning(cvars, &mut self.legion, &mut self.gs, &self.map);
 
         systems::vehicle_logic(cvars, &mut self.legion, &mut self.gs, &self.gs_prev);
 

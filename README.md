@@ -19,7 +19,7 @@ RecWars aims to have gameplay similar but not identical to RecWar - it would be 
 
 Additionally I suspect RecWar was balanced for playing against bots and might result in annoying strats when people start [playing to win](http://www.sirlin.net/articles/playing-to-win). E.g. with enough mines, the cow can be made completely inaccessible, especially to less maneuverable vehicles like the hovercraft. Experience from poorly designed games also shows large areas will be dominated by instant-hit weapons (in RecWar the railgun) and there might simply be no way to get across the map alive. I might make balance changes based on how the online gameplay evolves.
 
-Currently this is very much a work-in-progress: only some weapons work, the driving physics don't feel right, there are no collisions between vehicles, ..., you can't respawn, etc.
+Currently this is very much a work-in-progress: only some weapons work, the driving physics don't feel right, there are no collisions between vehicles, ...
 
 The ultimate goal is to create a multiplayer game playable in the browser and on Linux, Windows and macOS. This might be tricky since WASM in the browser doesn't allow UDP. I have some ideas how to solve that.
 

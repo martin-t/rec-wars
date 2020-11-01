@@ -13,7 +13,7 @@
 
 use std::f64::consts::PI;
 
-use legion::{component, query::IntoQuery, systems::CommandBuffer, Entity, World};
+use legion::{component, query::IntoQuery, systems::CommandBuffer, Entity, EntityStore, World};
 use rand::Rng;
 use rand_distr::StandardNormal;
 use vek::Clamp;
@@ -22,7 +22,7 @@ use crate::{
     ai::Ai,
     components::{
         Ammo, Angle, Bfg, Cb, GuidedMissile, Hitbox, Mg, Owner, Player, Pos, Time, TurnRate,
-        Vehicle, Vel, Weapon, WEAPS_CNT,
+        Vehicle, VehicleType, Vel, Weapon, WEAPS_CNT,
     },
     cvars::{Cvars, Hardpoint, MovementStats},
     game_state::{Explosion, GameState, Input, EMPTY_INPUT},
@@ -97,6 +97,68 @@ pub(crate) fn input(world: &mut World, gs: &GameState) {
                 .unwrap() = input.missile_while_guiding();
         }
     }
+}
+
+pub(crate) fn respawning(cvars: &Cvars, world: &mut World, gs: &mut GameState, map: &Map) {
+    let mut cmds = CommandBuffer::new(world);
+    let mut query_players = <(Entity, &mut Player, &Input)>::query();
+    let (mut world_players, world_rest) = world.split_for_query(&query_players);
+    for (&player_entity, player, input) in query_players.iter_mut(&mut world_players) {
+        if let Some(vehicle) = player.vehicle {
+            let destroyed = world_rest
+                .entry_ref(vehicle)
+                .unwrap()
+                .get_component::<Vehicle>()
+                .unwrap()
+                .destroyed();
+
+            if destroyed && input.fire {
+                cmds.remove(vehicle);
+
+                spawn(cvars, gs, map, &mut cmds, player_entity, player, true);
+            }
+        } else if input.fire {
+            spawn(cvars, gs, map, &mut cmds, player_entity, player, true);
+        }
+    }
+    cmds.flush(world);
+}
+
+pub(crate) fn spawn(
+    cvars: &Cvars,
+    gs: &mut GameState,
+    map: &Map,
+    cmds: &mut CommandBuffer,
+    player_entity: Entity,
+    player: &mut Player,
+    use_spawns: bool,
+) {
+    let veh_type = VehicleType::n(gs.rng.gen_range(0, 3)).unwrap();
+    let vehicle = Vehicle::new(cvars, veh_type);
+    let (spawn_pos, spawn_angle) = if use_spawns {
+        map.random_spawn(&mut gs.rng)
+    } else {
+        let (pos, _angle) = map.random_nonwall(&mut gs.rng);
+        // Most grass tiles have no rotation so everyone ends up facing right which looks bad.
+        // Throw away their angle and use a random one.
+        let angle = gs.rng.gen_range(0.0, 2.0 * PI);
+        (pos, angle)
+    };
+    let hitbox = cvars.g_vehicle_hitbox(veh_type);
+    let owner = Owner(player_entity);
+
+    let vehicle_entity = cmds.push((
+        vehicle,
+        Pos(spawn_pos),
+        Vel(Vec2f::zero()),
+        Angle(spawn_angle),
+        TurnRate(0.0),
+        hitbox, // keep hitbox a separate component, later missiles should have them too
+        EMPTY_INPUT.clone(),
+        owner,
+    ));
+
+    player.vehicle = Some(vehicle_entity);
 }
 
 pub(crate) fn self_destruct(cvars: &Cvars, world: &mut World, gs: &mut GameState) {
