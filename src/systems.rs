@@ -115,16 +115,16 @@ pub(crate) fn respawning(cvars: &Cvars, world: &mut World, gs: &mut GameState, m
             if destroyed && input.fire {
                 cmds.remove(vehicle);
 
-                spawn(cvars, gs, map, &mut cmds, player_entity, player, true);
+                spawn_vehicle(cvars, gs, map, &mut cmds, player_entity, player, true);
             }
         } else if input.fire {
-            spawn(cvars, gs, map, &mut cmds, player_entity, player, true);
+            spawn_vehicle(cvars, gs, map, &mut cmds, player_entity, player, true);
         }
     }
     cmds.flush(world);
 }
 
-pub(crate) fn spawn(
+pub(crate) fn spawn_vehicle(
     cvars: &Cvars,
     gs: &mut GameState,
     map: &Map,

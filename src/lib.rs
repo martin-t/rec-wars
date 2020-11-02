@@ -150,7 +150,7 @@ impl Game {
         let mut cmds = CommandBuffer::new(&legion);
         let mut players_query = <(Entity, &mut Player)>::query();
         for (&player_entity, player) in players_query.iter_mut(&mut legion) {
-            systems::spawn(
+            systems::spawn_vehicle(
                 cvars,
                 &mut gs,
                 &map,
