@@ -240,7 +240,7 @@ async function run() {
 
     let load_map = (tex_list_text) => {
         let request = new XMLHttpRequest();
-        request.open("GET", "../maps/Atrium.map");
+        request.open("GET", "../maps/Spots (8).map");
         request.onloadend = () => {
             if (request.status !== 200) {
                 alert("Failed to load map");
