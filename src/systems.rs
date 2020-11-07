@@ -56,6 +56,7 @@ pub(crate) fn input(world: &mut World, gs: &GameState) {
     }
 
     // Copy (parts of) player input to vehicles and missiles.
+    // TODO Why do it this way? Can't we just query the player's input in vehicle/missile movement system?
     // NOTE about potential bugs when refactoring:
     //  - vehicle can move while dead (this is a classic at this point)
     //  - can guide missile while dead
