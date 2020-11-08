@@ -3,7 +3,7 @@
 //! and they allow a primitive version of overloading.
 //! The fns and structs are only public because the macros need them.
 
-#![allow(unused)]
+#![allow(dead_code)]
 
 use std::cell::RefCell;
 

@@ -44,14 +44,6 @@ impl Explosion {
     }
 }
 
-// TODO unused - remove if it's not needed for explosions / mutual hitscan
-#[derive(Debug, Clone)]
-pub(crate) struct Damage {
-    attacker: Entity,
-    dmg: f64,
-    victim: Entity,
-}
-
 #[wasm_bindgen]
 #[derive(Debug, Clone, Default)]
 pub struct Input {

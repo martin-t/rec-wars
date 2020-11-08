@@ -71,7 +71,6 @@ impl Vehicle {
     }
 }
 
-#[allow(unused)]
 #[derive(Debug, Clone, Copy, N)]
 pub(crate) enum VehicleType {
     Tank,
