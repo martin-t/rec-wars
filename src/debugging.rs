@@ -9,6 +9,13 @@ use std::cell::RefCell;
 
 use crate::map::Vec2f;
 
+#[derive(Debug, Clone)]
+pub(crate) struct WorldText {
+    pub(crate) msg: String,
+    pub(crate) pos: Vec2f,
+}
+
+#[derive(Debug, Clone)]
 pub(crate) struct Line {
     pub(crate) begin: Vec2f,
     pub(crate) end: Vec2f,
@@ -17,6 +24,7 @@ pub(crate) struct Line {
     pub(crate) color: &'static str,
 }
 
+#[derive(Debug, Clone)]
 pub(crate) struct Cross {
     pub(crate) point: Vec2f,
     /// Time left (decreases every frame)
@@ -27,6 +35,7 @@ pub(crate) struct Cross {
 thread_local! {
     /// Lines of text to be printed onto the screen, cleared after printing.
     pub(crate) static DEBUG_TEXTS: RefCell<Vec<String>> = RefCell::new(Vec::new());
+    pub(crate) static DEBUG_TEXTS_WORLD: RefCell<Vec<WorldText>> = RefCell::new(Vec::new());
     pub(crate) static DEBUG_LINES: RefCell<Vec<Line>> = RefCell::new(Vec::new());
     pub(crate) static DEBUG_CROSSES: RefCell<Vec<Cross>> = RefCell::new(Vec::new());
 }
@@ -56,7 +65,7 @@ macro_rules! dbg_logd {
 macro_rules! dbg_textf {
     ( $( $t:tt )* ) => {
         let s = format!( $( $t )* );
-        crate::debugging::DEBUG_TEXTS.with(|texts| {
+        $crate::debugging::DEBUG_TEXTS.with(|texts| {
             texts.borrow_mut().push(s)
         });
     };
@@ -75,10 +84,24 @@ macro_rules! dbg_textd {
     };
 }
 
+#[macro_export]
+macro_rules! dbg_world_textf {
+    ( $pos:expr, $( $t:tt )* ) => {
+        let s = format!( $( $t )* );
+        let text = $crate::debugging::WorldText {
+            msg: s,
+            pos: $pos,
+        };
+        $crate::debugging::DEBUG_TEXTS_WORLD.with(|texts| {
+            texts.borrow_mut().push(text)
+        });
+    };
+}
+
 /// Private helper to print the name and value of each given variable.
 /// Not meant to be used directly.
 #[macro_export]
-macro_rules! __print_pairs {
+macro_rules! __format_pairs {
     ( $e:expr ) => {
         format!("{}: {:.6?}", stringify!($e), $e)
     };

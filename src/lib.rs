@@ -40,7 +40,7 @@ use crate::{
     ai::Ai,
     components::{Ammo, Angle, Bfg, Cb, Hitbox, Mg, Player, Pos, Vehicle, Vel, Weapon},
     cvars::{Cvars, TickrateMode},
-    debugging::{DbgCount, DEBUG_CROSSES, DEBUG_LINES, DEBUG_TEXTS},
+    debugging::{DbgCount, DEBUG_CROSSES, DEBUG_LINES, DEBUG_TEXTS, DEBUG_TEXTS_WORLD},
     game_state::{Explosion, GameState, Input, EMPTY_INPUT},
     map::{F64Ext, Kind, Map, Vec2f, VecExt, TILE_SIZE},
 };
@@ -751,13 +751,25 @@ impl Game {
             self.canvas_size.y - 15.0,
         )?;
 
+        // Draw world debug text
+        DEBUG_TEXTS_WORLD.with(|texts| {
+            let mut texts = texts.borrow_mut();
+            if cvars.d_text {
+                for text in texts.iter() {
+                    let scr_pos = text.pos - top_left;
+                    self.context.fill_text(&text.msg, scr_pos.x, scr_pos.y).unwrap();
+                }
+            }
+            texts.clear();
+        });
+
         // Draw debug text
         let mut y = 25.0;
         DEBUG_TEXTS.with(|texts| {
             let mut texts = texts.borrow_mut();
             if cvars.d_text {
-                for line in texts.iter() {
-                    self.context.fill_text(line, 20.0, y).unwrap();
+                for text in texts.iter() {
+                    self.context.fill_text(text, 20.0, y).unwrap();
                     y += cvars.d_text_line_height;
                 }
             }

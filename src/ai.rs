@@ -1,4 +1,4 @@
-/// Stub. So far bots move and shoot randomly.
+//! Stub. So far bots move and shoot randomly.
 
 use rand::{prelude::SmallRng, Rng};
 
