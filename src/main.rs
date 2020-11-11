@@ -1,10 +1,48 @@
 // Master TODO list:
 // MVP:
 // [x] pick a math lib, don't overthink it
-// [ ] canvas 2D is slow, pick an engine or rendering crate
-//      [x] check https://arewegameyet.rs/ecosystem/engines/
-//      [x] check https://github.com/dasifefe/rust-game-development-frameworks
+// [x] load maps
+// [x] cvars
+//      https://crates.io/crates/cvar
+//          no tab completion in js console
+//          https://crates.io/crates/amethyst-console - uses cvar and imgui
+// [x] ECS
+//      hecs
+//          - can't delete while iterating
+//          - no clone / snapshots
+//          + ffa example
+//          + nested queries (takes &World even for write access)
+//          + slightly faster in WASM, especially debug mode
+//          - no resources, commands
+//      legion
+//          - can't delete while iterating
+//          + should be able to make a clone of the world (clone_from)
+//          - bad docs / no examples / 0.3 transition
+//          - how to do nested queries without copying? split world? maybe systems make this easier?
+//          + slightly slower in WASM, especially debug mode
+//          + resources, commands?
+// [x] explosions
+//      [x] sizes
+// [x] hp/health
+//      [x] wrecks (vehicle turned into wreck immediately on hit, before explosion covers it)
+//      [x] configurable
+// [x] player separate from vehicle
+// [x] icon
+// [x] version info
+// [ ] mostly working weapons
+// [x] respawning
+// [ ] scores
+// [ ] primitive bots
+// [ ] splitscreen
+// [ ] decent default binds (2x for splitscreen)
+// [ ] fix perf - canvas 2D is slow, pick an engine or rendering crate
+//      option 1: optimize canvas (but still need something else for the native client)
+//          https://isaacsukin.com/news/2015/01/detailed-explanation-javascript-game-loops-and-timing
+//          render background to off-screen canvas, draw part of it to the main canvas in one call (actually 2 for nonwalls + walls)
+//      option 2: pick a rust engine / rendering crate
 //      engines
+//          [x] check https://arewegameyet.rs/ecosystem/engines/
+//          [x] check https://github.com/dasifefe/rust-game-development-frameworks
 //          godot
 //          https://crates.io/crates/amethyst
 //              WASM in progress: https://github.com/amethyst/amethyst/issues/2260
@@ -36,40 +74,6 @@
 //          list of tools: Instruction counts @ https://blog.mozilla.org/nnethercote/2020/09/08/how-to-speed-up-the-rust-compiler-one-last-time/
 //      note to self - renderdoc for graphics debugging
 //      [ ] FAQ - stuttering/tearing due to compositor - Alt+Shift+f12 - somehow this doesn't work anymore
-// [x] load maps
-// [x] cvars
-//      https://crates.io/crates/cvar
-//          no tab completion in js console
-//          https://crates.io/crates/amethyst-console - uses cvar and imgui
-// [x] ECS
-//      hecs
-//          - can't delete while iterating
-//          - no clone / snapshots
-//          + ffa example
-//          + nested queries (takes &World even for write access)
-//          + slightly faster in WASM, especially debug mode
-//          - no resources, commands
-//      legion
-//          - can't delete while iterating
-//          + should be able to make a clone of the world (clone_from)
-//          - bad docs / no examples / 0.3 transition
-//          - how to do nested queries without copying? split world? maybe systems make this easier?
-//          + slightly slower in WASM, especially debug mode
-//          + resources, commands?
-// [x] explosions
-//      [x] sizes
-// [x] hp/health
-//      [x] wrecks (vehicle turned into wreck immediately on hit, before explosion covers it)
-//      [x] configurable
-// [x] player separate from vehicle
-// [x] icon
-// [x] version info
-// [ ] mostly working weapons
-// [ ] respawning
-// [ ] scores
-// [ ] primitive bots
-// [ ] splitscreen
-// [ ] decent default binds (2x for splitscreen)
 // 1.0:
 // [ ] CI - GH actions / travis, mirror to GL???
 // [ ] extract/screenshot/record assets from RecWar or find alternatives
