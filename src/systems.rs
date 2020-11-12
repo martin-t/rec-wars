@@ -11,6 +11,8 @@
 //!   into separate components for vehicles and projectiles to be able to do collision detection.
 //! - Simple functions like these can return data to be passed to other systems.
 
+pub(crate) mod ai;
+
 use std::f64::consts::PI;
 
 use legion::{component, query::IntoQuery, systems::CommandBuffer, Entity, EntityStore, World};
@@ -19,7 +21,6 @@ use rand_distr::StandardNormal;
 use vek::Clamp;
 
 use crate::{
-    ai::Ai,
     components::{
         Ammo, Angle, Bfg, Cb, GuidedMissile, Hitbox, Mg, Owner, Player, Pos, Time, TurnRate,
         Vehicle, VehicleType, Vel, Weapon, WEAPS_CNT,
@@ -28,13 +29,6 @@ use crate::{
     game_state::{Explosion, GameState, Input, EMPTY_INPUT},
     map::{F64Ext, Map, Vec2f, VecExt},
 };
-
-pub(crate) fn ai(world: &mut World, gs: &mut GameState) {
-    let mut query_ai = <(&mut Input, &mut Ai)>::query();
-    for (input, ai) in query_ai.iter_mut(world) {
-        *input = ai.input(&mut gs.rng);
-    }
-}
 
 pub(crate) fn input(world: &mut World, gs: &GameState) {
     // Player 1 input
@@ -135,7 +129,7 @@ pub(crate) fn spawn_vehicle(
     use_spawns: bool,
 ) {
     let veh_type = VehicleType::n(gs.rng.gen_range(0, 3)).unwrap();
-    let vehicle = Vehicle::new(cvars, veh_type);
+    let vehicle = Vehicle::new(cvars, veh_type, gs.frame_time);
     let (spawn_pos, spawn_angle) = if use_spawns {
         map.random_spawn(&mut gs.rng)
     } else {

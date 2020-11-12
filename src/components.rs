@@ -31,6 +31,19 @@ impl Player {
     }
 }
 
+#[derive(Debug, Clone, Default)]
+pub(crate) struct Ai {
+    pub(crate) movement: i32,
+    pub(crate) turning: i32,
+    pub(crate) firing: bool,
+}
+
+impl Ai {
+    pub(crate) fn new() -> Self {
+        Self::default()
+    }
+}
+
 #[derive(Debug, Clone)]
 pub(crate) struct Vehicle {
     pub(crate) veh_type: VehicleType,
@@ -42,11 +55,12 @@ pub(crate) struct Vehicle {
     /// I plan to generalize this and have a cvar to choose between multiple reload mechanisms.
     pub(crate) ammos: Vec<Ammo>,
     pub(crate) cur_weapon: Weapon,
+    pub(crate) spawn_time: f64,
 }
 
 impl Vehicle {
     #[must_use]
-    pub(crate) fn new(cvars: &Cvars, veh_type: VehicleType) -> Vehicle {
+    pub(crate) fn new(cvars: &Cvars, veh_type: VehicleType, frame_time: f64) -> Vehicle {
         let ammos = vec![
             Ammo::Loaded(0.0, cvars.g_weapon_reload_ammo(Weapon::Mg)),
             Ammo::Loaded(0.0, cvars.g_weapon_reload_ammo(Weapon::Rail)),
@@ -63,6 +77,7 @@ impl Vehicle {
             hp_fraction: 1.0,
             ammos,
             cur_weapon: Weapon::Mg,
+            spawn_time: frame_time,
         }
     }
 

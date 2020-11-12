@@ -13,7 +13,6 @@
 #[macro_use]
 mod debugging; // keep first so the macros are available everywhere
 
-mod ai;
 mod components;
 mod cvars;
 mod game_state;
@@ -37,8 +36,7 @@ use wasm_bindgen::JsCast;
 use web_sys::{CanvasRenderingContext2d, HtmlImageElement, Performance};
 
 use crate::{
-    ai::Ai,
-    components::{Ammo, Angle, Bfg, Cb, Hitbox, Mg, Player, Pos, Vehicle, Vel, Weapon},
+    components::{Ai, Ammo, Angle, Bfg, Cb, Hitbox, Mg, Player, Pos, Vehicle, Vel, Weapon},
     cvars::{Cvars, TickrateMode},
     debugging::{DbgCount, DEBUG_CROSSES, DEBUG_LINES, DEBUG_TEXTS, DEBUG_TEXTS_WORLD},
     game_state::{Explosion, GameState, Input, EMPTY_INPUT},
@@ -129,12 +127,6 @@ impl Game {
         let player = Player::new(name);
         let player1_entity = legion.push((player, EMPTY_INPUT.clone()));
 
-        for i in 1..map.spawns().len() {
-            let name = format!("Bot {}", i);
-            let player = Player::new(name);
-            legion.push((player, EMPTY_INPUT.clone(), Ai::default()));
-        }
-
         let mut gs = GameState {
             rng,
             frame_time: 0.0,
@@ -146,6 +138,12 @@ impl Game {
             explosions: Vec::new(),
         };
         let gs_prev = gs.clone();
+
+        for i in 1..map.spawns().len() {
+            let name = format!("Bot {}", i);
+            let player = Player::new(name);
+            legion.push((player, EMPTY_INPUT.clone(), Ai::new()));
+        }
 
         let mut cmds = CommandBuffer::new(&legion);
         let mut players_query = <(Entity, &mut Player)>::query();
@@ -265,7 +263,7 @@ impl Game {
             progress <= 1.0
         });
 
-        systems::ai(&mut self.legion, &mut self.gs);
+        systems::ai::ai(&mut self.legion, &mut self.gs);
 
         systems::input(&mut self.legion, &self.gs);
 
@@ -757,7 +755,9 @@ impl Game {
             if cvars.d_text {
                 for text in texts.iter() {
                     let scr_pos = text.pos - top_left;
-                    self.context.fill_text(&text.msg, scr_pos.x, scr_pos.y).unwrap();
+                    self.context
+                        .fill_text(&text.msg, scr_pos.x, scr_pos.y)
+                        .unwrap();
                 }
             }
             texts.clear();
