@@ -619,12 +619,11 @@ fn projectile_impact(
     }
     if proj_weap == Weapon::Gm {
         cmds.exec_mut(move |world| {
-            world
-                .entry(proj_owner)
-                .unwrap()
-                .get_component_mut::<Player>()
-                .unwrap()
-                .guided_missile = None;
+            let mut entry = world.entry(proj_owner).unwrap();
+            let player = entry.get_component_mut::<Player>().unwrap();
+            if player.guided_missile == Some(proj) {
+                player.guided_missile = None;
+            }
         });
     }
     cmds.remove(proj);
