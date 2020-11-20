@@ -1,135 +1,52 @@
-//! The S in ECS. Most game behavior (code that changes state) goes here.
+//! The S in ECS
 //!
-//! Not using legion's #[system] macro because:
-//! - Legion wants to own resources and state (cvars, map, RNG, ...).
-//!   Both #[resource] and #[state] require the data to be passed by value (into Resources or the *_system() functions).
-//!   There's no way to have them stored somewhere else and pass them as reference into the systems.
-//!   This means I'd have to move everything into the ECS, which in turn would make even resources and state duck-typed
-//!   when accessing them outside systems. Cvars are even worse because those have to be owned by JS.
-//! - WASM currently only uses 1 thread anyway so no perf benefit from parallelism.
-//! - https://github.com/amethyst/legion/issues/199 - I'd have to to split Pos
-//!   into separate components for vehicles and projectiles to be able to do collision detection.
-//! - Simple functions like these can return data to be passed to other systems.
+//! We're using the ECS design pattern (decouple behavior from data),
+//! just without the ECS data structure (we use generational arenas instead).
+//! Most game behavior (code that changes state) goes here.
 
 pub(crate) mod ai;
 
 use std::f64::consts::PI;
 
-use legion::{component, query::IntoQuery, systems::CommandBuffer, Entity, EntityStore, World};
 use rand::Rng;
 use rand_distr::StandardNormal;
+use thunderdome::Index;
 use vek::Clamp;
 
 use crate::{
-    components::{
-        Ammo, Angle, Bfg, Cb, GuidedMissile, Hitbox, Mg, Owner, Player, Pos, Time, TurnRate,
-        Vehicle, VehicleType, Vel, Weapon, WEAPS_CNT,
-    },
     cvars::{Cvars, Hardpoint, MovementStats},
-    game_state::{Explosion, GameState, Input, EMPTY_INPUT},
-    map::{F64Ext, Map, Vec2f, VecExt},
+    entities::{Ammo, Projectile, Vehicle, VehicleType, Weapon, WEAPS_CNT},
+    game_state::ArenaExt,
+    game_state::{Explosion, GameState, Input},
+    map::{F64Ext, Map, Vec2f},
 };
 
-pub(crate) fn input(world: &mut World, gs: &GameState) {
-    // Player 1 input
-    *world
-        .entry(gs.player_entity)
-        .unwrap()
-        .get_component_mut::<Input>()
-        .unwrap() = gs.input.clone();
+pub(crate) fn respawning(cvars: &Cvars, gs: &mut GameState, map: &Map) {
+    for player_handle in gs.players.iter_handles() {
+        let player = &mut gs.players[player_handle];
+        if let Some(vehicle_handle) = player.vehicle {
+            let destroyed = gs.vehicles[vehicle_handle].destroyed();
 
-    let mut query_vehicles = <(&mut Input,)>::query().filter(component::<Vehicle>());
-    for (input,) in query_vehicles.iter_mut(world) {
-        *input = EMPTY_INPUT.clone();
-    }
+            if destroyed && player.input.fire {
+                gs.vehicles.remove(vehicle_handle).unwrap();
 
-    let mut query_gms = <(&mut Input,)>::query().filter(component::<GuidedMissile>());
-    for (input,) in query_gms.iter_mut(world) {
-        *input = EMPTY_INPUT.clone();
-        input.up = true;
-    }
-
-    // Copy (parts of) player input to vehicles and missiles.
-    // TODO Why do it this way? Can't we just query the player's input in vehicle/missile movement system?
-    // NOTE about potential bugs when refactoring:
-    //  - vehicle can move while dead (this is a classic at this point)
-    //  - can guide missile while dead
-    //  - can guide multiple missiles (LATER optionally allow by cvar)
-    //  - missile input is not reset after death / launching another (results in flying in circles)
-    //  - missile stops after player dies / launches another
-    let mut players = Vec::new();
-    let mut query_players = <(&Player, &Input)>::query();
-    for (player, input) in query_players.iter(world) {
-        if let Some(vehicle) = player.vehicle {
-            players.push((vehicle, player.guided_missile, input.clone()));
-        }
-    }
-    for (vehicle_entity, maybe_gm_entity, input) in players {
-        let mut vehicle_entry = world.entry(vehicle_entity).unwrap();
-        let destroyed = vehicle_entry
-            .get_component::<Vehicle>()
-            .unwrap()
-            .destroyed();
-
-        if destroyed {
-            // No movement or guiding after death (this doesn't stop the camera tracking the GM).
-            continue;
-        }
-
-        let veh_input = vehicle_entry.get_component_mut::<Input>().unwrap();
-        if maybe_gm_entity.is_some() {
-            // Note: vehicles can shoot while controlling a missile
-            *veh_input = input.vehicle_while_guiding();
-        } else {
-            *veh_input = input.clone();
-        }
-
-        if let Some(gm_entity) = maybe_gm_entity {
-            *world
-                .entry(gm_entity)
-                .unwrap()
-                .get_component_mut::<Input>()
-                .unwrap() = input.missile_while_guiding();
-        }
-    }
-}
-
-pub(crate) fn respawning(cvars: &Cvars, world: &mut World, gs: &mut GameState, map: &Map) {
-    let mut cmds = CommandBuffer::new(world);
-    let mut query_players = <(Entity, &mut Player, &Input)>::query();
-    let (mut world_players, world_rest) = world.split_for_query(&query_players);
-    for (&player_entity, player, input) in query_players.iter_mut(&mut world_players) {
-        if let Some(vehicle) = player.vehicle {
-            let destroyed = world_rest
-                .entry_ref(vehicle)
-                .unwrap()
-                .get_component::<Vehicle>()
-                .unwrap()
-                .destroyed();
-
-            if destroyed && input.fire {
-                cmds.remove(vehicle);
-
-                spawn_vehicle(cvars, gs, map, &mut cmds, player_entity, player, true);
+                spawn_vehicle(cvars, gs, map, player_handle, true);
             }
-        } else if input.fire {
-            spawn_vehicle(cvars, gs, map, &mut cmds, player_entity, player, true);
+        } else if player.input.fire {
+            spawn_vehicle(cvars, gs, map, player_handle, true);
         }
     }
-    cmds.flush(world);
 }
 
 pub(crate) fn spawn_vehicle(
     cvars: &Cvars,
     gs: &mut GameState,
     map: &Map,
-    cmds: &mut CommandBuffer,
-    player_entity: Entity,
-    player: &mut Player,
+    player_handle: Index,
     use_spawns: bool,
 ) {
+    let player = &mut gs.players[player_handle];
     let veh_type = VehicleType::n(gs.rng.gen_range(0, 3)).unwrap();
-    let vehicle = Vehicle::new(cvars, veh_type, gs.frame_time);
     let (spawn_pos, spawn_angle) = if use_spawns {
         map.random_spawn(&mut gs.rng)
     } else {
@@ -139,123 +56,118 @@ pub(crate) fn spawn_vehicle(
         let angle = gs.rng.gen_range(0.0, 2.0 * PI);
         (pos, angle)
     };
-    let hitbox = cvars.g_vehicle_hitbox(veh_type);
-    let owner = Owner(player_entity);
 
-    let vehicle_entity = cmds.push((
-        vehicle,
-        Pos(spawn_pos),
-        Vel(Vec2f::zero()),
-        Angle(spawn_angle),
-        TurnRate(0.0),
-        hitbox, // keep hitbox a separate component, later missiles should have them too
-        EMPTY_INPUT.clone(),
-        owner,
+    let vehicle_handle = gs.vehicles.insert(Vehicle::new(
+        cvars,
+        spawn_pos,
+        spawn_angle,
+        veh_type,
+        gs.frame_time,
+        player_handle,
     ));
 
-    player.vehicle = Some(vehicle_entity);
+    player.vehicle = Some(vehicle_handle);
 }
 
-pub(crate) fn self_destruct(cvars: &Cvars, world: &mut World, gs: &mut GameState) {
-    let mut cmds = CommandBuffer::new(world);
-
-    let mut query = <(&mut Vehicle, &Pos, &Owner, &Input)>::query();
-    for (vehicle, veh_pos, veh_owner, input) in query.iter_mut(world) {
+pub(crate) fn self_destruct(cvars: &Cvars, gs: &mut GameState) {
+    for vehicle_handle in gs.vehicles.iter_handles() {
+        let vehicle = &gs.vehicles[vehicle_handle];
+        let input = &gs.players[vehicle.owner].input;
         if !input.self_destruct || vehicle.destroyed() {
             continue;
         }
 
-        // First the big explosion
+        // First the big explosion...
         gs.explosions.push(Explosion::new(
-            veh_pos.0,
+            vehicle.pos,
             cvars.g_self_destruct_explosion_scale,
             gs.frame_time,
             false,
         ));
-        // Then destroy the vehicle to create the small explosion
-        damage(
-            cvars,
-            gs,
-            &mut cmds,
-            vehicle,
-            veh_pos.0,
-            veh_owner.0,
-            f64::MAX,
-        )
+        // ...then destroy the vehicle to create the small explosion on top.
+        damage(cvars, gs, vehicle_handle, f64::MAX)
     }
-
-    cmds.flush(world);
 }
 
-pub(crate) fn vehicle_movement(cvars: &Cvars, world: &mut World, gs: &GameState, map: &Map) {
-    let mut query = <(
-        &Vehicle,
-        &mut Pos,
-        &mut Vel,
-        &mut Angle,
-        &mut TurnRate,
-        &Hitbox,
-        &Input,
-    )>::query();
-    for (vehicle, pos, vel, angle, turn_rate, hitbox, input) in query.iter_mut(world) {
+pub(crate) fn vehicle_movement(cvars: &Cvars, gs: &mut GameState, map: &Map) {
+    for (_, vehicle) in gs.vehicles.iter_mut() {
         let stats = cvars.g_vehicle_movement_stats(vehicle.veh_type);
 
-        let new_angle = turning(&stats, vel, angle, turn_rate, input, gs.dt);
+        // No movement after death or when guiding
+        let input = if vehicle.destroyed() {
+            Input::new()
+        } else {
+            let player = &gs.players[vehicle.owner];
+            if player.guided_missile.is_some() {
+                gs.players[vehicle.owner].input.vehicle_while_guiding()
+            } else {
+                gs.players[vehicle.owner].input
+            }
+        };
+        let new_angle = turning(
+            &stats,
+            &mut vehicle.vel,
+            &vehicle.angle,
+            &mut vehicle.turn_rate,
+            input,
+            gs.dt,
+        );
 
-        if hitbox
-            .corners(pos.0, new_angle)
+        if vehicle
+            .hitbox
+            .corners(vehicle.pos, new_angle)
             .iter()
             .any(|&corner| map.collision(corner))
         {
-            turn_rate.0 *= -0.5;
+            vehicle.turn_rate *= -0.5;
         } else {
-            angle.0 = new_angle;
+            vehicle.angle = new_angle;
         }
 
-        accel_decel(&stats, vel, angle, input, gs.dt);
+        accel_decel(&stats, &mut vehicle.vel, &mut vehicle.angle, input, gs.dt);
 
-        let new_pos = pos.0 + vel.0 * gs.dt;
-        if hitbox
-            .corners(new_pos, angle.0)
+        let new_pos = vehicle.pos + vehicle.vel * gs.dt;
+        if vehicle
+            .hitbox
+            .corners(new_pos, vehicle.angle)
             .iter()
             .any(|&corner| map.collision(corner))
         {
-            vel.0 *= -0.5;
+            vehicle.vel *= -0.5;
         } else {
-            pos.0 = new_pos;
+            vehicle.pos = new_pos;
         }
     }
 }
 
 fn turning(
     stats: &MovementStats,
-    vel: &mut Vel,
-    angle: &Angle,
-    turn_rate: &mut TurnRate,
-    input: &Input,
+    vel: &mut Vec2f,
+    angle: &f64,
+    turn_rate: &mut f64,
+    input: Input,
     dt: f64,
 ) -> f64 {
     let tr_change = input.right_left() * stats.turn_rate_increase * dt;
-    turn_rate.0 += tr_change;
+    *turn_rate += tr_change;
 
     // Friction's constant component - always the same no matter the speed
     let tr_fric_const = stats.turn_rate_friction_const * dt;
-    if turn_rate.0 >= 0.0 {
-        turn_rate.0 = (turn_rate.0 - tr_fric_const).max(0.0);
+    if *turn_rate >= 0.0 {
+        *turn_rate = (*turn_rate - tr_fric_const).max(0.0);
     } else {
-        turn_rate.0 = (turn_rate.0 + tr_fric_const).min(0.0);
+        *turn_rate = (*turn_rate + tr_fric_const).min(0.0);
     }
 
     // Friction's linear component - increases with speed
-    let tr_new = turn_rate.0 * (1.0 - stats.turn_rate_friction_linear).powf(dt);
-    turn_rate.0 = tr_new.clamped(-stats.turn_rate_max, stats.turn_rate_max);
+    let tr_new = *turn_rate * (1.0 - stats.turn_rate_friction_linear).powf(dt);
+    *turn_rate = tr_new.clamped(-stats.turn_rate_max, stats.turn_rate_max);
 
     // A dirty hack to approximate car steering (i.e. no turning when still, reversed when moving backwards).
     let steering_coef = if stats.steering_car > 0.0 {
-        let sign = angle.0.to_vec2f().dot(vel.0).signum();
+        let sign = angle.to_vec2f().dot(*vel).signum();
         // Steering when below this speed is less effective.
         let steering_speed = vel
-            .0
             .magnitude()
             .clamped(-stats.steering_car, stats.steering_car);
         steering_speed * sign / stats.steering_car
@@ -264,44 +176,41 @@ fn turning(
     };
 
     // Turning - part of vel gets rotated to simulate steering
-    let turn = turn_rate.0 * dt * steering_coef;
+    let turn = *turn_rate * dt * steering_coef;
     let vel_rotation = turn * stats.turn_effectiveness;
-    vel.0.rotate_z(vel_rotation);
+    vel.rotate_z(vel_rotation);
 
     // Normalize to 0..=360 deg
-    (angle.0 + turn).rem_euclid(2.0 * PI)
+    (angle + turn).rem_euclid(2.0 * PI)
 }
 
-fn accel_decel(stats: &MovementStats, vel: &mut Vel, angle: &mut Angle, input: &Input, dt: f64) {
+fn accel_decel(stats: &MovementStats, vel: &mut Vec2f, angle: &mut f64, input: Input, dt: f64) {
     let vel_change = (input.up() * stats.accel_forward - input.down() * stats.accel_backward) * dt;
-    vel.0 += angle.0.to_vec2f() * vel_change;
+    *vel += angle.to_vec2f() * vel_change;
 
     // Friction's constant component - always the same no matter the speed
     let vel_fric_const = stats.friction_const * dt;
-    let vel_norm = vel.0.try_normalized().unwrap_or_default();
-    vel.0 -= (vel_fric_const).min(vel.0.magnitude()) * vel_norm;
+    let vel_norm = vel.try_normalized().unwrap_or_default();
+    *vel -= (vel_fric_const).min(vel.magnitude()) * vel_norm;
 
     // Friction's linear component - increases with speed
-    vel.0 *= (1.0 - stats.friction_linear).powf(dt);
-    if vel.0.magnitude_squared() > stats.speed_max.powi(2) {
-        vel.0 = vel_norm * stats.speed_max;
+    *vel *= (1.0 - stats.friction_linear).powf(dt);
+    if vel.magnitude_squared() > stats.speed_max.powi(2) {
+        *vel = vel_norm * stats.speed_max;
     }
 }
 
-pub(crate) fn vehicle_logic(
-    cvars: &Cvars,
-    world: &mut World,
-    gs: &mut GameState,
-    gs_prev: &GameState,
-) {
-    let mut query = <(&mut Vehicle, &Input)>::query();
-    for (vehicle, input) in query.iter_mut(world) {
+pub(crate) fn vehicle_logic(cvars: &Cvars, gs: &mut GameState, gs_prev: &GameState) {
+    for (_, vehicle) in gs.vehicles.iter_mut() {
+        let input = &gs.players[vehicle.owner].input;
+        let input_prev = &gs_prev.players[vehicle.owner].input;
+
         // Change weapon
-        if input.prev_weapon && !gs_prev.input.prev_weapon {
+        if input.prev_weapon && !input_prev.prev_weapon {
             let prev = (vehicle.cur_weapon as u8 + WEAPS_CNT - 1) % WEAPS_CNT;
             vehicle.cur_weapon = Weapon::n(prev).unwrap();
         }
-        if input.next_weapon && !gs_prev.input.next_weapon {
+        if input.next_weapon && !input_prev.next_weapon {
             let next = (vehicle.cur_weapon as u8 + 1) % WEAPS_CNT;
             vehicle.cur_weapon = Weapon::n(next).unwrap();
         }
@@ -327,12 +236,11 @@ pub(crate) fn vehicle_logic(
     }
 }
 
-pub(crate) fn shooting(cvars: &Cvars, world: &mut World, gs: &mut GameState, map: &Map) {
-    let mut cmds = CommandBuffer::new(world);
-    let mut query = <(&mut Vehicle, &Pos, &Vel, &Angle, &Owner, &Input)>::query();
-    for (vehicle, veh_pos, veh_vel, veh_angle, owner, input) in query.iter_mut(world) {
-        let owner = *owner;
-        if vehicle.destroyed() || !input.fire {
+pub(crate) fn shooting(cvars: &Cvars, gs: &mut GameState, map: &Map) {
+    for (_, vehicle) in gs.vehicles.iter_mut() {
+        let player = &mut gs.players[vehicle.owner];
+        // Note: vehicles can shoot while controlling a missile
+        if vehicle.destroyed() || !player.input.fire {
             continue;
         }
 
@@ -354,29 +262,37 @@ pub(crate) fn shooting(cvars: &Cvars, world: &mut World, gs: &mut GameState, map
             let (shot_angle, shot_origin);
             match hardpoint {
                 Hardpoint::Chassis => {
-                    shot_angle = veh_angle.0;
-                    shot_origin = veh_pos.0 + weapon_offset.rotated_z(shot_angle);
+                    shot_angle = vehicle.angle;
+                    shot_origin = vehicle.pos + weapon_offset.rotated_z(shot_angle);
                 }
                 Hardpoint::Turret => {
-                    shot_angle = veh_angle.0 + vehicle.turret_angle;
+                    shot_angle = vehicle.angle + vehicle.turret_angle;
                     let turret_offset = cvars.g_vehicle_turret_offset_chassis(vehicle.veh_type);
-                    shot_origin = veh_pos.0
-                        + turret_offset.rotated_z(veh_angle.0)
+                    shot_origin = vehicle.pos
+                        + turret_offset.rotated_z(vehicle.angle)
                         + weapon_offset.rotated_z(shot_angle);
                 }
             }
-            let pos = Pos(shot_origin);
+            let mut projectile = Projectile {
+                weapon: Weapon::Mg,
+                pos: shot_origin,
+                vel: Vec2f::zero(),
+                angle: shot_angle,
+                turn_rate: 0.0,
+                explode_time: f64::MAX,
+                owner: vehicle.owner,
+            };
             match vehicle.cur_weapon {
                 Weapon::Mg => {
                     let r: f64 = gs.rng.sample(StandardNormal);
                     let spread = cvars.g_machine_gun_angle_spread * r;
-                    // Using spread as y would mean the resulting spread depends on speed
+                    // Using spread as shot_vel.y would mean the resulting spread depends on speed
                     // so it's better to use spread on angle.
                     let shot_vel = Vec2f::new(cvars.g_machine_gun_speed, 0.0)
                         .rotated_z(shot_angle + spread)
-                        + cvars.g_machine_gun_vehicle_velocity_factor * veh_vel.0;
-                    let vel = Vel(shot_vel);
-                    cmds.push((Weapon::Mg, Mg, pos, vel, owner));
+                        + cvars.g_machine_gun_vehicle_velocity_factor * vehicle.vel;
+                    projectile.vel = shot_vel;
+                    gs.projectiles.insert(projectile);
                 }
                 Weapon::Rail => {
                     let dir = shot_angle.to_vec2f();
@@ -387,6 +303,7 @@ pub(crate) fn shooting(cvars: &Cvars, world: &mut World, gs: &mut GameState, map
                     }
                 }
                 Weapon::Cb => {
+                    projectile.weapon = Weapon::Cb;
                     for _ in 0..cvars.g_cluster_bomb_count {
                         let speed = cvars.g_cluster_bomb_speed;
                         let spread_forward;
@@ -405,226 +322,177 @@ pub(crate) fn shooting(cvars: &Cvars, world: &mut World, gs: &mut GameState, map
                         }
                         let shot_vel = Vec2f::new(speed + spread_forward, spread_sideways)
                             .rotated_z(shot_angle)
-                            + cvars.g_cluster_bomb_vehicle_velocity_factor * veh_vel.0;
-                        let vel = Vel(shot_vel);
+                            + cvars.g_cluster_bomb_vehicle_velocity_factor * vehicle.vel;
                         let time = gs.frame_time
                             + cvars.g_cluster_bomb_time
                             + gs.rng.gen_range(-1.0, 1.0) * cvars.g_cluster_bomb_time_spread;
-                        let time = Time(time);
-                        cmds.push((Weapon::Cb, Cb, pos, vel, time, owner));
+                        projectile.explode_time = time;
+                        projectile.vel = shot_vel;
+                        gs.projectiles.insert(projectile.clone());
                     }
                 }
                 Weapon::Rockets => {
                     let shot_vel = Vec2f::new(cvars.g_rockets_speed, 0.0).rotated_z(shot_angle)
-                        + cvars.g_rockets_vehicle_velocity_factor * veh_vel.0;
-                    let vel = Vel(shot_vel);
-                    cmds.push((Weapon::Rockets, pos, vel, owner));
+                        + cvars.g_rockets_vehicle_velocity_factor * vehicle.vel;
+                    projectile.weapon = Weapon::Rockets;
+                    projectile.vel = shot_vel;
+                    gs.projectiles.insert(projectile);
                 }
                 Weapon::Hm => {
                     let shot_vel = Vec2f::new(cvars.g_homing_missile_speed_initial, 0.0)
                         .rotated_z(shot_angle)
-                        + cvars.g_homing_missile_vehicle_velocity_factor * veh_vel.0;
-                    let vel = Vel(shot_vel);
-                    cmds.push((Weapon::Hm, pos, vel, owner));
+                        + cvars.g_homing_missile_vehicle_velocity_factor * vehicle.vel;
+                    projectile.weapon = Weapon::Hm;
+                    projectile.vel = shot_vel;
+                    gs.projectiles.insert(projectile);
                 }
                 Weapon::Gm => {
-                    let gm = GuidedMissile;
                     let shot_vel = Vec2f::new(cvars.g_guided_missile_speed_initial, 0.0)
                         .rotated_z(shot_angle)
-                        + cvars.g_guided_missile_vehicle_velocity_factor * veh_vel.0;
-                    let vel = Vel(shot_vel);
-                    let angle = Angle(vel.0.to_angle());
-                    let tr = TurnRate(0.0);
-                    let player = owner.0;
-                    let gm_entity =
-                        cmds.push((Weapon::Gm, gm, pos, vel, angle, tr, owner, EMPTY_INPUT));
-                    cmds.exec_mut(move |legion| {
-                        legion
-                            .entry(player)
-                            .unwrap()
-                            .get_component_mut::<Player>()
-                            .unwrap()
-                            .guided_missile = Some(gm_entity);
-                    });
+                        + cvars.g_guided_missile_vehicle_velocity_factor * vehicle.vel;
+                    projectile.weapon = Weapon::Gm;
+                    projectile.vel = shot_vel;
+                    // TODO angle (maybe also HM)
+                    let handle = gs.projectiles.insert(projectile);
+                    player.guided_missile = Some(handle);
                 }
                 Weapon::Bfg => {
                     let shot_vel = Vec2f::new(cvars.g_bfg_speed, 0.0).rotated_z(shot_angle)
-                        + cvars.g_bfg_vehicle_velocity_factor * veh_vel.0;
-                    let vel = Vel(shot_vel);
-                    cmds.push((Weapon::Bfg, Bfg, pos, vel, owner));
+                        + cvars.g_bfg_vehicle_velocity_factor * vehicle.vel;
+                    projectile.weapon = Weapon::Bfg;
+                    projectile.vel = shot_vel;
+                    gs.projectiles.insert(projectile);
                 }
             }
         }
     }
-    cmds.flush(world);
 }
 
-/// The guided part of guided missile
-pub(crate) fn gm_turning(cvars: &Cvars, world: &mut World, gs: &GameState) {
-    let mut query = <(&GuidedMissile, &mut Vel, &mut Angle, &mut TurnRate, &Input)>::query();
-    for (_, vel, angle, turn_rate, input) in query.iter_mut(world) {
+/// The *guided* part of guided missile
+pub(crate) fn gm_turning(cvars: &Cvars, gs: &mut GameState) {
+    for (gm_handle, gm) in gs
+        .projectiles
+        .iter_mut()
+        .filter(|(_, proj)| proj.weapon == Weapon::Gm)
+    {
         let stats = cvars.g_weapon_movement_stats();
+        let player = &gs.players[gm.owner];
 
-        angle.0 = turning(&stats, vel, angle, turn_rate, input, gs.dt);
+        // Only allow guiding the most recently launched missile
+        let input = if player.guided_missile == Some(gm_handle) {
+            player.input.missile_while_guiding()
+        } else {
+            Input::new_up()
+        };
 
-        accel_decel(&stats, vel, angle, input, gs.dt);
+        gm.angle = turning(
+            &stats,
+            &mut gm.vel,
+            &gm.angle,
+            &mut gm.turn_rate,
+            input,
+            gs.dt,
+        );
+
+        accel_decel(&stats, &mut gm.vel, &mut gm.angle, input, gs.dt);
     }
 }
 
 /// Movement and collisions
-pub(crate) fn projectiles(cvars: &Cvars, world: &mut World, gs: &mut GameState, map: &Map) {
-    let mut query_vehicles = <(Entity, &Vehicle, &Pos, &Angle, &Hitbox, &Owner)>::query();
-    let vehicles: Vec<(Entity, _, _, _, _)> = query_vehicles
-        .iter(world)
-        .filter_map(|(&veh_id, vehicle, &pos, &angle, &hitbox, &owner)| {
-            if !vehicle.destroyed() {
-                Some((veh_id, pos, angle, hitbox, owner))
-            } else {
-                None
-            }
-        })
-        .collect();
+pub(crate) fn projectiles(cvars: &Cvars, gs: &mut GameState, map: &Map) {
+    for proj_handle in gs.projectiles.iter_handles() {
+        let projectile = &mut gs.projectiles[proj_handle];
+        let new_pos = projectile.pos + projectile.vel * gs.dt;
 
-    let mut cmds = CommandBuffer::new(world);
-
-    let mut query_projectiles = <(Entity, &Weapon, &mut Pos, &Vel, &Owner)>::query();
-    let (mut world_projectiles, mut world_rest) = world.split_for_query(&query_projectiles);
-    for (&proj_id, &proj_weap, proj_pos, proj_vel, proj_owner) in
-        query_projectiles.iter_mut(&mut world_projectiles)
-    {
-        let new_pos = proj_pos.0 + proj_vel.0 * gs.dt;
-
-        if proj_weap == Weapon::Cb {
-            proj_pos.0 = new_pos;
+        if projectile.weapon == Weapon::Cb {
+            projectile.pos = new_pos;
             continue;
         }
 
-        let collision = map.collision_between(proj_pos.0, new_pos);
+        let collision = map.collision_between(projectile.pos, new_pos);
         if let Some(hit_pos) = collision {
-            projectile_impact(
-                cvars,
-                gs,
-                &mut cmds,
-                proj_id,
-                proj_weap,
-                proj_owner.0,
-                hit_pos,
-            );
+            projectile_impact(cvars, gs, proj_handle, hit_pos);
             continue;
         }
 
-        proj_pos.0 = new_pos;
+        projectile.pos = new_pos;
 
-        for (veh_id, veh_pos, _veh_angle, _veh_hitbox, veh_owner) in &vehicles {
-            let veh_id = *veh_id;
-            if veh_owner == proj_owner {
+        for vehicle_handle in gs.vehicles.iter_handles() {
+            // LATER immediately killing vehicles here means 2 players can't share a kill
+            let vehicle = &mut gs.vehicles[vehicle_handle];
+
+            // borrowchk dance - reborrow each iteration of the loop
+            let projectile = &gs.projectiles[proj_handle];
+
+            if vehicle.destroyed() || vehicle.owner == projectile.owner {
                 continue;
             }
 
-            let dist2 = (proj_pos.0 - veh_pos.0).magnitude_squared();
+            let dist2 = (projectile.pos - vehicle.pos).magnitude_squared();
             // TODO proper hitbox
             if dist2 <= 24.0 * 24.0 {
-                let mut query_veh = <(&mut Vehicle,)>::query();
-                let (vehicle,) = query_veh.get_mut(&mut world_rest, veh_id).unwrap();
-                let dmg = cvars.g_weapon_damage(proj_weap);
+                let dmg = cvars.g_weapon_damage(projectile.weapon);
+                let hit_pos = projectile.pos;
 
                 // Vehicle explosion first so it's below projectile explosion because it looks better.
-                damage(cvars, gs, &mut cmds, vehicle, veh_pos.0, veh_owner.0, dmg);
-                projectile_impact(
-                    cvars,
-                    gs,
-                    &mut cmds,
-                    proj_id,
-                    proj_weap,
-                    proj_owner.0,
-                    proj_pos.0,
-                );
+                damage(cvars, gs, vehicle_handle, dmg);
+                projectile_impact(cvars, gs, proj_handle, hit_pos);
                 break;
-            } else if proj_weap == Weapon::Bfg
+            } else if projectile.weapon == Weapon::Bfg
                 && dist2 <= cvars.g_bfg_beam_range * cvars.g_bfg_beam_range
-                && map.collision_between(proj_pos.0, veh_pos.0).is_none()
+                && map.collision_between(projectile.pos, vehicle.pos).is_none()
             {
-                let mut query_veh = <(&mut Vehicle,)>::query();
-                let (vehicle,) = query_veh.get_mut(&mut world_rest, veh_id).unwrap();
                 let dmg = cvars.g_bfg_beam_damage_per_sec * gs.dt;
-                damage(cvars, gs, &mut cmds, vehicle, veh_pos.0, veh_owner.0, dmg);
-                gs.bfg_beams.push((proj_pos.0, veh_pos.0));
+                gs.bfg_beams.push((projectile.pos, vehicle.pos));
+                damage(cvars, gs, vehicle_handle, dmg);
             }
         }
     }
-
-    cmds.flush(world);
 }
 
-pub(crate) fn damage(
-    cvars: &Cvars,
-    gs: &mut GameState,
-    cmds: &mut CommandBuffer,
-    vehicle: &mut Vehicle,
-    veh_pos: Vec2f,
-    veh_owner: Entity,
-    dmg_amount: f64,
-) {
+pub(crate) fn damage(cvars: &Cvars, gs: &mut GameState, vehicle_handle: Index, dmg_amount: f64) {
+    let vehicle = &mut gs.vehicles[vehicle_handle];
     vehicle.hp_fraction -= dmg_amount / cvars.g_vehicle_hp(vehicle.veh_type);
+
     if vehicle.hp_fraction >= 0.0 {
         return;
     }
 
+    // Vehicle got killed
+
     vehicle.hp_fraction = 0.0;
-
     gs.explosions
-        .push(Explosion::new(veh_pos, 1.0, gs.frame_time, false));
-
-    cmds.exec_mut(move |world| {
-        world
-            .entry(veh_owner)
-            .unwrap()
-            .get_component_mut::<Player>()
-            .unwrap()
-            .guided_missile = None;
-    });
+        .push(Explosion::new(vehicle.pos, 1.0, gs.frame_time, false));
+    gs.players[vehicle.owner].guided_missile = None; // No guiding after death
 }
 
 /// Right now, CBs are the only timed projectiles, long term, might wanna add timeouts to more
 /// to avoid too many entities on huge maps.
-pub(crate) fn projectiles_timeout(cvars: &Cvars, world: &mut World, gs: &mut GameState) {
-    let mut cmds = CommandBuffer::new(world);
-
-    let mut query = <(Entity, &Weapon, &Pos, &Time, &Owner)>::query();
-    for (&entity, &weap, pos, time, owner) in query.iter(world) {
-        if gs.frame_time > time.0 {
-            projectile_impact(cvars, gs, &mut cmds, entity, weap, owner.0, pos.0);
+pub(crate) fn projectiles_timeout(cvars: &Cvars, gs: &mut GameState) {
+    for handle in gs.projectiles.iter_handles() {
+        let projectile = &gs.projectiles[handle];
+        if gs.frame_time > projectile.explode_time {
+            let hit_pos = projectile.pos; // borrowchk dance
+            projectile_impact(cvars, gs, handle, hit_pos);
         }
     }
-
-    cmds.flush(world);
 }
 
-fn projectile_impact(
-    cvars: &Cvars,
-    gs: &mut GameState,
-    cmds: &mut CommandBuffer,
-    proj: Entity,
-    proj_weap: Weapon,
-    proj_owner: Entity,
-    hit_pos: Vec2f,
-) {
-    if let Some(expl_scale) = cvars.g_weapon_explosion_scale(proj_weap) {
+fn projectile_impact(cvars: &Cvars, gs: &mut GameState, projectile_handle: Index, hit_pos: Vec2f) {
+    let projectile = &mut gs.projectiles[projectile_handle];
+    if let Some(expl_scale) = cvars.g_weapon_explosion_scale(projectile.weapon) {
         gs.explosions.push(Explosion::new(
             hit_pos,
             expl_scale,
             gs.frame_time,
-            proj_weap == Weapon::Bfg,
+            projectile.weapon == Weapon::Bfg,
         ));
     }
-    if proj_weap == Weapon::Gm {
-        cmds.exec_mut(move |world| {
-            let mut entry = world.entry(proj_owner).unwrap();
-            let player = entry.get_component_mut::<Player>().unwrap();
-            if player.guided_missile == Some(proj) {
-                player.guided_missile = None;
-            }
-        });
+    if projectile.weapon == Weapon::Gm {
+        let player = &mut gs.players[projectile.owner];
+        if player.guided_missile == Some(projectile_handle) {
+            player.guided_missile = None;
+        }
     }
-    cmds.remove(proj);
+    gs.projectiles.remove(projectile_handle).unwrap();
 }

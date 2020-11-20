@@ -1,13 +1,16 @@
-use legion::Entity;
 use rand::prelude::*;
+use thunderdome::{Arena, Index};
 use wasm_bindgen::prelude::*;
 
-use crate::map::Vec2f;
+use crate::{
+    entities::{Ai, Player, Projectile, Vehicle},
+    map::Vec2f,
+};
 
-/// Things that are not in ECS but change during the game
+/// Things that change during the game
 /// and might need to be taken back during frame interpolation / reconciliation.
 ///
-/// TODO How to do frame interpolation / server reconcilliation? Put ECS World here too and clone each frame?
+/// TODO How to do frame interpolation / server reconcilliation?
 /// Ralith (hecs author) says to make all components a Vec but that requires all code to be aware of interpolation.
 /// What does veloren do?
 #[derive(Debug, Clone)]
@@ -17,12 +20,14 @@ pub(crate) struct GameState {
     pub(crate) frame_time: f64,
     /// Delta time since last frame in seconds
     pub(crate) dt: f64,
-    pub(crate) input: Input,
     pub(crate) railguns: Vec<(Vec2f, Vec2f)>,
     pub(crate) bfg_beams: Vec<(Vec2f, Vec2f)>,
-    /// Player entity - the vehicle
-    pub(crate) player_entity: Entity,
+    pub(crate) player_handle: Index,
     pub(crate) explosions: Vec<Explosion>,
+    pub(crate) ais: Arena<Ai>,
+    pub(crate) players: Arena<Player>,
+    pub(crate) vehicles: Arena<Vehicle>,
+    pub(crate) projectiles: Arena<Projectile>,
 }
 
 #[derive(Debug, Clone)]
@@ -45,7 +50,7 @@ impl Explosion {
 }
 
 #[wasm_bindgen]
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Copy, Default)]
 pub struct Input {
     pub left: bool,
     pub right: bool,
@@ -67,6 +72,13 @@ impl Input {
     #[wasm_bindgen(constructor)]
     pub fn new() -> Self {
         Self::default()
+    }
+
+    pub fn new_up() -> Self {
+        Self {
+            up: true,
+            ..Self::default()
+        }
     }
 
     pub(crate) fn right_left(&self) -> f64 {
@@ -103,19 +115,12 @@ impl Input {
     }
 }
 
-pub(crate) const EMPTY_INPUT: Input = Input {
-    // Can't use Input::default() in constants.
-    left: false,
-    right: false,
-    up: false,
-    down: false,
-    turret_left: false,
-    turret_right: false,
-    prev_weapon: false,
-    next_weapon: false,
-    fire: false,
-    mine: false,
-    self_destruct: false,
-    horn: false,
-    chat: false,
-};
+pub(crate) trait ArenaExt {
+    fn iter_handles(&self) -> Vec<Index>;
+}
+
+impl<T> ArenaExt for Arena<T> {
+    fn iter_handles(&self) -> Vec<Index> {
+        self.iter().map(|(handle, _)| handle).collect()
+    }
+}

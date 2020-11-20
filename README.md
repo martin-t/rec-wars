@@ -58,11 +58,13 @@ If you notice a bug or have a suggestion, please [open an Issue](https://github.
 
 If you'd like to improve RecWars, feel free to make a [Pull Request](https://github.com/martin-t/rec-wars/pulls). I want to make RecWars highly configurable with many different gamemodes and balance settings votable by players and anybody will be able to host their own server (if technically possible even from the browser). If you have a gameplay idea and don't suffer from the NIH syndrome, I'd be very happy to help you test it in RecWars.
 
-Most of the code is commented to be understandable to anyone with a vague idea of how a game works. If it's not clear why a particular piece of code exists or needs to be written the way it is, I consider that a bug which should be fixed by either rewriting the code more clearly or adding comments explaining it.
+### Architecture Overview
+
+Most of the code is commented to be understandable to anyone with a vague idea of how a game works. If it's not clear why a particular piece of code exists or why it needs to be written the way it is, I consider that a bug which should be fixed by either rewriting the code more clearly or adding comments explaining it.
 
 RecWars is written in Rust with a small bit of JS glue. It does *not* depend on NPM. Currently, it draws directly to an HTML5 canvas using the 2D API which turns out to be too slow to redraw the entire screen at 60Hz. I am still deciding between [macroquad](https://github.com/not-fl3/macroquad), [luminance](https://github.com/phaazon/luminance-rs) and [wgpu-rs](https://github.com/gfx-rs/wgpu-rs).
 
-Most game state is in the [legion](https://github.com/amethyst/legion) ECS, however it's cumbersome to use and WASM doesn't get any benefits from parallelism. It might have been a better idea to use a generational arena or similar allocator - the only reason I am using ECS is so I can have references between entities and for this I am paying by having all entities dynamicly typed which leads to bugs. It's a Rust tradition to start writing a game and end up writing a game engine or ECS so I am considering creating an ECS crate that would satisfy my standards of clean API and static typing.
+Currently, most game state is managed by generational arenas from the [thunderdome](https://github.com/LPGhatguy/thunderdome) crate to make the code type-safe and readable. Previously, RecWars used the [legion](https://github.com/amethyst/legion) ECS. However it was cumbersome to use and WASM didn't get any benefits from parallelism. The only reason I was using ECS was so I could have references between entities and for this I was paying by having all entities dynamicly typed which lead to bugs. It's a Rust tradition to start writing a game and end up writing a game engine or ECS so I am considering creating an ECS crate that would satisfy my standards of clean API and static typing. For now arenas seem to be close enough.
 
 The Original Game
 -----------------

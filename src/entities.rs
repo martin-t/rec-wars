@@ -1,52 +1,70 @@
-//! The C in ECS
+//! The E and C in ECS
 //!
-//! Some components have pure member functions.
+//! We're using the ECS design pattern (decouple behavior from data),
+//! just without the ECS data structure (we use generational arenas instead).
+//! Most game data goes here - entities are structs, components are fields.
+//!
+//! Some entities have pure member functions.
 //! This is not a violation of the ECS pattern,
 //! because they don't modify game state - they're not behavior.
-//!
-//! Some structs/enums here are not components but their members.
-//! E.g. VehicleType is stored in the Vehicle component instead of being a separate component.
-//! There's no need to make *everything* a component,
-//! especially if it's only gonna be used together with another component.
 
 use enumn::N;
-use legion::Entity;
+use thunderdome::Index;
 
-use crate::{cvars::Cvars, map::Vec2f};
+use crate::{cvars::Cvars, game_state::Input, map::Vec2f};
 
 #[derive(Debug, Clone)]
 pub(crate) struct Player {
     pub(crate) name: String,
-    pub(crate) vehicle: Option<Entity>,
-    pub(crate) guided_missile: Option<Entity>,
+    /// NOTE about potential bugs when refactoring:
+    /// - vehicle can move while dead (this is a classic at this point)
+    /// - can guide missile while dead
+    /// - can guide multiple missiles (LATER optionally allow by cvar)
+    /// - missile input is not reset after death / launching another (results in flying in circles)
+    /// - missile stops after player dies / launches another
+    pub(crate) input: Input,
+    pub(crate) vehicle: Option<Index>,
+    pub(crate) guided_missile: Option<Index>,
 }
 
 impl Player {
     pub(crate) fn new(name: String) -> Self {
         Self {
             name,
+            input: Input::new(),
             vehicle: None,
             guided_missile: None,
         }
     }
 }
 
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone)]
 pub(crate) struct Ai {
+    pub(crate) player: Index,
     pub(crate) movement: i32,
     pub(crate) turning: i32,
     pub(crate) firing: bool,
 }
 
 impl Ai {
-    pub(crate) fn new() -> Self {
-        Self::default()
+    pub(crate) fn new(player: Index) -> Self {
+        Self {
+            player,
+            movement: 0,
+            turning: 0,
+            firing: false,
+        }
     }
 }
 
 #[derive(Debug, Clone)]
 pub(crate) struct Vehicle {
+    pub(crate) pos: Vec2f,
+    pub(crate) vel: Vec2f,
+    pub(crate) angle: f64,
+    pub(crate) turn_rate: f64,
     pub(crate) veh_type: VehicleType,
+    pub(crate) hitbox: Hitbox,
     /// Angle from vehicle, see Coord system for more
     pub(crate) turret_angle: f64,
     /// HP between 0 and 1 - saving the fraction here instead of absolute hit points so armor cvars can be adjusted during a match.
@@ -56,11 +74,20 @@ pub(crate) struct Vehicle {
     pub(crate) ammos: Vec<Ammo>,
     pub(crate) cur_weapon: Weapon,
     pub(crate) spawn_time: f64,
+    pub(crate) owner: Index,
 }
 
 impl Vehicle {
     #[must_use]
-    pub(crate) fn new(cvars: &Cvars, veh_type: VehicleType, frame_time: f64) -> Vehicle {
+    pub(crate) fn new(
+        cvars: &Cvars,
+        pos: Vec2f,
+        angle: f64,
+        veh_type: VehicleType,
+        frame_time: f64,
+        owner: Index,
+    ) -> Vehicle {
+        let hitbox = cvars.g_vehicle_hitbox(veh_type);
         let ammos = vec![
             Ammo::Loaded(0.0, cvars.g_weapon_reload_ammo(Weapon::Mg)),
             Ammo::Loaded(0.0, cvars.g_weapon_reload_ammo(Weapon::Rail)),
@@ -72,12 +99,18 @@ impl Vehicle {
         ];
 
         Vehicle {
+            pos,
+            vel: Vec2f::zero(),
+            angle,
+            turn_rate: 0.0,
             veh_type,
+            hitbox,
             turret_angle: 0.0,
             hp_fraction: 1.0,
             ammos,
             cur_weapon: Weapon::Mg,
             spawn_time: frame_time,
+            owner,
         }
     }
 
@@ -101,20 +134,16 @@ pub(crate) enum Ammo {
     Reloading(f64, f64),
 }
 
-#[derive(Debug, Clone, Copy)]
-pub(crate) struct Pos(pub(crate) Vec2f);
-
-#[derive(Debug, Clone, Copy)]
-pub(crate) struct Vel(pub(crate) Vec2f);
-
-#[derive(Debug, Clone, Copy)]
-pub(crate) struct Angle(pub(crate) f64);
-
-#[derive(Debug, Clone, Copy)]
-pub(crate) struct TurnRate(pub(crate) f64);
-
-#[derive(Debug, Clone, Copy)]
-pub(crate) struct Time(pub(crate) f64);
+#[derive(Debug, Clone)]
+pub(crate) struct Projectile {
+    pub(crate) weapon: Weapon,
+    pub(crate) pos: Vec2f,
+    pub(crate) vel: Vec2f,
+    pub(crate) angle: f64,
+    pub(crate) turn_rate: f64,
+    pub(crate) explode_time: f64,
+    pub(crate) owner: Index,
+}
 
 pub(crate) const WEAPS_CNT: u8 = 7;
 
@@ -129,21 +158,6 @@ pub(crate) enum Weapon {
     Gm,
     Bfg,
 }
-
-#[derive(Debug, Clone, Copy)]
-pub(crate) struct Mg;
-
-#[derive(Debug, Clone, Copy)]
-pub(crate) struct Cb;
-
-#[derive(Debug, Clone, Copy)]
-pub(crate) struct GuidedMissile;
-
-#[derive(Debug, Clone, Copy)]
-pub(crate) struct Bfg;
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub(crate) struct Owner(pub(crate) Entity);
 
 #[derive(Debug, Clone, Copy)]
 pub(crate) struct Hitbox {

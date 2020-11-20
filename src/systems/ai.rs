@@ -1,28 +1,16 @@
 //! Stub. So far bots move and shoot randomly.
 
-use legion::{EntityStore, IntoQuery, World};
 use rand::Rng;
 
-use crate::{
-    components::{Ai, Player, Pos, Vehicle},
-    game_state::{GameState, Input},
-};
+use crate::game_state::{GameState, Input};
 
-pub(crate) fn ai(world: &mut World, gs: &mut GameState) {
-    let mut query_ai = <(&Player, &mut Ai, &mut Input)>::query();
-    let (mut world_ai, world_rest) = world.split_for_query(&query_ai);
-    for (player, ai, input) in query_ai.iter_mut(&mut world_ai) {
-        let (spawn_time, pos) = if let Some(veh_entity) = player.vehicle {
-            let veh_entry = world_rest.entry_ref(veh_entity).unwrap();
-            let vehicle = veh_entry.get_component::<Vehicle>().unwrap();
-            let pos = veh_entry.get_component::<Pos>().unwrap();
-            (vehicle.spawn_time, *pos)
-        } else {
-            continue;
-        };
+pub(crate) fn ai(gs: &mut GameState) {
+    for (_, ai) in gs.ais.iter_mut() {
+        let player = &mut gs.players[ai.player];
+        let vehicle = &gs.vehicles[player.vehicle.unwrap()];
 
         // keep moving forward if recently spawned
-        let age = gs.frame_time - spawn_time;
+        let age = gs.frame_time - vehicle.spawn_time;
         if age < 0.5 {
             ai.movement = 1;
         } else if gs.rng.gen_bool(0.01) {
@@ -46,9 +34,9 @@ pub(crate) fn ai(world: &mut World, gs: &mut GameState) {
             ai.firing = false;
         }
 
-        dbg_world_textf!(pos.0, "{:.1} {}", age, ai.movement);
+        dbg_world_textf!(vehicle.pos, "{:.1} {}", age, ai.movement);
 
-        *input = Input {
+        player.input = Input {
             up: ai.movement == 1,
             down: ai.movement == -1,
             left: ai.turning == -1,

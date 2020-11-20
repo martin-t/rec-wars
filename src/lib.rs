@@ -13,22 +13,18 @@
 #[macro_use]
 mod debugging; // keep first so the macros are available everywhere
 
-mod components;
+mod entities;
 mod cvars;
 mod game_state;
 mod map;
 mod systems;
 
-use std::{
-    any::TypeId,
-    collections::{HashSet, VecDeque},
-    f64::consts::PI,
-    fmt::Debug,
-};
+use std::{collections::VecDeque, f64::consts::PI, fmt::Debug};
 
+use game_state::ArenaExt;
 use js_sys::Array;
-use legion::{component, query::IntoQuery, systems::CommandBuffer, Entity, EntityStore, World};
 use rand::prelude::*;
+use thunderdome::Arena;
 use vek::ops::Clamp;
 use vek::Vec2;
 use wasm_bindgen::prelude::*;
@@ -36,10 +32,10 @@ use wasm_bindgen::JsCast;
 use web_sys::{CanvasRenderingContext2d, HtmlImageElement, Performance};
 
 use crate::{
-    components::{Ai, Ammo, Angle, Bfg, Cb, Hitbox, Mg, Player, Pos, Vehicle, Vel, Weapon},
+    entities::{Ai, Ammo, Player, Weapon},
     cvars::{Cvars, TickrateMode},
-    debugging::{DbgCount, DEBUG_CROSSES, DEBUG_LINES, DEBUG_TEXTS, DEBUG_TEXTS_WORLD},
-    game_state::{Explosion, GameState, Input, EMPTY_INPUT},
+    debugging::{DEBUG_CROSSES, DEBUG_LINES, DEBUG_TEXTS, DEBUG_TEXTS_WORLD},
+    game_state::{Explosion, GameState, Input},
     map::{F64Ext, Kind, Map, Vec2f, VecExt, TILE_SIZE},
 };
 
@@ -69,7 +65,6 @@ pub struct Game {
     map: Map,
     gs: GameState,
     gs_prev: GameState,
-    legion: World,
 }
 
 #[wasm_bindgen]
@@ -121,44 +116,37 @@ impl Game {
         let surfaces = map::load_tex_list(tex_list_text);
         let map = map::load_map(map_text, surfaces);
 
-        let mut legion = World::default();
+        let mut players = Arena::new();
 
         let name = "Player 1".to_owned();
         let player = Player::new(name);
-        let player1_entity = legion.push((player, EMPTY_INPUT.clone()));
+        let player1_handle = players.insert(player);
 
         let mut gs = GameState {
             rng,
             frame_time: 0.0,
             dt: 0.0,
-            input: Input::default(),
             railguns: Vec::new(),
             bfg_beams: Vec::new(),
-            player_entity: player1_entity,
+            player_handle: player1_handle,
             explosions: Vec::new(),
+            ais: Arena::new(),
+            players,
+            vehicles: Arena::new(),
+            projectiles: Arena::new(),
         };
         let gs_prev = gs.clone();
 
         for i in 1..map.spawns().len() {
             let name = format!("Bot {}", i);
             let player = Player::new(name);
-            legion.push((player, EMPTY_INPUT.clone(), Ai::new()));
+            let player_handle = gs.players.insert(player);
+            gs.ais.insert(Ai::new(player_handle));
         }
 
-        let mut cmds = CommandBuffer::new(&legion);
-        let mut players_query = <(Entity, &mut Player)>::query();
-        for (&player_entity, player) in players_query.iter_mut(&mut legion) {
-            systems::spawn_vehicle(
-                cvars,
-                &mut gs,
-                &map,
-                &mut cmds,
-                player_entity,
-                player,
-                false,
-            );
+        for handle in gs.players.iter_handles() {
+            systems::spawn_vehicle(cvars, &mut gs, &map, handle, false);
         }
-        cmds.flush(&mut legion);
 
         Self {
             performance: web_sys::window().unwrap().performance().unwrap(),
@@ -179,7 +167,6 @@ impl Game {
             map,
             gs,
             gs_prev,
-            legion,
         }
     }
 
@@ -250,7 +237,7 @@ impl Game {
     }
 
     fn input(&mut self, input: &Input) {
-        self.gs.input = input.clone();
+        self.gs.players[self.gs.player_handle].input = input.clone();
     }
 
     fn tick(&mut self, cvars: &Cvars) {
@@ -263,33 +250,31 @@ impl Game {
             progress <= 1.0
         });
 
-        systems::ai::ai(&mut self.legion, &mut self.gs);
+        systems::ai::ai(&mut self.gs);
 
-        systems::input(&mut self.legion, &self.gs);
+        systems::respawning(cvars, &mut self.gs, &self.map);
 
-        systems::respawning(cvars, &mut self.legion, &mut self.gs, &self.map);
+        systems::vehicle_logic(cvars, &mut self.gs, &self.gs_prev);
 
-        systems::vehicle_logic(cvars, &mut self.legion, &mut self.gs, &self.gs_prev);
+        systems::vehicle_movement(cvars, &mut self.gs, &self.map);
 
-        systems::vehicle_movement(cvars, &mut self.legion, &self.gs, &self.map);
+        systems::shooting(cvars, &mut self.gs, &self.map);
 
-        systems::shooting(cvars, &mut self.legion, &mut self.gs, &self.map);
+        systems::gm_turning(cvars, &mut self.gs);
 
-        systems::gm_turning(cvars, &mut self.legion, &self.gs);
+        systems::projectiles(cvars, &mut self.gs, &self.map);
 
-        systems::projectiles(cvars, &mut self.legion, &mut self.gs, &self.map);
+        systems::projectiles_timeout(cvars, &mut self.gs);
 
-        systems::projectiles_timeout(cvars, &mut self.legion, &mut self.gs);
+        systems::self_destruct(cvars, &mut self.gs);
 
-        systems::self_destruct(cvars, &mut self.legion, &mut self.gs);
-
-        dbg_textf!("entity count: {}", self.legion.len());
+        dbg_textf!("projectile count: {}", self.gs.projectiles.len());
     }
 
     /// Redraw the whole canvas.
     pub fn draw(&mut self, cvars: &Cvars) -> Result<(), JsValue> {
-        // This is one long function. A lot of people will tell you that's bad (TM)
-        // because they've heard it from other people who think long functions are bad (TM).
+        // This is one long function. A lot of people will tell you that's bad™
+        // because they've heard it from other people who think long functions are bad™.
         // Most of those people haven't written a game bigger than snake. Carmack says it's ok so it's ok:
         // http://number-none.com/blow/blog/programming/2014/09/26/carmack-on-inlined-code.html
 
@@ -302,16 +287,14 @@ impl Game {
         //      if disabling, try changing quality
         self.context.set_image_smoothing_enabled(cvars.r_smoothing);
 
-        let player_entry = self.legion.entry(self.gs.player_entity).unwrap();
-        let player = player_entry.get_component::<Player>().unwrap();
-        let maybe_gm_entity = player.guided_missile;
-        let player_vehicle_entity = player.vehicle.unwrap(); // TODO what if no vehicle
-        let controlled_entity_entry = if let Some(gm_entity) = maybe_gm_entity {
-            self.legion.entry(gm_entity).unwrap()
+        let player = &self.gs.players[self.gs.player_handle];
+        // TODO what if no vehicle
+        let player_veh_pos = self.gs.vehicles[player.vehicle.unwrap()].pos;
+        let player_entity_pos = if let Some(gm_handle) = player.guided_missile {
+            self.gs.projectiles[gm_handle].pos
         } else {
-            self.legion.entry(player_vehicle_entity).unwrap()
+            player_veh_pos
         };
-        let &Pos(player_entity_pos) = controlled_entity_entry.get_component::<Pos>().unwrap();
 
         // Don't put the camera so close to the edge that it would render area outside the map.
         // TODO handle maps smaller than canvas (currently crashes on unreachable)
@@ -359,15 +342,22 @@ impl Game {
             y += TILE_SIZE;
         }
 
+        // Helper to filter projectiles by weapon.
+        let weapon_projectiles = |weapon| {
+            self.gs
+                .projectiles
+                .iter()
+                .filter(move |(_, proj)| proj.weapon == weapon)
+        };
+
         // Draw MGs
         self.context.set_stroke_style(&"yellow".into());
-        let mut query = <(&Pos, &Vel)>::query().filter(component::<Mg>());
-        for (pos, vel) in query.iter(&self.legion).dbg_count("MG count") {
-            let scr_pos = pos.0 - top_left;
+        for (_, mg) in weapon_projectiles(Weapon::Mg) {
+            let scr_pos = mg.pos - top_left;
             self.context.begin_path();
             self.context.move_to(scr_pos.x, scr_pos.y);
             // we're drawing from the bullet's position backwards
-            let scr_end = scr_pos - vel.0.normalized() * cvars.g_machine_gun_trail_length;
+            let scr_end = scr_pos - mg.vel.normalized() * cvars.g_machine_gun_trail_length;
             self.line_to(scr_end);
             self.context.stroke();
         }
@@ -382,7 +372,6 @@ impl Game {
             self.line_to(scr_hit);
             self.context.stroke();
         }
-        self.gs.railguns.clear();
 
         // Draw cluster bombs
         if cvars.r_draw_cluster_bombs {
@@ -393,9 +382,8 @@ impl Game {
                 .set_shadow_offset_x(cvars.g_cluster_bomb_shadow_x);
             self.context
                 .set_shadow_offset_y(cvars.g_cluster_bomb_shadow_y);
-            let mut query = <(&Pos,)>::query().filter(component::<Cb>());
-            for (pos,) in query.iter(&self.legion).dbg_count("CB count") {
-                let scr_pos = pos.0 - top_left;
+            for (_, cb) in weapon_projectiles(Weapon::Cb) {
+                let scr_pos = cb.pos - top_left;
                 self.context.fill_rect(
                     scr_pos.x - cvars.g_cluster_bomb_size / 2.0,
                     scr_pos.y - cvars.g_cluster_bomb_size / 2.0,
@@ -408,25 +396,24 @@ impl Game {
         }
 
         // Draw rockets, homing and guided missiles
-        let mut query = <(&Weapon, &Pos, &Vel)>::query();
-        for (&weap, pos, vel) in query.iter(&self.legion) {
-            let scr_pos = pos.0 - top_left;
-            match weap {
-                Weapon::Rockets => {
-                    self.draw_img_center(&self.img_rocket, scr_pos, vel.0.to_angle())?
-                }
-                Weapon::Hm => self.draw_img_center(&self.img_hm, scr_pos, vel.0.to_angle())?,
-                Weapon::Gm => self.draw_img_center(&self.img_gm, scr_pos, vel.0.to_angle())?,
-                _ => {}
-            }
+        for (_, proj) in weapon_projectiles(Weapon::Rockets) {
+            let scr_pos = proj.pos - top_left;
+            self.draw_img_center(&self.img_rocket, scr_pos, proj.vel.to_angle())?;
+        }
+        for (_, proj) in weapon_projectiles(Weapon::Hm) {
+            let scr_pos = proj.pos - top_left;
+            self.draw_img_center(&self.img_hm, scr_pos, proj.vel.to_angle())?;
+        }
+        for (_, proj) in weapon_projectiles(Weapon::Gm) {
+            let scr_pos = proj.pos - top_left;
+            self.draw_img_center(&self.img_gm, scr_pos, proj.vel.to_angle())?;
         }
 
         // Draw BFGs
         self.context.set_fill_style(&"lime".into());
         self.context.set_stroke_style(&"lime".into());
-        let mut query = <(&Pos,)>::query().filter(component::<Bfg>());
-        for (bfg_pos,) in query.iter(&self.legion) {
-            let bfg_scr_pos = bfg_pos.0 - top_left;
+        for (_, bfg) in weapon_projectiles(Weapon::Bfg) {
+            let bfg_scr_pos = bfg.pos - top_left;
             self.context.begin_path();
             self.context.arc(
                 bfg_scr_pos.x,
@@ -445,23 +432,25 @@ impl Game {
             self.line_to(scr_dest);
             self.context.stroke();
         }
+
+        // borrowchk dance - clear after we stop using `weapon_projectiles`
+        self.gs.railguns.clear();
         self.gs.bfg_beams.clear();
 
         // Draw chassis
-        let mut chassis_query = <(&Vehicle, &Pos, &Angle, &Hitbox)>::query();
-        for (vehicle, pos, angle, hitbox) in chassis_query.iter(&self.legion) {
-            let scr_pos = pos.0 - top_left;
+        for (_, vehicle) in self.gs.vehicles.iter() {
+            let scr_pos = vehicle.pos - top_left;
             let img;
             if vehicle.destroyed() {
                 img = &self.imgs_wrecks[vehicle.veh_type as usize];
             } else {
                 img = &self.imgs_vehicles[vehicle.veh_type as usize * 2];
             }
-            self.draw_img_center(img, scr_pos, angle.0)?;
+            self.draw_img_center(img, scr_pos, vehicle.angle)?;
             if cvars.d_draw && cvars.d_draw_hitboxes {
                 self.context.set_stroke_style(&"yellow".into());
                 self.context.begin_path();
-                let corners = hitbox.corners(scr_pos, angle.0);
+                let corners = vehicle.hitbox.corners(scr_pos, vehicle.angle);
                 self.move_to(corners[0]);
                 self.line_to(corners[1]);
                 self.line_to(corners[2]);
@@ -474,22 +463,21 @@ impl Game {
         // TODO Draw cow
 
         // Draw turrets
-        let mut turrets_query = <(&Vehicle, &Pos, &Angle)>::query();
-        for (vehicle, pos, angle) in turrets_query.iter(&self.legion) {
+        for (_, vehicle) in self.gs.vehicles.iter() {
             if vehicle.destroyed() {
                 continue;
             }
 
             let img = &self.imgs_vehicles[vehicle.veh_type as usize * 2 + 1];
-            let scr_pos = pos.0 - top_left;
+            let scr_pos = vehicle.pos - top_left;
             let offset_chassis =
-                angle.0.to_mat2f() * cvars.g_vehicle_turret_offset_chassis(vehicle.veh_type);
+                vehicle.angle.to_mat2f() * cvars.g_vehicle_turret_offset_chassis(vehicle.veh_type);
             let turret_scr_pos = scr_pos + offset_chassis;
             let offset_turret = cvars.g_vehicle_turret_offset_turret(vehicle.veh_type);
             self.draw_img_offset(
                 img,
                 turret_scr_pos,
-                angle.0 + vehicle.turret_angle,
+                vehicle.angle + vehicle.turret_angle,
                 offset_turret,
             )?;
         }
@@ -556,14 +544,10 @@ impl Game {
             y += TILE_SIZE;
         }
 
-        let mut query = <(&Vehicle, &Pos)>::query();
-        let (player_vehicle, player_veh_pos) =
-            query.get(&self.legion, player_vehicle_entity).unwrap();
-
         // Draw HUD:
 
         // Homing missile indicator
-        let player_veh_scr_pos = player_veh_pos.0 - top_left;
+        let player_veh_scr_pos = player_veh_pos - top_left;
         self.context.set_stroke_style(&"rgb(0, 255, 0)".into());
         let dash_len = cvars.hud_missile_indicator_dash_length.into();
         let dash_pattern = Array::of2(&dash_len, &dash_len);
@@ -600,12 +584,6 @@ impl Game {
                 }
                 lines.retain(|line| line.time > 0.0);
             });
-            if cvars.d_draw_positions {
-                let mut query = <(&Pos,)>::query();
-                for (pos,) in query.iter(&self.legion) {
-                    dbg_cross!(pos.0);
-                }
-            }
             DEBUG_CROSSES.with(|crosses| {
                 let mut crosses = crosses.borrow_mut();
                 for cross in crosses.iter_mut() {
@@ -635,6 +613,7 @@ impl Game {
         // 0.5 = yellow
         // 0.5..1.0 -> decrease red channel
         // 1.0 = green
+        let player_vehicle = &self.gs.vehicles[player.vehicle.unwrap()]; // TODO what if no vehicle
         let r = 1.0 - (player_vehicle.hp_fraction.clamped(0.5, 1.0) - 0.5) * 2.0;
         let g = player_vehicle.hp_fraction.clamped(0.0, 0.5) * 2.0;
         let rgb = format!("rgb({}, {}, 0)", r * 255.0, g * 255.0);
@@ -855,72 +834,8 @@ impl Game {
 
 impl Debug for Game {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use components::*;
-
-        let mut query = <(Entity,)>::query();
-        let entities: Vec<_> = query.iter(&self.legion).map(|(&entity,)| entity).collect();
-        writeln!(f, "Entity count: {}", entities.len())?;
-
-        let archetype_indices: HashSet<_> = entities
-            .iter()
-            .map(|&entity| self.legion.entry_ref(entity).unwrap().archetype().index())
-            .collect();
-        writeln!(f, "Archetype count: {}", archetype_indices.len())?;
-
-        // For each entity, print all its components.
-        // I couldn't find a way to do this without having to list each component type manually.
-        writeln!(f, "Entities:")?;
-        for entity in entities {
-            writeln!(f, "    {:?}:", entity)?;
-            let entry = self.legion.entry_ref(entity).unwrap();
-            for comp_type in entry.archetype().layout().component_types() {
-                let mut known_type = true;
-                let type_id = comp_type.type_id();
-                let debug: &dyn Debug = if type_id == TypeId::of::<Input>() {
-                    entry.get_component::<Input>().unwrap()
-                } else if type_id == TypeId::of::<Player>() {
-                    entry.get_component::<Player>().unwrap()
-                } else if type_id == TypeId::of::<Vehicle>() {
-                    entry.get_component::<Vehicle>().unwrap()
-                } else if type_id == TypeId::of::<Pos>() {
-                    entry.get_component::<Pos>().unwrap()
-                } else if type_id == TypeId::of::<Vel>() {
-                    entry.get_component::<Vel>().unwrap()
-                } else if type_id == TypeId::of::<Angle>() {
-                    entry.get_component::<Angle>().unwrap()
-                } else if type_id == TypeId::of::<TurnRate>() {
-                    entry.get_component::<TurnRate>().unwrap()
-                } else if type_id == TypeId::of::<Time>() {
-                    entry.get_component::<Time>().unwrap()
-                } else if type_id == TypeId::of::<Weapon>() {
-                    entry.get_component::<Weapon>().unwrap()
-                } else if type_id == TypeId::of::<Mg>() {
-                    entry.get_component::<Mg>().unwrap()
-                } else if type_id == TypeId::of::<Cb>() {
-                    entry.get_component::<Cb>().unwrap()
-                } else if type_id == TypeId::of::<GuidedMissile>() {
-                    entry.get_component::<GuidedMissile>().unwrap()
-                } else if type_id == TypeId::of::<Bfg>() {
-                    entry.get_component::<Bfg>().unwrap()
-                } else if type_id == TypeId::of::<Owner>() {
-                    entry.get_component::<Owner>().unwrap()
-                } else if type_id == TypeId::of::<Hitbox>() {
-                    entry.get_component::<Hitbox>().unwrap()
-                } else {
-                    known_type = false;
-                    &0 // dummy value
-                };
-                if known_type {
-                    writeln!(f, "        {:?}", debug)?;
-                } else {
-                    writeln!(f, "        Unknown type: {}", comp_type)?;
-                }
-            }
-        }
-
-        // Override the default Debug impl - The JS types don't print anything useful at all
-        // and legion just dumps its internal state which is impossible to make sense of.
-        f.debug_struct("The rest of Game")
+        // Override the default Debug impl - The JS types don't print anything useful.
+        f.debug_struct("Parts of Game")
             .field("gs", &self.gs)
             .field("gs_prev", &self.gs_prev)
             .field("map", &self.map)

@@ -6,7 +6,7 @@
 //      https://crates.io/crates/cvar
 //          no tab completion in js console
 //          https://crates.io/crates/amethyst-console - uses cvar and imgui
-// [x] ECS
+// [x] some way to have references between entities
 //      hecs
 //          - can't delete while iterating
 //          - no clone / snapshots
@@ -21,6 +21,8 @@
 //          - how to do nested queries without copying? split world? maybe systems make this easier?
 //          + slightly slower in WASM, especially debug mode
 //          + resources, commands?
+//      generational arena
+//          + statically typed, simple
 // [x] explosions
 //      [x] sizes
 // [x] hp/health
@@ -275,6 +277,7 @@
 //      [ ] replace `as` with safer conversions (https://docs.rs/num_enum/0.5.1/num_enum/ instead of enumn?)
 //              also vek's `as_`?
 //      [ ] `unwrap` - they are all temporary from the prototyping phase
+//              - some are sanity checks when removing from thunderdome - soft_unwrap instead?
 //              - review all of them and eliminate or replace with `except` (to mark as reviewed)
 // [ ] all the LATERs - they mean something can be done better but marking it as a todo would be just noise when grepping
 
