@@ -554,6 +554,10 @@ impl Game {
                 "rgba({0}, {0}, {0}, {1})",
                 cvars.hud_names_brightness, cvars.hud_names_alpha
             );
+            let shadow_rgba = format!("rgba(0, 0, 0, {})", cvars.hud_names_shadow_alpha);
+            self.context.set_shadow_color(&shadow_rgba);
+            self.context.set_shadow_offset_x(cvars.hud_names_shadow_x);
+            self.context.set_shadow_offset_y(cvars.hud_names_shadow_y);
             self.context.set_fill_style(&names_rgba.into());
             for (_, vehicle) in self.gs.vehicles.iter() {
                 let name = &self.gs.players[vehicle.owner].name;
@@ -564,6 +568,8 @@ impl Game {
                     scr_pos.y + cvars.hud_names_y,
                 )?;
             }
+            self.context.set_shadow_offset_x(0.0);
+            self.context.set_shadow_offset_y(0.0);
         }
 
         // Homing missile indicator

@@ -267,6 +267,10 @@ pub struct Cvars {
     pub hud_names: bool,
     pub hud_names_alpha: f64,
     pub hud_names_brightness: f64,
+    pub hud_names_shadow_alpha: f64,
+    /// NB: these shadows absolutely murder performance in firefox (chromum is ok)
+    pub hud_names_shadow_x: f64,
+    pub hud_names_shadow_y: f64,
     pub hud_names_x: f64,
     pub hud_names_y: f64,
 
@@ -865,6 +869,10 @@ impl Default for Cvars {
             hud_names: true,
             hud_names_alpha: 1.0,
             hud_names_brightness: 255.0,
+            hud_names_shadow_alpha: 1.0,
+            // keep off because of firefox
+            hud_names_shadow_x: 0.0,
+            hud_names_shadow_y: 0.0,
             hud_names_x: -20.0,
             hud_names_y: 30.0,
 
