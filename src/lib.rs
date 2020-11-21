@@ -252,7 +252,7 @@ impl Game {
 
         systems::ai::ai(&mut self.gs);
 
-        systems::respawning(cvars, &mut self.gs, &self.map);
+        systems::respawning(cvars, &mut self.gs, &self.gs_prev, &self.map);
 
         systems::vehicle_logic(cvars, &mut self.gs, &self.gs_prev);
 

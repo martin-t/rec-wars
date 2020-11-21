@@ -21,18 +21,19 @@ use crate::{
     map::{F64Ext, Map, Vec2f},
 };
 
-pub(crate) fn respawning(cvars: &Cvars, gs: &mut GameState, map: &Map) {
+pub(crate) fn respawning(cvars: &Cvars, gs: &mut GameState, gs_prev: &GameState, map: &Map) {
     for player_handle in gs.players.iter_handles() {
         let player = &mut gs.players[player_handle];
+        let input_prev = gs_prev.players[player_handle].input;
         if let Some(vehicle_handle) = player.vehicle {
             let destroyed = gs.vehicles[vehicle_handle].destroyed();
 
-            if destroyed && player.input.fire {
+            if destroyed && player.input.fire && !input_prev.fire {
                 gs.vehicles.remove(vehicle_handle).unwrap();
 
                 spawn_vehicle(cvars, gs, map, player_handle, true);
             }
-        } else if player.input.fire {
+        } else if player.input.fire && !input_prev.fire {
             spawn_vehicle(cvars, gs, map, player_handle, true);
         }
     }
