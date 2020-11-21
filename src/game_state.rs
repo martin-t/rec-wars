@@ -1,3 +1,5 @@
+use std::fmt::{self, Debug, Formatter};
+
 use rand::prelude::*;
 use thunderdome::{Arena, Index};
 use wasm_bindgen::prelude::*;
@@ -50,7 +52,7 @@ impl Explosion {
 }
 
 #[wasm_bindgen]
-#[derive(Debug, Clone, Copy, Default)]
+#[derive(Clone, Copy, Default)]
 pub struct Input {
     pub left: bool,
     pub right: bool,
@@ -112,6 +114,53 @@ impl Input {
             down: false,
             ..*self
         }
+    }
+}
+
+impl Debug for Input {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        write!(f, "Input {{ ")?;
+        if self.left {
+            write!(f, "left ")?;
+        }
+        if self.right {
+            write!(f, "right ")?;
+        }
+        if self.up {
+            write!(f, "up ")?;
+        }
+        if self.down {
+            write!(f, "down ")?;
+        }
+        if self.turret_left {
+            write!(f, "turret_left ")?;
+        }
+        if self.turret_right {
+            write!(f, "turret_right ")?;
+        }
+        if self.prev_weapon {
+            write!(f, "prev_weapon ")?;
+        }
+        if self.next_weapon {
+            write!(f, "next_weapon ")?;
+        }
+        if self.fire {
+            write!(f, "fire ")?;
+        }
+        if self.mine {
+            write!(f, "mine ")?;
+        }
+        if self.self_destruct {
+            write!(f, "self_destruct ")?;
+        }
+        if self.horn {
+            write!(f, "horn ")?;
+        }
+        if self.chat {
+            write!(f, "chat ")?;
+        }
+        write!(f, "}}")?;
+        Ok(())
     }
 }
 
