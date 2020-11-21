@@ -13,8 +13,8 @@
 #[macro_use]
 mod debugging; // keep first so the macros are available everywhere
 
-mod entities;
 mod cvars;
+mod entities;
 mod game_state;
 mod map;
 mod systems;
@@ -32,9 +32,9 @@ use wasm_bindgen::JsCast;
 use web_sys::{CanvasRenderingContext2d, HtmlImageElement, Performance};
 
 use crate::{
-    entities::{Ai, Ammo, Player, Weapon},
     cvars::{Cvars, TickrateMode},
     debugging::{DEBUG_CROSSES, DEBUG_LINES, DEBUG_TEXTS, DEBUG_TEXTS_WORLD},
+    entities::{Ai, Ammo, Player, Weapon},
     game_state::{Explosion, GameState, Input},
     map::{F64Ext, Kind, Map, Vec2f, VecExt, TILE_SIZE},
 };
@@ -547,6 +547,15 @@ impl Game {
         }
 
         // Draw HUD:
+
+        // Names
+        self.context.set_fill_style(&"rgb(210, 210, 210)".into());
+        for (_, vehicle) in self.gs.vehicles.iter() {
+            let name = &self.gs.players[vehicle.owner].name;
+            let scr_pos = vehicle.pos - top_left;
+            self.context
+                .fill_text(name, scr_pos.x - 20.0, scr_pos.y + 30.0)?;
+        }
 
         // Homing missile indicator
         let player_veh_scr_pos = player_veh_pos - top_left;
