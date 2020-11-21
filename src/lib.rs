@@ -549,12 +549,21 @@ impl Game {
         // Draw HUD:
 
         // Names
-        self.context.set_fill_style(&"rgb(210, 210, 210)".into());
-        for (_, vehicle) in self.gs.vehicles.iter() {
-            let name = &self.gs.players[vehicle.owner].name;
-            let scr_pos = vehicle.pos - top_left;
-            self.context
-                .fill_text(name, scr_pos.x - 20.0, scr_pos.y + 30.0)?;
+        if cvars.hud_names {
+            let names_rgba = format!(
+                "rgba({0}, {0}, {0}, {1})",
+                cvars.hud_names_brightness, cvars.hud_names_alpha
+            );
+            self.context.set_fill_style(&names_rgba.into());
+            for (_, vehicle) in self.gs.vehicles.iter() {
+                let name = &self.gs.players[vehicle.owner].name;
+                let scr_pos = vehicle.pos - top_left;
+                self.context.fill_text(
+                    name,
+                    scr_pos.x + cvars.hud_names_x,
+                    scr_pos.y + cvars.hud_names_y,
+                )?;
+            }
         }
 
         // Homing missile indicator

@@ -264,6 +264,12 @@ pub struct Cvars {
     /// Original RecWar had 9.
     pub hud_hp_height: f64,
 
+    pub hud_names: bool,
+    pub hud_names_alpha: f64,
+    pub hud_names_brightness: f64,
+    pub hud_names_x: f64,
+    pub hud_names_y: f64,
+
     pub hud_missile_indicator_dash_length: f64,
     pub hud_missile_indicator_radius: f64,
 
@@ -855,6 +861,12 @@ impl Default for Cvars {
             hud_hp_y: -50.0,
             hud_hp_width: 100.0,
             hud_hp_height: 9.0,
+
+            hud_names: true,
+            hud_names_alpha: 1.0,
+            hud_names_brightness: 255.0,
+            hud_names_x: -20.0,
+            hud_names_y: 30.0,
 
             hud_missile_indicator_dash_length: 3.3,
             hud_missile_indicator_radius: 18.0,
