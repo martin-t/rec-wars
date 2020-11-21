@@ -66,7 +66,8 @@ pub(crate) struct Vehicle {
     pub(crate) veh_type: VehicleType,
     pub(crate) hitbox: Hitbox,
     /// Angle from vehicle, see Coord system for more
-    pub(crate) turret_angle: f64,
+    pub(crate) turret_angle_current: f64,
+    pub(crate) turret_angle_wanted: f64,
     /// HP between 0 and 1 - saving the fraction here instead of absolute hit points so armor cvars can be adjusted during a match.
     pub(crate) hp_fraction: f64,
     /// Each weapon has a separate reload status even if they all reload at the same time.
@@ -105,7 +106,8 @@ impl Vehicle {
             turn_rate: 0.0,
             veh_type,
             hitbox,
-            turret_angle: 0.0,
+            turret_angle_current: 0.0,
+            turret_angle_wanted: 0.0,
             hp_fraction: 1.0,
             ammos,
             cur_weapon: Weapon::Mg,

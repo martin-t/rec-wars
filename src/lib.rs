@@ -477,7 +477,7 @@ impl Game {
             self.draw_img_offset(
                 img,
                 turret_scr_pos,
-                vehicle.angle + vehicle.turret_angle,
+                vehicle.angle + vehicle.turret_angle_current,
                 offset_turret,
             )?;
         }

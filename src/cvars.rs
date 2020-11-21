@@ -248,7 +248,8 @@ pub struct Cvars {
     pub g_tank_turret_offset_turret_x: f64,
     pub g_tank_turret_offset_turret_y: f64,
 
-    pub g_turret_turn_speed: f64,
+    pub g_turret_turn_speed_deg: f64,
+    pub g_turret_turn_step_angle_deg: f64,
 
     pub hud_ammo_x: f64,
     pub hud_ammo_y: f64,
@@ -854,7 +855,8 @@ impl Default for Cvars {
             g_tank_turret_offset_turret_x: -14.0,
             g_tank_turret_offset_turret_y: 0.0,
 
-            g_turret_turn_speed: 2.0,
+            g_turret_turn_speed_deg: 120.0,
+            g_turret_turn_step_angle_deg: 45.0,
 
             hud_ammo_x: 30.0,
             hud_ammo_y: -30.0,

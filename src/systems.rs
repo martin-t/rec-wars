@@ -11,7 +11,7 @@ use std::f64::consts::PI;
 use rand::Rng;
 use rand_distr::StandardNormal;
 use thunderdome::Index;
-use vek::Clamp;
+use vek::{Clamp, Wrap};
 
 use crate::{
     cvars::{Cvars, Hardpoint, MovementStats},
@@ -216,12 +216,21 @@ pub(crate) fn vehicle_logic(cvars: &Cvars, gs: &mut GameState, gs_prev: &GameSta
         }
 
         // Turret turning
-        if input.turret_left {
-            vehicle.turret_angle -= cvars.g_turret_turn_speed * gs.dt;
+        if input.turret_left && !input_prev.turret_left {
+            vehicle.turret_angle_wanted -= cvars.g_turret_turn_step_angle_deg.to_radians();
         }
-        if input.turret_right {
-            vehicle.turret_angle += cvars.g_turret_turn_speed * gs.dt;
+        if input.turret_right && !input_prev.turret_right {
+            vehicle.turret_angle_wanted += cvars.g_turret_turn_step_angle_deg.to_radians();
         }
+        vehicle.turret_angle_wanted = vehicle.turret_angle_wanted.rem_euclid(2.0 * PI);
+
+        let delta = vehicle
+            .turret_angle_current
+            .delta_angle(vehicle.turret_angle_wanted);
+        let change = cvars.g_turret_turn_speed_deg.to_radians() * gs.dt * delta.signum();
+        let change_clamped = change.clamped(-delta.abs(), delta.abs());
+        vehicle.turret_angle_current += change_clamped;
+        vehicle.turret_angle_current = vehicle.turret_angle_current.rem_euclid(2.0 * PI);
 
         // Reloading
         let ammo = &mut vehicle.ammos[vehicle.cur_weapon as usize];
@@ -266,7 +275,7 @@ pub(crate) fn shooting(cvars: &Cvars, gs: &mut GameState, map: &Map) {
                     shot_origin = vehicle.pos + weapon_offset.rotated_z(shot_angle);
                 }
                 Hardpoint::Turret => {
-                    shot_angle = vehicle.angle + vehicle.turret_angle;
+                    shot_angle = vehicle.angle + vehicle.turret_angle_current;
                     let turret_offset = cvars.g_vehicle_turret_offset_chassis(vehicle.veh_type);
                     shot_origin = vehicle.pos
                         + turret_offset.rotated_z(vehicle.angle)
