@@ -17,7 +17,7 @@ crate-type = ["cdylib"]
 opt-level = 3
 
 [package.metadata.wasm-pack.profile.profiling]
-# Rustc optimizations (which make a huge difference, especially with legion) are still enabled but no additional wasm-opt
+# Rustc optimizations (which make a huge difference) are still enabled but no additional wasm-opt
 # Debug symbols are enabled
 wasm-opt = false  # see wasm-opt note
 
