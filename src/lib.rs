@@ -494,6 +494,8 @@ impl Game {
             // 13 sprites, 31 frames - examples:
             //      2,2,3,1,3,3,2,3,2,2,3,2,3
             //      2,2,2,3,1,3,2,2,3,2,2,3,4
+            // Different each time probably because RecWar's and the recorder's framerate don't match exactly.
+            //
             // This code produces similar results,
             // though it might display a single sprite for 4 frames slightly more often.
             let progress = (self.gs.frame_time - explosion.start_time) / cvars.r_explosion_duration;
