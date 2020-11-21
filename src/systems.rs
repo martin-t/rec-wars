@@ -464,7 +464,9 @@ pub(crate) fn damage(cvars: &Cvars, gs: &mut GameState, vehicle_handle: Index, d
     let vehicle = &mut gs.vehicles[vehicle_handle];
     vehicle.hp_fraction -= dmg_amount / cvars.g_vehicle_hp(vehicle.veh_type);
 
-    if vehicle.hp_fraction >= 0.0 {
+    // Not using 0.0 here because of floating point errors.
+    // Some weapons should reduce health to exact 0 in a small number of hits but it ends up being a tiny bit above it.
+    if vehicle.hp_fraction > 0.00001 {
         return;
     }
 
