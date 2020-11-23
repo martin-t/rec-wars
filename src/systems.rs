@@ -11,7 +11,7 @@ use std::f64::consts::PI;
 use rand::Rng;
 use rand_distr::StandardNormal;
 use thunderdome::Index;
-use vek::{Clamp, Wrap};
+use vek::{Clamp, LineSegment2, Wrap};
 
 use crate::{
     cvars::{Cvars, Hardpoint, MovementStats},
@@ -425,6 +425,10 @@ pub(crate) fn projectiles(cvars: &Cvars, gs: &mut GameState, map: &Map) {
             continue;
         }
 
+        let step = LineSegment2 {
+            start: projectile.pos,
+            end: new_pos,
+        };
         projectile.pos = new_pos;
 
         for vehicle_handle in gs.vehicles.iter_handles() {
@@ -438,7 +442,8 @@ pub(crate) fn projectiles(cvars: &Cvars, gs: &mut GameState, map: &Map) {
                 continue;
             }
 
-            let dist2 = (projectile.pos - vehicle.pos).magnitude_squared();
+            let nearest_point = step.projected_point(vehicle.pos);
+            let dist2 = nearest_point.distance_squared(vehicle.pos);
             // TODO proper hitbox
             if dist2 <= 24.0 * 24.0 {
                 let dmg = cvars.g_weapon_damage(projectile.weapon);
