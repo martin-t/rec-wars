@@ -146,7 +146,7 @@ pub(crate) fn debug_line(begin: Vec2f, end: Vec2f, time: f64, color: &'static st
 
 /// Draw a small cross at world coordinates.
 /// Optionally specify
-/// - how long it lasts in seconds (default 1 frame)
+/// - how long it lasts in seconds (default is 0.0 which means 1 frame)
 /// - color
 #[macro_export]
 macro_rules! dbg_cross {
