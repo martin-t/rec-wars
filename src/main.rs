@@ -120,6 +120,7 @@
 //          [ ] shooting to the side while moving looks awful
 //      [ ] rail
 //          [ ] push
+//          [ ] shoot through vehicles (don't stop after first hit)
 //      [ ] CB
 //          [x] 40 per shot
 //          [x] next shot starts a few frames after last explosion disappears
