@@ -789,7 +789,7 @@ impl Game {
             if cvars.d_draw && cvars.d_draw_text {
                 for text in texts.iter() {
                     self.context.fill_text(text, 20.0, y).unwrap();
-                    y += cvars.d_text_line_height;
+                    y += cvars.d_draw_text_line_height;
                 }
             }
             texts.clear();

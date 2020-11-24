@@ -36,9 +36,8 @@ pub struct Cvars {
     pub d_draw_lines_ends_length: f64,
     pub d_draw_perf: bool,
     pub d_draw_text: bool,
+    pub d_draw_text_line_height: f64,
     pub d_draw_world_text: bool,
-    pub d_text: bool,
-    pub d_text_line_height: f64,
     /// This is not very helpful by itself because by the time you can change cvars in the console,
     /// the seed has already been used.
     /// However, you can change it in index.js right after creating the cvars object
@@ -658,9 +657,8 @@ impl Default for Cvars {
             d_draw_lines_ends_length: 3.0,
             d_draw_perf: true,
             d_draw_text: true,
+            d_draw_text_line_height: 12.0,
             d_draw_world_text: true,
-            d_text: true,
-            d_text_line_height: 12.0,
             d_seed: 0,
             d_speed: 1.0,
 
