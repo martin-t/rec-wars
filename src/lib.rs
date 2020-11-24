@@ -700,8 +700,26 @@ impl Game {
         self.context.set_shadow_offset_x(0.0);
         self.context.set_shadow_offset_y(0.0);
 
-        // Draw perf info
+        // Draw FPS
+        // TODO this is wrong with d_speed
         self.context.set_fill_style(&"red".into());
+        if cvars.d_fps {
+            let fps = if self.frame_times.is_empty() {
+                0.0
+            } else {
+                let diff_time =
+                    self.frame_times.back().unwrap() - self.frame_times.front().unwrap();
+                let diff_frames = self.frame_times.len() - 1;
+                diff_frames as f64 / diff_time
+            };
+            self.context.fill_text(
+                &format!("FPS: {:.1}", fps),
+                self.canvas_size.x - 60.0,
+                self.canvas_size.y - 15.0,
+            )?;
+        }
+
+        // Draw perf info
         if cvars.d_draw && cvars.d_draw_perf {
             self.context.fill_text(
                 &format!("last {} frames:", STATS_FRAMES),
@@ -748,24 +766,6 @@ impl Game {
                     self.canvas_size.y - 45.0,
                 )?;
             }
-        }
-
-        // Draw FPS
-        // TODO this is wrong with d_speed
-        if cvars.d_fps {
-            let fps = if self.frame_times.is_empty() {
-                0.0
-            } else {
-                let diff_time =
-                    self.frame_times.back().unwrap() - self.frame_times.front().unwrap();
-                let diff_frames = self.frame_times.len() - 1;
-                diff_frames as f64 / diff_time
-            };
-            self.context.fill_text(
-                &format!("FPS: {:.1}", fps),
-                self.canvas_size.x - 60.0,
-                self.canvas_size.y - 15.0,
-            )?;
         }
 
         // Draw world debug text
