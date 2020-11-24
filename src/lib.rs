@@ -600,11 +600,20 @@ impl Game {
             for line in lines.iter_mut() {
                 if cvars.d_draw && cvars.d_draw_lines {
                     self.context.set_stroke_style(&line.color.into());
+
                     let scr_begin = line.begin - top_left;
                     let scr_end = line.end - top_left;
                     self.context.begin_path();
                     self.move_to(scr_begin);
                     self.line_to(scr_end);
+                    if cvars.d_draw_lines_ends_length > 0.0 {
+                        let segment = line.end - line.begin;
+                        let perpendicular = Vec2f::new(-segment.y, segment.x).normalized();
+                        self.move_to(scr_begin + -perpendicular * cvars.d_draw_lines_ends_length);
+                        self.line_to(scr_begin + perpendicular * cvars.d_draw_lines_ends_length);
+                        self.move_to(scr_end + -perpendicular * cvars.d_draw_lines_ends_length);
+                        self.line_to(scr_end + perpendicular * cvars.d_draw_lines_ends_length);
+                    }
                     self.context.stroke();
                 }
                 line.time -= self.gs.dt;
