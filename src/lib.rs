@@ -258,7 +258,7 @@ impl Game {
 
         systems::vehicle_movement(cvars, &mut self.gs, &self.map);
 
-        systems::shooting(cvars, &mut self.gs, &self.map);
+        systems::shooting(cvars, &mut self.gs);
 
         systems::gm_turning(cvars, &mut self.gs);
 

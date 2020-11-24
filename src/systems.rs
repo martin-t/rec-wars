@@ -246,7 +246,7 @@ pub(crate) fn vehicle_logic(cvars: &Cvars, gs: &mut GameState, gs_prev: &GameSta
     }
 }
 
-pub(crate) fn shooting(cvars: &Cvars, gs: &mut GameState, map: &Map) {
+pub(crate) fn shooting(cvars: &Cvars, gs: &mut GameState) {
     for (_, vehicle) in gs.vehicles.iter_mut() {
         let player = &mut gs.players[vehicle.owner];
         // Note: vehicles can shoot while controlling a missile
@@ -307,12 +307,10 @@ pub(crate) fn shooting(cvars: &Cvars, gs: &mut GameState, map: &Map) {
                     gs.projectiles.insert(projectile);
                 }
                 Weapon::Rail => {
-                    let dir = shot_angle.to_vec2f();
-                    let end = shot_origin + dir * 100_000.0;
-                    let hit = map.collision_between(shot_origin, end);
-                    if let Some(hit) = hit {
-                        gs.railguns.push((shot_origin, hit));
-                    }
+                    projectile.weapon = Weapon::Rail;
+                    projectile.vel = Vec2f::new(cvars.g_railgun_speed, 0.0).rotated_z(shot_angle)
+                        + cvars.g_railgun_vehicle_velocity_factor * vehicle.vel;
+                    gs.projectiles.insert(projectile);
                 }
                 Weapon::Cb => {
                     projectile.weapon = Weapon::Cb;
@@ -417,10 +415,12 @@ pub(crate) fn projectiles(cvars: &Cvars, gs: &mut GameState, map: &Map) {
 
         let collision = map.collision_between(projectile.pos, new_pos);
         if let Some(hit_pos) = collision {
+            // FIXME this means the last segment can't hit
             projectile_impact(cvars, gs, proj_handle, hit_pos);
             continue;
         }
 
+        dbg_line!(projectile.pos, new_pos, 0.5);
         let step = LineSegment2 {
             start: projectile.pos,
             end: new_pos,
@@ -439,16 +439,24 @@ pub(crate) fn projectiles(cvars: &Cvars, gs: &mut GameState, map: &Map) {
             }
 
             let nearest_point = step.projected_point(vehicle.pos);
+            dbg_cross!(nearest_point, 0.5);
             let dist2 = nearest_point.distance_squared(vehicle.pos);
             // TODO proper hitbox
             if dist2 <= 24.0 * 24.0 {
                 let dmg = cvars.g_weapon_damage(projectile.weapon);
-                let hit_pos = projectile.pos;
+                let is_rail = projectile.weapon == Weapon::Rail;
+                if is_rail {
+                    gs.railguns.push((step.start, nearest_point))
+                }
 
                 // Vehicle explosion first so it's below projectile explosion because it looks better.
                 damage(cvars, gs, vehicle_handle, dmg);
-                projectile_impact(cvars, gs, proj_handle, hit_pos);
-                break;
+                if !is_rail {
+                    projectile_impact(cvars, gs, proj_handle, nearest_point);
+                    break;
+                }
+            } else if projectile.weapon == Weapon::Rail {
+                gs.railguns.push((step.start, step.end));
             } else if projectile.weapon == Weapon::Bfg
                 && dist2 <= cvars.g_bfg_beam_range * cvars.g_bfg_beam_range
                 && map.collision_between(projectile.pos, vehicle.pos).is_none()
