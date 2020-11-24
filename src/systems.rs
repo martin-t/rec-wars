@@ -439,10 +439,10 @@ pub(crate) fn projectiles(cvars: &Cvars, gs: &mut GameState, map: &Map) {
             }
 
             let nearest_point = step.projected_point(vehicle.pos);
-            dbg_cross!(nearest_point, 0.5);
             let dist2 = nearest_point.distance_squared(vehicle.pos);
             // TODO proper hitbox
             if dist2 <= 24.0 * 24.0 {
+                dbg_cross!(nearest_point, 0.5);
                 let dmg = cvars.g_weapon_damage(projectile.weapon);
                 let is_rail = projectile.weapon == Weapon::Rail;
                 if is_rail {

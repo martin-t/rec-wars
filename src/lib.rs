@@ -595,7 +595,6 @@ impl Game {
         self.context.set_line_dash(&Array::new())?;
 
         // Debug lines and crosses
-
         DEBUG_LINES.with(|lines| {
             let mut lines = lines.borrow_mut();
             for line in lines.iter_mut() {
