@@ -598,8 +598,8 @@ impl Game {
 
         DEBUG_LINES.with(|lines| {
             let mut lines = lines.borrow_mut();
-            if cvars.d_draw && cvars.d_draw_lines {
-                for line in lines.iter_mut() {
+            for line in lines.iter_mut() {
+                if cvars.d_draw && cvars.d_draw_lines {
                     self.context.set_stroke_style(&line.color.into());
                     let scr_begin = line.begin - top_left;
                     let scr_end = line.end - top_left;
@@ -607,8 +607,8 @@ impl Game {
                     self.move_to(scr_begin);
                     self.line_to(scr_end);
                     self.context.stroke();
-                    line.time -= self.gs.dt;
                 }
+                line.time -= self.gs.dt;
             }
             lines.retain(|line| line.time > 0.0);
         });
@@ -628,8 +628,8 @@ impl Game {
                     self.move_to(top_right);
                     self.line_to(bottom_left);
                     self.context.stroke();
-                    cross.time -= self.gs.dt;
                 }
+                cross.time -= self.gs.dt;
             }
             crosses.retain(|cross| cross.time > 0.0);
         });
