@@ -623,7 +623,7 @@ impl Game {
         DEBUG_CROSSES.with(|crosses| {
             let mut crosses = crosses.borrow_mut();
             for cross in crosses.iter_mut() {
-                if cvars.d_draw && cvars.d_draw_lines {
+                if cvars.d_draw && cvars.d_draw_crosses {
                     self.context.set_stroke_style(&cross.color.into());
                     let scr_point = cross.point - top_left;
                     let top_left = scr_point - Vec2f::new(-3.0, -3.0);
