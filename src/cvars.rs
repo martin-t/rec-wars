@@ -29,7 +29,13 @@ pub struct Cvars {
     //  |
     //  v
     pub d_draw: bool,
+    pub d_draw_crosses: bool,
+    pub d_draw_fps: bool,
     pub d_draw_hitboxes: bool,
+    pub d_draw_lines: bool,
+    pub d_draw_perf: bool,
+    pub d_draw_text: bool,
+    pub d_draw_world_text: bool,
     pub d_text: bool,
     pub d_text_line_height: f64,
     /// This is not very helpful by itself because by the time you can change cvars in the console,
@@ -644,7 +650,13 @@ impl Default for Cvars {
     fn default() -> Self {
         Self {
             d_draw: true,
+            d_draw_fps: true,
+            d_draw_crosses: true,
             d_draw_hitboxes: false,
+            d_draw_lines: true,
+            d_draw_perf: true,
+            d_draw_text: true,
+            d_draw_world_text: true,
             d_text: true,
             d_text_line_height: 12.0,
             d_seed: 0,

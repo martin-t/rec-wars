@@ -595,9 +595,10 @@ impl Game {
         self.context.set_line_dash(&Array::new())?;
 
         // Debug lines and crosses
-        if cvars.d_draw {
-            DEBUG_LINES.with(|lines| {
-                let mut lines = lines.borrow_mut();
+
+        DEBUG_LINES.with(|lines| {
+            let mut lines = lines.borrow_mut();
+            if cvars.d_draw && cvars.d_draw_lines {
                 for line in lines.iter_mut() {
                     self.context.set_stroke_style(&line.color.into());
                     let scr_begin = line.begin - top_left;
@@ -608,11 +609,13 @@ impl Game {
                     self.context.stroke();
                     line.time -= self.gs.dt;
                 }
-                lines.retain(|line| line.time > 0.0);
-            });
-            DEBUG_CROSSES.with(|crosses| {
-                let mut crosses = crosses.borrow_mut();
-                for cross in crosses.iter_mut() {
+            }
+            lines.retain(|line| line.time > 0.0);
+        });
+        DEBUG_CROSSES.with(|crosses| {
+            let mut crosses = crosses.borrow_mut();
+            for cross in crosses.iter_mut() {
+                if cvars.d_draw && cvars.d_draw_lines {
                     self.context.set_stroke_style(&cross.color.into());
                     let scr_point = cross.point - top_left;
                     let top_left = scr_point - Vec2f::new(-3.0, -3.0);
@@ -627,9 +630,9 @@ impl Game {
                     self.context.stroke();
                     cross.time -= self.gs.dt;
                 }
-                crosses.retain(|cross| cross.time > 0.0);
-            });
-        }
+            }
+            crosses.retain(|cross| cross.time > 0.0);
+        });
 
         // Hit points (goes from green to red)
         // Might wanna use https://crates.io/crates/colorsys if I need more color operations.
@@ -691,7 +694,7 @@ impl Game {
 
         // Draw perf info
         self.context.set_fill_style(&"red".into());
-        if cvars.d_text {
+        if cvars.d_draw && cvars.d_draw_perf {
             self.context.fill_text(
                 &format!("last {} frames:", STATS_FRAMES),
                 self.canvas_size.x - 150.0,
@@ -741,23 +744,26 @@ impl Game {
 
         // Draw FPS
         // TODO this is wrong with d_speed
-        let fps = if self.frame_times.is_empty() {
-            0.0
-        } else {
-            let diff_time = self.frame_times.back().unwrap() - self.frame_times.front().unwrap();
-            let diff_frames = self.frame_times.len() - 1;
-            diff_frames as f64 / diff_time
-        };
-        self.context.fill_text(
-            &format!("FPS: {:.1}", fps),
-            self.canvas_size.x - 60.0,
-            self.canvas_size.y - 15.0,
-        )?;
+        if cvars.d_draw && cvars.d_draw_fps {
+            let fps = if self.frame_times.is_empty() {
+                0.0
+            } else {
+                let diff_time =
+                    self.frame_times.back().unwrap() - self.frame_times.front().unwrap();
+                let diff_frames = self.frame_times.len() - 1;
+                diff_frames as f64 / diff_time
+            };
+            self.context.fill_text(
+                &format!("FPS: {:.1}", fps),
+                self.canvas_size.x - 60.0,
+                self.canvas_size.y - 15.0,
+            )?;
+        }
 
         // Draw world debug text
         DEBUG_TEXTS_WORLD.with(|texts| {
             let mut texts = texts.borrow_mut();
-            if cvars.d_text {
+            if cvars.d_draw && cvars.d_draw_world_text {
                 for text in texts.iter() {
                     let scr_pos = text.pos - top_left;
                     self.context
@@ -772,7 +778,7 @@ impl Game {
         let mut y = 25.0;
         DEBUG_TEXTS.with(|texts| {
             let mut texts = texts.borrow_mut();
-            if cvars.d_text {
+            if cvars.d_draw && cvars.d_draw_text {
                 for text in texts.iter() {
                     self.context.fill_text(text, 20.0, y).unwrap();
                     y += cvars.d_text_line_height;
