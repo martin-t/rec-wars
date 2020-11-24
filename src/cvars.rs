@@ -28,9 +28,9 @@ pub struct Cvars {
     // Would be nice to keep alphabetically.
     //  |
     //  v
+    /// Master switch for debug output - the d_draw_* group.
     pub d_draw: bool,
     pub d_draw_crosses: bool,
-    pub d_draw_fps: bool,
     pub d_draw_hitboxes: bool,
     pub d_draw_lines: bool,
     pub d_draw_lines_ends_length: f64,
@@ -38,6 +38,9 @@ pub struct Cvars {
     pub d_draw_text: bool,
     pub d_draw_text_line_height: f64,
     pub d_draw_world_text: bool,
+    /// Draw FPS counter. Intentionally not in the d_draw_* group
+    /// so I can easily check perf with and without the other debug output.
+    pub d_fps: bool,
     /// This is not very helpful by itself because by the time you can change cvars in the console,
     /// the seed has already been used.
     /// However, you can change it in index.js right after creating the cvars object
@@ -650,7 +653,6 @@ impl Default for Cvars {
     fn default() -> Self {
         Self {
             d_draw: true,
-            d_draw_fps: true,
             d_draw_crosses: true,
             d_draw_hitboxes: false,
             d_draw_lines: true,
@@ -659,6 +661,7 @@ impl Default for Cvars {
             d_draw_text: true,
             d_draw_text_line_height: 12.0,
             d_draw_world_text: true,
+            d_fps: true,
             d_seed: 0,
             d_speed: 1.0,
 

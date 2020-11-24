@@ -752,7 +752,7 @@ impl Game {
 
         // Draw FPS
         // TODO this is wrong with d_speed
-        if cvars.d_draw && cvars.d_draw_fps {
+        if cvars.d_fps {
             let fps = if self.frame_times.is_empty() {
                 0.0
             } else {
