@@ -283,6 +283,8 @@ pub(crate) fn shooting(cvars: &Cvars, gs: &mut GameState, map: &Map) {
                         + weapon_offset.rotated_z(shot_angle);
                 }
             }
+
+            // Some sane defaults to be overriden later
             let mut projectile = Projectile {
                 weapon: Weapon::Mg,
                 pos: shot_origin,
@@ -292,16 +294,16 @@ pub(crate) fn shooting(cvars: &Cvars, gs: &mut GameState, map: &Map) {
                 explode_time: f64::MAX,
                 owner: vehicle.owner,
             };
+
             match vehicle.cur_weapon {
                 Weapon::Mg => {
                     let r: f64 = gs.rng.sample(StandardNormal);
                     let spread = cvars.g_machine_gun_angle_spread * r;
                     // Using spread as shot_vel.y would mean the resulting spread depends on speed
                     // so it's better to use spread on angle.
-                    let shot_vel = Vec2f::new(cvars.g_machine_gun_speed, 0.0)
+                    projectile.vel = Vec2f::new(cvars.g_machine_gun_speed, 0.0)
                         .rotated_z(shot_angle + spread)
                         + cvars.g_machine_gun_vehicle_velocity_factor * vehicle.vel;
-                    projectile.vel = shot_vel;
                     gs.projectiles.insert(projectile);
                 }
                 Weapon::Rail => {
@@ -330,47 +332,41 @@ pub(crate) fn shooting(cvars: &Cvars, gs: &mut GameState, map: &Map) {
                             let r = gs.rng.gen_range(-1.5, 1.5);
                             spread_sideways = cvars.g_cluster_bomb_speed_spread_sideways * r;
                         }
-                        let shot_vel = Vec2f::new(speed + spread_forward, spread_sideways)
+                        projectile.vel = Vec2f::new(speed + spread_forward, spread_sideways)
                             .rotated_z(shot_angle)
                             + cvars.g_cluster_bomb_vehicle_velocity_factor * vehicle.vel;
-                        let time = gs.frame_time
+                        projectile.explode_time = gs.frame_time
                             + cvars.g_cluster_bomb_time
                             + gs.rng.gen_range(-1.0, 1.0) * cvars.g_cluster_bomb_time_spread;
-                        projectile.explode_time = time;
-                        projectile.vel = shot_vel;
                         gs.projectiles.insert(projectile.clone());
                     }
                 }
                 Weapon::Rockets => {
-                    let shot_vel = Vec2f::new(cvars.g_rockets_speed, 0.0).rotated_z(shot_angle)
-                        + cvars.g_rockets_vehicle_velocity_factor * vehicle.vel;
                     projectile.weapon = Weapon::Rockets;
-                    projectile.vel = shot_vel;
+                    projectile.vel = Vec2f::new(cvars.g_rockets_speed, 0.0).rotated_z(shot_angle)
+                        + cvars.g_rockets_vehicle_velocity_factor * vehicle.vel;
                     gs.projectiles.insert(projectile);
                 }
                 Weapon::Hm => {
-                    let shot_vel = Vec2f::new(cvars.g_homing_missile_speed_initial, 0.0)
+                    projectile.weapon = Weapon::Hm;
+                    projectile.vel = Vec2f::new(cvars.g_homing_missile_speed_initial, 0.0)
                         .rotated_z(shot_angle)
                         + cvars.g_homing_missile_vehicle_velocity_factor * vehicle.vel;
-                    projectile.weapon = Weapon::Hm;
-                    projectile.vel = shot_vel;
                     gs.projectiles.insert(projectile);
                 }
                 Weapon::Gm => {
-                    let shot_vel = Vec2f::new(cvars.g_guided_missile_speed_initial, 0.0)
+                    projectile.weapon = Weapon::Gm;
+                    projectile.vel = Vec2f::new(cvars.g_guided_missile_speed_initial, 0.0)
                         .rotated_z(shot_angle)
                         + cvars.g_guided_missile_vehicle_velocity_factor * vehicle.vel;
-                    projectile.weapon = Weapon::Gm;
-                    projectile.vel = shot_vel;
                     // TODO angle (maybe also HM)
                     let handle = gs.projectiles.insert(projectile);
                     player.guided_missile = Some(handle);
                 }
                 Weapon::Bfg => {
-                    let shot_vel = Vec2f::new(cvars.g_bfg_speed, 0.0).rotated_z(shot_angle)
-                        + cvars.g_bfg_vehicle_velocity_factor * vehicle.vel;
                     projectile.weapon = Weapon::Bfg;
-                    projectile.vel = shot_vel;
+                    projectile.vel = Vec2f::new(cvars.g_bfg_speed, 0.0).rotated_z(shot_angle)
+                        + cvars.g_bfg_vehicle_velocity_factor * vehicle.vel;
                     gs.projectiles.insert(projectile);
                 }
             }
