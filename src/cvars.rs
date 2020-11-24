@@ -30,7 +30,6 @@ pub struct Cvars {
     //  v
     pub d_draw: bool,
     pub d_draw_hitboxes: bool,
-    pub d_draw_positions: bool,
     pub d_text: bool,
     pub d_text_line_height: f64,
     /// This is not very helpful by itself because by the time you can change cvars in the console,
@@ -646,7 +645,6 @@ impl Default for Cvars {
         Self {
             d_draw: true,
             d_draw_hitboxes: false,
-            d_draw_positions: false,
             d_text: true,
             d_text_line_height: 12.0,
             d_seed: 0,
