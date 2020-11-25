@@ -407,12 +407,19 @@ pub(crate) fn gm_turning(cvars: &Cvars, gs: &mut GameState) {
 pub(crate) fn projectiles(cvars: &Cvars, gs: &mut GameState, map: &Map) {
     for proj_handle in gs.projectiles.iter_handles() {
         let projectile = &mut gs.projectiles[proj_handle];
-        let new_pos = projectile.pos + projectile.vel * gs.dt;
+        let max_new_pos = projectile.pos + projectile.vel * gs.dt;
 
         if projectile.weapon == Weapon::Cb {
-            projectile.pos = new_pos;
+            projectile.pos = max_new_pos;
             continue;
         }
+
+        let maybe_collision = map.is_wall_trace(projectile.pos, max_new_pos);
+        let new_pos = if let Some(hit_pos) = maybe_collision {
+            hit_pos
+        } else {
+            max_new_pos
+        };
 
         if cvars.d_tracing {
             dbg_line!(projectile.pos, new_pos, 0.5);
@@ -423,12 +430,7 @@ pub(crate) fn projectiles(cvars: &Cvars, gs: &mut GameState, map: &Map) {
         };
         let step_dir = (new_pos - projectile.pos).normalized();
 
-        let maybe_collision = map.is_wall_trace(projectile.pos, new_pos);
-        if let Some(hit_pos) = maybe_collision {
-            projectile.pos = hit_pos;
-        } else {
-            projectile.pos = new_pos;
-        }
+        projectile.pos = new_pos;
 
         for vehicle_handle in gs.vehicles.iter_handles() {
             // LATER immediately killing vehicles here means 2 players can't share a kill
