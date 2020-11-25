@@ -425,6 +425,7 @@ pub(crate) fn projectiles(cvars: &Cvars, gs: &mut GameState, map: &Map) {
             start: projectile.pos,
             end: new_pos,
         };
+        let step_dir = (new_pos - projectile.pos).normalized();
         projectile.pos = new_pos;
 
         for vehicle_handle in gs.vehicles.iter_handles() {
@@ -446,7 +447,8 @@ pub(crate) fn projectiles(cvars: &Cvars, gs: &mut GameState, map: &Map) {
                 let dmg = cvars.g_weapon_damage(projectile.weapon);
                 let is_rail = projectile.weapon == Weapon::Rail;
                 if is_rail {
-                    gs.railguns.push((step.start, nearest_point))
+                    gs.railguns.push((step.start, nearest_point));
+                    vehicle.vel += step_dir * cvars.g_railgun_push;
                 }
 
                 // Vehicle explosion first so it's below projectile explosion because it looks better.
