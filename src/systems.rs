@@ -414,13 +414,6 @@ pub(crate) fn projectiles(cvars: &Cvars, gs: &mut GameState, map: &Map) {
             continue;
         }
 
-        let collision = map.is_wall_trace(projectile.pos, new_pos);
-        if let Some(hit_pos) = collision {
-            // FIXME this means the last segment can't hit
-            projectile_impact(cvars, gs, proj_handle, hit_pos);
-            continue;
-        }
-
         if cvars.d_tracing {
             dbg_line!(projectile.pos, new_pos, 0.5);
         }
@@ -429,7 +422,13 @@ pub(crate) fn projectiles(cvars: &Cvars, gs: &mut GameState, map: &Map) {
             end: new_pos,
         };
         let step_dir = (new_pos - projectile.pos).normalized();
-        projectile.pos = new_pos;
+
+        let maybe_collision = map.is_wall_trace(projectile.pos, new_pos);
+        if let Some(hit_pos) = maybe_collision {
+            projectile.pos = hit_pos;
+        } else {
+            projectile.pos = new_pos;
+        }
 
         for vehicle_handle in gs.vehicles.iter_handles() {
             // LATER immediately killing vehicles here means 2 players can't share a kill
@@ -461,7 +460,7 @@ pub(crate) fn projectiles(cvars: &Cvars, gs: &mut GameState, map: &Map) {
                 damage(cvars, gs, vehicle_handle, dmg);
                 if !is_rail {
                     projectile_impact(cvars, gs, proj_handle, nearest_point);
-                    break;
+                    break; // TODO actually ... what if the segment is long and 2 vehicles are in the path
                 }
             } else if projectile.weapon == Weapon::Rail {
                 gs.railguns.push((step.start, step.end));
@@ -472,6 +471,16 @@ pub(crate) fn projectiles(cvars: &Cvars, gs: &mut GameState, map: &Map) {
                 let dmg = cvars.g_bfg_beam_damage_per_sec * gs.dt;
                 gs.bfg_beams.push((projectile.pos, vehicle.pos));
                 damage(cvars, gs, vehicle_handle, dmg);
+            }
+        }
+
+        if let Some(hit_pos) = maybe_collision {
+            // Only hit the final wall if it didn't hit a vehicle first.
+            // Otherwise this tries to remove the projectile a second time.
+            //
+            // We could set a flag when hitting vehicles above instead of `.contains` but this is more future-proof.
+            if gs.projectiles.contains(proj_handle) {
+                projectile_impact(cvars, gs, proj_handle, hit_pos);
             }
         }
     }
