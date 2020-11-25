@@ -152,7 +152,7 @@ impl Map {
     }
 
     /// Is `pos` outside the map or inside a wall?
-    pub(crate) fn collision(&self, pos: Vec2f) -> bool {
+    pub(crate) fn is_wall(&self, pos: Vec2f) -> bool {
         if pos.x <= 0.0 {
             return true;
         }
@@ -177,8 +177,9 @@ impl Map {
 
     /// Find first wall collision when traveling from `begin` to `end`.
     /// The returned point is nudged slightly inside the wall.
-    pub(crate) fn collision_between(&self, begin: Vec2f, end: Vec2f) -> Option<Vec2f> {
-        if self.collision(begin) {
+    /// Area outside the map is considered wall.
+    pub(crate) fn is_wall_trace(&self, begin: Vec2f, end: Vec2f) -> Option<Vec2f> {
+        if self.is_wall(begin) {
             return Some(begin);
         }
 
@@ -238,7 +239,7 @@ impl Map {
             }
             let intersection = begin + delta * t;
             let wall = intersection + nudge;
-            if self.collision(wall) {
+            if self.is_wall(wall) {
                 return Some(wall);
             }
         }
@@ -457,16 +458,16 @@ mod tests {
         let bottom_left = map.tile_center(Vec2u::new(0, 3));
         let top_right = map.tile_center(Vec2u::new(3, 0));
 
-        assert!(map.collision_between(outside, outside).is_some());
-        assert!(map.collision_between(outside, top_left).is_some());
-        assert!(map.collision_between(top_left, outside).is_some());
+        assert!(map.is_wall_trace(outside, outside).is_some());
+        assert!(map.is_wall_trace(outside, top_left).is_some());
+        assert!(map.is_wall_trace(top_left, outside).is_some());
 
-        assert!(map.collision_between(top_left, top_left).is_none());
-        assert!(map.collision_between(top_left, bottom_left).is_none());
-        assert!(map.collision_between(bottom_left, top_left).is_none());
+        assert!(map.is_wall_trace(top_left, top_left).is_none());
+        assert!(map.is_wall_trace(top_left, bottom_left).is_none());
+        assert!(map.is_wall_trace(bottom_left, top_left).is_none());
 
         let up = Vec2f::new(0.0, -10.0);
-        assert!(map.collision_between(bottom_left, top_right + up).is_none());
-        assert!(map.collision_between(bottom_left, top_right - up).is_some());
+        assert!(map.is_wall_trace(bottom_left, top_right + up).is_none());
+        assert!(map.is_wall_trace(bottom_left, top_right - up).is_some());
     }
 }

@@ -118,7 +118,7 @@ pub(crate) fn vehicle_movement(cvars: &Cvars, gs: &mut GameState, map: &Map) {
             .hitbox
             .corners(vehicle.pos, new_angle)
             .iter()
-            .any(|&corner| map.collision(corner))
+            .any(|&corner| map.is_wall(corner))
         {
             vehicle.turn_rate *= -0.5;
         } else {
@@ -132,7 +132,7 @@ pub(crate) fn vehicle_movement(cvars: &Cvars, gs: &mut GameState, map: &Map) {
             .hitbox
             .corners(new_pos, vehicle.angle)
             .iter()
-            .any(|&corner| map.collision(corner))
+            .any(|&corner| map.is_wall(corner))
         {
             vehicle.vel *= -0.5;
         } else {
@@ -414,7 +414,7 @@ pub(crate) fn projectiles(cvars: &Cvars, gs: &mut GameState, map: &Map) {
             continue;
         }
 
-        let collision = map.collision_between(projectile.pos, new_pos);
+        let collision = map.is_wall_trace(projectile.pos, new_pos);
         if let Some(hit_pos) = collision {
             // FIXME this means the last segment can't hit
             projectile_impact(cvars, gs, proj_handle, hit_pos);
@@ -467,7 +467,7 @@ pub(crate) fn projectiles(cvars: &Cvars, gs: &mut GameState, map: &Map) {
                 gs.railguns.push((step.start, step.end));
             } else if projectile.weapon == Weapon::Bfg
                 && dist2 <= cvars.g_bfg_beam_range * cvars.g_bfg_beam_range
-                && map.collision_between(projectile.pos, vehicle.pos).is_none()
+                && map.is_wall_trace(projectile.pos, vehicle.pos).is_none()
             {
                 let dmg = cvars.g_bfg_beam_damage_per_sec * gs.dt;
                 gs.bfg_beams.push((projectile.pos, vehicle.pos));
