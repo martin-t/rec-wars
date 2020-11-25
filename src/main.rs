@@ -119,8 +119,9 @@
 //          [ ] shoot faster on hovercraft, more ammo too?
 //          [ ] shooting to the side while moving looks awful
 //      [ ] rail
-//          [ ] push
-//          [ ] shoot through vehicles (don't stop after first hit)
+//          [x] push
+//          [ ] exact push values - just add to velocity or divide by mass?
+//          [x] shoot through vehicles (don't stop after first hit)
 //      [ ] CB
 //          [x] 40 per shot
 //          [x] next shot starts a few frames after last explosion disappears
@@ -159,9 +160,9 @@
 // [ ] mines
 //      [ ] not within radius of base and/or cow
 // [x] turrets
-//      [ ] 8 angles
+//      [x] 8 angles
+//      [ ] better control scheme - changing direction cancels the queue, starts counting from current position
 //          original RW has a bug: quick left,left,right would result in turning the longer way around
-//          better control scheme - changing direction cancels the queue, starts counting from current position
 // [ ] shadows
 //      [ ] HUD
 //      [ ] vehicles (is turret "higher"?)
