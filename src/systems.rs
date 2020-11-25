@@ -434,7 +434,8 @@ pub(crate) fn projectiles(cvars: &Cvars, gs: &mut GameState, map: &Map) {
             // LATER immediately killing vehicles here means 2 players can't share a kill
             let vehicle = &mut gs.vehicles[vehicle_handle];
 
-            // borrowchk dance - reborrow each iteration of the loop
+            // Borrowchk dance - reborrow each iteration of the loop
+            // so the borrow ends before we pass `gs` to other functions.
             let projectile = &gs.projectiles[proj_handle];
 
             if vehicle.destroyed() || vehicle.owner == projectile.owner {

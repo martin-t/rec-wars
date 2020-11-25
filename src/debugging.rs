@@ -169,7 +169,7 @@ pub(crate) fn debug_cross(point: Vec2f, time: f64, color: &'static str) {
     });
 }
 
-/// Count how many times in iterator returned Some
+/// Count how many times in iterator returned `Some`
 /// and print it when it's done.
 ///
 /// # Examples

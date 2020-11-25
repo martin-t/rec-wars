@@ -433,7 +433,7 @@ impl Game {
             self.context.stroke();
         }
 
-        // borrowchk dance - clear after we stop using `weapon_projectiles`
+        // Borrowchk dance - clear after we stop using `weapon_projectiles`.
         self.gs.railguns.clear();
         self.gs.bfg_beams.clear();
 
