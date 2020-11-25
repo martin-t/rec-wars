@@ -28,6 +28,9 @@ pub struct Cvars {
     // Would be nice to keep alphabetically.
     //  |
     //  v
+    /// Master switch for AI - disable if you want stationary targets
+    pub ai: bool,
+
     /// Master switch for debug output - the d_draw_* group.
     pub d_draw: bool,
     pub d_draw_crosses: bool,
@@ -654,6 +657,8 @@ impl Cvars {
 impl Default for Cvars {
     fn default() -> Self {
         Self {
+            ai: true,
+
             d_draw: true,
             d_draw_crosses: true,
             d_draw_hitboxes: false,

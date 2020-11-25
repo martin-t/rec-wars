@@ -2,9 +2,16 @@
 
 use rand::Rng;
 
-use crate::game_state::{GameState, Input};
+use crate::{
+    cvars::Cvars,
+    game_state::{GameState, Input},
+};
 
-pub(crate) fn ai(gs: &mut GameState) {
+pub(crate) fn ai(cvars: &Cvars, gs: &mut GameState) {
+    if !cvars.ai {
+        return;
+    }
+
     for (_, ai) in gs.ais.iter_mut() {
         let player = &mut gs.players[ai.player];
         let vehicle = &gs.vehicles[player.vehicle.unwrap()];

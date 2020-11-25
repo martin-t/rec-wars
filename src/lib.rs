@@ -250,7 +250,7 @@ impl Game {
             progress <= 1.0
         });
 
-        systems::ai::ai(&mut self.gs);
+        systems::ai::ai(cvars, &mut self.gs);
 
         systems::respawning(cvars, &mut self.gs, &self.gs_prev, &self.map);
 
