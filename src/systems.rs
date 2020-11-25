@@ -46,7 +46,6 @@ pub(crate) fn spawn_vehicle(
     player_handle: Index,
     use_spawns: bool,
 ) {
-    let player = &mut gs.players[player_handle];
     let veh_type = VehicleType::n(gs.rng.gen_range(0, 3)).unwrap();
     let (spawn_pos, spawn_angle) = if use_spawns {
         map.random_spawn(&mut gs.rng)
@@ -67,6 +66,7 @@ pub(crate) fn spawn_vehicle(
         player_handle,
     ));
 
+    let player = &mut gs.players[player_handle];
     player.vehicle = Some(vehicle_handle);
 }
 

@@ -77,7 +77,7 @@ macro_rules! dbg_textf {
 #[macro_export]
 macro_rules! dbg_textd {
     ( $( $e:expr ),* ) => {
-        let s = $crate::__print_pairs!( $( $e ),* );
+        let s = $crate::__format_pairs!( $( $e ),* );
         $crate::debugging::DEBUG_TEXTS.with(|texts| {
             texts.borrow_mut().push(s)
         });
@@ -108,8 +108,8 @@ macro_rules! __format_pairs {
     ( $e:expr, $( $rest:expr ),+ ) => {
         format!(
             "{}, {}",
-            $crate::__print_pairs!($e),
-            $crate::__print_pairs!( $( $rest ),+ )
+            $crate::__format_pairs!($e),
+            $crate::__format_pairs!( $( $rest ),+ )
         )
     };
 }
