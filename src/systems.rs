@@ -420,7 +420,9 @@ pub(crate) fn projectiles(cvars: &Cvars, gs: &mut GameState, map: &Map) {
             continue;
         }
 
-        dbg_line!(projectile.pos, new_pos, 0.5);
+        if cvars.d_tracing {
+            dbg_line!(projectile.pos, new_pos, 0.5);
+        }
         let step = LineSegment2 {
             start: projectile.pos,
             end: new_pos,
@@ -443,7 +445,9 @@ pub(crate) fn projectiles(cvars: &Cvars, gs: &mut GameState, map: &Map) {
             let dist2 = nearest_point.distance_squared(vehicle.pos);
             // TODO proper hitbox
             if dist2 <= 24.0 * 24.0 {
-                dbg_cross!(nearest_point, 0.5);
+                if cvars.d_tracing {
+                    dbg_cross!(nearest_point, 0.5);
+                }
                 let dmg = cvars.g_weapon_damage(projectile.weapon);
                 let is_rail = projectile.weapon == Weapon::Rail;
                 if is_rail {

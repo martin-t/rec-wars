@@ -41,6 +41,7 @@ pub struct Cvars {
     /// Draw FPS counter. Intentionally not in the d_draw_* group
     /// so I can easily check perf with and without the other debug output.
     pub d_fps: bool,
+    pub d_tracing: bool,
     /// This is not very helpful by itself because by the time you can change cvars in the console,
     /// the seed has already been used.
     /// However, you can change it in index.js right after creating the cvars object
@@ -663,6 +664,7 @@ impl Default for Cvars {
             d_draw_text_line_height: 12.0,
             d_draw_world_text: true,
             d_fps: true,
+            d_tracing: false,
             d_seed: 0,
             d_speed: 1.0,
 
