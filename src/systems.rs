@@ -402,7 +402,8 @@ pub(crate) fn gm_turning(cvars: &Cvars, gs: &mut GameState) {
     }
 }
 
-/// Movement and collisions
+/// Projectile movement and collisions / hit detection.
+/// Traces the projectile's path between positions to avoid passing through thin objects.
 pub(crate) fn projectiles(cvars: &Cvars, gs: &mut GameState, map: &Map) {
     for proj_handle in gs.projectiles.iter_handles() {
         let projectile = &mut gs.projectiles[proj_handle];
