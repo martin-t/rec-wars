@@ -224,6 +224,10 @@ pub(crate) fn player_logic(gs: &mut GameState, gs_prev: &GameState) {
 
 pub(crate) fn vehicle_logic(cvars: &Cvars, gs: &mut GameState, gs_prev: &GameState) {
     for (_, vehicle) in gs.vehicles.iter_mut() {
+        if vehicle.destroyed() {
+            continue;
+        }
+
         let player = &gs.players[vehicle.owner];
         let input = &player.input;
         let input_prev = if let Some(player_prev) = gs_prev.players.get(vehicle.owner) {
