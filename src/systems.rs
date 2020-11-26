@@ -203,17 +203,18 @@ fn accel_decel(stats: &MovementStats, vel: &mut Vec2f, angle: &mut f64, input: I
 
 pub(crate) fn vehicle_logic(cvars: &Cvars, gs: &mut GameState, gs_prev: &GameState) {
     for (_, vehicle) in gs.vehicles.iter_mut() {
-        let input = &gs.players[vehicle.owner].input;
+        let player = &mut gs.players[vehicle.owner];
+        let input = &player.input;
         let input_prev = &gs_prev.players[vehicle.owner].input;
 
         // Change weapon
         if input.prev_weapon && !input_prev.prev_weapon {
-            let prev = (vehicle.cur_weapon as u8 + WEAPS_CNT - 1) % WEAPS_CNT;
-            vehicle.cur_weapon = Weapon::n(prev).unwrap();
+            let prev = (player.cur_weapon as u8 + WEAPS_CNT - 1) % WEAPS_CNT;
+            player.cur_weapon = Weapon::n(prev).unwrap();
         }
         if input.next_weapon && !input_prev.next_weapon {
-            let next = (vehicle.cur_weapon as u8 + 1) % WEAPS_CNT;
-            vehicle.cur_weapon = Weapon::n(next).unwrap();
+            let next = (player.cur_weapon as u8 + 1) % WEAPS_CNT;
+            player.cur_weapon = Weapon::n(next).unwrap();
         }
 
         // Turret turning
@@ -234,12 +235,12 @@ pub(crate) fn vehicle_logic(cvars: &Cvars, gs: &mut GameState, gs_prev: &GameSta
         vehicle.turret_angle_current = vehicle.turret_angle_current.rem_euclid(2.0 * PI);
 
         // Reloading
-        let ammo = &mut vehicle.ammos[vehicle.cur_weapon as usize];
+        let ammo = &mut vehicle.ammos[player.cur_weapon as usize];
         if let Ammo::Reloading(_, end) = ammo {
             if gs.frame_time >= *end {
                 *ammo = Ammo::Loaded(
                     gs.frame_time,
-                    cvars.g_weapon_reload_ammo(vehicle.cur_weapon),
+                    cvars.g_weapon_reload_ammo(player.cur_weapon),
                 );
             }
         }
@@ -254,21 +255,21 @@ pub(crate) fn shooting(cvars: &Cvars, gs: &mut GameState) {
             continue;
         }
 
-        let ammo = &mut vehicle.ammos[vehicle.cur_weapon as usize];
+        let ammo = &mut vehicle.ammos[player.cur_weapon as usize];
         if let Ammo::Loaded(ready_time, count) = ammo {
             if gs.frame_time < *ready_time {
                 continue;
             }
 
-            *ready_time = gs.frame_time + cvars.g_weapon_refire(vehicle.cur_weapon);
+            *ready_time = gs.frame_time + cvars.g_weapon_refire(player.cur_weapon);
             *count -= 1;
             if *count == 0 {
-                let reload_time = cvars.g_weapon_reload_time(vehicle.cur_weapon);
+                let reload_time = cvars.g_weapon_reload_time(player.cur_weapon);
                 *ammo = Ammo::Reloading(gs.frame_time, gs.frame_time + reload_time);
             }
 
             let (hardpoint, weapon_offset) =
-                cvars.g_hardpoint(vehicle.veh_type, vehicle.cur_weapon);
+                cvars.g_hardpoint(vehicle.veh_type, player.cur_weapon);
             let (shot_angle, shot_origin);
             match hardpoint {
                 Hardpoint::Chassis => {
@@ -295,7 +296,7 @@ pub(crate) fn shooting(cvars: &Cvars, gs: &mut GameState) {
                 owner: vehicle.owner,
             };
 
-            match vehicle.cur_weapon {
+            match player.cur_weapon {
                 Weapon::Mg => {
                     let r: f64 = gs.rng.sample(StandardNormal);
                     let spread = cvars.g_machine_gun_angle_spread * r;

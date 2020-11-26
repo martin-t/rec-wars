@@ -705,9 +705,9 @@ impl Game {
 
         // Ammo
         self.context.set_fill_style(&"yellow".into());
-        let fraction = match player_vehicle.ammos[player_vehicle.cur_weapon as usize] {
+        let fraction = match player_vehicle.ammos[player.cur_weapon as usize] {
             Ammo::Loaded(_, count) => {
-                let max = cvars.g_weapon_reload_ammo(player_vehicle.cur_weapon);
+                let max = cvars.g_weapon_reload_ammo(player.cur_weapon);
                 count as f64 / max as f64
             }
             Ammo::Reloading(start, end) => {
@@ -733,7 +733,7 @@ impl Game {
         self.context
             .set_shadow_offset_y(cvars.hud_weapon_icon_shadow_y);
         self.draw_img_center(
-            &self.imgs_weapon_icons[player_vehicle.cur_weapon as usize],
+            &self.imgs_weapon_icons[player.cur_weapon as usize],
             self.hud_pos(cvars.hud_weapon_icon_x, cvars.hud_weapon_icon_y),
             0.0,
         )?;

@@ -25,6 +25,7 @@ pub(crate) struct Player {
     pub(crate) input: Input,
     pub(crate) vehicle: Option<Index>,
     pub(crate) guided_missile: Option<Index>,
+    pub(crate) cur_weapon: Weapon,
 }
 
 impl Player {
@@ -34,6 +35,7 @@ impl Player {
             input: Input::new(),
             vehicle: None,
             guided_missile: None,
+            cur_weapon: Weapon::Mg,
         }
     }
 }
@@ -73,7 +75,6 @@ pub(crate) struct Vehicle {
     /// Each weapon has a separate reload status even if they all reload at the same time.
     /// I plan to generalize this and have a cvar to choose between multiple reload mechanisms.
     pub(crate) ammos: Vec<Ammo>,
-    pub(crate) cur_weapon: Weapon,
     pub(crate) spawn_time: f64,
     pub(crate) owner: Index,
 }
@@ -110,7 +111,6 @@ impl Vehicle {
             turret_angle_wanted: 0.0,
             hp_fraction: 1.0,
             ammos,
-            cur_weapon: Weapon::Mg,
             spawn_time: frame_time,
             owner,
         }
