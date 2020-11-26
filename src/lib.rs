@@ -593,6 +593,7 @@ impl Game {
             for (_, vehicle) in self.gs.vehicles.iter() {
                 let scr_pos = vehicle.pos - top_left;
                 if cull(scr_pos) {
+                    // LATER, restrict name length
                     continue;
                 }
 
@@ -814,6 +815,8 @@ impl Game {
                 for text in texts.iter() {
                     let scr_pos = text.pos - top_left;
                     if cull(scr_pos) {
+                        // Technically the text can be so long
+                        // that it's culled overzealously but meh, perf is more important.
                         continue;
                     }
 
