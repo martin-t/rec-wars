@@ -352,10 +352,22 @@ impl Game {
                 .filter(move |(_, proj)| proj.weapon == weapon)
         };
 
+        // Is the object certainly outside camera view?
+        let cull = |scr_pos: Vec2f| {
+            // There is no single object bigger than TILE_SIZE (except lines).
+            scr_pos.x < -TILE_SIZE
+                || scr_pos.y < -TILE_SIZE
+                || scr_pos.x > self.canvas_size.x + TILE_SIZE
+                || scr_pos.y > self.canvas_size.y + TILE_SIZE
+        };
+
         // Draw MGs
         self.context.set_stroke_style(&"yellow".into());
         for (_, mg) in weapon_projectiles(Weapon::Mg) {
             let scr_pos = mg.pos - top_left;
+            if cull(scr_pos) {
+                continue;
+            }
             self.context.begin_path();
             self.context.move_to(scr_pos.x, scr_pos.y);
             // we're drawing from the bullet's position backwards
@@ -386,6 +398,9 @@ impl Game {
                 .set_shadow_offset_y(cvars.g_cluster_bomb_shadow_y);
             for (_, cb) in weapon_projectiles(Weapon::Cb) {
                 let scr_pos = cb.pos - top_left;
+                if cull(scr_pos) {
+                    continue;
+                }
                 self.context.fill_rect(
                     scr_pos.x - cvars.g_cluster_bomb_size / 2.0,
                     scr_pos.y - cvars.g_cluster_bomb_size / 2.0,
@@ -400,14 +415,23 @@ impl Game {
         // Draw rockets, homing and guided missiles
         for (_, proj) in weapon_projectiles(Weapon::Rockets) {
             let scr_pos = proj.pos - top_left;
+            if cull(scr_pos) {
+                continue;
+            }
             self.draw_img_center(&self.img_rocket, scr_pos, proj.vel.to_angle())?;
         }
         for (_, proj) in weapon_projectiles(Weapon::Hm) {
             let scr_pos = proj.pos - top_left;
+            if cull(scr_pos) {
+                continue;
+            }
             self.draw_img_center(&self.img_hm, scr_pos, proj.vel.to_angle())?;
         }
         for (_, proj) in weapon_projectiles(Weapon::Gm) {
             let scr_pos = proj.pos - top_left;
+            if cull(scr_pos) {
+                continue;
+            }
             self.draw_img_center(&self.img_gm, scr_pos, proj.vel.to_angle())?;
         }
 
@@ -415,15 +439,13 @@ impl Game {
         self.context.set_fill_style(&"lime".into());
         self.context.set_stroke_style(&"lime".into());
         for (_, bfg) in weapon_projectiles(Weapon::Bfg) {
-            let bfg_scr_pos = bfg.pos - top_left;
+            let scr_pos = bfg.pos - top_left;
+            if cull(scr_pos) {
+                continue;
+            }
             self.context.begin_path();
-            self.context.arc(
-                bfg_scr_pos.x,
-                bfg_scr_pos.y,
-                cvars.g_bfg_radius,
-                0.0,
-                2.0 * PI,
-            )?;
+            self.context
+                .arc(scr_pos.x, scr_pos.y, cvars.g_bfg_radius, 0.0, 2.0 * PI)?;
             self.context.fill();
         }
         for &(src, dest) in &self.gs.bfg_beams {
@@ -438,6 +460,9 @@ impl Game {
         // Draw chassis
         for (_, vehicle) in self.gs.vehicles.iter() {
             let scr_pos = vehicle.pos - top_left;
+            if cull(scr_pos) {
+                continue;
+            }
             let img;
             if vehicle.destroyed() {
                 img = &self.imgs_wrecks[vehicle.veh_type as usize];
@@ -466,8 +491,12 @@ impl Game {
                 continue;
             }
 
-            let img = &self.imgs_vehicles[vehicle.veh_type as usize * 2 + 1];
             let scr_pos = vehicle.pos - top_left;
+            if cull(scr_pos) {
+                continue;
+            }
+
+            let img = &self.imgs_vehicles[vehicle.veh_type as usize * 2 + 1];
             let offset_chassis =
                 vehicle.angle.to_mat2f() * cvars.g_vehicle_turret_offset_chassis(vehicle.veh_type);
             let turret_scr_pos = scr_pos + offset_chassis;
@@ -487,6 +516,11 @@ impl Game {
             Box::new(self.gs.explosions.iter())
         };
         for explosion in iter {
+            let scr_pos = explosion.pos - top_left;
+            if cull(scr_pos) {
+                continue;
+            }
+
             // It looks like the original animation is made for 30 fps.
             // Single stepping a recording of the original RecWars explosion in blender:
             // 13 sprites, 31 frames - examples:
@@ -507,7 +541,6 @@ impl Game {
                 offset = frame * 100.0;
                 img = &self.img_explosion;
             };
-            let scr_pos = explosion.pos - top_left;
             self.context
                 .draw_image_with_html_image_element_and_sw_and_sh_and_dx_and_dy_and_dw_and_dh(
                     img,
@@ -558,8 +591,12 @@ impl Game {
             self.context.set_shadow_offset_y(cvars.hud_names_shadow_y);
             self.context.set_fill_style(&names_rgba.into());
             for (_, vehicle) in self.gs.vehicles.iter() {
-                let name = &self.gs.players[vehicle.owner].name;
                 let scr_pos = vehicle.pos - top_left;
+                if cull(scr_pos) {
+                    continue;
+                }
+
+                let name = &self.gs.players[vehicle.owner].name;
                 self.context.fill_text(
                     name,
                     scr_pos.x + cvars.hud_names_x,
@@ -622,8 +659,12 @@ impl Game {
             let mut crosses = crosses.borrow_mut();
             for cross in crosses.iter_mut() {
                 if cvars.d_draw && cvars.d_draw_crosses {
-                    self.context.set_stroke_style(&cross.color.into());
                     let scr_point = cross.point - top_left;
+                    if cull(scr_point) {
+                        continue;
+                    }
+
+                    self.context.set_stroke_style(&cross.color.into());
                     let top_left = scr_point - Vec2f::new(-3.0, -3.0);
                     let bottom_right = scr_point - Vec2f::new(3.0, 3.0);
                     let top_right = scr_point - Vec2f::new(3.0, -3.0);
@@ -772,6 +813,10 @@ impl Game {
             if cvars.d_draw && cvars.d_draw_world_text {
                 for text in texts.iter() {
                     let scr_pos = text.pos - top_left;
+                    if cull(scr_pos) {
+                        continue;
+                    }
+
                     self.context
                         .fill_text(&text.msg, scr_pos.x, scr_pos.y)
                         .unwrap();
