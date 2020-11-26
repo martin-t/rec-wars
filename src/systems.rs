@@ -201,21 +201,37 @@ fn accel_decel(stats: &MovementStats, vel: &mut Vec2f, angle: &mut f64, input: I
     }
 }
 
-pub(crate) fn vehicle_logic(cvars: &Cvars, gs: &mut GameState, gs_prev: &GameState) {
-    for (_, vehicle) in gs.vehicles.iter_mut() {
-        let player = &mut gs.players[vehicle.owner];
-        let input = &player.input;
-        let input_prev = &gs_prev.players[vehicle.owner].input;
+pub(crate) fn player_logic(gs: &mut GameState, gs_prev: &GameState) {
+    for (player_index, player) in gs.players.iter_mut() {
+        let input_prev = if let Some(player_prev) = gs_prev.players.get(player_index) {
+            player_prev.input
+        } else {
+            // The player not might have been connected last frame.
+            Input::new()
+        };
 
         // Change weapon
-        if input.prev_weapon && !input_prev.prev_weapon {
+        if player.input.prev_weapon && !input_prev.prev_weapon {
             let prev = (player.cur_weapon as u8 + WEAPS_CNT - 1) % WEAPS_CNT;
             player.cur_weapon = Weapon::n(prev).unwrap();
         }
-        if input.next_weapon && !input_prev.next_weapon {
+        if player.input.next_weapon && !input_prev.next_weapon {
             let next = (player.cur_weapon as u8 + 1) % WEAPS_CNT;
             player.cur_weapon = Weapon::n(next).unwrap();
         }
+    }
+}
+
+pub(crate) fn vehicle_logic(cvars: &Cvars, gs: &mut GameState, gs_prev: &GameState) {
+    for (_, vehicle) in gs.vehicles.iter_mut() {
+        let player = &gs.players[vehicle.owner];
+        let input = &player.input;
+        let input_prev = if let Some(player_prev) = gs_prev.players.get(vehicle.owner) {
+            player_prev.input
+        } else {
+            // The player not might have been connected last frame.
+            Input::new()
+        };
 
         // Turret turning
         if input.turret_left && !input_prev.turret_left {
@@ -238,10 +254,7 @@ pub(crate) fn vehicle_logic(cvars: &Cvars, gs: &mut GameState, gs_prev: &GameSta
         let ammo = &mut vehicle.ammos[player.cur_weapon as usize];
         if let Ammo::Reloading(_, end) = ammo {
             if gs.frame_time >= *end {
-                *ammo = Ammo::Loaded(
-                    gs.frame_time,
-                    cvars.g_weapon_reload_ammo(player.cur_weapon),
-                );
+                *ammo = Ammo::Loaded(gs.frame_time, cvars.g_weapon_reload_ammo(player.cur_weapon));
             }
         }
     }
@@ -268,8 +281,7 @@ pub(crate) fn shooting(cvars: &Cvars, gs: &mut GameState) {
                 *ammo = Ammo::Reloading(gs.frame_time, gs.frame_time + reload_time);
             }
 
-            let (hardpoint, weapon_offset) =
-                cvars.g_hardpoint(vehicle.veh_type, player.cur_weapon);
+            let (hardpoint, weapon_offset) = cvars.g_hardpoint(vehicle.veh_type, player.cur_weapon);
             let (shot_angle, shot_origin);
             match hardpoint {
                 Hardpoint::Chassis => {

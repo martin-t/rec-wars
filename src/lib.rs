@@ -256,6 +256,8 @@ impl Game {
 
         systems::respawning(cvars, &mut self.gs, &self.gs_prev, &self.map);
 
+        systems::player_logic(&mut self.gs, &self.gs_prev);
+
         systems::vehicle_logic(cvars, &mut self.gs, &self.gs_prev);
 
         systems::vehicle_movement(cvars, &mut self.gs, &self.map);
