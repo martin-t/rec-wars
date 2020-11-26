@@ -184,7 +184,7 @@ impl Game {
     }
 
     /// Run gamelogic frame.
-    pub fn update(&mut self, t: f64, input: &Input, cvars: &Cvars) {
+    fn update(&mut self, t: f64, input: &Input, cvars: &Cvars) {
         // Recommended reading: https://gafferongames.com/post/fix_your_timestep/
 
         let start = self.performance.now();
@@ -274,7 +274,7 @@ impl Game {
     }
 
     /// Redraw the whole canvas.
-    pub fn draw(&mut self, cvars: &Cvars) -> Result<(), JsValue> {
+    fn draw(&mut self, cvars: &Cvars) -> Result<(), JsValue> {
         // This is one long function. A lot of people will tell you that's bad™
         // because they've heard it from other people who think long functions are bad™.
         // Most of those people haven't written a game bigger than snake. Carmack says it's ok so it's ok:
