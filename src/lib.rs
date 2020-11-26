@@ -243,7 +243,9 @@ impl Game {
     fn tick(&mut self, cvars: &Cvars) {
         dbg_textf!("{}", env!("GIT_VERSION"));
 
-        // Cleanup old explosions
+        // Cleanup old entities
+        self.gs.railguns.clear();
+        self.gs.bfg_beams.clear();
         let frame_time = self.gs.frame_time; // borrowchk
         self.gs.explosions.retain(|explosion| {
             let progress = (frame_time - explosion.start_time) / cvars.r_explosion_duration;
@@ -432,10 +434,6 @@ impl Game {
             self.line_to(scr_dest);
             self.context.stroke();
         }
-
-        // Borrowchk dance - clear after we stop using `weapon_projectiles`.
-        self.gs.railguns.clear();
-        self.gs.bfg_beams.clear();
 
         // Draw chassis
         for (_, vehicle) in self.gs.vehicles.iter() {
