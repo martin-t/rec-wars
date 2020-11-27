@@ -1,4 +1,4 @@
-//! Initialization, game loop, drawing.
+//! Initialization and game loop.
 
 // Additional warnings that are allow by default (`rustc -W help`)
 //#![warn(missing_copy_implementations)]
@@ -19,24 +19,21 @@ mod game_state;
 mod map;
 mod systems;
 
-use std::{collections::VecDeque, f64::consts::PI, fmt::Debug};
+use std::{collections::VecDeque, fmt::Debug};
 
 use game_state::ArenaExt;
 use js_sys::Array;
 use rand::prelude::*;
 use thunderdome::Arena;
-use vek::ops::Clamp;
-use vek::Vec2;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use web_sys::{CanvasRenderingContext2d, HtmlImageElement, Performance};
 
 use crate::{
     cvars::{Cvars, TickrateMode},
-    debugging::{DEBUG_CROSSES, DEBUG_LINES, DEBUG_TEXTS, DEBUG_TEXTS_WORLD},
-    entities::{Ai, Ammo, Player, Weapon},
-    game_state::{Explosion, GameState, Input},
-    map::{F64Ext, Kind, Map, Vec2f, VecExt, TILE_SIZE},
+    entities::{Ai, Player},
+    game_state::{GameState, Input},
+    map::{Map, Vec2f},
 };
 
 const STATS_FRAMES: usize = 60;
@@ -281,7 +278,17 @@ impl Game {
     }
 
     fn render(&mut self, cvars: &Cvars) -> Result<(), JsValue> {
-        systems::rendering::draw(self, cvars)
+        let start = self.performance.now();
+
+        systems::rendering::draw(self, cvars)?;
+
+        let end = self.performance.now();
+        if self.draw_durations.len() >= STATS_FRAMES {
+            self.draw_durations.pop_front();
+        }
+        self.draw_durations.push_back(end - start);
+
+        Ok(())
     }
 }
 

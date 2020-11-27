@@ -1,3 +1,5 @@
+//! Rendering to HTML5 canvas using the 2D API.
+
 use std::f64::consts::PI;
 
 use js_sys::Array;
@@ -18,13 +20,11 @@ use crate::{
 };
 
 /// Redraw the whole canvas.
-pub(crate) fn draw(game: &mut Game, cvars: &Cvars) -> Result<(), JsValue> {
+pub(crate) fn draw(game: &Game, cvars: &Cvars) -> Result<(), JsValue> {
     // This is one long function. A lot of people will tell you that's bad™
     // because they've heard it from other people who think long functions are bad™.
     // Most of those people haven't written a game bigger than snake. Carmack says it's ok so it's ok:
     // http://number-none.com/blow/blog/programming/2014/09/26/carmack-on-inlined-code.html
-
-    let start = game.performance.now();
 
     // No smoothing makes nicer rockets (more like original RW).
     // This also means everything is aligned to pixels
@@ -597,12 +597,6 @@ pub(crate) fn draw(game: &mut Game, cvars: &Cvars) -> Result<(), JsValue> {
         }
         texts.clear();
     });
-
-    let end = game.performance.now();
-    if game.draw_durations.len() >= STATS_FRAMES {
-        game.draw_durations.pop_front();
-    }
-    game.draw_durations.push_back(end - start);
 
     Ok(())
 }
