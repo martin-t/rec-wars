@@ -314,9 +314,37 @@ pub struct Cvars {
 
 #[wasm_bindgen]
 impl Cvars {
-    #[wasm_bindgen(constructor)]
-    pub fn new() -> Self {
+    /// Create a new Cvars object with the default RecWars settings.
+    pub fn new_rec_wars() -> Self {
         Self::default()
+    }
+
+    /// Create a new Cvars object with an approximation of the original RecWar settings.
+    pub fn new_original() -> Self {
+        Self {
+            // This is 15625 tiles - should be enough (biggest original maps have 59).
+            // Can't use infinity - it would break the math.
+            g_railgun_speed: 1_000_000.0,
+            ..Self::default()
+        }
+    }
+
+    /// Reset this Cvars object to the default RecWars settings.
+    ///
+    /// You can call this from the JavaScript console to change settings on the fly.
+    pub fn load_rec_wars(&mut self) {
+        *self = Self {
+            ..Self::new_rec_wars()
+        }
+    }
+
+    /// Reset this Cvars object to an approximation of the original RecWar settings.
+    ///
+    /// You can call this from the JavaScript console to change settings on the fly.
+    pub fn load_original(&mut self) {
+        *self = Self {
+            ..Self::new_original()
+        }
     }
 
     /// Returns whether the weapon is on the chassis or turret and where relative to that part's center.
@@ -847,7 +875,7 @@ impl Default for Cvars {
             g_railgun_push: 300.0,
             g_railgun_reload_ammo: 1,
             g_railgun_reload_time: 1.0,
-            g_railgun_speed: 2000.0, // TODO must be low because of bad tracing, RW was instahit
+            g_railgun_speed: 2000.0,
             g_railgun_vehicle_velocity_factor: 0.0,
 
             g_rockets_damage: 25.0, // pretty sure from orig RW testing

@@ -272,7 +272,7 @@ async function run() {
         // - can't have a reference in Game
         // - owned pub cvars in Game need to be copy -> can't be changed from JS (changing will have no effect)
         // - LATER try returning Rc/Arc
-        const cvars = new Cvars();
+        const cvars = Cvars.new_rec_wars();
         // Some cvars need to be changed before creating Game - e.g.:
         //cvars.d_seed = 5n;
         const game = new Game(cvars, ctx, canvas.width, canvas.height,
