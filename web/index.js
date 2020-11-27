@@ -239,8 +239,12 @@ async function run() {
     }
 
     let load_map = (tex_list_text) => {
+        let params = new URLSearchParams(document.location.search);
+        let map = params.get("map") ?? "Spots (8)";
+        let map_path = `../maps/${map}.map`;
+
         let request = new XMLHttpRequest();
-        request.open("GET", "../maps/Spots (8).map");
+        request.open("GET", map_path);
         request.onloadend = () => {
             if (request.status !== 200) {
                 alert("Failed to load map");
