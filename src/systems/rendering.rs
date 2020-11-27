@@ -1,4 +1,4 @@
-//! Rendering to HTML5 canvas using the 2D API.
+//! Rendering to an HTML5 canvas using its 2D API.
 
 use std::f64::consts::PI;
 
