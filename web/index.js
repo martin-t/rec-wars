@@ -328,7 +328,7 @@ async function run() {
                     speed_value.innerHTML = cvars.d_speed;
                 }
 
-                game.update_and_draw(t_scaled, input, cvars);
+                game.update_and_render(t_scaled, input, cvars);
             } catch (e) {
                 console.log("exception - aborting next frame");
                 window.cancelAnimationFrame(handle);

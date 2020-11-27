@@ -5,6 +5,7 @@
 //! Most game behavior (code that changes state) goes here.
 
 pub(crate) mod ai;
+pub(crate) mod rendering;
 
 use std::f64::consts::PI;
 
