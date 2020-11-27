@@ -229,8 +229,8 @@ async function run() {
         request.open("GET", "../assets/texture_list.txt");
         request.onloadend = () => {
             if (request.status !== 200) {
-                alert("Failed to load texture_list");
                 console.log("Failed to load texture_list: ", request);
+                alert("Failed to load texture_list");
             } else {
                 load_map(request.responseText);
             }
@@ -247,8 +247,8 @@ async function run() {
         request.open("GET", map_path);
         request.onloadend = () => {
             if (request.status !== 200) {
-                alert("Failed to load map");
                 console.log("Failed to load map: ", request);
+                alert(`Failed to load map '${map}'`);
             } else {
                 play(tex_list_text, request.responseText);
             }
