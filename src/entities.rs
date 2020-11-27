@@ -26,6 +26,7 @@ pub(crate) struct Player {
     pub(crate) vehicle: Option<Index>,
     pub(crate) guided_missile: Option<Index>,
     pub(crate) cur_weapon: Weapon,
+    pub(crate) score: Score,
 }
 
 impl Player {
@@ -36,8 +37,16 @@ impl Player {
             vehicle: None,
             guided_missile: None,
             cur_weapon: Weapon::Mg,
+            score: Score::default(),
         }
     }
+}
+
+#[derive(Debug, Clone, Default)]
+pub(crate) struct Score {
+    pub(crate) kills: i32,
+    pub(crate) deaths: i32,
+    pub(crate) suicides: i32,
 }
 
 #[derive(Debug, Clone)]

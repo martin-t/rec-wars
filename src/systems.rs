@@ -98,7 +98,8 @@ pub(crate) fn self_destruct(cvars: &Cvars, gs: &mut GameState) {
             false,
         ));
         // ...then destroy the vehicle to create the small explosion on top.
-        damage(cvars, gs, vehicle_handle, f64::MAX)
+        let attacker_handle = vehicle.owner;
+        damage(cvars, gs, attacker_handle, vehicle_handle, f64::MAX)
     }
 }
 
@@ -488,7 +489,8 @@ pub(crate) fn projectiles(cvars: &Cvars, gs: &mut GameState, map: &Map) {
                 }
 
                 // Vehicle explosion first so it's below projectile explosion because it looks better.
-                damage(cvars, gs, vehicle_handle, dmg);
+                let attacker_handle = projectile.owner;
+                damage(cvars, gs, attacker_handle, vehicle_handle, dmg);
                 if !is_rail {
                     projectile_impact(cvars, gs, proj_handle, nearest_point);
                     break; // TODO actually ... what if the segment is long and 2 vehicles are in the path
@@ -501,7 +503,8 @@ pub(crate) fn projectiles(cvars: &Cvars, gs: &mut GameState, map: &Map) {
             {
                 let dmg = cvars.g_bfg_beam_damage_per_sec * gs.dt;
                 gs.bfg_beams.push((projectile.pos, vehicle.pos));
-                damage(cvars, gs, vehicle_handle, dmg);
+                let attacker_handle = projectile.owner;
+                damage(cvars, gs, attacker_handle, vehicle_handle, dmg);
             }
         }
 
@@ -517,7 +520,13 @@ pub(crate) fn projectiles(cvars: &Cvars, gs: &mut GameState, map: &Map) {
     }
 }
 
-pub(crate) fn damage(cvars: &Cvars, gs: &mut GameState, vehicle_handle: Index, dmg_amount: f64) {
+pub(crate) fn damage(
+    cvars: &Cvars,
+    gs: &mut GameState,
+    attacker_handle: Index,
+    vehicle_handle: Index,
+    dmg_amount: f64,
+) {
     let vehicle = &mut gs.vehicles[vehicle_handle];
     vehicle.hp_fraction -= dmg_amount / cvars.g_vehicle_hp(vehicle.veh_type);
 
@@ -533,6 +542,15 @@ pub(crate) fn damage(cvars: &Cvars, gs: &mut GameState, vehicle_handle: Index, d
     gs.explosions
         .push(Explosion::new(vehicle.pos, 1.0, gs.frame_time, false));
     gs.players[vehicle.owner].guided_missile = None; // No guiding after death
+
+    let attacker = &mut gs.players[attacker_handle];
+    if attacker_handle == vehicle.owner {
+        attacker.score.suicides += 1;
+    } else {
+        attacker.score.kills += 1;
+    }
+    let victim = &mut gs.players[vehicle.owner];
+    victim.score.deaths += 1;
 }
 
 /// Right now, CBs are the only timed projectiles, long term, might wanna add timeouts to more

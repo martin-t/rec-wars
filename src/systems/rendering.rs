@@ -322,7 +322,7 @@ pub(crate) fn draw(game: &Game, cvars: &Cvars) -> Result<(), JsValue> {
         y += TILE_SIZE;
     }
 
-    // Draw HUD:
+    // Draw world-space HUD elements:
 
     // Names
     if cvars.hud_names {
@@ -438,6 +438,16 @@ pub(crate) fn draw(game: &Game, cvars: &Cvars) -> Result<(), JsValue> {
         }
         crosses.retain(|cross| cross.time > 0.0);
     });
+
+    // Draw screen-space HUD elements:
+
+    // Score
+    let score_pos = hud_pos(game, cvars.hud_score_x, cvars.hud_score_y);
+    game.context.fill_text(
+        &(player.score.kills - player.score.deaths).to_string(),
+        score_pos.x,
+        score_pos.y,
+    )?;
 
     // Hit points (goes from green to red)
     // Might wanna use https://crates.io/crates/colorsys if I need more color operations.
