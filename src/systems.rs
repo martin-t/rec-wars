@@ -237,9 +237,8 @@ pub(crate) fn player_logic(gs: &mut GameState, gs_prev: &GameState) {
 
 pub(crate) fn vehicle_logic(cvars: &Cvars, gs: &mut GameState, gs_prev: &GameState) {
     for (_, vehicle) in gs.vehicles.iter_mut() {
-        if vehicle.destroyed() {
-            continue;
-        }
+        // This should run even while dead, otherwise the ammo indicator will be buggy.
+        // Original RW also reloaded while dead.
 
         let player = &gs.players[vehicle.owner];
         let input = &player.input;
