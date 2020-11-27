@@ -147,6 +147,7 @@ pub(crate) fn vehicle_movement(cvars: &Cvars, gs: &mut GameState, map: &Map) {
             .iter()
             .any(|&corner| map.is_wall(corner))
         {
+            // LATER map edge in original RW absorbs the impact - there's no bounce
             vehicle.vel *= -0.5;
         } else {
             vehicle.pos = new_pos;

@@ -442,12 +442,17 @@ pub(crate) fn draw(game: &Game, cvars: &Cvars) -> Result<(), JsValue> {
     // Draw screen-space HUD elements:
 
     // Score
+    // Original RW shows current score as a big number with a shadow (2 px offset?).
     let score_pos = hud_pos(game, cvars.hud_score_x, cvars.hud_score_y);
     game.context.fill_text(
         &(player.score.kills - player.score.deaths).to_string(),
         score_pos.x,
         score_pos.y,
     )?;
+
+    // TODO Ranking
+    // Original RW shows "current rank / total players (+/- difference to leader)".
+    // E.g. "1/3 (+2)".
 
     // Hit points (goes from green to red)
     // Might wanna use https://crates.io/crates/colorsys if I need more color operations.
