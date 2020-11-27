@@ -245,14 +245,7 @@ impl Game {
     fn tick(&mut self, cvars: &Cvars) {
         dbg_textf!("{}", env!("GIT_VERSION"));
 
-        // Cleanup old entities
-        self.gs.railguns.clear();
-        self.gs.bfg_beams.clear();
-        let frame_time = self.gs.frame_time; // borrowchk
-        self.gs.explosions.retain(|explosion| {
-            let progress = (frame_time - explosion.start_time) / cvars.r_explosion_duration;
-            progress <= 1.0
-        });
+        systems::cleanup(cvars, &mut self.gs);
 
         systems::ai::ai(cvars, &mut self.gs);
 

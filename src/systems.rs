@@ -22,6 +22,17 @@ use crate::{
     map::{F64Ext, Map, Vec2f},
 };
 
+pub(crate) fn cleanup(cvars: &Cvars, gs: &mut GameState) {
+    // Cleanup old entities
+    gs.railguns.clear();
+    gs.bfg_beams.clear();
+    let frame_time = gs.frame_time; // borrowchk
+    gs.explosions.retain(|explosion| {
+        let progress = (frame_time - explosion.start_time) / cvars.r_explosion_duration;
+        progress <= 1.0
+    });
+}
+
 pub(crate) fn respawning(cvars: &Cvars, gs: &mut GameState, gs_prev: &GameState, map: &Map) {
     for player_handle in gs.players.iter_handles() {
         let player = &mut gs.players[player_handle];
