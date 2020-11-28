@@ -18,15 +18,16 @@ use crate::{
     cvars::{Cvars, Hardpoint, MovementStats},
     entities::{Ammo, Projectile, Vehicle, VehicleType, Weapon, WEAPS_CNT},
     game_state::ArenaExt,
-    game_state::{Explosion, GameState, Input},
+    game_state::{Explosion, GameState, Input, RailBeam},
     map::{F64Ext, Map, Vec2f},
 };
 
 pub(crate) fn cleanup(cvars: &Cvars, gs: &mut GameState) {
     // Cleanup old entities
-    gs.rail_beams.clear();
-    gs.bfg_beams.clear();
     let frame_time = gs.frame_time; // borrowchk
+    gs.rail_beams
+        .retain(|beam| beam.start_time + cvars.g_railgun_beam_duration > frame_time);
+    gs.bfg_beams.clear();
     gs.explosions.retain(|explosion| {
         let progress = (frame_time - explosion.start_time) / cvars.r_explosion_duration;
         progress <= 1.0
@@ -484,7 +485,8 @@ pub(crate) fn projectiles(cvars: &Cvars, gs: &mut GameState, map: &Map) {
                 let dmg = cvars.g_weapon_damage(projectile.weapon);
                 let is_rail = projectile.weapon == Weapon::Rail;
                 if is_rail {
-                    gs.rail_beams.push((step.start, nearest_point));
+                    let beam = RailBeam::new(step.start, nearest_point, gs.frame_time);
+                    gs.rail_beams.push(beam);
                     vehicle.vel += step_dir * cvars.g_railgun_push;
                 }
 
@@ -496,7 +498,10 @@ pub(crate) fn projectiles(cvars: &Cvars, gs: &mut GameState, map: &Map) {
                     break; // TODO actually ... what if the segment is long and 2 vehicles are in the path
                 }
             } else if projectile.weapon == Weapon::Rail {
-                gs.rail_beams.push((step.start, step.end));
+                // FIXME not here, this is for all vehicles
+                //gs.rail_beams.push((step.start, step.end));
+                let beam = RailBeam::new(step.start, step.end, gs.frame_time);
+                gs.rail_beams.push(beam);
             } else if projectile.weapon == Weapon::Bfg
                 && dist2 <= cvars.g_bfg_beam_range * cvars.g_bfg_beam_range
                 && map.is_wall_trace(projectile.pos, vehicle.pos).is_none()

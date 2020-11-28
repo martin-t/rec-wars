@@ -122,12 +122,12 @@ pub(crate) fn draw(game: &Game, cvars: &Cvars) -> Result<(), JsValue> {
 
     // Draw railguns
     game.context.set_stroke_style(&"blue".into());
-    for (begin, end) in &game.gs.rail_beams {
-        let scr_src = begin - top_left;
-        let scr_hit = end - top_left;
+    for beam in &game.gs.rail_beams {
+        let scr_begin = beam.begin - top_left;
+        let scr_end = beam.end - top_left;
         game.context.begin_path();
-        move_to(game, scr_src);
-        line_to(game, scr_hit);
+        move_to(game, scr_begin);
+        line_to(game, scr_end);
         game.context.stroke();
     }
 

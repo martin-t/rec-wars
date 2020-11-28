@@ -22,7 +22,7 @@ pub(crate) struct GameState {
     pub(crate) frame_time: f64,
     /// Delta time since last frame in seconds
     pub(crate) dt: f64,
-    pub(crate) rail_beams: Vec<(Vec2f, Vec2f)>,
+    pub(crate) rail_beams: Vec<RailBeam>,
     pub(crate) bfg_beams: Vec<(Vec2f, Vec2f)>,
     pub(crate) player_handle: Index,
     pub(crate) explosions: Vec<Explosion>,
@@ -30,6 +30,23 @@ pub(crate) struct GameState {
     pub(crate) players: Arena<Player>,
     pub(crate) vehicles: Arena<Vehicle>,
     pub(crate) projectiles: Arena<Projectile>,
+}
+
+#[derive(Debug, Clone)]
+pub(crate) struct RailBeam {
+    pub(crate) begin: Vec2f,
+    pub(crate) end: Vec2f,
+    pub(crate) start_time: f64,
+}
+
+impl RailBeam {
+    pub(crate) fn new(begin: Vec2f, end: Vec2f, start_time: f64) -> Self {
+        Self {
+            begin,
+            end,
+            start_time,
+        }
+    }
 }
 
 #[derive(Debug, Clone)]

@@ -222,6 +222,7 @@ pub struct Cvars {
     pub g_hummer_turret_offset_turret_x: f64,
     pub g_hummer_turret_offset_turret_y: f64,
 
+    pub g_railgun_beam_duration: f64,
     pub g_railgun_damage: f64,
     pub g_railgun_push: f64,
     pub g_railgun_reload_ammo: u32,
@@ -871,6 +872,7 @@ impl Default for Cvars {
             g_hummer_turret_offset_turret_x: 0.0,
             g_hummer_turret_offset_turret_y: 0.0,
 
+            g_railgun_beam_duration: 0.05,
             g_railgun_damage: 47.0, // exact from orig RW
             g_railgun_push: 300.0,
             g_railgun_reload_ammo: 1,
