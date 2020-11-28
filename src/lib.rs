@@ -255,9 +255,11 @@ impl Game {
 
         systems::vehicle_logic(cvars, &mut self.gs, &self.gs_prev);
 
-        systems::vehicle_movement(cvars, &mut self.gs, &self.map);
-
+        // It's probably a good idea to shoot before movement so that when turning
+        // the shot angle corresponds to the vehicle angle the player saw last frame.
         systems::shooting(cvars, &mut self.gs);
+
+        systems::vehicle_movement(cvars, &mut self.gs, &self.map);
 
         systems::gm_turning(cvars, &mut self.gs);
 
