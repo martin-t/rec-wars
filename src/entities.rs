@@ -137,7 +137,7 @@ pub(crate) enum VehicleType {
     Hummer,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub(crate) enum Ammo {
     /// Refire delay end time, ammo count remaining
     Loaded(f64, u32),

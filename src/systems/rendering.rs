@@ -474,11 +474,19 @@ pub(crate) fn draw(game: &Game, cvars: &Cvars) -> Result<(), JsValue> {
         cvars.hud_hp_width * player_vehicle.hp_fraction,
         cvars.hud_hp_height,
     );
+    if cvars.d_draw_text {
+        game.context.set_fill_style(&"red".into());
+        let hp_number = player_vehicle.hp_fraction * cvars.g_vehicle_hp(player_vehicle.veh_type);
+        let hp_text = format!("{}", hp_number);
+        game.context
+            .fill_text(&hp_text, hp_pos.x - 25.0, hp_pos.y + cvars.hud_hp_height)?;
+    }
 
     // Ammo
     game.context.set_fill_style(&"yellow".into());
-    let fraction = match player_vehicle.ammos[player.cur_weapon as usize] {
-        Ammo::Loaded(_, count) => {
+    let ammo = player_vehicle.ammos[player.cur_weapon as usize];
+    let ammo_fraction = match ammo {
+        Ammo::Loaded(_ready_time, count) => {
             let max = cvars.g_weapon_reload_ammo(player.cur_weapon);
             count as f64 / max as f64
         }
@@ -492,9 +500,21 @@ pub(crate) fn draw(game: &Game, cvars: &Cvars) -> Result<(), JsValue> {
     game.context.fill_rect(
         ammo_pos.x,
         ammo_pos.y,
-        cvars.hud_ammo_width * fraction,
+        cvars.hud_ammo_width * ammo_fraction,
         cvars.hud_ammo_height,
     );
+    if cvars.d_draw_text {
+        game.context.set_fill_style(&"red".into());
+        let ammo_number = match ammo {
+            Ammo::Loaded(_ready_time, count) => count,
+            Ammo::Reloading(_start, _end) => 0,
+        };
+        game.context.fill_text(
+            &ammo_number.to_string(),
+            ammo_pos.x - 25.0,
+            ammo_pos.y + cvars.hud_ammo_height,
+        )?;
+    }
 
     // Weapon icon
     // The original shadows were part of the image but this is good enough for now.
@@ -513,9 +533,11 @@ pub(crate) fn draw(game: &Game, cvars: &Cvars) -> Result<(), JsValue> {
     game.context.set_shadow_offset_x(0.0);
     game.context.set_shadow_offset_y(0.0);
 
+    // Draw screen space debug info:
+    game.context.set_fill_style(&"red".into());
+
     // Draw FPS
     // TODO this is wrong with d_speed
-    game.context.set_fill_style(&"red".into());
     if cvars.d_fps {
         let fps = if game.frame_times.is_empty() {
             0.0
