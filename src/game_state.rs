@@ -22,7 +22,7 @@ pub(crate) struct GameState {
     pub(crate) frame_time: f64,
     /// Delta time since last frame in seconds
     pub(crate) dt: f64,
-    pub(crate) railguns: Vec<(Vec2f, Vec2f)>,
+    pub(crate) rail_beams: Vec<(Vec2f, Vec2f)>,
     pub(crate) bfg_beams: Vec<(Vec2f, Vec2f)>,
     pub(crate) player_handle: Index,
     pub(crate) explosions: Vec<Explosion>,

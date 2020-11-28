@@ -123,7 +123,7 @@ impl Game {
             rng,
             frame_time: 0.0,
             dt: 0.0,
-            railguns: Vec::new(),
+            rail_beams: Vec::new(),
             bfg_beams: Vec::new(),
             player_handle: player1_handle,
             explosions: Vec::new(),

@@ -24,7 +24,7 @@ use crate::{
 
 pub(crate) fn cleanup(cvars: &Cvars, gs: &mut GameState) {
     // Cleanup old entities
-    gs.railguns.clear();
+    gs.rail_beams.clear();
     gs.bfg_beams.clear();
     let frame_time = gs.frame_time; // borrowchk
     gs.explosions.retain(|explosion| {
@@ -484,7 +484,7 @@ pub(crate) fn projectiles(cvars: &Cvars, gs: &mut GameState, map: &Map) {
                 let dmg = cvars.g_weapon_damage(projectile.weapon);
                 let is_rail = projectile.weapon == Weapon::Rail;
                 if is_rail {
-                    gs.railguns.push((step.start, nearest_point));
+                    gs.rail_beams.push((step.start, nearest_point));
                     vehicle.vel += step_dir * cvars.g_railgun_push;
                 }
 
@@ -496,7 +496,7 @@ pub(crate) fn projectiles(cvars: &Cvars, gs: &mut GameState, map: &Map) {
                     break; // TODO actually ... what if the segment is long and 2 vehicles are in the path
                 }
             } else if projectile.weapon == Weapon::Rail {
-                gs.railguns.push((step.start, step.end));
+                gs.rail_beams.push((step.start, step.end));
             } else if projectile.weapon == Weapon::Bfg
                 && dist2 <= cvars.g_bfg_beam_range * cvars.g_bfg_beam_range
                 && map.is_wall_trace(projectile.pos, vehicle.pos).is_none()
