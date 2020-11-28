@@ -463,6 +463,12 @@ pub(crate) fn projectiles(cvars: &Cvars, gs: &mut GameState, map: &Map) {
 
         projectile.pos = new_pos;
 
+        let is_rail = projectile.weapon == Weapon::Rail;
+        if is_rail {
+            let beam = RailBeam::new(step.start, step.end, gs.frame_time);
+            gs.rail_beams.push(beam);
+        }
+
         for vehicle_handle in gs.vehicles.iter_handles() {
             // LATER immediately killing vehicles here means 2 players can't share a kill
             let vehicle = &mut gs.vehicles[vehicle_handle];
@@ -483,10 +489,8 @@ pub(crate) fn projectiles(cvars: &Cvars, gs: &mut GameState, map: &Map) {
                     dbg_cross!(nearest_point, 0.5);
                 }
                 let dmg = cvars.g_weapon_damage(projectile.weapon);
-                let is_rail = projectile.weapon == Weapon::Rail;
+
                 if is_rail {
-                    let beam = RailBeam::new(step.start, nearest_point, gs.frame_time);
-                    gs.rail_beams.push(beam);
                     vehicle.vel += step_dir * cvars.g_railgun_push;
                 }
 
@@ -497,11 +501,6 @@ pub(crate) fn projectiles(cvars: &Cvars, gs: &mut GameState, map: &Map) {
                     projectile_impact(cvars, gs, proj_handle, nearest_point);
                     break; // TODO actually ... what if the segment is long and 2 vehicles are in the path
                 }
-            } else if projectile.weapon == Weapon::Rail {
-                // FIXME not here, this is for all vehicles
-                //gs.rail_beams.push((step.start, step.end));
-                let beam = RailBeam::new(step.start, step.end, gs.frame_time);
-                gs.rail_beams.push(beam);
             } else if projectile.weapon == Weapon::Bfg
                 && dist2 <= cvars.g_bfg_beam_range * cvars.g_bfg_beam_range
                 && map.is_wall_trace(projectile.pos, vehicle.pos).is_none()
