@@ -277,8 +277,32 @@ async function run() {
         // - owned pub cvars in Game need to be copy -> can't be changed from JS (changing will have no effect)
         // - LATER try returning Rc/Arc
         const cvars = Cvars.new_rec_wars();
-        // Some cvars need to be changed before creating Game - e.g.:
-        //cvars.d_seed = 5n;
+
+        // Allow changing cvars using URL params
+        let params = new URLSearchParams(document.location.search);
+        params.forEach(function (value, key) {
+            if (key !== "map") {
+                console.log(`URL param: cvars.${key} = ${value}`);
+
+                // The param is a string, convert it to the type of the cvar.
+                // Technically, this is not necessary for float cvars, they get converted implicitly.
+                // For non-float cvars, however, the generated bindings in rec_wars.js explicitly check the type
+                // so they need to be converted here.
+                if (typeof cvars[key] === "boolean" && value === "false") {
+                    // JS is retarded and Boolean("false") is true
+                    // https://www.ecma-international.org/ecma-262/#sec-toboolean
+                    cvars[key] = false;
+                } else {
+                    cvars[key] = cvars[key].constructor(value);
+                }
+            }
+        });
+
+        // Some cvars are used during initialization and need to be changed before creating Game.
+        // Either set them here:
+        // cvars.d_seed = 5n;
+        // or append this to the URL:
+        // ?d_seed=5
         const game = new Game(cvars, ctx, canvas.width, canvas.height,
             imgs_tiles, imgs_vehicles, imgs_wrecks, imgs_weapon_icons,
             img_rocket, img_hm, img_gm, img_explosion, img_explosion_cyan,
