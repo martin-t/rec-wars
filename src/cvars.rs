@@ -45,11 +45,11 @@ pub struct Cvars {
     /// so I can easily check perf with and without the other debug output.
     pub d_fps: bool,
     pub d_tracing: bool,
+    /// The seed to initialize the RNG.
+    ///
     /// This is not very helpful by itself because by the time you can change cvars in the console,
     /// the seed has already been used.
-    /// However, you can change it in index.js right after creating the cvars object
-    /// and reload the page which at least avoids having to recompile.
-    /// Example: `cvars.d_seed = 5n;` - note the `n` suffix to create a BigInt.
+    /// However, you can set it by appending it to the URL (e.g. `?d_seed=5`) like any other cvar.
     pub d_seed: u64,
     /// Change speed of everything in the game
     pub d_speed: f64,

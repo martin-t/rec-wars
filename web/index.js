@@ -298,11 +298,6 @@ async function run() {
             }
         });
 
-        // Some cvars are used during initialization and need to be changed before creating Game.
-        // Either set them here:
-        // cvars.d_seed = 5n;
-        // or append this to the URL:
-        // ?d_seed=5
         const game = new Game(cvars, ctx, canvas.width, canvas.height,
             imgs_tiles, imgs_vehicles, imgs_wrecks, imgs_weapon_icons,
             img_rocket, img_hm, img_gm, img_explosion, img_explosion_cyan,
