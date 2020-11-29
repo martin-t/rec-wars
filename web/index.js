@@ -239,8 +239,31 @@ async function run() {
     }
 
     let load_map = (tex_list_text) => {
+        // This is a subset of maps that are not blatantly broken with the current bots.
+        let maps = [
+            //"Arena",
+            //"A simple plan (2)",
+            "Atrium",
+            "Bunkers (2)",
+            "Castle Islands (2)",
+            "Castle Islands (4)",
+            //"Corners (4)",
+            "Delta",
+            "Desert Eagle",
+            //"Joust (2)",
+            //"Large front (2)",
+            //"Oases (4)",
+            "Park",
+            "Roads",
+            "Snow",
+            "Spots (8)",
+            //"Vast Arena",
+        ];
+        let random_index = Math.floor(Math.random() * maps.length);
+        let random_map = maps[random_index];
+
         let params = new URLSearchParams(document.location.search);
-        let map = params.get("map") ?? "Spots (8)";
+        let map = params.get("map") ?? random_map;
         let map_path = `../maps/${map}.map`;
 
         let request = new XMLHttpRequest();
