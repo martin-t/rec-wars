@@ -31,6 +31,8 @@ pub struct Cvars {
     /// Master switch for AI - disable if you want stationary targets
     pub ai: bool,
 
+    pub bots_max: usize,
+
     /// Master switch for debug output - the d_draw_* group.
     pub d_draw: bool,
     pub d_draw_crosses: bool,
@@ -690,6 +692,8 @@ impl Default for Cvars {
     fn default() -> Self {
         Self {
             ai: true,
+
+            bots_max: 20,
 
             d_draw: true,
             d_draw_crosses: true,

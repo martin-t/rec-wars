@@ -134,7 +134,8 @@ impl Game {
         };
         let gs_prev = gs.clone();
 
-        for i in 1..map.spawns().len() {
+        let bots_count = map.spawns().len().min(cvars.bots_max);
+        for i in 1..bots_count {
             let name = format!("Bot {}", i);
             let player = Player::new(name);
             let player_handle = gs.players.insert(player);
