@@ -269,7 +269,9 @@ impl Game {
 
         systems::self_destruct(cvars, &mut self.gs);
 
+        dbg_textf!("vehicle count: {}", self.gs.vehicles.len());
         dbg_textf!("projectile count: {}", self.gs.projectiles.len());
+        dbg_textf!("explosion count: {}", self.gs.explosions.len());
     }
 
     fn render(&mut self, cvars: &Cvars) -> Result<(), JsValue> {
