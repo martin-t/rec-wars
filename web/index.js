@@ -264,14 +264,17 @@ async function run() {
 
         let params = new URLSearchParams(document.location.search);
         let map = params.get("map") ?? random_map;
-        let map_path = `../maps/${map}.map`;
+        if (!map.endsWith(".map")) {
+            map += ".map";
+        }
+        let map_path = `../maps/${map}`;
 
         let request = new XMLHttpRequest();
         request.open("GET", map_path);
         request.onloadend = () => {
             if (request.status !== 200) {
                 console.log("Failed to load map: ", request);
-                alert(`Failed to load map '${map}'`);
+                alert(`Failed to load map '${map_path}'`);
             } else {
                 play(tex_list_text, request.responseText);
             }
