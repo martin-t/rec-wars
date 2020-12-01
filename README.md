@@ -87,6 +87,12 @@ Known ways RecWars differs from RecWar:
     - Railgun - Will be a very fast projectile because hitscan weapons ruin large maps
 - Self destruct damage and range - it appears to be the only explosion in RecWar with damage decreasing by distance and it's really hard to measure exactly.
 
+Maps
+----
+
+- `maps/` - Maps from the original RecWar
+- `maps/extra/` - Extra maps from the official homepage
+- `maps/extra2/` - Extra maps from archive.org
 
 License
 -------
