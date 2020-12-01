@@ -258,6 +258,41 @@ async function run() {
             "Snow",
             "Spots (8)",
             //"Vast Arena",
+
+            //"extra/6 terrains (2)",
+            //"extra/A Cow Too Far",
+            //"extra/All Water",
+            //"extra/Battlegrounds (2)",
+            //"extra/Crossing", // No spawns
+            "extra/Damned Rockets (2)", // Asymmetric CTF, left half like Castly Islands (2)
+            //"extra/doom",
+            //"extra/elements",
+            //"extra/Exile (4)", // Tiny, many spawns
+            //"extra/football",
+            "extra/Ice ring",
+            //"extra/ice skating ring (2)",
+            "extra/IceWorld",
+            "extra/I see you (2)", // Like Large Front (2) but without any cover
+            //"extra/Knifflig (2)",
+            //"extra/Large",
+            //"extra/Neutral",
+            "extra/Nile",
+            //"extra/OK Corral (2)",
+            //"extra/Peninsulae (3)",
+            //"extra/River Crossings",
+            //"extra/Road To Hell (2)", // Only 4 spawns in a tiny area
+            //"extra/THE Crossing",
+            //"extra/Thomap1 (4)",
+            //"extra/Town on Fire",
+            "extra/twisted (2)",
+            //"extra/winterhardcore",
+            "extra/Yellow and Green",
+
+            "extra2/Mini Islands (4)",
+            //"extra2/Symmetric",
+            //"extra2/Training room",
+            //"extra2/Winter (4)",
+            //"extra2/World War (2)",
         ];
         let random_index = Math.floor(Math.random() * maps.length);
         let random_map = maps[random_index];
