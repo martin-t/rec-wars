@@ -213,6 +213,9 @@
 //          TCP
 //              reduce extra latency: https://lobste.rs/s/5qlb7z/40_milliseconds_latency_just_would_not_go (article + link to HN)
 //              crazy idea: multiple TCP streams, rotate among them - not all will be stalled by PL
+//              https://old.reddit.com/r/linux/comments/k2opr7/veloren_08_an_opensource_multiplayer_rpg_is_being/gdz8avd/
+//                  "never use TCP. ISPs will rudely inject RSTs into long-running streams, and you can't realistically ask people to install a firewall rule to drop them.
+//                  "Likewise, always encrypt everything. QUIC made life easier but there are numerous alternates. Multiple streams are probably overrated."
 //          webRTC
 //      https://arewegameyet.rs/ecosystem/networking/ or custom?
 //          https://crates.io/crates/quinn - what is QUIC?
