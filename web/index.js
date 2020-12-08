@@ -308,8 +308,9 @@ async function run() {
         request.open("GET", map_path);
         request.onloadend = () => {
             if (request.status !== 200) {
-                console.log("Failed to load map: ", request);
-                alert(`Failed to load map '${map_path}'`);
+                let msg = `Failed to load map '${map_path}'`;
+                console.log(msg, request);
+                alert(msg);
             } else {
                 play(tex_list_text, request.responseText);
             }
