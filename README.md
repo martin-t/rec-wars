@@ -15,13 +15,11 @@ _**[Play Online](https://martin-t.gitlab.io/gitlab-pages/rec-wars/web)**_
 
 RecWars is a free and open source clone of [RecWar](#the-original-game) - you control a vehicle and fight other vehicles in a variety of game modes using an arsenal of several distinct weapons. You can play against bots, in splitscreen and over the network.
 
-RecWars aims to have gameplay similar but not identical to RecWar - it would be impossible to replicate exactly without decompiling the binary (which doesn't even contain debug symbols), though if a fan of the original finds this project, I am not gonna stop them from trying.
+RecWars aims to have gameplay similar but not identical to RecWar. I suspect RecWar was balanced for playing against bots and might result in annoying strats being the most effective when people start [playing to win](http://www.sirlin.net/articles/playing-to-win). However, almost everything in RecWars is [configurable](#cvars) and you can switch to the original RecWar balance to [compare](#RecWars vs RecWar differences).
 
-Additionally I suspect RecWar was balanced for playing against bots and might result in annoying strats when people start [playing to win](http://www.sirlin.net/articles/playing-to-win). E.g. with enough mines, the cow can be made completely inaccessible, especially to less maneuverable vehicles like the hovercraft. Experience from poorly designed games also shows large areas will be dominated by instant-hit weapons (in RecWar the railgun) and there might simply be no way to get across the map alive. I might make balance changes based on how the online gameplay evolves.
+**Currently this is very much a work-in-progress**: only some weapons work, the driving physics don't feel right, there are no collisions between vehicles, ...
 
-Currently this is very much a work-in-progress: only some weapons work, the driving physics don't feel right, there are no collisions between vehicles, ...
-
-The ultimate goal is to create a multiplayer game playable in the browser and on Linux, Windows and macOS. This might be tricky since WASM in the browser doesn't allow UDP. I have some ideas how to solve that.
+The ultimate goal is to create a moddable multiplayer game playable in the browser and natively on Linux, Windows and macOS. This might be tricky since WASM in the browser doesn't allow UDP. I have some ideas how to solve that.
 
 (Planned) Features
 ------------------
@@ -37,6 +35,18 @@ The ultimate goal is to create a multiplayer game playable in the browser and on
     - [ ] Free For All
     - [ ] Team War
     - [ ] Capture The Cow
+- [x] [Highly configurable](#cvars)
+
+Cvars
+-----
+
+Cvars are *console variables* - configuration settings which control everything in the game like physics, weapon behavior, AI, HUD layout, etc.
+
+There are two ways to change them:
+- Edit the `cvars` object using the browser console - e.g. `cvars.g_armor = 100`.
+- Set them using URL parameters - e.g. [https://martin-t.gitlab.io/gitlab-pages/rec-wars/web/?g_armor=100](https://martin-t.gitlab.io/gitlab-pages/rec-wars/web/?g_armor=100)
+
+The entire list of cvars is in [src/cvars.rs](src/cvars.rs).
 
 Dependencies
 ------------
@@ -77,6 +87,16 @@ RecWar by Willem Janssen:
 
 The original RecWar only contains a Windows .exe but runs ok-ish wine (sometimes freezes on map load). It includes a map editor. The binaries in both archive.org links are identical to what I got on an old CD so should be safe.
 
+### RecWars vs RecWar differences
+
+RecWar would probably be impossible to replicate exactly without decompiling the binary (which doesn't even contain debug symbols), though if a fan of the original finds this project, I am not gonna stop them from trying.
+
+Additionally, when playing against people instead of bots, I suspect RecWar's original balance would lead to annoying and boring strats like making the cow inaccessible with mines or just simple camping. For example, experience from poorly designed games shows large areas will be dominated by instant-hit weapons (in RecWar the railgun) and there might simply be no way to get across the map alive. Therefore I made the railgun a very fast projectile in RecWars. I might make more balance changes based on how the online gameplay evolves.
+
+The two balance presets are available here:
+- https://martin-t.gitlab.io/gitlab-pages/rec-wars/web/?balance=recwars
+- https://martin-t.gitlab.io/gitlab-pages/rec-wars/web/?balance=recwar
+
 Known ways RecWars differs from RecWar:
 - Speeds, accelerations, turning, inertia of vehicles and weapons - I will make best effort here but it won't be exact
 - Push force of mines and railguns
@@ -84,7 +104,7 @@ Known ways RecWars differs from RecWar:
 - Weapons
     - Damage - Cluster bomb and BFG beam are hard to measure exactly
     - Spreads - Cluster bombs and MG are hard to measure exactly
-    - Railgun - Will be a very fast projectile because hitscan weapons ruin large maps
+    - Railgun - RecWars uses a very fast projectile because hitscan weapons ruin large maps
 - Self destruct damage and range - it appears to be the only explosion in RecWar with damage decreasing by distance and it's really hard to measure exactly.
 
 Maps
@@ -93,6 +113,8 @@ Maps
 - `maps/` - Maps from the original RecWar
 - `maps/extra/` - Extra maps from the official homepage
 - `maps/extra2/` - Extra maps from archive.org
+
+Currently the map is picked randomly by default, however, you can select one manually by using the `map` URL parameter, for example [https://martin-t.gitlab.io/gitlab-pages/rec-wars/web/?map=Castle Islands (4)](https://martin-t.gitlab.io/gitlab-pages/rec-wars/web/?map=Castle%20Islands%20(4)).
 
 License
 -------
