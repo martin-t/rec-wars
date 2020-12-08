@@ -15,7 +15,7 @@ _**[Play Online](https://martin-t.gitlab.io/gitlab-pages/rec-wars/web)**_
 
 RecWars is a free and open source clone of [RecWar](#the-original-game) - you control a vehicle and fight other vehicles in a variety of game modes using an arsenal of several distinct weapons. You can play against bots, in splitscreen and over the network.
 
-RecWars aims to have gameplay similar but not identical to RecWar. I suspect RecWar was balanced for playing against bots and might result in annoying strats being the most effective when people start [playing to win](http://www.sirlin.net/articles/playing-to-win). However, almost everything in RecWars is [configurable](#cvars) and you can switch to the original RecWar balance to [compare](#RecWars vs RecWar differences).
+RecWars aims to have gameplay similar but not identical to RecWar. I suspect RecWar was balanced for playing against bots and might result in annoying strats being the most effective when people start [playing to win](http://www.sirlin.net/articles/playing-to-win). However, almost everything in RecWars is [configurable](#cvars) and you can switch to the original RecWar balance to [compare](#recwars-vs-recwar-differences).
 
 **Currently this is very much a work-in-progress**: only some weapons work, the driving physics don't feel right, there are no collisions between vehicles, ...
 
@@ -93,18 +93,22 @@ RecWar would probably be impossible to replicate exactly without decompiling the
 
 Additionally, when playing against people instead of bots, I suspect RecWar's original balance would lead to annoying and boring strats like making the cow inaccessible with mines or just simple camping. For example, experience from poorly designed games shows large areas will be dominated by instant-hit weapons (in RecWar the railgun) and there might simply be no way to get across the map alive. Therefore I made the railgun a very fast projectile in RecWars. I might make more balance changes based on how the online gameplay evolves.
 
+For those reasons, RecWars will have a slightly different balance than RecWar. I will try to keep them as similar as possible but some things like physics will never be exact and I will make changes where I see fit to make the gameplay more interesting.
+
 The two balance presets are available here:
-- https://martin-t.gitlab.io/gitlab-pages/rec-wars/web/?balance=recwars
+- https://martin-t.gitlab.io/gitlab-pages/rec-wars/web/?balance=recwars (default)
 - https://martin-t.gitlab.io/gitlab-pages/rec-wars/web/?balance=recwar
 
-Known ways RecWars differs from RecWar:
-- Speeds, accelerations, turning, inertia of vehicles and weapons - I will make best effort here but it won't be exact
+Intentional differences (can be toggled by switching the balance):
+- Railgun - RecWar railgun hits instantly, RecWars uses a very fast projectile because hitscan weapons ruin large maps
+
+Other unintentional differences - I will make best effort here but some things won't be exact:
+- Speeds, accelerations, turning, inertia of vehicles and weapons
 - Push force of mines and railguns
-- Tank in RecWar turned around turret swivel point, not center of chassis
+- Tank in RecWar turned around turret swivel point, not center of chassis - this is for simplicity for now
 - Weapons
     - Damage - Cluster bomb and BFG beam are hard to measure exactly
     - Spreads - Cluster bombs and MG are hard to measure exactly
-    - Railgun - RecWars uses a very fast projectile because hitscan weapons ruin large maps
 - Self destruct damage and range - it appears to be the only explosion in RecWar with damage decreasing by distance and it's really hard to measure exactly.
 
 Maps
