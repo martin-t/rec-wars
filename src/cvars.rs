@@ -956,7 +956,7 @@ impl Default for Cvars {
             r_align_to_pixels_background: true,
             r_draw_cluster_bombs: true,
             r_explosion_duration: 0.5,
-            // After trying true for a while, i think false looks better:
+            // After trying true for a while, I think false looks better:
             // - CB looks smoother. With true it sometimes looked like it had 2 stages
             //   because the later explosions were suddenly revealed after the first ones disappeared.
             // - Rockets look better if hitting the same spot.
@@ -991,7 +991,7 @@ pub enum TickrateMode {
     /// Fixed FPS - always the same timestep, leftover time carries over to the next render frame.
     /// This means simulation can be only very slightly or up to almost a full frame
     /// behind what should be rendered *and* this delay varries.
-    /// As i understand, this can cause a specific kind of stutter called judder.
+    /// As I understand, this can cause a specific kind of stutter called judder.
     Fixed,
     /// Simulation runs in fixed steps as long as it can, the last step is smaller
     /// to catch up to rendering exactly. The last step is then thrown away and simulation
