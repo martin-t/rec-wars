@@ -323,7 +323,7 @@ impl Cvars {
     }
 
     /// Create a new Cvars object with an approximation of the original RecWar settings.
-    pub fn new_original() -> Self {
+    pub fn new_rec_war() -> Self {
         Self {
             // This is 15625 tiles - should be more than enough, biggest original maps have 59.
             // Can't use infinity - it would break the math.
@@ -344,9 +344,9 @@ impl Cvars {
     /// Reset this Cvars object to an approximation of the original RecWar settings.
     ///
     /// You can call this from the JavaScript console to change settings on the fly.
-    pub fn load_original(&mut self) {
+    pub fn load_rec_war(&mut self) {
         *self = Self {
-            ..Self::new_original()
+            ..Self::new_rec_war()
         }
     }
 

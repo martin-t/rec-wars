@@ -330,6 +330,8 @@ async function run() {
         }
         request.send();
 
+        let params = new URLSearchParams(document.location.search);
+
         // Cvars can be changed through the browser's console.
         // For now, they need to live on the JS heap and be passed into each function that needs them.
         // I couldn't find a better way to make them mutable in JS and readable in Rust:
@@ -337,12 +339,22 @@ async function run() {
         // - can't have a reference in Game
         // - owned pub cvars in Game need to be copy -> can't be changed from JS (changing will have no effect)
         // - LATER try returning Rc/Arc
-        const cvars = Cvars.new_rec_wars();
+        let cvars;
+        let balance = params.get("balance");
+        if (balance === null || balance.toLowerCase() === "recwars") {
+            cvars = Cvars.new_rec_wars();
+        } else if (balance.toLowerCase() === "recwar") {
+            cvars = Cvars.new_rec_war();
+        } else {
+            const msg = `Unknown balance '${balance}', falling back to default RecWars`;
+            console.log(msg);
+            alert(msg);
+            cvars = Cvars.new_rec_wars();
+        }
 
         // Allow changing cvars using URL params
-        let params = new URLSearchParams(document.location.search);
         params.forEach(function (value, key) {
-            if (key !== "map") {
+            if (key !== "map" && key !== "balance") {
                 console.log(`URL param: cvars.${key} = ${value}`);
 
                 // The param is a string, convert it to the type of the cvar.
@@ -422,7 +434,7 @@ async function run() {
         window.requestAnimationFrame(frame);
     }
 
-    // LATER there's gotta be a way to avoid this retarded chain
+    // TODO load assets at the same time - in parallel or packed into an archive
     load_tex_list();
 }
 
