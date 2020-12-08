@@ -325,7 +325,7 @@ impl Cvars {
     /// Create a new Cvars object with an approximation of the original RecWar settings.
     pub fn new_original() -> Self {
         Self {
-            // This is 15625 tiles - should be enough (biggest original maps have 59).
+            // This is 15625 tiles - should be more than enough, biggest original maps have 59.
             // Can't use infinity - it would break the math.
             g_railgun_speed: 1_000_000.0,
             ..Self::default()
