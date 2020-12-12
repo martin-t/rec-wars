@@ -264,7 +264,7 @@ async function run() {
             //"extra/All Water",
             //"extra/Battlegrounds (2)",
             //"extra/Crossing", // No spawns
-            "extra/Damned Rockets (2)", // Asymmetric CTF, left half like Castly Islands (2)
+            "extra/Damned Rockets (2)", // Asymmetric CTF, left half like Castly Islands (2), right half has 2 bases
             //"extra/doom",
             //"extra/elements",
             //"extra/Exile (4)", // Tiny, many spawns
