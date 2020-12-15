@@ -135,6 +135,14 @@ impl Game {
         let gs_prev = gs.clone();
 
         let bots_count = map.spawns().len().min(cvars.bots_max);
+        dbg_logf!(
+            "Spawns per bot: {}",
+            map.spawns().len() as f64 / bots_count as f64
+        );
+        dbg_logf!(
+            "Tiles per bot: {}",
+            (map.width() * map.height()) as f64 / bots_count as f64
+        );
         for i in 1..bots_count {
             let name = format!("Bot {}", i);
             let player = Player::new(name);
