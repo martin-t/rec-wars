@@ -257,7 +257,6 @@ impl Map {
     }
 
     /// Returns (pos, angle).
-    #[allow(dead_code)]
     pub(crate) fn random_spawn(&self, rng: &mut SmallRng) -> (Vec2f, f64) {
         // TODO maps with no spawns (or even all walls)
         let i = rng.gen_range(0, self.spawns().len());
@@ -268,7 +267,6 @@ impl Map {
     }
 
     /// Returns (pos, angle).
-    #[allow(dead_code)]
     pub(crate) fn random_nonwall(&self, rng: &mut SmallRng) -> (Vec2f, f64) {
         loop {
             let c = rng.gen_range(0, self.width());
