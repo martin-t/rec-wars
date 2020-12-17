@@ -49,7 +49,7 @@ macro_rules! dbg_logf {
     };
 }
 
-/// Print variables into console formatted as `var1: value1, var2: value2`
+/// Print variables into console formatted as `var1: value1, var2: value2`.
 #[macro_export]
 macro_rules! dbg_logd {
     ( $( $e:expr ),* ) => {
@@ -71,7 +71,7 @@ macro_rules! dbg_textf {
     };
 }
 
-/// Print variables onto the screen formatted as `var1: value1, var2: value2`
+/// Print variables onto the screen formatted as `var1: value1, var2: value2`.
 ///
 /// Useful for printing debug info each frame.
 #[macro_export]
@@ -84,10 +84,30 @@ macro_rules! dbg_textd {
     };
 }
 
+/// Print text onto the screen at the given world coordinates.
+///
+/// Useful for printing debug info next to game entities each frame.
 #[macro_export]
 macro_rules! dbg_world_textf {
     ( $pos:expr, $( $t:tt )* ) => {
         let s = format!( $( $t )* );
+        let text = $crate::debugging::WorldText {
+            msg: s,
+            pos: $pos,
+        };
+        $crate::debugging::DEBUG_TEXTS_WORLD.with(|texts| {
+            texts.borrow_mut().push(text)
+        });
+    };
+}
+
+/// Print variables onto the screen at the given world coordinates formatted as `var1: value1, var2: value2`.
+///
+/// Useful for printing debug info next to game entities each frame.
+#[macro_export]
+macro_rules! dbg_world_textd {
+    ( $pos:expr, $( $e:expr ),* ) => {
+        let s = $crate::__format_pairs!( $( $e ),* );
         let text = $crate::debugging::WorldText {
             msg: s,
             pos: $pos,
