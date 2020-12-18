@@ -442,7 +442,11 @@ pub(crate) fn draw(game: &Game, cvars: &Cvars) -> Result<(), JsValue> {
     // Draw screen-space HUD elements:
 
     // Score
-    // Original RW shows current score as a big number with a shadow (2 px offset?).
+    // Original RW shows current score as a big bold number with a 2px shadow.
+    game.context.set_shadow_offset_x(cvars.hud_score_shadow_x);
+    game.context.set_shadow_offset_y(cvars.hud_score_shadow_y);
+    let score_font = format!("{}px sans-serif", cvars.hud_score_font_size);
+    game.context.set_font(&score_font);
     let score_pos = hud_pos(game, cvars.hud_score_x, cvars.hud_score_y);
     game.context.fill_text(
         &(player.score.kills - player.score.deaths).to_string(),
@@ -451,8 +455,12 @@ pub(crate) fn draw(game: &Game, cvars: &Cvars) -> Result<(), JsValue> {
     )?;
 
     // TODO Ranking
-    // Original RW shows "current rank / total players (+/- difference to leader)".
-    // E.g. "1/3 (+2)".
+    // Original RW shows "current rank / total players (+/- difference to leader)"
+    // as a big but not bold number with a 1px shadow. E.g. "1/3 (+2)".
+
+    game.context.set_font("10px sans-serif");
+    game.context.set_shadow_offset_x(0.0);
+    game.context.set_shadow_offset_y(0.0);
 
     // Hit points (goes from green to red)
     // Might wanna use https://crates.io/crates/colorsys if I need more color operations.
