@@ -164,9 +164,11 @@
 //      [ ] better control scheme - changing direction cancels the queue, starts counting from current position
 //          original RW has a bug: quick left,left,right would result in turning the longer way around
 // [ ] shadows
-//      [ ] HUD
-//      [ ] vehicles (is turret "higher"?)
+//      [ ] HUD - all text for readability (score, scoreboard, names), weap, optionally hp/ammo
+//      [ ] vehicles (is turret "higher"?), cow?, projectiles?
 //      [x] CB
+//      [ ] solve perf issues - firefox (78.0.2) *really* hates shadows (maybe only on text)
+//              - try prerendering text into offscreen canvas
 // [ ] self destruct
 //      [x] bigger explosion
 //      [ ] countdown
@@ -285,6 +287,8 @@
 //              - some are sanity checks when removing from thunderdome - soft_unwrap instead?
 //              - review all of them and eliminate or replace with `except` (to mark as reviewed)
 //      [ ] find a way to increase rustfmt line length - the arbitrary line breaks are dumb
+//              - stuff like setting canvas shadow offset should be one line
+//              - stuff like long chains of iterator ops should be split
 // [ ] all the LATERs - they mean something can be done better but marking it as a todo would be just noise when grepping
 
 fn main() {
