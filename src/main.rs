@@ -284,6 +284,7 @@
 //      [ ] `unwrap` - they are all temporary from the prototyping phase
 //              - some are sanity checks when removing from thunderdome - soft_unwrap instead?
 //              - review all of them and eliminate or replace with `except` (to mark as reviewed)
+//      [ ] find a way to increase rustfmt line length - the arbitrary line breaks are dumb
 // [ ] all the LATERs - they mean something can be done better but marking it as a todo would be just noise when grepping
 
 fn main() {
