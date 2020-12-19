@@ -302,6 +302,12 @@ pub struct Cvars {
     pub hud_score_x: f64,
     pub hud_score_y: f64,
 
+    pub hud_scoreboard_font_size: f64,
+    pub hud_scoreboard_line_height: f64,
+    /// NB: these shadows absolutely murder performance in firefox (chromum is ok)
+    pub hud_scoreboard_shadow_x: f64,
+    pub hud_scoreboard_shadow_y: f64,
+
     pub hud_weapon_icon_shadow_alpha: f64,
     pub hud_weapon_icon_shadow_x: f64,
     pub hud_weapon_icon_shadow_y: f64,
@@ -952,6 +958,12 @@ impl Default for Cvars {
             hud_score_shadow_y: 2.0,
             hud_score_x: 30.0,
             hud_score_y: -70.0,
+
+            hud_scoreboard_font_size: 15.0,
+            hud_scoreboard_line_height: 18.0,
+            // keep off because of firefox
+            hud_scoreboard_shadow_x: 0.0,
+            hud_scoreboard_shadow_y: 0.0,
 
             hud_weapon_icon_shadow_alpha: 0.5,
             hud_weapon_icon_shadow_x: 2.0,
