@@ -542,25 +542,38 @@ pub(crate) fn draw(game: &Game, cvars: &Cvars) -> Result<(), JsValue> {
     game.context.set_shadow_offset_y(0.0);
 
     // Scoreboard
-    game.context
-        .set_shadow_offset_x(cvars.hud_scoreboard_shadow_x);
-    game.context
-        .set_shadow_offset_y(cvars.hud_scoreboard_shadow_y);
-    game.context.set_fill_style(&"white".into());
-    let scoreboard_font = format!("{}px sans-serif", cvars.hud_scoreboard_font_size);
-    game.context.set_font(&scoreboard_font);
-    let mut y = 50.0;
-    for (_, player) in game.gs.players.iter() {
-        game.context.fill_text(&player.name, 150.0, y)?;
+    if player_vehicle.destroyed() {
         game.context
-            .fill_text(&player.score.kills.to_string(), 250.0, y)?;
+            .set_shadow_offset_x(cvars.hud_scoreboard_shadow_x);
         game.context
-            .fill_text(&player.score.deaths.to_string(), 280.0, y)?;
+            .set_shadow_offset_y(cvars.hud_scoreboard_shadow_y);
+        game.context.set_fill_style(&"white".into());
+
+        let height = (game.gs.players.len() + 1) as f64 * cvars.hud_scoreboard_line_height;
+        let mut y = (game.canvas_size.y - height) / 2.0;
+        let x = (game.canvas_size.x - 200.0) / 2.0;
+
+        let header_font = format!("bold {}px sans-serif", cvars.hud_scoreboard_font_size);
+        game.context.set_font(&header_font);
+        game.context.fill_text("Name", x, y)?;
+        game.context.fill_text("Kills", x + 150.0, y)?;
+        game.context.fill_text("Deaths", x + 200.0, y)?;
         y += cvars.hud_scoreboard_line_height;
+
+        let entry_font = format!("{}px sans-serif", cvars.hud_scoreboard_font_size);
+        game.context.set_font(&entry_font);
+        for (_, player) in game.gs.players.iter() {
+            game.context.fill_text(&player.name, x, y)?;
+            game.context
+                .fill_text(&player.score.kills.to_string(), x + 150.0, y)?;
+            game.context
+                .fill_text(&player.score.deaths.to_string(), x + 200.0, y)?;
+            y += cvars.hud_scoreboard_line_height;
+        }
+        game.context.set_font("10px sans-serif");
+        game.context.set_shadow_offset_x(0.0);
+        game.context.set_shadow_offset_y(0.0);
     }
-    game.context.set_font("10px sans-serif");
-    game.context.set_shadow_offset_x(0.0);
-    game.context.set_shadow_offset_y(0.0);
 
     // Draw screen space debug info:
     game.context.set_fill_style(&"red".into());
