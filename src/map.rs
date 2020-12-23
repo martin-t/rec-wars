@@ -377,7 +377,6 @@ pub(crate) fn load_tex_list(text: &str) -> Vec<Surface> {
     // if using cvars, update load_map docs
     text.split_terminator("\r\n")
         .map(|line| {
-            dbg!(line);
             let mut parts = line.split(" ");
             let name = parts.next().unwrap();
             let kind_num = parts.next().unwrap().parse().unwrap();
@@ -396,6 +395,8 @@ mod tests {
 
     use std::fs;
 
+    use walkdir::WalkDir;
+
     #[test]
     fn test_loading_tex_list() {
         let text = fs::read_to_string("assets/texture_list.txt").unwrap();
@@ -409,8 +410,14 @@ mod tests {
 
         let tex_list_text = fs::read_to_string("assets/texture_list.txt").unwrap();
         let surfaces = load_tex_list(&tex_list_text);
-        for entry in fs::read_dir("maps").unwrap() {
+        for entry in WalkDir::new("maps") {
             let entry = entry.unwrap();
+            let is_map = entry.file_name().to_str().unwrap().ends_with(".map");
+            if entry.file_type().is_dir() || !is_map {
+                continue;
+            }
+
+            dbg!(entry.file_name());
             let map_text = fs::read_to_string(entry.path()).unwrap();
             let map = load_map(&map_text, surfaces.clone());
             assert_ne!(map.width(), 0);

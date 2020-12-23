@@ -57,3 +57,6 @@ features = [
   "Performance",
   "Window",
 ]
+
+[dev-dependencies]
+walkdir = "2.3.1"
