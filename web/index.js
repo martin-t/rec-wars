@@ -432,6 +432,11 @@ async function run() {
                 throw e;
             }
         };
+
+        // This is the recommended way to create a draw loop in a browser.
+        // It's possible to use setTimeout or setInterval but
+        // they require using performance.now() which has limited precision.
+        // Using requestAnimationFrame gives more precise timestamps.
         window.requestAnimationFrame(frame);
     }
 

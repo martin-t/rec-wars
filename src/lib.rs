@@ -241,6 +241,9 @@ impl Game {
             self.gs.frame_time,
         );
 
+        // There are multiple ways to count FPS.
+        // Methods like using 1 / average_ms_per_frame end up with a lot of 59.9 vs 60.1 jitter.
+        // Counting number of frames during the last second seems to give a stable 60.
         self.frame_times.push_back(t);
         while !self.frame_times.is_empty() && self.frame_times.front().unwrap() + 1.0 < t {
             self.frame_times.pop_front();
