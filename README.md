@@ -6,6 +6,7 @@
 </div>
 <br />
 
+[![CI](https://github.com/martin-t/rec-wars/workflows/CI/badge.svg)](https://github.com/martin-t/rec-wars/actions)
 [![Discord](https://img.shields.io/discord/770013530593689620?label=discord)](https://discord.gg/9BQVVgV)
 [![Total lines](https://tokei.rs/b1/github/martin-t/rec-wars)](https://github.com/martin-t/rec-wars)
 [![Lines of comments](https://tokei.rs/b1/github/martin-t/rec-wars?category=comments)](https://github.com/martin-t/rec-wars#architecture-overview)
