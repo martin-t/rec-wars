@@ -477,7 +477,10 @@ pub(crate) fn projectiles(cvars: &Cvars, gs: &mut GameState, map: &Map) {
             // so the borrow ends before we pass `gs` to other functions.
             let projectile = &gs.projectiles[proj_handle];
 
-            if vehicle.destroyed() || vehicle.owner == projectile.owner {
+            if vehicle.destroyed()
+                || vehicle.owner == projectile.owner
+                || (is_rail && gs.rail_hits.get(&proj_handle) == Some(&vehicle_handle))
+            {
                 continue;
             }
 
@@ -491,6 +494,7 @@ pub(crate) fn projectiles(cvars: &Cvars, gs: &mut GameState, map: &Map) {
                 let dmg = cvars.g_weapon_damage(projectile.weapon);
 
                 if is_rail {
+                    gs.rail_hits.insert(proj_handle, vehicle_handle);
                     vehicle.vel += step_dir * cvars.g_railgun_push;
                 }
 
@@ -515,10 +519,12 @@ pub(crate) fn projectiles(cvars: &Cvars, gs: &mut GameState, map: &Map) {
         if let Some(hit_pos) = maybe_collision {
             // Only hit the final wall if it didn't hit a vehicle first.
             // Otherwise this tries to remove the projectile a second time.
-            //
             // We could set a flag when hitting vehicles above instead of `.contains` but this is more future-proof.
             if gs.projectiles.contains(proj_handle) {
                 projectile_impact(cvars, gs, proj_handle, hit_pos);
+                if is_rail {
+                    gs.rail_hits.remove(&proj_handle);
+                }
             }
         }
     }

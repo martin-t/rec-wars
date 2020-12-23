@@ -21,6 +21,7 @@ mod systems;
 
 use std::{collections::VecDeque, fmt::Debug};
 
+use fnv::FnvHashMap;
 use game_state::ArenaExt;
 use js_sys::Array;
 use rand::prelude::*;
@@ -124,6 +125,7 @@ impl Game {
             frame_time: 0.0,
             dt: 0.0,
             rail_beams: Vec::new(),
+            rail_hits: FnvHashMap::default(),
             bfg_beams: Vec::new(),
             player_handle: player1_handle,
             explosions: Vec::new(),

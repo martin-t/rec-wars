@@ -1,5 +1,6 @@
 use std::fmt::{self, Debug, Formatter};
 
+use fnv::FnvHashMap;
 use rand::prelude::*;
 use thunderdome::{Arena, Index};
 use wasm_bindgen::prelude::*;
@@ -23,6 +24,17 @@ pub(crate) struct GameState {
     /// Delta time since last frame in seconds
     pub(crate) dt: f64,
     pub(crate) rail_beams: Vec<RailBeam>,
+    /// Map of projectile handles to vehicle handles.
+    /// Prevents rail hitting the same vehicle twice
+    /// when one segment ends inside the hitbox and the next starts inside it the next frame.
+    /// This can for now only happen with railguns since all other projectiles get removed on hit.
+    /// TODO This is still not perfect since one segment can hit multiple vehicles in any order
+    /// and there's no guarantee the last vehicle is the one where the beam ends.
+    /// LATER This is a can of worms:
+    ///     1) Make sure (add test) one beam can kill the player and hit him again if he's unlucky enough to respawn in its path.
+    ///     2) Remove the entry after the projectile exist the hitbox - e.g. guided missiles that can pass through several times.
+    ///     3) Make sure the HashMap doesn't grow indefinitely in case we forgot to remove in some cases.
+    pub(crate) rail_hits: FnvHashMap<Index, Index>,
     pub(crate) bfg_beams: Vec<(Vec2f, Vec2f)>,
     pub(crate) player_handle: Index,
     pub(crate) explosions: Vec<Explosion>,
