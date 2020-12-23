@@ -14,7 +14,7 @@
 <!-- Note to my future OCD: The ideal image width for github is 838 pixels -->
 [![Gameplay](media/screenshot.jpg)](https://martin-t.gitlab.io/gitlab-pages/rec-wars/web)
 
-_**[Play Online](https://martin-t.gitlab.io/gitlab-pages/rec-wars/web)**_
+_**[Play Online](https://martin-t.gitlab.io/gitlab-pages/rec-wars/web) | [Join Discord](https://discord.gg/9BQVVgV)**_
 
 RecWars is a free and open source clone of [RecWar](#the-original-game) - you control a vehicle and fight other vehicles in a variety of game modes using an arsenal of several distinct weapons. You can play against bots, in splitscreen and over the network.
 
@@ -67,7 +67,9 @@ Compiling
 Contributing
 ------------
 
-If you notice a bug or have a suggestion, please [open an Issue](https://github.com/martin-t/rec-wars/issues/new).
+You can always find me on the [RecWars Discord server](https://discord.gg/9BQVVgV) if you have any questions or suggestions.
+
+If you notice a bug, please [open an Issue](https://github.com/martin-t/rec-wars/issues/new).
 
 If you'd like to improve RecWars, feel free to make a [Pull Request](https://github.com/martin-t/rec-wars/pulls). I want to make RecWars highly configurable with many different gamemodes and balance settings votable by players and anybody will be able to host their own server (if technically possible even from the browser). If you have a gameplay idea and don't suffer from the NIH syndrome, I'd be very happy to help you test it in RecWars.
 
