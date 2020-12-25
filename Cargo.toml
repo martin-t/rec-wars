@@ -8,6 +8,10 @@ repository = "https://github.com/martin-t/rec-wars"
 license = "AGPL-3.0-or-later"
 
 [lib]
+# cdylib is for generatig WASM
+# Add rlib to run doctests (they don't get run with just cdylib)
+# but keep in mind they only work for public items for now:
+# https://users.rust-lang.org/t/rustdoc-doctests-and-private-documentation/20955
 crate-type = ["cdylib"]
 
 [profile.dev.package."*"]

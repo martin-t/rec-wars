@@ -194,7 +194,7 @@ pub(crate) fn debug_cross(point: Vec2f, time: f64, color: &'static str) {
 ///
 /// # Examples
 /// ```ignore
-/// query.iter(world).dbg_count("entity count") { ... }
+/// for x in [1, 2, 3].iter().dbg_count("element count") { /* loop body */ }
 /// ```
 pub(crate) trait DbgCount<T>
 where
