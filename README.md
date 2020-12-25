@@ -69,9 +69,9 @@ Contributing
 
 You can always find me on the [RecWars Discord server](https://discord.gg/9BQVVgV) if you have any questions or suggestions.
 
-If you notice a bug, please [open an Issue](https://github.com/martin-t/rec-wars/issues/new).
+[Issues](https://github.com/martin-t/rec-wars/issues/new) and [Pull Requests](https://github.com/martin-t/rec-wars/pulls) are welcome. While I am not *actively* looking for contributors, I am open to anyone wanting to help improve RecWars.
 
-If you'd like to improve RecWars, feel free to make a [Pull Request](https://github.com/martin-t/rec-wars/pulls). I want to make RecWars highly configurable with many different gamemodes and balance settings votable by players and anybody will be able to host their own server (if technically possible even from the browser). If you have a gameplay idea and don't suffer from the NIH syndrome, I'd be very happy to help you test it in RecWars.
+I want to make RecWars highly configurable with many different gamemodes and balance settings votable by players and anybody will be able to host their own server (if technically possible even from the browser). If you have a gameplay idea and don't suffer from the NIH syndrome, I'd be very happy to help you test it in RecWars.
 
 ### Architecture Overview
 
@@ -124,6 +124,15 @@ Maps
 - `maps/extra2/` - Extra maps from archive.org
 
 Currently the map is picked randomly by default, however, you can select one manually by using the `map` URL parameter, for example [https://martin-t.gitlab.io/gitlab-pages/rec-wars/web/?map=Castle Islands (4)](https://martin-t.gitlab.io/gitlab-pages/rec-wars/web/?map=Castle%20Islands%20(4)).
+
+Lessons Learned
+---------------
+
+Read this to learn from other people's mistakes and save yourself some time.
+
+- It's possible and advisable to use WASM without NPM. The official [Rust+WASM book](https://rustwasm.github.io/docs/book/) heavily pushes people towards NPM and the whole thing feels like "just download this big template, don't try to understand it and only touch the parts we tell you to". Honestly how do you even statically host the thing on GH pages without `npm run`?. If you're not planning to use other NPM packages, all you need is a few lines of JS glue to run your WASM. Use the [Without a Bundler](https://rustwasm.github.io/docs/wasm-bindgen/examples/without-a-bundler.html) example as your "template" and host it with `python3 -m http.server`. You'll understand exactly what is going on and you'll avoid the whole JS ecosystem.
+- The canvas 2D API is too slow for a game which needs to redraw the entire screen each frame, especially in firefox.
+- ECS is overhyped. It will make all your game entities dynamicly typed but with much more boilerplate than a dynlang and will predictably lead to bugs. If you don't need to add/remove components at runtime, the only reason you're using it is probably so you can have references between entities - just use generational arenas. Appeal to authority: [rg3d](https://rg3d.rs/) is written by an experienced game engine dev and avoids ECS for much the same reason.
 
 License
 -------
