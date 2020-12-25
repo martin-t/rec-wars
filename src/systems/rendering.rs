@@ -543,6 +543,16 @@ pub(crate) fn draw(game: &Game, cvars: &Cvars) -> Result<(), JsValue> {
 
     // Scoreboard
     if player_vehicle.destroyed() {
+        let mut players_by_score: Vec<_> = game.gs.players.iter().map(|(index, _)| index).collect();
+        players_by_score.sort_by(|&index1, &index2| {
+            let score1 = &game.gs.players[index1].score;
+            let score2 = &game.gs.players[index2].score;
+            let points1 = score1.kills as f64 - score1.deaths as f64;
+            let points2 = score2.kills as f64 - score2.deaths as f64;
+            // Comparing in this order so the best player is first
+            points2.partial_cmp(&points1).unwrap()
+        });
+
         game.context
             .set_shadow_offset_x(cvars.hud_scoreboard_shadow_x);
         game.context
@@ -562,7 +572,8 @@ pub(crate) fn draw(game: &Game, cvars: &Cvars) -> Result<(), JsValue> {
 
         let entry_font = format!("{}px sans-serif", cvars.hud_scoreboard_font_size);
         game.context.set_font(&entry_font);
-        for (_, player) in game.gs.players.iter() {
+        for player_handle in players_by_score {
+            let player = &game.gs.players[player_handle];
             game.context.fill_text(&player.name, x, y)?;
             game.context
                 .fill_text(&player.score.kills.to_string(), x + 150.0, y)?;
