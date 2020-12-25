@@ -1,6 +1,6 @@
 //! Rendering to an HTML5 canvas using its 2D API.
 
-use std::f64::consts::PI;
+use std::{cmp::Reverse, f64::consts::PI};
 
 use js_sys::Array;
 use vek::{Clamp, Vec2};
@@ -544,13 +544,11 @@ pub(crate) fn draw(game: &Game, cvars: &Cvars) -> Result<(), JsValue> {
     // Scoreboard
     if player_vehicle.destroyed() {
         let mut players_by_score: Vec<_> = game.gs.players.iter().map(|(index, _)| index).collect();
-        players_by_score.sort_by(|&index1, &index2| {
-            let score1 = &game.gs.players[index1].score;
-            let score2 = &game.gs.players[index2].score;
-            let points1 = score1.kills as f64 - score1.deaths as f64;
-            let points2 = score2.kills as f64 - score2.deaths as f64;
-            // Comparing in this order so the best player is first
-            points2.partial_cmp(&points1).unwrap()
+        players_by_score.sort_by_key(|&handle| {
+            let score = &game.gs.players[handle].score;
+            let points =
+                score.kills * cvars.g_ffa_score_kill + score.deaths * cvars.g_ffa_score_death;
+            Reverse(points)
         });
 
         game.context
