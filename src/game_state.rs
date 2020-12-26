@@ -135,7 +135,7 @@ impl Input {
 
     /// Subset of inputs to control the vehicle while guiding a missile
     pub(crate) fn vehicle_while_guiding(&self) -> Self {
-        // TODO what exactly is allowed? mines? make configurable
+        // Original RW allowed everything except movement.
         Self {
             left: false,
             right: false,
