@@ -33,7 +33,7 @@
 // [x] version info
 // [ ] mostly working weapons
 // [x] respawning
-// [ ] scores
+// [x] scores
 // [ ] primitive bots
 // [ ] splitscreen
 // [ ] decent default binds (2x for splitscreen)
@@ -77,7 +77,7 @@
 //      note to self - renderdoc for graphics debugging
 //      [ ] FAQ - stuttering/tearing due to compositor - Alt+Shift+f12 - somehow this doesn't work anymore
 // 1.0:
-// [ ] CI - GH actions / travis, mirror to GL???
+// [x] CI - GH actions
 // [ ] extract/screenshot/record assets from RecWar or find alternatives
 //      [ ] images
 //          [x] weapon icons
