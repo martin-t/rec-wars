@@ -441,11 +441,23 @@ pub(crate) fn draw(game: &Game, cvars: &Cvars) -> Result<(), JsValue> {
 
     // Draw screen-space HUD elements:
 
+    let mut player_points: Vec<_> = game
+        .gs
+        .players
+        .iter()
+        .map(|(index, player)| {
+            let points = player.score.kills * cvars.g_ffa_score_kill
+                + player.score.deaths * cvars.g_ffa_score_death;
+            (index, points)
+        })
+        .collect();
+    player_points.sort_by_key(|&(_, points)| Reverse(points));
+
     // Score
     // Original RW shows current score as a big bold number with a 2px shadow.
     game.context.set_shadow_offset_x(cvars.hud_score_shadow_x);
     game.context.set_shadow_offset_y(cvars.hud_score_shadow_y);
-    let score_font = format!("{}px sans-serif", cvars.hud_score_font_size);
+    let score_font = format!("bold {}px sans-serif", cvars.hud_score_font_size);
     game.context.set_font(&score_font);
     let score_pos = hud_pos(game, cvars.hud_score_x, cvars.hud_score_y);
     game.context.fill_text(
@@ -454,9 +466,44 @@ pub(crate) fn draw(game: &Game, cvars: &Cvars) -> Result<(), JsValue> {
         score_pos.y,
     )?;
 
-    // TODO Ranking
-    // Original RW shows "current rank / total players (+/- difference to leader)"
-    // as a big but not bold number with a 1px shadow. E.g. "1/3 (+2)".
+    // Ranking
+    // Original RW shows "current rank / total players (+/- points difference to leader or second)"
+    // as a big but not bold number with a 1px shadow. E.g. "1/3 (+5)" or "2/3 (0)".
+    // There's no special treatement for players with the same number of points.
+    let ranking_font = format!("{}px sans-serif", cvars.hud_score_font_size);
+    game.context.set_font(&ranking_font);
+    let ranking_pos = hud_pos(game, cvars.hud_score_x + 50.0, cvars.hud_score_y);
+    let current_index = player_points
+        .iter()
+        .position(|&(handle, _)| handle == game.gs.player_handle)
+        .unwrap();
+    let points_diff = if current_index == 0 {
+        if player_points.len() == 2 {
+            0
+        } else {
+            player_points[current_index].1 - player_points[1].1
+        }
+    } else {
+        player_points[current_index].1 - player_points[0].1
+    };
+    let ranking = if points_diff > 0 {
+        // Only show the + sign for positive numbers, not 0
+        format!(
+            "{}/{} (+{})",
+            current_index + 1,
+            player_points.len(),
+            points_diff
+        )
+    } else {
+        format!(
+            "{}/{} ({})",
+            current_index + 1,
+            player_points.len(),
+            points_diff
+        )
+    };
+    game.context
+        .fill_text(&ranking, ranking_pos.x, ranking_pos.y)?;
 
     game.context.set_font("10px sans-serif");
     game.context.set_shadow_offset_x(0.0);
@@ -543,14 +590,6 @@ pub(crate) fn draw(game: &Game, cvars: &Cvars) -> Result<(), JsValue> {
 
     // Scoreboard
     if player_vehicle.destroyed() {
-        let mut players_by_score: Vec<_> = game.gs.players.iter().map(|(index, _)| index).collect();
-        players_by_score.sort_by_key(|&handle| {
-            let score = &game.gs.players[handle].score;
-            let points =
-                score.kills * cvars.g_ffa_score_kill + score.deaths * cvars.g_ffa_score_death;
-            Reverse(points)
-        });
-
         game.context
             .set_shadow_offset_x(cvars.hud_scoreboard_shadow_x);
         game.context
@@ -566,17 +605,19 @@ pub(crate) fn draw(game: &Game, cvars: &Cvars) -> Result<(), JsValue> {
         game.context.fill_text("Name", x, y)?;
         game.context.fill_text("Kills", x + 150.0, y)?;
         game.context.fill_text("Deaths", x + 200.0, y)?;
+        game.context.fill_text("Points", x + 270.0, y)?;
         y += cvars.hud_scoreboard_line_height;
 
         let entry_font = format!("{}px sans-serif", cvars.hud_scoreboard_font_size);
         game.context.set_font(&entry_font);
-        for player_handle in players_by_score {
+        for (player_handle, points) in player_points {
             let player = &game.gs.players[player_handle];
             game.context.fill_text(&player.name, x, y)?;
             game.context
                 .fill_text(&player.score.kills.to_string(), x + 150.0, y)?;
             game.context
                 .fill_text(&player.score.deaths.to_string(), x + 200.0, y)?;
+            game.context.fill_text(&points.to_string(), x + 270.0, y)?;
             y += cvars.hud_scoreboard_line_height;
         }
         game.context.set_font("10px sans-serif");
