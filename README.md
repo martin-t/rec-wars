@@ -133,6 +133,14 @@ Read this to learn from other people's mistakes and save yourself some time.
 - It's possible and advisable to use WASM without NPM. The official [Rust+WASM book](https://rustwasm.github.io/docs/book/) heavily pushes people towards NPM and the whole thing feels like "just download this big template, don't try to understand it and only touch the parts we tell you to". Honestly how do you even statically host the thing on GH pages without `npm run`?. If you're not planning to use other NPM packages, all you need is a few lines of JS glue to run your WASM. Use the [Without a Bundler](https://rustwasm.github.io/docs/wasm-bindgen/examples/without-a-bundler.html) example as your "template" and host it with `python3 -m http.server`. You'll understand exactly what is going on and you'll avoid the whole JS ecosystem.
 - The canvas 2D API is too slow for a game which needs to redraw the entire screen each frame, especially in firefox.
 - ECS is overhyped. It will make all your game entities dynamicly typed but with much more boilerplate than a dynlang and will predictably lead to bugs. If you don't need to add/remove components at runtime, the only reason you're using it is probably so you can have references between entities - just use generational arenas. Appeal to authority: [rg3d](https://rg3d.rs/) is written by an experienced game engine dev and avoids ECS for much the same reason.
+- Generationl arenas will lead to slightly more borrowchk errors. ECS either avoided them implicitly by borrowing only parts of the gamestate (runtime borrowchecking) or resolved them explicitly by postponing mutation (e.g. legion's [`CommandBuffer`](https://docs.rs/legion/*/legion/systems/struct.CommandBuffer.html)). With arenas, you have to deal with them explicitly more often:
+    - You can't add to / remove from an arena while iterating through it
+        - Use specialized methods like `retain` if available
+        - Avoid borrowing the whole arena in a loop - instead, collect handles into a vector, iterate through that vector and borrow only for parts of the loop body
+        - Collect entities to add / handles to remove into a vector, add / remove after the loop is done
+    - Subfunctions need mutable game state while you're iterating through one of the arenas
+        - Be more granular - don't pass them the entire game state, just the arenas it needs
+        - Again, collect handles, iterate through them, reborrow each iteration, end borrow before calling subfunctions
 
 License
 -------
