@@ -299,6 +299,14 @@ pub struct Cvars {
     pub hud_missile_indicator_dash_length: f64,
     pub hud_missile_indicator_radius: f64,
 
+    pub hud_ranking_font_size: f64,
+    /// Origranking RW uses 1
+    pub hud_ranking_shadow_x: f64,
+    /// Origranking RW uses 1
+    pub hud_ranking_shadow_y: f64,
+    pub hud_ranking_x: f64,
+    pub hud_ranking_y: f64,
+
     pub hud_score_font_size: f64,
     /// Original RW uses 2
     pub hud_score_shadow_x: f64,
@@ -960,6 +968,13 @@ impl Default for Cvars {
 
             hud_missile_indicator_dash_length: 3.3,
             hud_missile_indicator_radius: 18.0,
+
+            hud_ranking_font_size: 15.0,
+            // keep off because of firefox
+            hud_ranking_shadow_x: 0.0,
+            hud_ranking_shadow_y: 0.0,
+            hud_ranking_x: 80.0,
+            hud_ranking_y: -70.0,
 
             hud_score_font_size: 25.0,
             // keep off because of firefox (even just this one number costs about 5 ms each frame)

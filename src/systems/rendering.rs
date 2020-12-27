@@ -457,7 +457,7 @@ pub(crate) fn draw(game: &Game, cvars: &Cvars) -> Result<(), JsValue> {
     // Original RW shows current score as a big bold number with a 2px shadow.
     game.context.set_shadow_offset_x(cvars.hud_score_shadow_x);
     game.context.set_shadow_offset_y(cvars.hud_score_shadow_y);
-    let score_font = format!("bold {}px sans-serif", cvars.hud_score_font_size);
+    let score_font = format!("{}px sans-serif", cvars.hud_score_font_size);
     game.context.set_font(&score_font);
     let score_pos = hud_pos(game, cvars.hud_score_x, cvars.hud_score_y);
     game.context.fill_text(
@@ -470,9 +470,11 @@ pub(crate) fn draw(game: &Game, cvars: &Cvars) -> Result<(), JsValue> {
     // Original RW shows "current rank / total players (+/- points difference to leader or second)"
     // as a big but not bold number with a 1px shadow. E.g. "1/3 (+5)" or "2/3 (0)".
     // There's no special treatement for players with the same number of points.
-    let ranking_font = format!("{}px sans-serif", cvars.hud_score_font_size);
+    game.context.set_shadow_offset_x(cvars.hud_ranking_shadow_x);
+    game.context.set_shadow_offset_y(cvars.hud_ranking_shadow_y);
+    let ranking_font = format!("{}px sans-serif", cvars.hud_ranking_font_size);
     game.context.set_font(&ranking_font);
-    let ranking_pos = hud_pos(game, cvars.hud_score_x + 50.0, cvars.hud_score_y);
+    let ranking_pos = hud_pos(game, cvars.hud_ranking_x, cvars.hud_ranking_y);
     let current_index = player_points
         .iter()
         .position(|&(handle, _)| handle == game.gs.player_handle)
