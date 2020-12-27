@@ -237,7 +237,9 @@
 // nice to have:
 // [ ] logo (RecWars spelled out by in-game entities?)
 // [ ] GM - presing fire again switches back to tank
-// [ ] record seed+input (WASM should be reproducible when avoiding NaNs) - replay, debugging
+// [ ] replays (also easier debugging)
+//      [ ] record seed+input (WASM should be reproducible when avoiding NaNs)
+//      [ ] SmallRng depends on platform and rand version: https://docs.rs/rand/*/rand/rngs/struct.SmallRng.html
 // [ ] allow MG to shoot down missiles
 // [ ] lateral friction
 // [ ] announcer
@@ -253,7 +255,6 @@
 //          https://stackoverflow.com/questions/16151018/npm-throws-error-without-sudo/24404451#24404451
 //          put in the *beginning* of PATH or it uses old debian npm which breaks everything
 // [ ] native binary
-//      [ ] SmallRng might be platform dependant: https://docs.rs/rand/0.7.3/rand/rngs/index.html
 // [ ] make parsing return errors instead of crashing
 // [x] pause, variable speed
 // [ ] frame debug mode - only render gamelogic frames, no interpolation
