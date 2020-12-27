@@ -32,7 +32,7 @@ pub(crate) fn ai(cvars: &Cvars, gs: &mut GameState) {
         }
 
         if gs.rng.gen_bool(0.03) {
-            ai.turning = gs.rng.gen_range(-1, 2);
+            ai.turning = gs.rng.gen_range(-1..=1);
         }
 
         if !ai.firing && gs.rng.gen_bool(0.01) {

@@ -259,7 +259,7 @@ impl Map {
     /// Returns (pos, angle).
     pub(crate) fn random_spawn(&self, rng: &mut SmallRng) -> (Vec2f, f64) {
         // TODO maps with no spawns (or even all walls)
-        let i = rng.gen_range(0, self.spawns().len());
+        let i = rng.gen_range(0..self.spawns().len());
         let index = self.spawns()[i];
         let pos = self.tile_center(index);
         let angle = self[index].angle;
@@ -269,8 +269,8 @@ impl Map {
     /// Returns (pos, angle).
     pub(crate) fn random_nonwall(&self, rng: &mut SmallRng) -> (Vec2f, f64) {
         loop {
-            let c = rng.gen_range(0, self.width());
-            let r = rng.gen_range(0, self.height());
+            let c = rng.gen_range(0..self.width());
+            let r = rng.gen_range(0..self.height());
             let index = Vec2u::new(c, r);
             if self.surface_at_index(index).kind != Kind::Wall {
                 let pos = self.tile_center(index);

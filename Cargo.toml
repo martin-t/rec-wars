@@ -43,14 +43,18 @@ console_error_panic_hook = "0.1.6"
 enumn = "0.1.3"
 fnv = "1.0.7"
 js-sys = "0.3.42"
-rand_distr = "0.3.0"
+rand_distr = "0.4.0"
 thunderdome = "0.4.0"
 vek = "0.12.0"
 wasm-bindgen = "0.2.65"
 
+[dependencies.getrandom]
+version = "0.2.0"
+features = ["js"]
+
 [dependencies.rand]
-version = "0.7.3"
-features = ["small_rng", "wasm-bindgen"]
+version = "0.8.0"
+features = ["small_rng"]
 
 [dependencies.web-sys]
 version = "0.3.4"

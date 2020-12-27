@@ -59,14 +59,14 @@ pub(crate) fn spawn_vehicle(
     player_handle: Index,
     use_spawns: bool,
 ) {
-    let veh_type = VehicleType::n(gs.rng.gen_range(0, 3)).unwrap();
+    let veh_type = VehicleType::n(gs.rng.gen_range(0..3)).unwrap();
     let (spawn_pos, spawn_angle) = if use_spawns {
         map.random_spawn(&mut gs.rng)
     } else {
         let (pos, _angle) = map.random_nonwall(&mut gs.rng);
         // Most grass tiles have no rotation so everyone ends up facing right which looks bad.
         // Throw away their angle and use a random one.
-        let angle = gs.rng.gen_range(0.0, 2.0 * PI);
+        let angle = gs.rng.gen_range(0.0..2.0 * PI);
         (pos, angle)
     };
 
@@ -356,9 +356,9 @@ pub(crate) fn shooting(cvars: &Cvars, gs: &mut GameState) {
                             let r: f64 = gs.rng.sample(StandardNormal);
                             spread_sideways = cvars.g_cluster_bomb_speed_spread_sideways * r;
                         } else {
-                            let r = gs.rng.gen_range(-1.5, 1.5);
+                            let r = gs.rng.gen_range(-1.5..=1.5);
                             spread_forward = cvars.g_cluster_bomb_speed_spread_forward * r;
-                            let r = gs.rng.gen_range(-1.5, 1.5);
+                            let r = gs.rng.gen_range(-1.5..=1.5);
                             spread_sideways = cvars.g_cluster_bomb_speed_spread_sideways * r;
                         }
                         projectile.vel = Vec2f::new(speed + spread_forward, spread_sideways)
@@ -366,7 +366,7 @@ pub(crate) fn shooting(cvars: &Cvars, gs: &mut GameState) {
                             + cvars.g_cluster_bomb_vehicle_velocity_factor * vehicle.vel;
                         projectile.explode_time = gs.frame_time
                             + cvars.g_cluster_bomb_time
-                            + gs.rng.gen_range(-1.0, 1.0) * cvars.g_cluster_bomb_time_spread;
+                            + gs.rng.gen_range(-1.0..=1.0) * cvars.g_cluster_bomb_time_spread;
                         gs.projectiles.insert(projectile.clone());
                     }
                 }
