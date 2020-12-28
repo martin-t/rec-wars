@@ -73,6 +73,8 @@ You can always find me on the [RecWars Discord server](https://discord.gg/9BQVVg
 
 I want to make RecWars highly configurable with many different gamemodes and balance settings votable by players and anybody will be able to host their own server (if technically possible even from the browser). If you have a gameplay idea and don't suffer from the NIH syndrome, I'd be very happy to help you test it in RecWars.
 
+**Optionally** enable extra checks before every commit with `git config core.hooksPath git-hooks`.
+
 ### Architecture Overview
 
 Most of the code is commented to be understandable to anyone with a vague idea of how a game works. If it's not clear why a particular piece of code exists or why it needs to be written the way it is, I consider that a bug which should be fixed by either rewriting the code more clearly or adding comments explaining it.
