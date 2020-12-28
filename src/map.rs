@@ -350,7 +350,7 @@ pub(crate) fn load_map(text: &str, surfaces: Vec<Surface>) -> Map {
     let tiles = text
         .split_terminator("\r\n")
         .map(|line| {
-            line.split(" ")
+            line.split(' ')
                 .map(|tile| {
                     let val: usize = tile.parse().unwrap();
                     // rotation is number of turns counterclockwise
@@ -377,7 +377,7 @@ pub(crate) fn load_tex_list(text: &str) -> Vec<Surface> {
     // if using cvars, update load_map docs
     text.split_terminator("\r\n")
         .map(|line| {
-            let mut parts = line.split(" ");
+            let mut parts = line.split(' ');
             let name = parts.next().unwrap();
             let kind_num = parts.next().unwrap().parse().unwrap();
             let friction = parts.next().unwrap().parse().unwrap();

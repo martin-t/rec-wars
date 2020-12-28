@@ -791,10 +791,10 @@ fn draw_img_offset(
 /// Useful to make HUD config cvars work for any canvas size.
 fn hud_pos(game: &Game, mut x: f64, mut y: f64) -> Vec2f {
     if x < 0.0 {
-        x = game.canvas_size.x + x;
+        x += game.canvas_size.x;
     }
     if y < 0.0 {
-        y = game.canvas_size.y + y;
+        y += game.canvas_size.y;
     }
     Vec2f::new(x, y)
 }

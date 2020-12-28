@@ -68,6 +68,7 @@ pub struct Game {
 #[wasm_bindgen]
 impl Game {
     #[wasm_bindgen(constructor)]
+    #[allow(clippy::too_many_arguments)]
     pub fn new(
         cvars: &Cvars,
         context: CanvasRenderingContext2d,
@@ -253,7 +254,7 @@ impl Game {
     }
 
     fn input(&mut self, input: &Input) {
-        self.gs.players[self.gs.player_handle].input = input.clone();
+        self.gs.players[self.gs.player_handle].input = *input;
     }
 
     fn tick(&mut self, cvars: &Cvars) {
