@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+# Exit on error
+set -e
+# Error on unset variables
+set -u
+# Don't ignore errors in pipelines
+set -o pipefail
+
+
+cargo fmt -- --check
+
+# Make sure clippy runs properly - https://github.com/rust-lang/rust-clippy/issues/4612
+find . | grep "\.rs$" | xargs touch
+
+# Technically --all-features doesn't check all code when something is *disabled* by a feature
+# but that is discouraged and no such feature existed at the time this was added.
+cargo clippy --all-features -- --deny warnings
+
+cargo audit
