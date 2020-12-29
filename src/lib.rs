@@ -8,7 +8,6 @@
 #![warn(unreachable_pub)]
 #![warn(unused)]
 #![warn(clippy::all)]
-// TODO check clippy lints actually work - e.g. shadow_unrelated/pedantic doesn't seem to
 
 #[macro_use]
 mod debugging; // keep first so the macros are available everywhere
