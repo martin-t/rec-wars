@@ -37,7 +37,7 @@ pub(crate) fn draw(game: &Game, cvars: &Cvars) -> Result<(), JsValue> {
         .context
         .set_image_smoothing_enabled(cvars.r_smoothing);
 
-    let player = &server.gs.players[server.gs.player_handle];
+    let player = &server.gs.players[client.player_handle];
     // TODO what if no vehicle
     let player_veh_pos = server.gs.vehicles[player.vehicle.unwrap()].pos;
     let player_entity_pos = if let Some(gm_handle) = player.guided_missile {
@@ -490,7 +490,7 @@ pub(crate) fn draw(game: &Game, cvars: &Cvars) -> Result<(), JsValue> {
     let ranking_pos = hud_pos(client, cvars.hud_ranking_x, cvars.hud_ranking_y);
     let current_index = player_points
         .iter()
-        .position(|&(handle, _)| handle == server.gs.player_handle)
+        .position(|&(handle, _)| handle == client.player_handle)
         .unwrap();
     let points_diff = if current_index == 0 {
         if player_points.len() == 2 {

@@ -24,7 +24,7 @@ use fnv::FnvHashMap;
 use game_state::ArenaExt;
 use js_sys::Array;
 use rand::prelude::*;
-use thunderdome::Arena;
+use thunderdome::{Arena, Index};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use web_sys::{CanvasRenderingContext2d, HtmlImageElement, Performance};
@@ -116,7 +116,6 @@ impl Game {
             rail_beams: Vec::new(),
             rail_hits: FnvHashMap::default(),
             bfg_beams: Vec::new(),
-            player_handle: player1_handle,
             explosions: Vec::new(),
             ais: Arena::new(),
             players,
@@ -159,6 +158,7 @@ impl Game {
                 img_gm,
                 img_explosion,
                 img_explosion_cyan,
+                player_handle: player1_handle,
             },
             frame_times: VecDeque::new(),
             update_durations: VecDeque::new(),
@@ -234,7 +234,7 @@ impl Game {
     }
 
     fn input(&mut self, input: &Input) {
-        self.server.gs.players[self.server.gs.player_handle].input = *input;
+        self.server.gs.players[self.client.player_handle].input = *input;
     }
 
     fn render(&mut self, cvars: &Cvars) -> Result<(), JsValue> {
@@ -265,6 +265,7 @@ pub struct Client {
     img_gm: HtmlImageElement,
     img_explosion: HtmlImageElement,
     img_explosion_cyan: HtmlImageElement,
+    player_handle: Index,
 }
 
 impl Debug for Client {

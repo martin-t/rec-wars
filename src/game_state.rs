@@ -36,7 +36,6 @@ pub(crate) struct GameState {
     ///     3) Make sure the HashMap doesn't grow indefinitely in case we forgot to remove in some cases.
     pub(crate) rail_hits: FnvHashMap<Index, Index>,
     pub(crate) bfg_beams: Vec<(Vec2f, Vec2f)>,
-    pub(crate) player_handle: Index,
     pub(crate) explosions: Vec<Explosion>,
     pub(crate) ais: Arena<Ai>,
     pub(crate) players: Arena<Player>,
