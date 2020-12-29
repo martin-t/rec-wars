@@ -40,29 +40,18 @@ use crate::{
 const STATS_FRAMES: usize = 60;
 
 #[wasm_bindgen]
+#[derive(Debug)]
 pub struct Game {
     /// I want to track update and render time in Rust so i can draw the FPS counter and keep stats.
     /// Unfortunately, Instant::now() panics in WASM so i have to use performance.now().
     /// And just like in JS, it has limited precision in some browsers like firefox.
     performance: Performance,
-    context: CanvasRenderingContext2d,
-    canvas_size: Vec2f,
-    imgs_tiles: Vec<HtmlImageElement>,
-    imgs_vehicles: Vec<HtmlImageElement>,
-    imgs_wrecks: Vec<HtmlImageElement>,
-    imgs_weapon_icons: Vec<HtmlImageElement>,
-    img_rocket: HtmlImageElement,
-    img_hm: HtmlImageElement,
-    img_gm: HtmlImageElement,
-    img_explosion: HtmlImageElement,
-    img_explosion_cyan: HtmlImageElement,
+    client: Client,
     /// Saved frame times in seconds over some period of time to measure FPS
     frame_times: VecDeque<f64>,
     update_durations: VecDeque<f64>,
     draw_durations: VecDeque<f64>,
-    map: Map,
-    gs: GameState,
-    gs_prev: GameState,
+    server: Server,
 }
 
 #[wasm_bindgen]
@@ -159,23 +148,23 @@ impl Game {
 
         Self {
             performance: web_sys::window().unwrap().performance().unwrap(),
-            context,
-            canvas_size: Vec2f::new(width, height),
-            imgs_tiles,
-            imgs_vehicles,
-            imgs_wrecks,
-            imgs_weapon_icons,
-            img_rocket,
-            img_hm,
-            img_gm,
-            img_explosion,
-            img_explosion_cyan,
+            client: Client {
+                context,
+                canvas_size: Vec2f::new(width, height),
+                imgs_tiles,
+                imgs_vehicles,
+                imgs_wrecks,
+                imgs_weapon_icons,
+                img_rocket,
+                img_hm,
+                img_gm,
+                img_explosion,
+                img_explosion_cyan,
+            },
             frame_times: VecDeque::new(),
             update_durations: VecDeque::new(),
             draw_durations: VecDeque::new(),
-            map,
-            gs,
-            gs_prev,
+            server: Server { map, gs, gs_prev },
         }
     }
 
@@ -208,19 +197,19 @@ impl Game {
             TickrateMode::Synchronized => {
                 self.begin_frame(t);
                 self.input(input);
-                self.tick(cvars);
+                self.server.tick(cvars);
             }
             TickrateMode::SynchronizedBounded => todo!(),
             TickrateMode::Fixed => loop {
                 // gs, not gs_prev, is the previous frame here
-                let remaining = t - self.gs.frame_time;
+                let remaining = t - self.server.gs.frame_time;
                 let dt = 1.0 / cvars.sv_gamelogic_fixed_fps;
                 if remaining < dt {
                     break;
                 }
-                self.begin_frame(self.gs.frame_time + dt);
+                self.begin_frame(self.server.gs.frame_time + dt);
                 self.input(input);
-                self.tick(cvars);
+                self.server.tick(cvars);
             },
             TickrateMode::FixedOrSmaller => todo!(),
         }
@@ -234,15 +223,7 @@ impl Game {
 
     /// Update time tracking variables (in seconds)
     fn begin_frame(&mut self, t: f64) {
-        self.gs_prev = self.gs.clone();
-        self.gs.frame_time = t;
-        self.gs.dt = self.gs.frame_time - self.gs_prev.frame_time;
-        assert!(
-            self.gs.frame_time >= self.gs_prev.frame_time,
-            "frametime didn't increase: prev {}, current {}",
-            self.gs_prev.frame_time,
-            self.gs.frame_time,
-        );
+        self.server.begin_frame(t);
 
         // There are multiple ways to count FPS.
         // Methods like using 1 / average_ms_per_frame end up with a lot of 59.9 vs 60.1 jitter.
@@ -254,7 +235,68 @@ impl Game {
     }
 
     fn input(&mut self, input: &Input) {
-        self.gs.players[self.gs.player_handle].input = *input;
+        self.server.gs.players[self.server.gs.player_handle].input = *input;
+    }
+
+    fn render(&mut self, cvars: &Cvars) -> Result<(), JsValue> {
+        let start = self.performance.now();
+
+        systems::rendering::draw(self, cvars)?;
+
+        let end = self.performance.now();
+        if self.draw_durations.len() >= STATS_FRAMES {
+            self.draw_durations.pop_front();
+        }
+        self.draw_durations.push_back(end - start);
+
+        Ok(())
+    }
+}
+
+#[wasm_bindgen]
+pub struct Client {
+    context: CanvasRenderingContext2d,
+    canvas_size: Vec2f,
+    imgs_tiles: Vec<HtmlImageElement>,
+    imgs_vehicles: Vec<HtmlImageElement>,
+    imgs_wrecks: Vec<HtmlImageElement>,
+    imgs_weapon_icons: Vec<HtmlImageElement>,
+    img_rocket: HtmlImageElement,
+    img_hm: HtmlImageElement,
+    img_gm: HtmlImageElement,
+    img_explosion: HtmlImageElement,
+    img_explosion_cyan: HtmlImageElement,
+}
+
+impl Debug for Client {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        // Override the default Debug impl - The JS types don't print anything useful.
+        f.debug_struct("Parts of Client")
+            .field("canvas_size", &self.canvas_size)
+            .finish()
+    }
+}
+
+#[wasm_bindgen]
+#[derive(Debug)]
+pub struct Server {
+    map: Map,
+    gs: GameState,
+    gs_prev: GameState,
+}
+
+impl Server {
+    /// Update time tracking variables (in seconds)
+    fn begin_frame(&mut self, t: f64) {
+        self.gs_prev = self.gs.clone();
+        self.gs.frame_time = t;
+        self.gs.dt = self.gs.frame_time - self.gs_prev.frame_time;
+        assert!(
+            self.gs.frame_time >= self.gs_prev.frame_time,
+            "frametime didn't increase: prev {}, current {}",
+            self.gs_prev.frame_time,
+            self.gs.frame_time,
+        );
     }
 
     fn tick(&mut self, cvars: &Cvars) {
@@ -287,34 +329,5 @@ impl Game {
         dbg_textf!("vehicle count: {}", self.gs.vehicles.len());
         dbg_textf!("projectile count: {}", self.gs.projectiles.len());
         dbg_textf!("explosion count: {}", self.gs.explosions.len());
-    }
-
-    fn render(&mut self, cvars: &Cvars) -> Result<(), JsValue> {
-        let start = self.performance.now();
-
-        systems::rendering::draw(self, cvars)?;
-
-        let end = self.performance.now();
-        if self.draw_durations.len() >= STATS_FRAMES {
-            self.draw_durations.pop_front();
-        }
-        self.draw_durations.push_back(end - start);
-
-        Ok(())
-    }
-}
-
-impl Debug for Game {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        // Override the default Debug impl - The JS types don't print anything useful.
-        f.debug_struct("Parts of Game")
-            .field("gs", &self.gs)
-            .field("gs_prev", &self.gs_prev)
-            .field("map", &self.map)
-            .field("canvas_size", &self.canvas_size)
-            .field("frame_times", &self.frame_times)
-            .field("update_durations", &self.update_durations)
-            .field("draw_durations", &self.draw_durations)
-            .finish()
     }
 }
