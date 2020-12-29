@@ -31,6 +31,5 @@ jobs:
         with:
           crate: cargo-audit
           version: latest
-          use-tool-cache: true
       # https://github.com/rust-random/getrandom/issues/175
       - run: cargo audit --deny warnings --ignore RUSTSEC-2020-0056
