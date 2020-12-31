@@ -650,6 +650,23 @@ pub(crate) fn draw(game: &Game, cvars: &Cvars) -> Result<(), JsValue> {
         client.context.set_shadow_offset_y(0.0);
     }
 
+    // Pause
+    if server.paused {
+        client.context.set_shadow_offset_x(cvars.hud_pause_shadow_x);
+        client.context.set_shadow_offset_y(cvars.hud_pause_shadow_y);
+        client.context.set_fill_style(&"red".into());
+        let pause_font = format!("{}px sans-serif", cvars.hud_pause_font_size);
+        client.context.set_font(&pause_font);
+
+        client
+            .context
+            .fill_text("PAUSED", cvars.hud_pause_x, cvars.hud_pause_y)?;
+
+        client.context.set_font("10px sans-serif");
+        client.context.set_shadow_offset_x(0.0);
+        client.context.set_shadow_offset_y(0.0);
+    }
+
     // Draw screen space debug info:
     client.context.set_fill_style(&"red".into());
 

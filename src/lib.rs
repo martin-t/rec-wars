@@ -148,7 +148,6 @@ impl Game {
             performance: web_sys::window().unwrap().performance().unwrap(),
             client: Client {
                 context,
-                canvas_size: Vec2f::new(width, height),
                 imgs_tiles,
                 imgs_vehicles,
                 imgs_wrecks,
@@ -158,12 +157,21 @@ impl Game {
                 img_gm,
                 img_explosion,
                 img_explosion_cyan,
+                canvas_size: Vec2f::new(width, height),
+                input_prev: Input::default(),
                 player_handle: player1_handle,
             },
             frame_times: VecDeque::new(),
             update_durations: VecDeque::new(),
             draw_durations: VecDeque::new(),
-            server: Server { map, gs, gs_prev },
+            server: Server {
+                map,
+                gs,
+                gs_prev,
+                paused: false,
+                real_time_prev: 0.0,
+                game_time_prev: 0.0,
+            },
         }
     }
 
@@ -173,14 +181,32 @@ impl Game {
         format!("{:#?}", self)
     }
 
-    /// Run gamelogic up to `t` (in seconds) and render.
+    /// Process everything and render.
+    /// `real_time` is in seconds.
     pub fn update_and_render(
         &mut self,
-        t: f64,
+        real_time: f64,
         input: &Input,
         cvars: &Cvars,
     ) -> Result<(), JsValue> {
-        self.update(t, input, cvars);
+        let diff_real = real_time - self.server.real_time_prev;
+        self.server.real_time_prev = real_time;
+
+        if input.pause && !self.client.input_prev.pause {
+            self.server.paused = !self.server.paused;
+        }
+        self.client.input_prev = *input;
+
+        if !self.server.paused {
+            // TODO make sure fps / debug times make sense
+
+            let diff_scaled = diff_real * cvars.d_speed;
+            let t = self.server.game_time_prev + diff_scaled;
+            self.server.game_time_prev = t;
+
+            self.update(t, input, cvars);
+        }
+
         self.render(cvars)?;
         Ok(())
     }
@@ -192,13 +218,14 @@ impl Game {
         let start = self.performance.now();
 
         // TODO prevent death spirals
+        // LATER impl the other modes
         match cvars.sv_gamelogic_mode {
             TickrateMode::Synchronized => {
                 self.begin_frame(t);
                 self.input(input);
                 self.server.tick(cvars);
             }
-            TickrateMode::SynchronizedBounded => todo!(),
+            TickrateMode::SynchronizedBounded => unimplemented!(),
             TickrateMode::Fixed => loop {
                 // gs, not gs_prev, is the previous frame here
                 let remaining = t - self.server.gs.frame_time;
@@ -210,7 +237,7 @@ impl Game {
                 self.input(input);
                 self.server.tick(cvars);
             },
-            TickrateMode::FixedOrSmaller => todo!(),
+            TickrateMode::FixedOrSmaller => unimplemented!(),
         }
 
         let end = self.performance.now();
@@ -255,7 +282,6 @@ impl Game {
 #[wasm_bindgen]
 pub struct Client {
     context: CanvasRenderingContext2d,
-    canvas_size: Vec2f,
     imgs_tiles: Vec<HtmlImageElement>,
     imgs_vehicles: Vec<HtmlImageElement>,
     imgs_wrecks: Vec<HtmlImageElement>,
@@ -265,6 +291,8 @@ pub struct Client {
     img_gm: HtmlImageElement,
     img_explosion: HtmlImageElement,
     img_explosion_cyan: HtmlImageElement,
+    input_prev: Input,
+    canvas_size: Vec2f,
     player_handle: Index,
 }
 
@@ -283,6 +311,9 @@ pub struct Server {
     map: Map,
     gs: GameState,
     gs_prev: GameState,
+    real_time_prev: f64,
+    game_time_prev: f64,
+    paused: bool,
 }
 
 impl Server {

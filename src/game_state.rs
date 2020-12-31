@@ -95,6 +95,8 @@ pub struct Input {
     pub self_destruct: bool,
     pub horn: bool,
     pub chat: bool,
+    pub pause: bool,
+    // ^ when adding fields, also add them to Debug
 }
 
 #[wasm_bindgen]
@@ -186,6 +188,9 @@ impl Debug for Input {
         }
         if self.chat {
             write!(f, "chat ")?;
+        }
+        if self.pause {
+            write!(f, "pause ")?;
         }
         write!(f, "}}")?;
         Ok(())

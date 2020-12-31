@@ -137,7 +137,6 @@ async function run() {
     });
 
     const input = new Input();
-    let paused = false;
 
     // This can't be part of Cvars - there is no way to expose rust's String to JS as a struct field.
     // It's a good idea to avoid Ctrl and Alt:
@@ -173,10 +172,6 @@ async function run() {
             if (binds[action].includes(event.key.toLowerCase())) {
                 input[action] = true;
             }
-        }
-
-        if (binds.pause.includes(event.key.toLowerCase())) {
-            paused = !paused;
         }
     });
 
@@ -380,41 +375,18 @@ async function run() {
         // Make some things available on window for easier debugging.
         window.cvars = cvars;
         window.game = game;
-        window.min_frame_delay = 0;
 
-        let last_frame_t_real = 0;
-        let last_frame_t_scaled = 0;
-
-        const frame = (t) => {
-            if (log_time_checkbox.checked) {
-                console.log(performance.now(), "frame", t);
-            }
-
-            // Seconds just make more sense, plus I keep assuming they're seconds and causing bugs.
-            const t_real = t / 1000.0;
-
-            // Apparently it's best practice to call requestAnimationFrame at the start of the frame.
-            // However if something throws an exception, it'll likely happen every frame and
-            // spam the console, making firefox painfully slow. In that case, cancel the next frame.
-            // Note that rust panics seem to throw exceptions but ALSO abort the program after the catch runs.
-            const handle = window.requestAnimationFrame(frame);
-
+        const frame = (real_time_ms) => {
             try {
-                // Hack to test lower FPS - skip some frames as if they never happened.
-                // TODO remove when physics/gamelogic have a separate framerate
-                if (t_real - last_frame_t_real < window.min_frame_delay) {
-                    return;
-                }
-                const diff_real = t_real - last_frame_t_real;
-                last_frame_t_real = t_real;
+                // Apparently it's best practice to call requestAnimationFrame at the start of the frame.
+                // However if something throws an exception, it'll likely happen every frame and
+                // spam the console, making firefox painfully slow. In that case, cancel the next frame.
+                // Note that rust panics seem to throw exceptions but ALSO abort the program after the catch runs.
+                const handle = window.requestAnimationFrame(frame);
 
-                if (paused) {
-                    return;
+                if (log_time_checkbox.checked) {
+                    console.log("performance.now():", performance.now(), "real_time_ms:", real_time_ms);
                 }
-
-                const diff_scaled = diff_real * cvars.d_speed;
-                const t_scaled = last_frame_t_scaled + diff_scaled;
-                last_frame_t_scaled = t_scaled;
 
                 // In case it was updated using console.
                 // Does not trigger the `input` / `change` events.
@@ -425,7 +397,10 @@ async function run() {
                     speed_value.innerHTML = cvars.d_speed;
                 }
 
-                game.update_and_render(t_scaled, input, cvars);
+                // Seconds just make more sense, plus I keep assuming they're seconds and causing bugs.
+                const real_time = real_time_ms / 1000.0;
+
+                game.update_and_render(real_time, input, cvars);
             } catch (e) {
                 console.log("exception - aborting next frame");
                 window.cancelAnimationFrame(handle);

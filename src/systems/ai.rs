@@ -57,6 +57,7 @@ pub(crate) fn ai(cvars: &Cvars, gs: &mut GameState) {
             self_destruct: gs.rng.gen_bool(0.0001),
             horn: gs.rng.gen_bool(0.0001),
             chat: false,
+            pause: false, // :)
         }
     }
 }
