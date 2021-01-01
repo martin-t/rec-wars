@@ -38,14 +38,14 @@ wasm-opt = ["-O3", "--enable-mutable-globals"]  # see wasm-opt note
 # https://github.com/rustwasm/wasm-pack/issues/886
 
 [dependencies]
-approx = "0.3.2"  # keep on 0.3.2 because of vek 0.12
+approx = "0.4.0"
 console_error_panic_hook = "0.1.6"
 enumn = "0.1.3"
 fnv = "1.0.7"
 js-sys = "0.3.42"
 rand_distr = "0.4.0"
 thunderdome = "0.4.0"
-vek = "0.12.0"
+vek = "0.13.0"
 wasm-bindgen = "0.2.65"
 
 [dependencies.getrandom]
