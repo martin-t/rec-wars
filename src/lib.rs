@@ -20,11 +20,10 @@ mod systems;
 
 use std::{collections::VecDeque, fmt::Debug};
 
-use fnv::FnvHashMap;
 use game_state::ArenaExt;
 use js_sys::Array;
 use rand::prelude::*;
-use thunderdome::{Arena, Index};
+use thunderdome::Index;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use web_sys::{CanvasRenderingContext2d, HtmlImageElement, Performance};
@@ -103,26 +102,10 @@ impl Game {
         let surfaces = map::load_tex_list(tex_list_text);
         let map = map::load_map(map_text, surfaces);
 
-        let mut players = Arena::new();
-
+        let mut gs = GameState::new(rng);
         let name = "Player 1".to_owned();
         let player = Player::new(name);
-        let player1_handle = players.insert(player);
-
-        let mut gs = GameState {
-            rng,
-            frame_time: 0.0,
-            dt: 0.0,
-            rail_beams: Vec::new(),
-            rail_hits: FnvHashMap::default(),
-            bfg_beams: Vec::new(),
-            explosions: Vec::new(),
-            ais: Arena::new(),
-            players,
-            vehicles: Arena::new(),
-            projectiles: Arena::new(),
-        };
-        let gs_prev = gs.clone();
+        let player1_handle = gs.players.insert(player);
 
         let bots_count = map.spawns().len().min(cvars.bots_max);
         dbg_logf!(
@@ -167,10 +150,10 @@ impl Game {
             server: Server {
                 map,
                 gs,
-                gs_prev,
-                paused: false,
+                real_time: 0.0,
                 real_time_prev: 0.0,
                 game_time_prev: 0.0,
+                paused: false,
             },
         }
     }
@@ -189,8 +172,9 @@ impl Game {
         input: &Input,
         cvars: &Cvars,
     ) -> Result<(), JsValue> {
-        let diff_real = real_time - self.server.real_time_prev;
-        self.server.real_time_prev = real_time;
+        self.server.real_time_prev = self.server.real_time;
+        self.server.real_time = real_time;
+        let diff_real = self.server.real_time - self.server.real_time_prev;
 
         if input.pause && !self.client.input_prev.pause {
             self.server.paused = !self.server.paused;
@@ -261,6 +245,7 @@ impl Game {
     }
 
     fn input(&mut self, input: &Input) {
+        self.server.gs.inputs_prev.update(&self.server.gs.players);
         self.server.gs.players[self.client.player_handle].input = *input;
     }
 
@@ -310,7 +295,10 @@ impl Debug for Client {
 pub struct Server {
     map: Map,
     gs: GameState,
-    gs_prev: GameState,
+    /// Time since game started in seconds. Increases at wall clock speed even when paused.
+    ///
+    /// This is not meant to be used for anything that affects gameplay - use gs.frame_time instead.
+    real_time: f64,
     real_time_prev: f64,
     game_time_prev: f64,
     paused: bool,
@@ -318,16 +306,15 @@ pub struct Server {
 
 impl Server {
     /// Update time tracking variables (in seconds)
-    fn begin_frame(&mut self, t: f64) {
-        self.gs_prev = self.gs.clone();
-        self.gs.frame_time = t;
-        self.gs.dt = self.gs.frame_time - self.gs_prev.frame_time;
+    fn begin_frame(&mut self, game_time: f64) {
         assert!(
-            self.gs.frame_time >= self.gs_prev.frame_time,
-            "frametime didn't increase: prev {}, current {}",
-            self.gs_prev.frame_time,
+            game_time >= self.gs.frame_time,
+            "game_time didn't increase: prev {}, current {}",
             self.gs.frame_time,
+            game_time,
         );
+        self.gs.dt = game_time - self.gs.frame_time;
+        self.gs.frame_time = game_time;
     }
 
     fn tick(&mut self, cvars: &Cvars) {
@@ -337,11 +324,11 @@ impl Server {
 
         systems::ai::ai(cvars, &mut self.gs);
 
-        systems::respawning(cvars, &mut self.gs, &self.gs_prev, &self.map);
+        systems::respawning(cvars, &mut self.gs, &self.map);
 
-        systems::player_logic(&mut self.gs, &self.gs_prev);
+        systems::player_logic(&mut self.gs);
 
-        systems::vehicle_logic(cvars, &mut self.gs, &self.gs_prev);
+        systems::vehicle_logic(cvars, &mut self.gs);
 
         // It's probably a good idea to shoot before movement so that when turning
         // the shot angle corresponds to the vehicle angle the player saw last frame.

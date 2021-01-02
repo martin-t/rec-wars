@@ -34,10 +34,11 @@ pub(crate) fn cleanup(cvars: &Cvars, gs: &mut GameState) {
     });
 }
 
-pub(crate) fn respawning(cvars: &Cvars, gs: &mut GameState, gs_prev: &GameState, map: &Map) {
+pub(crate) fn respawning(cvars: &Cvars, gs: &mut GameState, map: &Map) {
     for player_handle in gs.players.iter_handles() {
         let player = &mut gs.players[player_handle];
-        let input_prev = gs_prev.players[player_handle].input;
+        let input_prev = gs.inputs_prev.get(player_handle);
+
         if let Some(vehicle_handle) = player.vehicle {
             let destroyed = gs.vehicles[vehicle_handle].destroyed();
 
@@ -216,14 +217,9 @@ fn accel_decel(stats: &MovementStats, vel: &mut Vec2f, angle: &mut f64, input: I
     }
 }
 
-pub(crate) fn player_logic(gs: &mut GameState, gs_prev: &GameState) {
-    for (player_index, player) in gs.players.iter_mut() {
-        let input_prev = if let Some(player_prev) = gs_prev.players.get(player_index) {
-            player_prev.input
-        } else {
-            // The player not might have been connected last frame.
-            Input::new()
-        };
+pub(crate) fn player_logic(gs: &mut GameState) {
+    for (player_handle, player) in gs.players.iter_mut() {
+        let input_prev = gs.inputs_prev.get(player_handle);
 
         // Change weapon
         if player.input.prev_weapon && !input_prev.prev_weapon {
@@ -237,25 +233,19 @@ pub(crate) fn player_logic(gs: &mut GameState, gs_prev: &GameState) {
     }
 }
 
-pub(crate) fn vehicle_logic(cvars: &Cvars, gs: &mut GameState, gs_prev: &GameState) {
+pub(crate) fn vehicle_logic(cvars: &Cvars, gs: &mut GameState) {
     for (_, vehicle) in gs.vehicles.iter_mut() {
         // This should run even while dead, otherwise the ammo indicator will be buggy.
         // Original RW also reloaded while dead.
 
         let player = &gs.players[vehicle.owner];
-        let input = &player.input;
-        let input_prev = if let Some(player_prev) = gs_prev.players.get(vehicle.owner) {
-            player_prev.input
-        } else {
-            // The player not might have been connected last frame.
-            Input::new()
-        };
+        let input_prev = gs.inputs_prev.get(vehicle.owner);
 
         // Turret turning
-        if input.turret_left && !input_prev.turret_left {
+        if player.input.turret_left && !input_prev.turret_left {
             vehicle.turret_angle_wanted -= cvars.g_turret_turn_step_angle_deg.to_radians();
         }
-        if input.turret_right && !input_prev.turret_right {
+        if player.input.turret_right && !input_prev.turret_right {
             vehicle.turret_angle_wanted += cvars.g_turret_turn_step_angle_deg.to_radians();
         }
         vehicle.turret_angle_wanted = vehicle.turret_angle_wanted.rem_euclid(2.0 * PI);

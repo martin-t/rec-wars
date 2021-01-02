@@ -19,7 +19,7 @@ use crate::{
 #[derive(Debug, Clone)]
 pub(crate) struct GameState {
     pub(crate) rng: SmallRng,
-    /// This frame's time in seconds
+    /// This frame's time in seconds. Affected by d_speed and pause.
     pub(crate) frame_time: f64,
     /// Delta time since last frame in seconds
     pub(crate) dt: f64,
@@ -41,6 +41,27 @@ pub(crate) struct GameState {
     pub(crate) players: Arena<Player>,
     pub(crate) vehicles: Arena<Vehicle>,
     pub(crate) projectiles: Arena<Projectile>,
+    /// Inputs of players last frame.
+    pub(crate) inputs_prev: InputsPrev,
+}
+
+impl GameState {
+    pub(crate) fn new(rng: SmallRng) -> Self {
+        Self {
+            rng,
+            frame_time: 0.0,
+            dt: 0.0,
+            rail_beams: Vec::new(),
+            rail_hits: FnvHashMap::default(),
+            bfg_beams: Vec::new(),
+            explosions: Vec::new(),
+            ais: Arena::new(),
+            players: Arena::new(),
+            vehicles: Arena::new(),
+            projectiles: Arena::new(),
+            inputs_prev: InputsPrev(FnvHashMap::default()),
+        }
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -75,6 +96,27 @@ impl Explosion {
             scale,
             start_time,
             bfg,
+        }
+    }
+}
+
+#[derive(Debug, Clone)]
+pub(crate) struct InputsPrev(FnvHashMap<Index, Input>);
+
+impl InputsPrev {
+    /// The player's input last frame or empty input if the player wasn't connected last frame.
+    pub(crate) fn get(&self, player_handle: Index) -> Input {
+        if let Some(input) = self.0.get(&player_handle) {
+            *input
+        } else {
+            Input::new()
+        }
+    }
+
+    pub(crate) fn update(&mut self, players: &Arena<Player>) {
+        self.0.clear();
+        for (handle, player) in players.iter() {
+            self.0.insert(handle, player.input);
         }
     }
 }
