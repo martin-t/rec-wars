@@ -283,7 +283,7 @@ pub(crate) fn draw(game: &Game, cvars: &Cvars) -> Result<(), JsValue> {
         //
         // This code produces similar results,
         // though it might display a single sprite for 4 frames slightly more often.
-        let progress = (server.gs.frame_time - explosion.start_time) / cvars.r_explosion_duration;
+        let progress = (server.gs.game_time - explosion.start_time) / cvars.r_explosion_duration;
         // 13 sprites in the sheet, 100x100 pixels per sprite
         let frame = (progress * 13.0).floor();
         let (offset, img);
@@ -564,7 +564,7 @@ pub(crate) fn draw(game: &Game, cvars: &Cvars) -> Result<(), JsValue> {
         }
         Ammo::Reloading(start, end) => {
             let max_diff = end - start;
-            let cur_diff = server.gs.frame_time - start;
+            let cur_diff = server.gs.game_time - start;
             cur_diff / max_diff
         }
     };

@@ -95,7 +95,7 @@ impl Vehicle {
         pos: Vec2f,
         angle: f64,
         veh_type: VehicleType,
-        frame_time: f64,
+        spawn_time: f64,
         owner: Index,
     ) -> Vehicle {
         let hitbox = cvars.g_vehicle_hitbox(veh_type);
@@ -120,7 +120,7 @@ impl Vehicle {
             turret_angle_wanted: 0.0,
             hp_fraction: 1.0,
             ammos,
-            spawn_time: frame_time,
+            spawn_time,
             owner,
         }
     }

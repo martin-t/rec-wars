@@ -24,12 +24,12 @@ use crate::{
 
 pub(crate) fn cleanup(cvars: &Cvars, gs: &mut GameState) {
     // Cleanup old entities
-    let frame_time = gs.frame_time; // borrowchk
+    let game_time = gs.game_time; // borrowchk
     gs.rail_beams
-        .retain(|beam| beam.start_time + cvars.g_railgun_beam_duration > frame_time);
+        .retain(|beam| beam.start_time + cvars.g_railgun_beam_duration > game_time);
     gs.bfg_beams.clear();
     gs.explosions.retain(|explosion| {
-        let progress = (frame_time - explosion.start_time) / cvars.r_explosion_duration;
+        let progress = (game_time - explosion.start_time) / cvars.r_explosion_duration;
         progress <= 1.0
     });
 }
@@ -76,7 +76,7 @@ pub(crate) fn spawn_vehicle(
         spawn_pos,
         spawn_angle,
         veh_type,
-        gs.frame_time,
+        gs.game_time,
         player_handle,
     ));
 
@@ -96,7 +96,7 @@ pub(crate) fn self_destruct(cvars: &Cvars, gs: &mut GameState) {
         gs.explosions.push(Explosion::new(
             vehicle.pos,
             cvars.g_self_destruct_explosion_scale,
-            gs.frame_time,
+            gs.game_time,
             false,
         ));
         // ...then destroy the vehicle to create the small explosion on top.
@@ -261,8 +261,8 @@ pub(crate) fn vehicle_logic(cvars: &Cvars, gs: &mut GameState) {
         // Reloading
         let ammo = &mut vehicle.ammos[player.cur_weapon as usize];
         if let Ammo::Reloading(_, end) = ammo {
-            if gs.frame_time >= *end {
-                *ammo = Ammo::Loaded(gs.frame_time, cvars.g_weapon_reload_ammo(player.cur_weapon));
+            if gs.game_time >= *end {
+                *ammo = Ammo::Loaded(gs.game_time, cvars.g_weapon_reload_ammo(player.cur_weapon));
             }
         }
     }
@@ -278,15 +278,15 @@ pub(crate) fn shooting(cvars: &Cvars, gs: &mut GameState) {
 
         let ammo = &mut vehicle.ammos[player.cur_weapon as usize];
         if let Ammo::Loaded(ready_time, count) = ammo {
-            if gs.frame_time < *ready_time {
+            if gs.game_time < *ready_time {
                 continue;
             }
 
-            *ready_time = gs.frame_time + cvars.g_weapon_refire(player.cur_weapon);
+            *ready_time = gs.game_time + cvars.g_weapon_refire(player.cur_weapon);
             *count -= 1;
             if *count == 0 {
                 let reload_time = cvars.g_weapon_reload_time(player.cur_weapon);
-                *ammo = Ammo::Reloading(gs.frame_time, gs.frame_time + reload_time);
+                *ammo = Ammo::Reloading(gs.game_time, gs.game_time + reload_time);
             }
 
             let (hardpoint, weapon_offset) = cvars.g_hardpoint(vehicle.veh_type, player.cur_weapon);
@@ -354,7 +354,7 @@ pub(crate) fn shooting(cvars: &Cvars, gs: &mut GameState) {
                         projectile.vel = Vec2f::new(speed + spread_forward, spread_sideways)
                             .rotated_z(shot_angle)
                             + cvars.g_cluster_bomb_vehicle_velocity_factor * vehicle.vel;
-                        projectile.explode_time = gs.frame_time
+                        projectile.explode_time = gs.game_time
                             + cvars.g_cluster_bomb_time
                             + gs.rng.gen_range(-1.0..=1.0) * cvars.g_cluster_bomb_time_spread;
                         gs.projectiles.insert(projectile.clone());
@@ -455,7 +455,7 @@ pub(crate) fn projectiles(cvars: &Cvars, gs: &mut GameState, map: &Map) {
 
         let is_rail = projectile.weapon == Weapon::Rail;
         if is_rail {
-            let beam = RailBeam::new(step.start, step.end, gs.frame_time);
+            let beam = RailBeam::new(step.start, step.end, gs.game_time);
             gs.rail_beams.push(beam);
         }
 
@@ -540,7 +540,7 @@ pub(crate) fn damage(
 
     vehicle.hp_fraction = 0.0;
     gs.explosions
-        .push(Explosion::new(vehicle.pos, 1.0, gs.frame_time, false));
+        .push(Explosion::new(vehicle.pos, 1.0, gs.game_time, false));
     gs.players[vehicle.owner].guided_missile = None; // No guiding after death
 
     let attacker = &mut gs.players[attacker_handle];
@@ -558,7 +558,7 @@ pub(crate) fn damage(
 pub(crate) fn projectiles_timeout(cvars: &Cvars, gs: &mut GameState) {
     for handle in gs.projectiles.iter_handles() {
         let projectile = &gs.projectiles[handle];
-        if gs.frame_time > projectile.explode_time {
+        if gs.game_time > projectile.explode_time {
             let hit_pos = projectile.pos; // borrowchk dance
             projectile_impact(cvars, gs, handle, hit_pos);
         }
@@ -571,7 +571,7 @@ fn projectile_impact(cvars: &Cvars, gs: &mut GameState, projectile_handle: Index
         gs.explosions.push(Explosion::new(
             hit_pos,
             expl_scale,
-            gs.frame_time,
+            gs.game_time,
             projectile.weapon == Weapon::Bfg,
         ));
     }

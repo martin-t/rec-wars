@@ -20,7 +20,7 @@ use crate::{
 pub(crate) struct GameState {
     pub(crate) rng: SmallRng,
     /// This frame's time in seconds. Affected by d_speed and pause.
-    pub(crate) frame_time: f64,
+    pub(crate) game_time: f64,
     /// Delta time since last frame in seconds
     pub(crate) dt: f64,
     pub(crate) rail_beams: Vec<RailBeam>,
@@ -49,7 +49,7 @@ impl GameState {
     pub(crate) fn new(rng: SmallRng) -> Self {
         Self {
             rng,
-            frame_time: 0.0,
+            game_time: 0.0,
             dt: 0.0,
             rail_beams: Vec::new(),
             rail_hits: FnvHashMap::default(),

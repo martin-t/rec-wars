@@ -212,12 +212,12 @@ impl Game {
             TickrateMode::SynchronizedBounded => unimplemented!(),
             TickrateMode::Fixed => loop {
                 // gs, not gs_prev, is the previous frame here
-                let remaining = t - self.server.gs.frame_time;
+                let remaining = t - self.server.gs.game_time;
                 let dt = 1.0 / cvars.sv_gamelogic_fixed_fps;
                 if remaining < dt {
                     break;
                 }
-                self.begin_frame(self.server.gs.frame_time + dt);
+                self.begin_frame(self.server.gs.game_time + dt);
                 self.input(input);
                 self.server.tick(cvars);
             },
@@ -297,7 +297,7 @@ pub struct Server {
     gs: GameState,
     /// Time since game started in seconds. Increases at wall clock speed even when paused.
     ///
-    /// This is not meant to be used for anything that affects gameplay - use gs.frame_time instead.
+    /// This is not meant to be used for anything that affects gameplay - use gs.game_time instead.
     real_time: f64,
     real_time_prev: f64,
     game_time_prev: f64,
@@ -308,13 +308,13 @@ impl Server {
     /// Update time tracking variables (in seconds)
     fn begin_frame(&mut self, game_time: f64) {
         assert!(
-            game_time >= self.gs.frame_time,
+            game_time >= self.gs.game_time,
             "game_time didn't increase: prev {}, current {}",
-            self.gs.frame_time,
+            self.gs.game_time,
             game_time,
         );
-        self.gs.dt = game_time - self.gs.frame_time;
-        self.gs.frame_time = game_time;
+        self.gs.dt = game_time - self.gs.game_time;
+        self.gs.game_time = game_time;
     }
 
     fn tick(&mut self, cvars: &Cvars) {

@@ -17,7 +17,7 @@ pub(crate) fn ai(cvars: &Cvars, gs: &mut GameState) {
         let vehicle = &gs.vehicles[player.vehicle.unwrap()];
 
         // keep moving forward if recently spawned
-        let age = gs.frame_time - vehicle.spawn_time;
+        let age = gs.game_time - vehicle.spawn_time;
         if age < 0.5 {
             ai.movement = 1;
         } else if gs.rng.gen_bool(0.01) {
