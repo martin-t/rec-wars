@@ -2,6 +2,7 @@ use std::fmt::{self, Debug, Formatter};
 
 use fnv::FnvHashMap;
 use rand::prelude::*;
+use rand_distr::Uniform;
 use thunderdome::{Arena, Index};
 use wasm_bindgen::prelude::*;
 
@@ -19,6 +20,9 @@ use crate::{
 #[derive(Debug, Clone)]
 pub(crate) struct GameState {
     pub(crate) rng: SmallRng,
+    /// Inclusive range [-1.0, 1.0].
+    /// Creating it once and saving it here might be faster than using gen_range according to docs.
+    pub(crate) range_uniform11: Uniform<f64>,
     /// This frame's time in seconds. Affected by d_speed and pause.
     pub(crate) game_time: f64,
     /// Delta time since last frame in seconds
@@ -49,6 +53,7 @@ impl GameState {
     pub(crate) fn new(rng: SmallRng) -> Self {
         Self {
             rng,
+            range_uniform11: Uniform::new_inclusive(-1.0, 1.0),
             game_time: 0.0,
             dt: 0.0,
             rail_beams: Vec::new(),

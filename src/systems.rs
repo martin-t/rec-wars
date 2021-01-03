@@ -346,9 +346,9 @@ pub(crate) fn shooting(cvars: &Cvars, gs: &mut GameState) {
                             let r: f64 = gs.rng.sample(StandardNormal);
                             spread_sideways = cvars.g_cluster_bomb_speed_spread_sideways * r;
                         } else {
-                            let r = gs.rng.gen_range(-1.5..=1.5);
+                            let r = gs.rng.sample(gs.range_uniform11);
                             spread_forward = cvars.g_cluster_bomb_speed_spread_forward * r;
-                            let r = gs.rng.gen_range(-1.5..=1.5);
+                            let r = gs.rng.sample(gs.range_uniform11);
                             spread_sideways = cvars.g_cluster_bomb_speed_spread_sideways * r;
                         }
                         projectile.vel = Vec2f::new(speed + spread_forward, spread_sideways)
@@ -356,7 +356,7 @@ pub(crate) fn shooting(cvars: &Cvars, gs: &mut GameState) {
                             + cvars.g_cluster_bomb_vehicle_velocity_factor * vehicle.vel;
                         projectile.explode_time = gs.game_time
                             + cvars.g_cluster_bomb_time
-                            + gs.rng.gen_range(-1.0..=1.0) * cvars.g_cluster_bomb_time_spread;
+                            + gs.rng.sample(gs.range_uniform11) * cvars.g_cluster_bomb_time_spread;
                         gs.projectiles.insert(projectile.clone());
                     }
                 }
