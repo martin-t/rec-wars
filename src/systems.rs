@@ -24,7 +24,7 @@ use crate::{
 
 pub(crate) fn cleanup(cvars: &Cvars, gs: &mut GameState) {
     // Cleanup old entities
-    let game_time = gs.game_time; // borrowchk
+    let game_time = gs.game_time; // borrowck
     gs.rail_beams
         .retain(|beam| beam.start_time + cvars.g_railgun_beam_duration > game_time);
     gs.bfg_beams.clear();
@@ -463,7 +463,7 @@ pub(crate) fn projectiles(cvars: &Cvars, gs: &mut GameState, map: &Map) {
             // LATER immediately killing vehicles here means 2 players can't share a kill
             let vehicle = &mut gs.vehicles[vehicle_handle];
 
-            // Borrowchk dance - reborrow each iteration of the loop
+            // borrowck dance - reborrow each iteration of the loop
             // so the borrow ends before we pass `gs` to other functions.
             let projectile = &gs.projectiles[proj_handle];
 
@@ -559,7 +559,7 @@ pub(crate) fn projectiles_timeout(cvars: &Cvars, gs: &mut GameState) {
     for handle in gs.projectiles.iter_handles() {
         let projectile = &gs.projectiles[handle];
         if gs.game_time > projectile.explode_time {
-            let hit_pos = projectile.pos; // borrowchk dance
+            let hit_pos = projectile.pos; // borrowck dance
             projectile_impact(cvars, gs, handle, hit_pos);
         }
     }
