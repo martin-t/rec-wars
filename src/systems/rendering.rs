@@ -16,7 +16,7 @@ use crate::{
     map::Vec2f,
     map::VecExt,
     map::{Kind, TILE_SIZE},
-    Client, Game, STATS_FRAMES,
+    Client, Game,
 };
 
 /// Redraw the whole canvas.
@@ -671,15 +671,8 @@ pub(crate) fn draw(game: &Game, cvars: &Cvars) -> Result<(), JsValue> {
     client.context.set_fill_style(&"red".into());
 
     // Draw FPS
-    // TODO this is wrong with d_speed
     if cvars.d_fps {
-        let fps = if game.frame_times.is_empty() {
-            0.0
-        } else {
-            let diff_time = game.frame_times.back().unwrap() - game.frame_times.front().unwrap();
-            let diff_frames = game.frame_times.len() - 1;
-            diff_frames as f64 / diff_time
-        };
+        let fps = client.fps.get_fps();
         client.context.fill_text(
             &format!("FPS: {:.1}", fps),
             client.canvas_size.x - 60.0,
@@ -690,46 +683,20 @@ pub(crate) fn draw(game: &Game, cvars: &Cvars) -> Result<(), JsValue> {
     // Draw perf info
     if cvars.d_draw && cvars.d_draw_perf {
         client.context.fill_text(
-            &format!("last {} frames:", STATS_FRAMES),
+            &format!("last {} frames:", cvars.d_timing_samples),
             client.canvas_size.x - 150.0,
             client.canvas_size.y - 75.0,
         )?;
-        if !game.update_durations.is_empty() {
-            let mut sum = 0.0;
-            let mut max = 0.0;
-            for &dur in &game.update_durations {
-                sum += dur;
-                if dur > max {
-                    max = dur;
-                }
-            }
-
+        if let Some((avg, max)) = game.update_durations.get_stats() {
             client.context.fill_text(
-                &format!(
-                    "update avg: {:.1}, max: {:.1}",
-                    sum / game.update_durations.len() as f64,
-                    max
-                ),
+                &format!("update avg: {:.1}, max: {:.1}", avg, max),
                 client.canvas_size.x - 150.0,
                 client.canvas_size.y - 60.0,
             )?;
         }
-        if !game.draw_durations.is_empty() {
-            let mut sum = 0.0;
-            let mut max = 0.0;
-            for &dur in &game.draw_durations {
-                sum += dur;
-                if dur > max {
-                    max = dur;
-                }
-            }
-
+        if let Some((avg, max)) = game.draw_durations.get_stats() {
             client.context.fill_text(
-                &format!(
-                    "draw avg: {:.1}, max: {:.1}",
-                    sum / game.draw_durations.len() as f64,
-                    max
-                ),
+                &format!("draw avg: {:.1}, max: {:.1}", avg, max),
                 client.canvas_size.x - 150.0,
                 client.canvas_size.y - 45.0,
             )?;

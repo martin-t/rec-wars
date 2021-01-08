@@ -17,13 +17,15 @@ mod entities;
 mod game_state;
 mod map;
 mod systems;
+mod timing;
 
-use std::{collections::VecDeque, fmt::Debug};
+use std::fmt::Debug;
 
 use game_state::ArenaExt;
 use js_sys::Array;
 use rand::prelude::*;
 use thunderdome::Index;
+use timing::{Durations, Fps};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use web_sys::{CanvasRenderingContext2d, HtmlImageElement, Performance};
@@ -35,8 +37,6 @@ use crate::{
     map::{Map, Vec2f},
 };
 
-const STATS_FRAMES: usize = 60;
-
 #[wasm_bindgen]
 #[derive(Debug)]
 pub struct Game {
@@ -45,10 +45,8 @@ pub struct Game {
     /// And just like in JS, it has limited precision in some browsers like firefox.
     performance: Performance,
     client: Client,
-    /// Saved frame times in seconds over some period of time to measure FPS
-    frame_times: VecDeque<f64>,
-    update_durations: VecDeque<f64>,
-    draw_durations: VecDeque<f64>,
+    update_durations: Durations,
+    draw_durations: Durations,
     server: Server,
 }
 
@@ -141,18 +139,17 @@ impl Game {
                 img_explosion,
                 img_explosion_cyan,
                 canvas_size: Vec2f::new(width, height),
-                input_prev: Input::default(),
+                fps: Fps::new(),
                 player_handle: player1_handle,
             },
-            frame_times: VecDeque::new(),
-            update_durations: VecDeque::new(),
-            draw_durations: VecDeque::new(),
+            update_durations: Durations::new(),
+            draw_durations: Durations::new(),
             server: Server {
                 map,
                 gs,
                 real_time: 0.0,
                 real_time_prev: 0.0,
-                game_time_prev: 0.0,
+                real_time_delta: 0.0,
                 paused: false,
             },
         }
@@ -172,93 +169,30 @@ impl Game {
         input: &Input,
         cvars: &Cvars,
     ) -> Result<(), JsValue> {
-        self.server.real_time_prev = self.server.real_time;
-        self.server.real_time = real_time;
-        let diff_real = self.server.real_time - self.server.real_time_prev;
+        dbg_textf!("{}", env!("GIT_VERSION"));
 
-        if input.pause && !self.client.input_prev.pause {
-            self.server.paused = !self.server.paused;
-        }
-        self.client.input_prev = *input;
-
-        if !self.server.paused {
-            // TODO make sure fps / debug times make sense
-
-            let diff_scaled = diff_real * cvars.d_speed;
-            let t = self.server.game_time_prev + diff_scaled;
-            self.server.game_time_prev = t;
-
-            self.update(t, input, cvars);
-        }
-
-        self.render(cvars)?;
-        Ok(())
-    }
-
-    /// Run gamelogic frame.
-    fn update(&mut self, t: f64, input: &Input, cvars: &Cvars) {
-        // Recommended reading: https://gafferongames.com/post/fix_your_timestep/
-
-        let start = self.performance.now();
-
-        // TODO prevent death spirals
-        // LATER impl the other modes
-        match cvars.sv_gamelogic_mode {
-            TickrateMode::Synchronized => {
-                self.begin_frame(t);
-                self.input(input);
-                self.server.tick(cvars);
-            }
-            TickrateMode::SynchronizedBounded => unimplemented!(),
-            TickrateMode::Fixed => loop {
-                // gs, not gs_prev, is the previous frame here
-                let remaining = t - self.server.gs.game_time;
-                let dt = 1.0 / cvars.sv_gamelogic_fixed_fps;
-                if remaining < dt {
-                    break;
-                }
-                self.begin_frame(self.server.gs.game_time + dt);
-                self.input(input);
-                self.server.tick(cvars);
-            },
-            TickrateMode::FixedOrSmaller => unimplemented!(),
-        }
-
-        let end = self.performance.now();
-        if self.update_durations.len() >= STATS_FRAMES {
-            self.update_durations.pop_front();
-        }
-        self.update_durations.push_back(end - start);
-    }
-
-    /// Update time tracking variables (in seconds)
-    fn begin_frame(&mut self, t: f64) {
-        self.server.begin_frame(t);
-
-        // There are multiple ways to count FPS.
-        // Methods like using 1 / average_ms_per_frame end up with a lot of 59.9 vs 60.1 jitter.
-        // Counting number of frames during the last second seems to give a stable 60.
-        self.frame_times.push_back(t);
-        while !self.frame_times.is_empty() && self.frame_times.front().unwrap() + 1.0 < t {
-            self.frame_times.pop_front();
-        }
-    }
-
-    fn input(&mut self, input: &Input) {
+        // Handle input early so pause works immediately.
+        // LATER Keep timestamps of input events. When splitting frame into multiple steps, update input each step.
         self.server.gs.inputs_prev.update(&self.server.gs.players);
         self.server.gs.players[self.client.player_handle].input = *input;
-    }
 
-    fn render(&mut self, cvars: &Cvars) -> Result<(), JsValue> {
+        self.client
+            .fps
+            .tick(cvars.d_fps_period, self.server.real_time);
+
         let start = self.performance.now();
+
+        self.server.update(cvars, real_time);
+
+        let updated = self.performance.now();
+        self.update_durations
+            .add(cvars.d_timing_samples, updated - start);
 
         systems::rendering::draw(self, cvars)?;
 
-        let end = self.performance.now();
-        if self.draw_durations.len() >= STATS_FRAMES {
-            self.draw_durations.pop_front();
-        }
-        self.draw_durations.push_back(end - start);
+        let rendered = self.performance.now();
+        self.draw_durations
+            .add(cvars.d_timing_samples, rendered - updated);
 
         Ok(())
     }
@@ -276,8 +210,8 @@ pub struct Client {
     img_gm: HtmlImageElement,
     img_explosion: HtmlImageElement,
     img_explosion_cyan: HtmlImageElement,
-    input_prev: Input,
     canvas_size: Vec2f,
+    fps: Fps,
     player_handle: Index,
 }
 
@@ -297,28 +231,76 @@ pub struct Server {
     gs: GameState,
     /// Time since game started in seconds. Increases at wall clock speed even when paused.
     ///
-    /// This is not meant to be used for anything that affects gameplay - use gs.game_time instead.
+    /// This is not meant to be used for anything that affects gameplay - use `gs.game_time` instead.
     real_time: f64,
     real_time_prev: f64,
-    game_time_prev: f64,
+    real_time_delta: f64,
     paused: bool,
 }
 
 impl Server {
-    /// Update time tracking variables (in seconds)
-    fn begin_frame(&mut self, game_time: f64) {
+    /// Run gamelogic frame(s) up to current time (in seconds).
+    fn update(&mut self, cvars: &Cvars, real_time: f64) {
+        // Recommended reading: https://gafferongames.com/post/fix_your_timestep/
+
+        // Update time tracking variables
+        self.real_time_prev = self.real_time;
+        self.real_time = real_time;
+        self.real_time_delta = self.real_time - self.real_time_prev;
+
+        let diff_scaled = self.real_time_delta * cvars.d_speed;
+        let game_time_target = self.gs.game_time + diff_scaled;
+
+        dbg_textd!(self.gs.game_time);
+        dbg_textd!(self.gs.game_time_prev);
+
+        for (handle, player) in self.gs.players.iter() {
+            if player.input.pause && !self.gs.inputs_prev.get(handle).pause {
+                self.paused = !self.paused;
+            }
+        }
+        if !self.paused {
+            self.gamelogic(cvars, game_time_target);
+        }
+
+        // Print these even while paused
+        dbg_textf!("vehicle count: {}", self.gs.vehicles.len());
+        dbg_textf!("projectile count: {}", self.gs.projectiles.len());
+        dbg_textf!("explosion count: {}", self.gs.explosions.len());
+    }
+
+    fn gamelogic(&mut self, cvars: &Cvars, game_time_target: f64) {
+        // TODO prevent death spirals
+        // LATER impl the other modes
+        match cvars.sv_gamelogic_mode {
+            TickrateMode::Synchronized => {
+                self.gamelogic_tick(cvars, game_time_target);
+            }
+            TickrateMode::SynchronizedBounded => unimplemented!(),
+            TickrateMode::Fixed => loop {
+                // gs.game_time is still the previous frame here
+                let remaining = game_time_target - self.gs.game_time;
+                let dt = 1.0 / cvars.sv_gamelogic_fixed_fps;
+                if remaining < dt {
+                    break;
+                }
+                self.gamelogic_tick(cvars, self.gs.game_time + dt);
+            },
+            TickrateMode::FixedOrSmaller => unimplemented!(),
+        }
+    }
+
+    fn gamelogic_tick(&mut self, cvars: &Cvars, game_time: f64) {
+        // Update time tracking variables (in seconds)
         assert!(
             game_time >= self.gs.game_time,
             "game_time didn't increase: prev {}, current {}",
             self.gs.game_time,
             game_time,
         );
-        self.gs.dt = game_time - self.gs.game_time;
+        self.gs.game_time_prev = self.gs.game_time;
         self.gs.game_time = game_time;
-    }
-
-    fn tick(&mut self, cvars: &Cvars) {
-        dbg_textf!("{}", env!("GIT_VERSION"));
+        self.gs.dt = self.gs.game_time - self.gs.game_time_prev;
 
         systems::cleanup(cvars, &mut self.gs);
 
@@ -343,9 +325,5 @@ impl Server {
         systems::projectiles_timeout(cvars, &mut self.gs);
 
         systems::self_destruct(cvars, &mut self.gs);
-
-        dbg_textf!("vehicle count: {}", self.gs.vehicles.len());
-        dbg_textf!("projectile count: {}", self.gs.projectiles.len());
-        dbg_textf!("explosion count: {}", self.gs.explosions.len());
     }
 }

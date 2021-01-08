@@ -19,15 +19,22 @@ use crate::{
 /// What does veloren do?
 #[derive(Debug, Clone)]
 pub(crate) struct GameState {
+    /// The RNG for all gamelogic
     pub(crate) rng: SmallRng,
+
     /// Inclusive range [-1.0, 1.0].
     /// Creating it once and saving it here might be faster than using gen_range according to docs.
     pub(crate) range_uniform11: Uniform<f64>,
-    /// This frame's time in seconds. Affected by d_speed and pause.
+
+    /// This gamelogic frame's time in seconds. Affected by d_speed and pause.
     pub(crate) game_time: f64,
-    /// Delta time since last frame in seconds
+
+    /// The previous gamelogic frame's time in seconds. Affected by d_speed and pause.
+    pub(crate) game_time_prev: f64,
+
+    /// Delta time since last gamelogic frame in seconds
     pub(crate) dt: f64,
-    pub(crate) rail_beams: Vec<RailBeam>,
+
     /// Map of projectile handles to vehicle handles.
     /// Prevents rail hitting the same vehicle twice
     /// when one segment ends inside the hitbox and the next starts inside it the next frame.
@@ -39,12 +46,15 @@ pub(crate) struct GameState {
     ///     2) Remove the entry after the projectile exist the hitbox - e.g. guided missiles that can pass through several times.
     ///     3) Make sure the HashMap doesn't grow indefinitely in case we forgot to remove in some cases.
     pub(crate) rail_hits: FnvHashMap<Index, Index>,
+
+    pub(crate) rail_beams: Vec<RailBeam>,
     pub(crate) bfg_beams: Vec<(Vec2f, Vec2f)>,
     pub(crate) explosions: Vec<Explosion>,
     pub(crate) ais: Arena<Ai>,
     pub(crate) players: Arena<Player>,
     pub(crate) vehicles: Arena<Vehicle>,
     pub(crate) projectiles: Arena<Projectile>,
+
     /// Inputs of players last frame.
     pub(crate) inputs_prev: InputsPrev,
 }
@@ -55,6 +65,7 @@ impl GameState {
             rng,
             range_uniform11: Uniform::new_inclusive(-1.0, 1.0),
             game_time: 0.0,
+            game_time_prev: 0.0,
             dt: 0.0,
             rail_beams: Vec::new(),
             rail_hits: FnvHashMap::default(),
