@@ -1053,7 +1053,7 @@ pub enum TickrateMode {
     /// As I understand, this can cause a specific kind of stutter called judder.
     Fixed,
     /// Simulation runs in fixed steps as long as it can, the last step is smaller
-    /// to catch up to rendering exactly. The last step is then thrown away and simulation
+    /// to catch up to rendering exactly. Next frame, the smaller step is thrown away and simulation
     /// resumes from the last full step so it's deterministic. Too small steps are skipped.
     /// This is described by Jonathan Blow here: https://youtu.be/fdAOPHgW7qM?t=7149
     FixedOrSmaller,
