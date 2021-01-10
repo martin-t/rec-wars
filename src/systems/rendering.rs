@@ -670,11 +670,16 @@ pub(crate) fn draw(game: &Game, cvars: &Cvars) -> Result<(), JsValue> {
 
     // Draw FPS
     if cvars.d_fps {
-        let fps = client.fps.get_fps();
+        let fps_pos = hud_pos(client, cvars.d_fps_x, cvars.d_fps_y);
         client.context.fill_text(
-            &format!("FPS: {:.1}", fps),
-            client.canvas_size.x - 60.0,
-            client.canvas_size.y - 15.0,
+            &format!(
+                "update FPS: {:.1}   gamelogic FPS: {:.1}   render FPS: {:.1}",
+                server.update_fps.get_fps(),
+                server.gamelogic_fps.get_fps(),
+                client.render_fps.get_fps()
+            ),
+            fps_pos.x,
+            fps_pos.y,
         )?;
     }
 
@@ -683,18 +688,25 @@ pub(crate) fn draw(game: &Game, cvars: &Cvars) -> Result<(), JsValue> {
         client.context.fill_text(
             &format!("last {} frames:", cvars.d_timing_samples),
             client.canvas_size.x - 150.0,
-            client.canvas_size.y - 75.0,
+            client.canvas_size.y - 90.0,
         )?;
-        if let Some((avg, max)) = game.update_durations.get_stats() {
+        if let Some((avg, max)) = server.update_durations.get_stats() {
             client.context.fill_text(
                 &format!("update avg: {:.1}, max: {:.1}", avg, max),
+                client.canvas_size.x - 150.0,
+                client.canvas_size.y - 75.0,
+            )?;
+        }
+        if let Some((avg, max)) = server.gamelogic_durations.get_stats() {
+            client.context.fill_text(
+                &format!("gamelogic avg: {:.1}, max: {:.1}", avg, max),
                 client.canvas_size.x - 150.0,
                 client.canvas_size.y - 60.0,
             )?;
         }
-        if let Some((avg, max)) = game.draw_durations.get_stats() {
+        if let Some((avg, max)) = client.render_durations.get_stats() {
             client.context.fill_text(
-                &format!("draw avg: {:.1}, max: {:.1}", avg, max),
+                &format!("render avg: {:.1}, max: {:.1}", avg, max),
                 client.canvas_size.x - 150.0,
                 client.canvas_size.y - 45.0,
             )?;

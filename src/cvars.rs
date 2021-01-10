@@ -48,6 +48,8 @@ pub struct Cvars {
     /// so I can easily check perf with and without the other debug output.
     pub d_fps: bool,
     pub d_fps_period: f64,
+    pub d_fps_x: f64,
+    pub d_fps_y: f64,
     pub d_timing_samples: usize,
     pub d_tracing: bool,
     /// The seed to initialize the RNG.
@@ -737,6 +739,8 @@ impl Default for Cvars {
             d_draw_world_text: true,
             d_fps: true,
             d_fps_period: 1.0,
+            d_fps_x: -300.0,
+            d_fps_y: -15.0,
             d_timing_samples: 60,
             d_tracing: false,
             d_seed: 0,

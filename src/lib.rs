@@ -40,13 +40,7 @@ use crate::{
 #[wasm_bindgen]
 #[derive(Debug)]
 pub struct Game {
-    /// I want to track update and render time in Rust so i can draw the FPS counter and keep stats.
-    /// Unfortunately, Instant::now() panics in WASM so i have to use performance.now().
-    /// And just like in JS, it has limited precision in some browsers like firefox.
-    performance: Performance,
     client: Client,
-    update_durations: Durations,
-    draw_durations: Durations,
     server: Server,
 }
 
@@ -126,7 +120,6 @@ impl Game {
         }
 
         Self {
-            performance: web_sys::window().unwrap().performance().unwrap(),
             client: Client {
                 context,
                 imgs_tiles,
@@ -139,18 +132,22 @@ impl Game {
                 img_explosion,
                 img_explosion_cyan,
                 canvas_size: Vec2f::new(width, height),
-                fps: Fps::new(),
+                render_fps: Fps::new(),
+                render_durations: Durations::new(),
                 player_handle: player1_handle,
             },
-            update_durations: Durations::new(),
-            draw_durations: Durations::new(),
             server: Server {
+                performance: web_sys::window().unwrap().performance().unwrap(),
                 map,
                 gs,
                 real_time: 0.0,
                 real_time_prev: 0.0,
                 real_time_delta: 0.0,
                 paused: false,
+                update_fps: Fps::new(),
+                update_durations: Durations::new(),
+                gamelogic_fps: Fps::new(),
+                gamelogic_durations: Durations::new(),
             },
         }
     }
@@ -174,22 +171,26 @@ impl Game {
         self.server.gs.inputs_prev.update(&self.server.gs.players);
         self.server.gs.players[self.client.player_handle].input = *input;
 
-        self.client
-            .fps
+        let start = self.server.performance.now();
+
+        self.server
+            .update_fps
             .tick(cvars.d_fps_period, self.server.real_time);
-
-        let start = self.performance.now();
-
         self.server.update(cvars, real_time);
 
-        let updated = self.performance.now();
-        self.update_durations
+        let updated = self.server.performance.now();
+        self.server
+            .update_durations
             .add(cvars.d_timing_samples, updated - start);
 
+        self.client
+            .render_fps
+            .tick(cvars.d_fps_period, self.server.real_time);
         systems::rendering::draw(self, cvars)?;
 
-        let rendered = self.performance.now();
-        self.draw_durations
+        let rendered = self.server.performance.now();
+        self.client
+            .render_durations
             .add(cvars.d_timing_samples, rendered - updated);
 
         Ok(())
@@ -209,7 +210,8 @@ pub struct Client {
     img_explosion: HtmlImageElement,
     img_explosion_cyan: HtmlImageElement,
     canvas_size: Vec2f,
-    fps: Fps,
+    render_fps: Fps,
+    render_durations: Durations,
     player_handle: Index,
 }
 
@@ -225,6 +227,10 @@ impl Debug for Client {
 #[wasm_bindgen]
 #[derive(Debug)]
 pub struct Server {
+    /// I want to track update and render time in Rust so i can draw the FPS counter and keep stats.
+    /// Unfortunately, Instant::now() panics in WASM so i have to use performance.now().
+    /// And just like in JS, it has limited precision in some browsers like firefox.
+    performance: Performance,
     map: Map,
     gs: GameState,
     /// Time since game started in seconds. Increases at wall clock speed even when paused.
@@ -234,6 +240,10 @@ pub struct Server {
     real_time_prev: f64,
     real_time_delta: f64,
     paused: bool,
+    update_fps: Fps,
+    update_durations: Durations,
+    gamelogic_fps: Fps,
+    gamelogic_durations: Durations,
 }
 
 impl Server {
@@ -281,6 +291,9 @@ impl Server {
     }
 
     fn gamelogic_tick(&mut self, cvars: &Cvars, game_time: f64) {
+        let start = self.performance.now();
+        self.gamelogic_fps.tick(cvars.d_fps_period, self.real_time);
+
         // Update time tracking variables (in seconds)
         assert!(
             game_time >= self.gs.game_time,
@@ -325,5 +338,9 @@ impl Server {
         dbg_textf!("vehicle count: {}", self.gs.vehicles.len());
         dbg_textf!("projectile count: {}", self.gs.projectiles.len());
         dbg_textf!("explosion count: {}", self.gs.explosions.len());
+
+        let end = self.performance.now();
+        self.gamelogic_durations
+            .add(cvars.d_timing_samples, end - start);
     }
 }

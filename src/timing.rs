@@ -16,9 +16,9 @@ impl Fps {
         Self(VecDeque::new())
     }
 
-    pub(crate) fn tick(&mut self, period: f64, time: f64) {
-        self.0.push_back(time);
-        while !self.0.is_empty() && self.0.front().unwrap() + period < time {
+    pub(crate) fn tick(&mut self, period: f64, real_time: f64) {
+        self.0.push_back(real_time);
+        while !self.0.is_empty() && self.0.front().unwrap() + period < real_time {
             self.0.pop_front();
         }
     }
