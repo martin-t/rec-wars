@@ -22,8 +22,8 @@ use crate::{
     map::{F64Ext, Map, Vec2f},
 };
 
+/// Delete data from previous frames that's no longer needed.
 pub(crate) fn cleanup(cvars: &Cvars, gs: &mut GameState) {
-    // Cleanup old entities
     let game_time = gs.game_time; // borrowck
     gs.rail_beams
         .retain(|beam| beam.start_time + cvars.g_railgun_beam_duration > game_time);

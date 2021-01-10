@@ -420,7 +420,6 @@ pub(crate) fn draw(game: &Game, cvars: &Cvars) -> Result<(), JsValue> {
             }
             line.time -= server.gs.dt;
         }
-        lines.retain(|line| line.time > 0.0);
     });
     DEBUG_CROSSES.with(|crosses| {
         let mut crosses = crosses.borrow_mut();
@@ -445,7 +444,6 @@ pub(crate) fn draw(game: &Game, cvars: &Cvars) -> Result<(), JsValue> {
             }
             cross.time -= server.gs.dt;
         }
-        crosses.retain(|cross| cross.time > 0.0);
     });
 
     // Draw screen-space HUD elements:
@@ -705,7 +703,7 @@ pub(crate) fn draw(game: &Game, cvars: &Cvars) -> Result<(), JsValue> {
 
     // Draw world debug text
     DEBUG_TEXTS_WORLD.with(|texts| {
-        let mut texts = texts.borrow_mut();
+        let texts = texts.borrow();
         if cvars.d_draw && cvars.d_draw_world_text {
             for text in texts.iter() {
                 let scr_pos = text.pos - top_left;
@@ -721,20 +719,18 @@ pub(crate) fn draw(game: &Game, cvars: &Cvars) -> Result<(), JsValue> {
                     .unwrap();
             }
         }
-        texts.clear();
     });
 
     // Draw debug text
     let mut y = 25.0;
     DEBUG_TEXTS.with(|texts| {
-        let mut texts = texts.borrow_mut();
+        let texts = texts.borrow();
         if cvars.d_draw && cvars.d_draw_text {
             for text in texts.iter() {
                 client.context.fill_text(text, 20.0, y).unwrap();
                 y += cvars.d_draw_text_line_height;
             }
         }
-        texts.clear();
     });
 
     Ok(())

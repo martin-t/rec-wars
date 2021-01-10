@@ -2,6 +2,12 @@
 //! Use the `dbg_*` macros since they don't need to be imported explicitly
 //! and they allow a primitive version of overloading.
 //! The fns and structs are only public because the macros need them.
+//!
+//! Note that there are 3 different framerates: server bookkeeping, server gamelogic, client rendering.
+//! These debug tools are mainly meant for use in gamelogic - some get cleared each gamelogic step.
+//! This might result in missing or duplicated messages when the framerates are no the same
+//! (especially when the game is paused and nothing is cleared).
+//! LATER For each message, save which frame type it came from, only clear it at the start of the same frame type.
 
 #![allow(dead_code)]
 
@@ -243,4 +249,11 @@ where
             }
         }
     }
+}
+
+pub(crate) fn cleanup() {
+    DEBUG_LINES.with(|lines| lines.borrow_mut().retain(|line| line.time > 0.0));
+    DEBUG_CROSSES.with(|crosses| crosses.borrow_mut().retain(|cross| cross.time > 0.0));
+    DEBUG_TEXTS.with(|texts| texts.borrow_mut().clear());
+    DEBUG_TEXTS_WORLD.with(|texts| texts.borrow_mut().clear());
 }

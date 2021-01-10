@@ -169,8 +169,6 @@ impl Game {
         input: &Input,
         cvars: &Cvars,
     ) -> Result<(), JsValue> {
-        dbg_textf!("{}", env!("GIT_VERSION"));
-
         // Handle input early so pause works immediately.
         // LATER Keep timestamps of input events. When splitting frame into multiple steps, update input each step.
         self.server.gs.inputs_prev.update(&self.server.gs.players);
@@ -251,9 +249,6 @@ impl Server {
         let diff_scaled = self.real_time_delta * cvars.d_speed;
         let game_time_target = self.gs.game_time + diff_scaled;
 
-        dbg_textd!(self.gs.game_time);
-        dbg_textd!(self.gs.game_time_prev);
-
         for (handle, player) in self.gs.players.iter() {
             if player.input.pause && !self.gs.inputs_prev.get(handle).pause {
                 self.paused = !self.paused;
@@ -262,11 +257,6 @@ impl Server {
         if !self.paused {
             self.gamelogic(cvars, game_time_target);
         }
-
-        // Print these even while paused
-        dbg_textf!("vehicle count: {}", self.gs.vehicles.len());
-        dbg_textf!("projectile count: {}", self.gs.projectiles.len());
-        dbg_textf!("explosion count: {}", self.gs.explosions.len());
     }
 
     fn gamelogic(&mut self, cvars: &Cvars, game_time_target: f64) {
@@ -302,6 +292,12 @@ impl Server {
         self.gs.game_time = game_time;
         self.gs.dt = self.gs.game_time - self.gs.game_time_prev;
 
+        debugging::cleanup();
+
+        dbg_textf!("{}", env!("GIT_VERSION"));
+        dbg_textd!(self.gs.game_time);
+        dbg_textd!(self.gs.game_time_prev);
+
         systems::cleanup(cvars, &mut self.gs);
 
         systems::ai::ai(cvars, &mut self.gs);
@@ -325,5 +321,9 @@ impl Server {
         systems::projectiles_timeout(cvars, &mut self.gs);
 
         systems::self_destruct(cvars, &mut self.gs);
+
+        dbg_textf!("vehicle count: {}", self.gs.vehicles.len());
+        dbg_textf!("projectile count: {}", self.gs.projectiles.len());
+        dbg_textf!("explosion count: {}", self.gs.explosions.len());
     }
 }
