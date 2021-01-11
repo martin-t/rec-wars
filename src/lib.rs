@@ -8,6 +8,7 @@
 #![warn(unreachable_pub)]
 #![warn(unused)]
 #![warn(clippy::all)]
+#![allow(clippy::needless_range_loop)] // False positives
 
 #[macro_use]
 mod debugging; // keep first so the macros are available everywhere
@@ -36,6 +37,29 @@ use crate::{
     game_state::{GameState, Input},
     map::{Map, Vec2f},
 };
+
+const BOT_NAMES: [&str; 20] = [
+    "Dr. Dead",
+    "Sir Hurt",
+    "Mr. Pain",
+    "PhD. Torture",
+    "Mrs. Chestwound",
+    "Ms. Dismember",
+    "Don Lobotomy",
+    "Lt. Dead",
+    "Sgt. Dead",
+    "Private Dead",
+    "Colonel Dead",
+    "Captain Dead",
+    "Major Dead",
+    "Commander Dead",
+    "Díotóir",
+    "Fireman",
+    "Goldfinger",
+    "Silverfinger",
+    "Bronzefinger",
+    "President Dead",
+];
 
 #[wasm_bindgen]
 #[derive(Debug)]
@@ -108,8 +132,12 @@ impl Game {
             "Tiles per bot: {}",
             (map.width() * map.height()) as f64 / bots_count as f64
         );
-        for i in 1..bots_count {
-            let name = format!("Bot {}", i);
+        for i in 0..bots_count {
+            let name = if i < BOT_NAMES.len() {
+                BOT_NAMES[i].to_owned()
+            } else {
+                format!("Bot {}", i + 1)
+            };
             let player = Player::new(name);
             let player_handle = gs.players.insert(player);
             gs.ais.insert(Ai::new(player_handle));
