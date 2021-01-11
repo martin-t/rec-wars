@@ -180,6 +180,7 @@ async function run() {
             console.log(performance.now(), "up", event.key);
         }
 
+        // Single letters need toLowerCase to be detected when shift is held.
         for (const action in binds) {
             if (binds[action].includes(event.key.toLowerCase())) {
                 input[action] = false;

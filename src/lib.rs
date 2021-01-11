@@ -140,6 +140,7 @@ impl Game {
                 performance: web_sys::window().unwrap().performance().unwrap(),
                 map,
                 gs,
+                dt_carry: 0.0,
                 real_time: 0.0,
                 real_time_prev: 0.0,
                 real_time_delta: 0.0,
@@ -233,6 +234,8 @@ pub struct Server {
     performance: Performance,
     map: Map,
     gs: GameState,
+    /// Game time left over from previous update.
+    dt_carry: f64,
     /// Time since game started in seconds. Increases at wall clock speed even when paused.
     ///
     /// This is not meant to be used for anything that affects gameplay - use `gs.game_time` instead.
@@ -256,36 +259,39 @@ impl Server {
         self.real_time = real_time;
         self.real_time_delta = self.real_time - self.real_time_prev;
 
-        let diff_scaled = self.real_time_delta * cvars.d_speed;
-        let game_time_target = self.gs.game_time + diff_scaled;
-
         for (handle, player) in self.gs.players.iter() {
             if player.input.pause && !self.gs.inputs_prev.get(handle).pause {
                 self.paused = !self.paused;
             }
         }
         if !self.paused {
-            self.gamelogic(cvars, game_time_target);
+            let dt_update = self.real_time_delta * cvars.d_speed;
+            self.gamelogic(cvars, dt_update);
         }
     }
 
-    fn gamelogic(&mut self, cvars: &Cvars, game_time_target: f64) {
+    fn gamelogic(&mut self, cvars: &Cvars, dt_update: f64) {
         // TODO prevent death spirals
         // LATER impl the other modes
         match cvars.sv_gamelogic_mode {
             TickrateMode::Synchronized => {
+                let game_time_target = self.gs.game_time + dt_update;
                 self.gamelogic_tick(cvars, game_time_target);
             }
             TickrateMode::SynchronizedBounded => unimplemented!(),
-            TickrateMode::Fixed => loop {
-                // gs.game_time is still the previous frame here
-                let remaining = game_time_target - self.gs.game_time;
-                let dt = 1.0 / cvars.sv_gamelogic_fixed_fps;
-                if remaining < dt {
-                    break;
+            TickrateMode::Fixed => {
+                let game_time_target = self.gs.game_time + self.dt_carry + dt_update;
+                loop {
+                    // gs.game_time is still the previous frame here
+                    let remaining = game_time_target - self.gs.game_time;
+                    let dt = 1.0 / cvars.sv_gamelogic_fixed_fps;
+                    if remaining < dt {
+                        self.dt_carry = remaining;
+                        break;
+                    }
+                    self.gamelogic_tick(cvars, self.gs.game_time + dt);
                 }
-                self.gamelogic_tick(cvars, self.gs.game_time + dt);
-            },
+            }
             TickrateMode::FixedOrSmaller => unimplemented!(),
         }
     }
