@@ -37,17 +37,25 @@ pub(crate) fn cleanup(cvars: &Cvars, gs: &mut GameState) {
 pub(crate) fn respawning(cvars: &Cvars, gs: &mut GameState, map: &Map) {
     for player_handle in gs.players.iter_handles() {
         let player = &mut gs.players[player_handle];
+        let vehicle_handle = player.vehicle.unwrap();
+        if !gs.vehicles[vehicle_handle].destroyed() {
+            continue;
+        }
+
         let input_prev = gs.inputs_prev.get(player_handle);
 
-        if let Some(vehicle_handle) = player.vehicle {
-            let destroyed = gs.vehicles[vehicle_handle].destroyed();
+        // Respawn on release so the vehicle doesn't immediately shoot.
+        // Require the whole press and release cycle to happen while dead
+        // so releasing fire after dying doesn't respawn immediately
+        // even if respawn delay is 0.
 
-            if destroyed && player.input.fire && !input_prev.fire {
-                gs.vehicles.remove(vehicle_handle).unwrap();
+        if player.input.fire && !input_prev.fire {
+            player.can_respawn = true;
+        }
 
-                spawn_vehicle(cvars, gs, map, player_handle, true);
-            }
-        } else if player.input.fire && !input_prev.fire {
+        if !player.input.fire && input_prev.fire && player.can_respawn {
+            player.can_respawn = false;
+            gs.vehicles.remove(vehicle_handle).unwrap();
             spawn_vehicle(cvars, gs, map, player_handle, true);
         }
     }

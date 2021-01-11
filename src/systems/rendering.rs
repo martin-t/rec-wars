@@ -38,7 +38,6 @@ pub(crate) fn draw(game: &Game, cvars: &Cvars) -> Result<(), JsValue> {
         .set_image_smoothing_enabled(cvars.r_smoothing);
 
     let player = &server.gs.players[client.player_handle];
-    // TODO what if no vehicle
     let player_veh_pos = server.gs.vehicles[player.vehicle.unwrap()].pos;
     let player_entity_pos = if let Some(gm_handle) = player.guided_missile {
         server.gs.projectiles[gm_handle].pos

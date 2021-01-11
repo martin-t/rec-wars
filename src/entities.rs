@@ -23,6 +23,7 @@ pub(crate) struct Player {
     /// - missile input is not reset after death / launching another (results in flying in circles)
     /// - missile stops after player dies / launches another
     pub(crate) input: Input,
+    pub(crate) can_respawn: bool,
     pub(crate) vehicle: Option<Index>,
     pub(crate) guided_missile: Option<Index>,
     pub(crate) cur_weapon: Weapon,
@@ -34,6 +35,7 @@ impl Player {
         Self {
             name,
             input: Input::new(),
+            can_respawn: false,
             vehicle: None,
             guided_missile: None,
             cur_weapon: Weapon::Mg,
