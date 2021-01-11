@@ -16,6 +16,3 @@ find . | grep "\.rs$" | xargs touch
 # Technically --all-features doesn't check all code when something is *disabled* by a feature
 # but that is discouraged and no such feature existed at the time this was added.
 cargo clippy --all-features -- --deny warnings
-
-# https://github.com/rust-random/getrandom/issues/175
-cargo audit --deny warnings --ignore RUSTSEC-2020-0056
