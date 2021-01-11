@@ -49,11 +49,11 @@ pub(crate) fn respawning(cvars: &Cvars, gs: &mut GameState, map: &Map) {
         // so releasing fire after dying doesn't respawn immediately
         // even if respawn delay is 0.
 
-        if player.input.fire && !input_prev.fire {
+        if !input_prev.fire && player.input.fire {
             player.can_respawn = true;
         }
 
-        if !player.input.fire && input_prev.fire && player.can_respawn {
+        if input_prev.fire && !player.input.fire && player.can_respawn {
             player.can_respawn = false;
             gs.vehicles.remove(vehicle_handle).unwrap();
             spawn_vehicle(cvars, gs, map, player_handle, true);
@@ -230,11 +230,11 @@ pub(crate) fn player_logic(gs: &mut GameState) {
         let input_prev = gs.inputs_prev.get(player_handle);
 
         // Change weapon
-        if player.input.prev_weapon && !input_prev.prev_weapon {
+        if !input_prev.prev_weapon && player.input.prev_weapon {
             let prev = (player.cur_weapon as u8 + WEAPS_CNT - 1) % WEAPS_CNT;
             player.cur_weapon = Weapon::n(prev).unwrap();
         }
-        if player.input.next_weapon && !input_prev.next_weapon {
+        if !input_prev.next_weapon && player.input.next_weapon {
             let next = (player.cur_weapon as u8 + 1) % WEAPS_CNT;
             player.cur_weapon = Weapon::n(next).unwrap();
         }
@@ -250,10 +250,10 @@ pub(crate) fn vehicle_logic(cvars: &Cvars, gs: &mut GameState) {
         let input_prev = gs.inputs_prev.get(vehicle.owner);
 
         // Turret turning
-        if player.input.turret_left && !input_prev.turret_left {
+        if !input_prev.turret_left && player.input.turret_left {
             vehicle.turret_angle_wanted -= cvars.g_turret_turn_step_angle_deg.to_radians();
         }
-        if player.input.turret_right && !input_prev.turret_right {
+        if !input_prev.turret_right && player.input.turret_right {
             vehicle.turret_angle_wanted += cvars.g_turret_turn_step_angle_deg.to_radians();
         }
         vehicle.turret_angle_wanted = vehicle.turret_angle_wanted.rem_euclid(2.0 * PI);
