@@ -59,7 +59,7 @@ macro_rules! dbg_logf {
 #[macro_export]
 macro_rules! dbg_logd {
     ( $( $e:expr ),* ) => {
-        let s = $crate::__print_pairs!( $( $e ),* );
+        let s = $crate::__format_pairs!( $( $e ),* );
         web_sys::console::log_1(&s.into());
     };
 }
