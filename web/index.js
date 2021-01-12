@@ -378,13 +378,12 @@ async function run() {
         window.game = game;
 
         const frame = (real_time_ms) => {
+            // Apparently it's best practice to call requestAnimationFrame at the start of the frame.
+            // However if something throws an exception, it'll likely happen every frame and
+            // spam the console, making firefox painfully slow. In that case, cancel the next frame.
+            // Note that rust panics seem to throw exceptions but ALSO abort the program after the catch runs.
+            const handle = window.requestAnimationFrame(frame);
             try {
-                // Apparently it's best practice to call requestAnimationFrame at the start of the frame.
-                // However if something throws an exception, it'll likely happen every frame and
-                // spam the console, making firefox painfully slow. In that case, cancel the next frame.
-                // Note that rust panics seem to throw exceptions but ALSO abort the program after the catch runs.
-                const handle = window.requestAnimationFrame(frame);
-
                 if (log_time_checkbox.checked) {
                     console.log("performance.now():", performance.now(), "real_time_ms:", real_time_ms);
                 }
