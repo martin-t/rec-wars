@@ -490,7 +490,8 @@ pub(crate) fn draw(game: &Game, cvars: &Cvars) -> Result<(), JsValue> {
         .position(|&(handle, _)| handle == client.player_handle)
         .unwrap();
     let points_diff = if current_index == 0 {
-        if player_points.len() == 2 {
+        if player_points.len() == 1 {
+            // The player is alone.
             0
         } else {
             player_points[current_index].1 - player_points[1].1
