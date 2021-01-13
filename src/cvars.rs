@@ -1046,11 +1046,6 @@ pub enum TickrateMode {
     /// Same FPS as rendering - runs one tick with variable timestep before rendering.
     /// This means simulation always catches up to rendering (wall-clock time) exactly.
     Synchronized,
-    /// Same FPS as rendering unless the step would be too large or too small.
-    /// Too large steps are split into smaller ones.
-    /// Too small steps are skipped and the time carries over to the next render frame,
-    /// this means simulation can be very slightly behind what should be rendered.
-    SynchronizedBounded,
     /// Fixed FPS - always the same timestep, leftover time carries over to the next render frame.
     /// This means simulation can be only very slightly or up to almost a full frame
     /// behind what should be rendered *and* this delay varries.

@@ -306,7 +306,6 @@ impl Server {
                 let game_time_target = self.gs.game_time + dt_update;
                 self.gamelogic_tick(cvars, game_time_target);
             }
-            TickrateMode::SynchronizedBounded => unimplemented!(),
             TickrateMode::Fixed => {
                 let game_time_target = self.gs.game_time + self.dt_carry + dt_update;
                 loop {
