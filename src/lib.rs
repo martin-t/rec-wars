@@ -224,6 +224,14 @@ impl Game {
 
         Ok(())
     }
+
+    pub fn visibility_change(&mut self, cvars: &Cvars, hidden: bool) {
+        if hidden && cvars.sv_auto_pause_on_minimize {
+            self.server.paused = true;
+        } else if !hidden && cvars.sv_auto_unpause_on_restore {
+            self.server.paused = false;
+        }
+    }
 }
 
 #[wasm_bindgen]

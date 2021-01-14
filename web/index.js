@@ -377,6 +377,10 @@ async function run() {
         window.cvars = cvars;
         window.game = game;
 
+        document.addEventListener("visibilitychange", () => {
+            game.visibility_change(cvars, document.hidden);
+        });
+
         const frame = (real_time_ms) => {
             // Apparently it's best practice to call requestAnimationFrame at the start of the frame.
             // However if something throws an exception, it'll likely happen every frame and

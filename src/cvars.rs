@@ -344,6 +344,9 @@ pub struct Cvars {
     pub r_explosions_reverse: bool,
     pub r_smoothing: bool,
 
+    pub sv_auto_pause_on_minimize: bool,
+    pub sv_auto_unpause_on_restore: bool,
+
     pub sv_gamelogic_mode: TickrateMode,
     pub sv_gamelogic_fixed_fps: f64,
 }
@@ -1025,6 +1028,9 @@ impl Default for Cvars {
             // - Rockets look better if hitting the same spot.
             r_explosions_reverse: false,
             r_smoothing: false,
+
+            sv_auto_pause_on_minimize: true,
+            sv_auto_unpause_on_restore: false,
 
             sv_gamelogic_mode: TickrateMode::Synchronized,
             sv_gamelogic_fixed_fps: 150.0,
