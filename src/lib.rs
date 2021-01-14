@@ -288,7 +288,8 @@ impl Server {
         self.real_time_delta = self.real_time - self.real_time_prev;
 
         for (handle, player) in self.gs.players.iter() {
-            if player.input.pause && !self.gs.inputs_prev.get(handle).pause {
+            let input_prev = self.gs.inputs_prev.get(handle);
+            if !input_prev.pause && player.input.pause {
                 self.paused = !self.paused;
             }
         }
