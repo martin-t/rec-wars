@@ -167,8 +167,9 @@ impl Game {
             server: Server {
                 performance: web_sys::window().unwrap().performance().unwrap(),
                 map,
-                gs,
+                gs: gs.clone(),
                 dt_carry: 0.0,
+                gs_fixed: gs,
                 real_time: 0.0,
                 real_time_prev: 0.0,
                 real_time_delta: 0.0,
@@ -199,6 +200,11 @@ impl Game {
         // LATER Keep timestamps of input events. When splitting frame into multiple steps, update input each step.
         self.server.gs.inputs_prev.update(&self.server.gs.players);
         self.server.gs.players[self.client.player_handle].input = *input;
+        self.server
+            .gs_fixed
+            .inputs_prev
+            .update(&self.server.gs_fixed.players);
+        self.server.gs_fixed.players[self.client.player_handle].input = *input;
 
         let start = self.server.performance.now();
 
@@ -272,6 +278,7 @@ pub struct Server {
     gs: GameState,
     /// Game time left over from previous update.
     dt_carry: f64,
+    gs_fixed: GameState,
     /// Time since game started in seconds. Increases at wall clock speed even when paused.
     ///
     /// This is not meant to be used for anything that affects gameplay - use `gs.game_time` instead.
@@ -328,8 +335,29 @@ impl Server {
                     self.gamelogic_tick(cvars, self.gs.game_time + dt);
                 }
             }
-            TickrateMode::FixedOrSmaller => unimplemented!(),
+            TickrateMode::FixedOrSmaller => {
+                // FIXME
+                std::mem::swap(&mut self.gs, &mut self.gs_fixed);
+                let game_time_target = self.gs.game_time + dt_update;
+                let mut remaining;
+                loop {
+                    // gs.game_time is still the previous frame here
+                    remaining = game_time_target - self.gs.game_time;
+                    let dt = 1.0 / cvars.sv_gamelogic_fixed_fps;
+                    if remaining < dt {
+                        self.gs_fixed = self.gs.clone();
+                        break;
+                    }
+                    self.gamelogic_tick(cvars, self.gs.game_time + dt);
+                }
+                if cvars.d_dbg {
+                    dbg_logd!(remaining);
+                }
+                self.gamelogic_tick(cvars, self.gs.game_time + remaining);
+                // TODO skip too small steps?
+            }
         }
+        // TODO don't use game_time here?
     }
 
     fn gamelogic_tick(&mut self, cvars: &Cvars, game_time: f64) {
