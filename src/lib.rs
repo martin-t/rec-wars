@@ -198,13 +198,7 @@ impl Game {
     ) -> Result<(), JsValue> {
         // Handle input early so pause works immediately.
         // LATER Keep timestamps of input events. When splitting frame into multiple steps, update input each step.
-        self.server.gs.inputs_prev.update(&self.server.gs.players);
-        self.server.gs.players[self.client.player_handle].input = *input;
-        self.server
-            .gs_fixed
-            .inputs_prev
-            .update(&self.server.gs_fixed.players);
-        self.server.gs_fixed.players[self.client.player_handle].input = *input;
+        self.server.input(self.client.player_handle, *input);
 
         let start = self.server.performance.now();
 
@@ -293,6 +287,13 @@ pub struct Server {
 }
 
 impl Server {
+    fn input(&mut self, player_handle: Index, input: Input) {
+        self.gs.inputs_prev.update(&self.gs.players);
+        self.gs.players[player_handle].input = input;
+        self.gs_fixed.inputs_prev.update(&self.gs_fixed.players);
+        self.gs_fixed.players[player_handle].input = input;
+    }
+
     /// Run gamelogic frame(s) up to current time (in seconds).
     fn update(&mut self, cvars: &Cvars, real_time: f64) {
         // Recommended reading: https://gafferongames.com/post/fix_your_timestep/
@@ -317,6 +318,7 @@ impl Server {
     fn gamelogic(&mut self, cvars: &Cvars, dt_update: f64) {
         // TODO prevent death spirals
         // LATER impl the other modes
+        // TODO allow switching at runtime
         match cvars.sv_gamelogic_mode {
             TickrateMode::Synchronized => {
                 let game_time_target = self.gs.game_time + dt_update;
@@ -336,7 +338,8 @@ impl Server {
                 }
             }
             TickrateMode::FixedOrSmaller => {
-                // FIXME
+                // FIXME http://localhost:8000/web/?map=Atrium&bots_max=5&sv_gamelogic_mode=2&sv_gamelogic_fixed_fps=90
+
                 std::mem::swap(&mut self.gs, &mut self.gs_fixed);
                 let game_time_target = self.gs.game_time + dt_update;
                 let mut remaining;
