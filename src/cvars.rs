@@ -34,6 +34,10 @@ pub struct Cvars {
 
     pub bots_max: usize,
 
+    /// "Temporary" cvar for quick testing. Normally unused but kept here
+    /// so I don't have to add a cvar each time I want a quick toggle.
+    pub d_dbg: bool,
+
     /// Master switch for debug output - the d_draw_* group.
     pub d_draw: bool,
     pub d_draw_crosses: bool,
@@ -730,6 +734,8 @@ impl Default for Cvars {
             ai: true,
 
             bots_max: 20,
+
+            d_dbg: false,
 
             d_draw: true,
             d_draw_crosses: true,
