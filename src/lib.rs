@@ -250,6 +250,7 @@ pub struct Client {
     render_fps: Fps,
     render_durations: Durations,
     player_handle: Index,
+    // ^ When adding fields, consider adding them to Debug
 }
 
 impl Debug for Client {
@@ -257,6 +258,9 @@ impl Debug for Client {
         // Override the default Debug impl - The JS types don't print anything useful.
         f.debug_struct("Parts of Client")
             .field("canvas_size", &self.canvas_size)
+            .field("render_fps", &self.render_fps)
+            .field("render_durations", &self.render_durations)
+            .field("player_handle", &self.player_handle)
             .finish()
     }
 }
