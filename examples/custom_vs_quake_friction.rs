@@ -7,7 +7,7 @@
 //! and therefore the final position is affected by framerate.
 //!
 //! Quake friction uses a different formula which takes dt into account in such a way
-//! that even friction differs based on framerate so there are two places where differences accumulate.
+//! that even velocity differs based on framerate so there are two places where differences accumulate.
 //! Quake code: https://github.com/id-Software/Quake-III-Arena/blob/master/code/game/bg_pmove.c
 //!
 //! This example shows that the effect, however, is much smaller than I expected.
