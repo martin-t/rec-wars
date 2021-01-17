@@ -2,7 +2,7 @@
 //!
 //! I tried to make friction framerate independent.
 //! If you run 30 fps, you get the same resulting velocity (ignoring float rounding errors)
-//! as 60 fps because the time delta (dt) changes too and using powf assures friction changes proportionally.
+//! as 60 fps because the time delta (dt) changes too and using powf assures friction applies proportionally.
 //! Unfortunately I didn't realize that when integrating it to get distance, the step size still matters
 //! and therefore the final position is affected by framerate.
 //!
