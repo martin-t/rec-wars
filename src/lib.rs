@@ -342,10 +342,12 @@ impl Server {
                 }
             }
             TickrateMode::FixedOrSmaller => {
-                // FIXME http://localhost:8000/web/?map=Atrium&bots_max=5&sv_gamelogic_mode=2&sv_gamelogic_fixed_fps=90
+                // FIXME Input is ignored or duplicated depending on fixed FPS
+                // http://localhost:8000/web/?map=Atrium&bots_max=5&sv_gamelogic_mode=2&sv_gamelogic_fixed_fps=90
 
-                std::mem::swap(&mut self.gs, &mut self.gs_fixed);
-                let game_time_target = self.gs.game_time + dt_update;
+                let dt_fixed = self.gs.game_time - self.gs_fixed.game_time;
+                let game_time_target = self.gs_fixed.game_time + dt_fixed + dt_update;
+                self.gs = self.gs_fixed.clone();
                 let mut remaining;
                 loop {
                     // gs.game_time is still the previous frame here
