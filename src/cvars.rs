@@ -244,6 +244,8 @@ pub struct Cvars {
     pub g_railgun_speed: f64,
     pub g_railgun_vehicle_velocity_factor: f64,
 
+    pub g_respawn_delay: f64,
+
     pub g_rockets_damage: f64,
     pub g_rockets_explosion_scale: f64,
     pub g_rockets_refire: f64,
@@ -932,6 +934,8 @@ impl Default for Cvars {
             g_railgun_reload_time: 1.0,
             g_railgun_speed: 2000.0,
             g_railgun_vehicle_velocity_factor: 0.0,
+
+            g_respawn_delay: 2.0,
 
             g_rockets_damage: 25.0, // pretty sure from orig RW testing
             g_rockets_explosion_scale: 0.5,

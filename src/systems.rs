@@ -16,7 +16,7 @@ use vek::{Clamp, LineSegment2, Wrap};
 
 use crate::{
     cvars::{Cvars, Hardpoint, MovementStats},
-    entities::{Ammo, Projectile, Vehicle, VehicleType, Weapon, WEAPS_CNT},
+    entities::{Ammo, Projectile, Respawn, Vehicle, VehicleType, Weapon, WEAPS_CNT},
     game_state::ArenaExt,
     game_state::{Explosion, GameState, Input, RailBeam},
     map::{F64Ext, Map, Vec2f},
@@ -50,11 +50,17 @@ pub(crate) fn respawning(cvars: &Cvars, gs: &mut GameState, map: &Map) {
         // even if respawn delay is 0.
 
         if !input_prev.fire && player.input.fire {
-            player.can_respawn = true;
+            player.respawn = Respawn::Pressed;
         }
 
-        if input_prev.fire && !player.input.fire && player.can_respawn {
-            player.can_respawn = false;
+        if player.respawn == Respawn::Pressed && input_prev.fire && !player.input.fire {
+            player.respawn = Respawn::Scheduled;
+        }
+
+        if player.respawn == Respawn::Scheduled
+            && player.death_time + cvars.g_respawn_delay < gs.game_time
+        {
+            player.respawn = Respawn::No;
             gs.vehicles.remove(vehicle_handle).unwrap();
             spawn_vehicle(cvars, gs, map, player_handle, true);
         }
@@ -559,6 +565,8 @@ pub(crate) fn damage(
     }
     let victim = &mut gs.players[vehicle.owner];
     victim.score.deaths += 1;
+
+    victim.death_time = gs.game_time;
 }
 
 /// Right now, CBs are the only timed projectiles, long term, might wanna add timeouts to more
