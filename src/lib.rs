@@ -29,13 +29,13 @@ use thunderdome::Index;
 use timing::{Durations, Fps};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
-use web_sys::{CanvasRenderingContext2d, HtmlImageElement, Performance};
+use web_sys::{CanvasRenderingContext2d, HtmlCanvasElement, HtmlImageElement, Performance};
 
 use crate::{
     cvars::{Cvars, TickrateMode},
     entities::{Ai, Player},
     game_state::{GameState, Input},
-    map::{Map, Vec2f},
+    map::Map,
 };
 
 const BOT_NAMES: [&str; 20] = [
@@ -74,9 +74,8 @@ impl Game {
     #[allow(clippy::too_many_arguments)]
     pub fn new(
         cvars: &Cvars,
+        canvas: HtmlCanvasElement,
         context: CanvasRenderingContext2d,
-        width: f64,
-        height: f64,
         array_tiles: Array,
         array_vehicles: Array,
         array_wrecks: Array,
@@ -149,6 +148,7 @@ impl Game {
 
         Self {
             client: Client {
+                canvas,
                 context,
                 imgs_tiles,
                 imgs_vehicles,
@@ -159,7 +159,6 @@ impl Game {
                 img_gm,
                 img_explosion,
                 img_explosion_cyan,
-                canvas_size: Vec2f::new(width, height),
                 render_fps: Fps::new(),
                 render_durations: Durations::new(),
                 player_handle: player1_handle,
@@ -236,6 +235,7 @@ impl Game {
 
 #[wasm_bindgen]
 pub struct Client {
+    canvas: HtmlCanvasElement,
     context: CanvasRenderingContext2d,
     imgs_tiles: Vec<HtmlImageElement>,
     imgs_vehicles: Vec<HtmlImageElement>,
@@ -246,7 +246,6 @@ pub struct Client {
     img_gm: HtmlImageElement,
     img_explosion: HtmlImageElement,
     img_explosion_cyan: HtmlImageElement,
-    canvas_size: Vec2f,
     render_fps: Fps,
     render_durations: Durations,
     player_handle: Index,
@@ -257,7 +256,6 @@ impl Debug for Client {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         // Override the default Debug impl - The JS types don't print anything useful.
         f.debug_struct("Parts of Client")
-            .field("canvas_size", &self.canvas_size)
             .field("render_fps", &self.render_fps)
             .field("render_durations", &self.render_durations)
             .field("player_handle", &self.player_handle)

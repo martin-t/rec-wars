@@ -28,6 +28,7 @@ pub(crate) fn draw(game: &Game, cvars: &Cvars) -> Result<(), JsValue> {
 
     let client = &game.client;
     let server = &game.server;
+
     // No smoothing makes nicer rockets (more like original RW).
     // This also means everything is aligned to pixels
     // without the need to explicitly round x and y in draw calls to whole numbers.
@@ -47,7 +48,8 @@ pub(crate) fn draw(game: &Game, cvars: &Cvars) -> Result<(), JsValue> {
 
     // Don't put the camera so close to the edge that it would render area outside the map.
     // TODO handle maps smaller than canvas (currently crashes on unreachable)
-    let camera_min = client.canvas_size / 2.0;
+    let canvas_size = Vec2f::new(client.canvas.width() as f64, client.canvas.height() as f64);
+    let camera_min = canvas_size / 2.0;
     let map_size = server.map.maxs();
     let camera_max = map_size - camera_min;
     let camera_pos = player_entity_pos.clamped(camera_min, camera_max);
@@ -73,10 +75,10 @@ pub(crate) fn draw(game: &Game, cvars: &Cvars) -> Result<(), JsValue> {
     // Draw non-walls
     let mut r = top_left_index.y;
     let mut y = -bg_offset.y;
-    while y < client.canvas_size.y {
+    while y < canvas_size.y {
         let mut c = top_left_index.x;
         let mut x = -bg_offset.x;
-        while x < client.canvas_size.x {
+        while x < canvas_size.x {
             let tile = server.map.col_row(c, r);
 
             if server.map.surface_of(tile).kind != Kind::Wall {
@@ -105,8 +107,8 @@ pub(crate) fn draw(game: &Game, cvars: &Cvars) -> Result<(), JsValue> {
         // There is no single object bigger than TILE_SIZE (except lines).
         scr_pos.x < -TILE_SIZE
             || scr_pos.y < -TILE_SIZE
-            || scr_pos.x > client.canvas_size.x + TILE_SIZE
-            || scr_pos.y > client.canvas_size.y + TILE_SIZE
+            || scr_pos.x > canvas_size.x + TILE_SIZE
+            || scr_pos.y > canvas_size.y + TILE_SIZE
     };
 
     // Draw MGs
@@ -312,10 +314,10 @@ pub(crate) fn draw(game: &Game, cvars: &Cvars) -> Result<(), JsValue> {
     // They are above explosions and turrets, just like in RecWar.
     let mut r = top_left_index.y;
     let mut y = -bg_offset.y;
-    while y < client.canvas_size.y {
+    while y < canvas_size.y {
         let mut c = top_left_index.x;
         let mut x = -bg_offset.x;
-        while x < client.canvas_size.x {
+        while x < canvas_size.x {
             let tile = server.map.col_row(c, r);
 
             if server.map.surface_of(tile).kind == Kind::Wall {
@@ -465,7 +467,7 @@ pub(crate) fn draw(game: &Game, cvars: &Cvars) -> Result<(), JsValue> {
     client.context.set_shadow_offset_y(cvars.hud_score_shadow_y);
     let score_font = format!("{}px sans-serif", cvars.hud_score_font_size);
     client.context.set_font(&score_font);
-    let score_pos = hud_pos(client, cvars.hud_score_x, cvars.hud_score_y);
+    let score_pos = hud_pos(canvas_size, cvars.hud_score_x, cvars.hud_score_y);
     client.context.fill_text(
         &(player.score.kills - player.score.deaths).to_string(),
         score_pos.x,
@@ -484,7 +486,7 @@ pub(crate) fn draw(game: &Game, cvars: &Cvars) -> Result<(), JsValue> {
         .set_shadow_offset_y(cvars.hud_ranking_shadow_y);
     let ranking_font = format!("{}px sans-serif", cvars.hud_ranking_font_size);
     client.context.set_font(&ranking_font);
-    let ranking_pos = hud_pos(client, cvars.hud_ranking_x, cvars.hud_ranking_y);
+    let ranking_pos = hud_pos(canvas_size, cvars.hud_ranking_x, cvars.hud_ranking_y);
     let current_index = player_points
         .iter()
         .position(|&(handle, _)| handle == client.player_handle)
@@ -536,7 +538,7 @@ pub(crate) fn draw(game: &Game, cvars: &Cvars) -> Result<(), JsValue> {
     let g = player_vehicle.hp_fraction.clamped(0.0, 0.5) * 2.0;
     let rgb = format!("rgb({}, {}, 0)", r * 255.0, g * 255.0);
     client.context.set_fill_style(&rgb.into());
-    let hp_pos = hud_pos(client, cvars.hud_hp_x, cvars.hud_hp_y);
+    let hp_pos = hud_pos(canvas_size, cvars.hud_hp_x, cvars.hud_hp_y);
     client.context.fill_rect(
         hp_pos.x,
         hp_pos.y,
@@ -566,7 +568,7 @@ pub(crate) fn draw(game: &Game, cvars: &Cvars) -> Result<(), JsValue> {
             cur_diff / max_diff
         }
     };
-    let ammo_pos = hud_pos(client, cvars.hud_ammo_x, cvars.hud_ammo_y);
+    let ammo_pos = hud_pos(canvas_size, cvars.hud_ammo_x, cvars.hud_ammo_y);
     client.context.fill_rect(
         ammo_pos.x,
         ammo_pos.y,
@@ -599,7 +601,11 @@ pub(crate) fn draw(game: &Game, cvars: &Cvars) -> Result<(), JsValue> {
     draw_img_center(
         client,
         &client.imgs_weapon_icons[player.cur_weapon as usize],
-        hud_pos(client, cvars.hud_weapon_icon_x, cvars.hud_weapon_icon_y),
+        hud_pos(
+            canvas_size,
+            cvars.hud_weapon_icon_x,
+            cvars.hud_weapon_icon_y,
+        ),
         0.0,
     )?;
     client.context.set_shadow_offset_x(0.0);
@@ -616,8 +622,8 @@ pub(crate) fn draw(game: &Game, cvars: &Cvars) -> Result<(), JsValue> {
         client.context.set_fill_style(&"white".into());
 
         let height = (server.gs.players.len() + 1) as f64 * cvars.hud_scoreboard_line_height;
-        let mut y = (client.canvas_size.y - height) / 2.0;
-        let x = (client.canvas_size.x - 200.0) / 2.0;
+        let mut y = (canvas_size.y - height) / 2.0;
+        let x = (canvas_size.x - 200.0) / 2.0;
 
         let header_font = format!("bold {}px sans-serif", cvars.hud_scoreboard_font_size);
         client.context.set_font(&header_font);
@@ -670,7 +676,7 @@ pub(crate) fn draw(game: &Game, cvars: &Cvars) -> Result<(), JsValue> {
 
     // Draw FPS
     if cvars.d_fps {
-        let fps_pos = hud_pos(client, cvars.d_fps_x, cvars.d_fps_y);
+        let fps_pos = hud_pos(canvas_size, cvars.d_fps_x, cvars.d_fps_y);
         client.context.fill_text(
             &format!(
                 "update FPS: {:.1}   gamelogic FPS: {:.1}   render FPS: {:.1}",
@@ -687,28 +693,28 @@ pub(crate) fn draw(game: &Game, cvars: &Cvars) -> Result<(), JsValue> {
     if cvars.d_draw && cvars.d_draw_perf {
         client.context.fill_text(
             &format!("last {} frames:", cvars.d_timing_samples),
-            client.canvas_size.x - 150.0,
-            client.canvas_size.y - 90.0,
+            canvas_size.x - 150.0,
+            canvas_size.y - 90.0,
         )?;
         if let Some((avg, max)) = server.update_durations.get_stats() {
             client.context.fill_text(
                 &format!("update avg: {:.1}, max: {:.1}", avg, max),
-                client.canvas_size.x - 150.0,
-                client.canvas_size.y - 75.0,
+                canvas_size.x - 150.0,
+                canvas_size.y - 75.0,
             )?;
         }
         if let Some((avg, max)) = server.gamelogic_durations.get_stats() {
             client.context.fill_text(
                 &format!("gamelogic avg: {:.1}, max: {:.1}", avg, max),
-                client.canvas_size.x - 150.0,
-                client.canvas_size.y - 60.0,
+                canvas_size.x - 150.0,
+                canvas_size.y - 60.0,
             )?;
         }
         if let Some((avg, max)) = client.render_durations.get_stats() {
             client.context.fill_text(
                 &format!("render avg: {:.1}, max: {:.1}", avg, max),
-                client.canvas_size.x - 150.0,
-                client.canvas_size.y - 45.0,
+                canvas_size.x - 150.0,
+                canvas_size.y - 45.0,
             )?;
         }
     }
@@ -812,12 +818,12 @@ fn draw_img_offset(
 
 /// If x or y are negative, count them from the right or bottom respectively.
 /// Useful to make HUD config cvars work for any canvas size.
-fn hud_pos(client: &Client, mut x: f64, mut y: f64) -> Vec2f {
+fn hud_pos(canvas_size: Vec2f, mut x: f64, mut y: f64) -> Vec2f {
     if x < 0.0 {
-        x += client.canvas_size.x;
+        x += canvas_size.x;
     }
     if y < 0.0 {
-        y += client.canvas_size.y;
+        y += canvas_size.y;
     }
     Vec2f::new(x, y)
 }

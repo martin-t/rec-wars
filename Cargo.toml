@@ -62,6 +62,7 @@ features = [
   "CanvasRenderingContext2d",
   "console",
   "DomMatrix",
+  "HtmlCanvasElement",
   "HtmlImageElement",
   "Performance",
   "Window",

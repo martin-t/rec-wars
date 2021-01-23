@@ -126,7 +126,8 @@ async function run() {
     // or better yet, figure out how webpack works
 
     const canvas = document.getElementById("canvas");
-    // It appears disabling alpha just means that the canvas itself won't be transparent to show other elements behind it.
+    // Disable alpha in case it helps perf a tiny bit.
+    // It appears disabling it just means that the canvas itself won't be transparent to show other elements behind it.
     // Transparency can still be used within the canvas e.g. when drawing overlapping images.
     const ctx = canvas.getContext("2d", { alpha: false });
 
@@ -368,7 +369,7 @@ async function run() {
             }
         });
 
-        const game = new Game(cvars, ctx, canvas.width, canvas.height,
+        const game = new Game(cvars, canvas, ctx,
             imgs_tiles, imgs_vehicles, imgs_wrecks, imgs_weapon_icons,
             img_rocket, img_hm, img_gm, img_explosion, img_explosion_cyan,
             tex_list_text, map_text);
