@@ -130,6 +130,10 @@ async function run() {
     // It appears disabling it just means that the canvas itself won't be transparent to show other elements behind it.
     // Transparency can still be used within the canvas e.g. when drawing overlapping images.
     const ctx = canvas.getContext("2d", { alpha: false });
+    resize(canvas);
+    window.addEventListener("resize", () => {
+        resize(canvas);
+    });
 
     const log_time_checkbox = document.getElementById("log-time-checkbox");
     log_time_checkbox.addEventListener("change", event => {
@@ -422,6 +426,20 @@ async function run() {
 
     // TODO load assets at the same time - in parallel or packed into an archive
     load_tex_list();
+}
+
+function resize(canvas) {
+    // Resizing the window doesn't update the canvas' width and height,
+    // have to do that here manually. Borrowed from macroquad:
+    // https://github.com/not-fl3/miniquad/blob/eec0d1dce08c49c5420ba81b98b2962d16f3f304/native/sapp-wasm/js/gl.js#L1151
+    var displayWidth = canvas.clientWidth;
+    var displayHeight = canvas.clientHeight;
+
+    if (canvas.width != displayWidth ||
+        canvas.height != displayHeight) {
+        canvas.width = displayWidth;
+        canvas.height = displayHeight;
+    }
 }
 
 run();
