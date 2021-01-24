@@ -34,7 +34,7 @@ The ultimate goal is to create a moddable multiplayer game playable in the brows
     - [ ] Network
     - [ ] Combination of both (plus bots)
 - [x] [Browser client](https://martin-t.gitlab.io/gitlab-pages/rec-wars/web)
-- [ ] Native client
+- [ ] Native client (Linux, Windows, macOS)
 - [ ] Game modes
     - [ ] Free For All
     - [ ] Team War
