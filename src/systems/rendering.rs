@@ -692,7 +692,7 @@ pub(crate) fn draw(game: &Game, cvars: &Cvars) -> Result<(), JsValue> {
     // Draw perf info
     if cvars.d_draw && cvars.d_draw_perf {
         client.context.fill_text(
-            &format!("last {} frames:", cvars.d_timing_samples),
+            &format!("last {} frames (in ms):", cvars.d_timing_samples),
             canvas_size.x - 150.0,
             canvas_size.y - 90.0,
         )?;
