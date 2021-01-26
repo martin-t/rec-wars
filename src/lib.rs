@@ -27,8 +27,7 @@ use js_sys::Array;
 use rand::prelude::*;
 use thunderdome::Index;
 use timing::{Durations, Fps, RawCanvasTime, Time};
-use wasm_bindgen::prelude::*;
-use wasm_bindgen::JsCast;
+use wasm_bindgen::{prelude::*, JsCast};
 use web_sys::{CanvasRenderingContext2d, HtmlCanvasElement, HtmlImageElement};
 
 use crate::{
@@ -63,13 +62,13 @@ const BOT_NAMES: [&str; 20] = [
 
 #[wasm_bindgen]
 #[derive(Debug)]
-pub struct Game {
+pub struct RawCanvasGame {
     client: Client,
     server: Server,
 }
 
 #[wasm_bindgen]
-impl Game {
+impl RawCanvasGame {
     #[wasm_bindgen(constructor)]
     #[allow(clippy::too_many_arguments)]
     pub fn new(
@@ -164,7 +163,7 @@ impl Game {
                 player_handle: player1_handle,
             },
             server: Server {
-                performance: Box::new(RawCanvasTime(
+                time: Box::new(RawCanvasTime(
                     web_sys::window().unwrap().performance().unwrap(),
                 )),
                 map,
@@ -201,14 +200,14 @@ impl Game {
         // LATER Keep timestamps of input events. When splitting frame into multiple steps, update input each step.
         self.server.input(self.client.player_handle, *input);
 
-        let start = self.server.performance.now();
+        let start = self.server.time.now();
 
         self.server
             .update_fps
             .tick(cvars.d_fps_period, self.server.real_time);
         self.server.update(cvars, real_time);
 
-        let updated = self.server.performance.now();
+        let updated = self.server.time.now();
         self.server
             .update_durations
             .add(cvars.d_timing_samples, updated - start);
@@ -218,7 +217,7 @@ impl Game {
             .tick(cvars.d_fps_period, self.server.real_time);
         systems::rendering::draw(self, cvars)?;
 
-        let rendered = self.server.performance.now();
+        let rendered = self.server.time.now();
         self.client
             .render_durations
             .add(cvars.d_timing_samples, rendered - updated);
@@ -235,7 +234,6 @@ impl Game {
     }
 }
 
-#[wasm_bindgen]
 pub struct Client {
     canvas: HtmlCanvasElement,
     context: CanvasRenderingContext2d,
@@ -265,13 +263,9 @@ impl Debug for Client {
     }
 }
 
-#[wasm_bindgen]
 #[derive(Debug)]
 pub struct Server {
-    /// I want to track update and render time in Rust so i can draw the FPS counter and keep stats.
-    /// Unfortunately, Instant::now() panics in WASM so i have to use performance.now().
-    /// And just like in JS, it has limited precision in some browsers like firefox.
-    performance: Box<dyn Time>,
+    time: Box<dyn Time>,
     map: Map,
     gs: GameState,
     /// Game time left over from previous update.
@@ -370,7 +364,7 @@ impl Server {
     }
 
     fn gamelogic_tick(&mut self, cvars: &Cvars, game_time: f64) {
-        let start = self.performance.now();
+        let start = self.time.now();
         self.gamelogic_fps.tick(cvars.d_fps_period, self.real_time);
 
         // Update time tracking variables (in seconds)
@@ -418,7 +412,7 @@ impl Server {
         dbg_textf!("projectile count: {}", self.gs.projectiles.len());
         dbg_textf!("explosion count: {}", self.gs.explosions.len());
 
-        let end = self.performance.now();
+        let end = self.time.now();
         self.gamelogic_durations
             .add(cvars.d_timing_samples, end - start);
     }

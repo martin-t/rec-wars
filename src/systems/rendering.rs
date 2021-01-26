@@ -16,11 +16,11 @@ use crate::{
     map::Vec2f,
     map::VecExt,
     map::{Kind, TILE_SIZE},
-    Client, Game,
+    Client, RawCanvasGame,
 };
 
 /// Redraw the whole canvas.
-pub(crate) fn draw(game: &Game, cvars: &Cvars) -> Result<(), JsValue> {
+pub(crate) fn draw(game: &RawCanvasGame, cvars: &Cvars) -> Result<(), JsValue> {
     // This is one long function. A lot of people will tell you that's bad™
     // because they've heard it from other people who think long functions are bad™.
     // Most of those people haven't written a game bigger than snake. Carmack says it's ok so it's ok:

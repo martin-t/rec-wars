@@ -6,6 +6,9 @@ pub(crate) trait Time: Debug {
     fn now(&self) -> f64;
 }
 
+/// I want to track update and render time in Rust so i can draw the FPS counter and keep stats.
+/// Unfortunately, Instant::now() panics in WASM so i have to use performance.now().
+/// And just like in JS, it has limited precision in some browsers like firefox.
 #[derive(Debug, Clone)]
 pub(crate) struct RawCanvasTime(pub(crate) web_sys::Performance);
 

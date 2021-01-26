@@ -12,7 +12,7 @@
 // will "boot" the module and make it ready to use. Currently browsers
 // don't support natively imported WebAssembly as an ES module, but
 // eventually the manual initialization won't be required!
-import init, { Input, Game, Cvars } from '../pkg/rec_wars.js';
+import init, { Input, RawCanvasGame, Cvars } from '../pkg/rec_wars.js';
 
 async function run() {
     // First up we need to actually load the wasm file, so we use the
@@ -369,7 +369,7 @@ async function run() {
             }
         });
 
-        const game = new Game(cvars, canvas, ctx,
+        const game = new RawCanvasGame(cvars, canvas, ctx,
             imgs_tiles, imgs_vehicles, imgs_wrecks, imgs_weapon_icons,
             img_rocket, img_hm, img_gm, img_explosion, img_explosion_cyan,
             tex_list_text, map_text);

@@ -44,6 +44,7 @@ wasm-opt = ["-O3", "--enable-mutable-globals"]  # see wasm-opt note
 [features]
 # The macroquad dependency must *not* be present when compiling to WASM+canvas,
 # otherwise it will crash with a TypeError.
+# LATER invert conditions so people can just `cargo run` to run the native client
 mq = ["macroquad", "image"]
 
 [dependencies]
