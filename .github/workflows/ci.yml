@@ -20,7 +20,7 @@ jobs:
       - run: sudo apt-get install libx11-dev libxi-dev libgl1-mesa-dev
       - uses: actions/checkout@v2
       - name: Build
-        run: cargo build --verbose
+        run: cargo build --verbose --features mq
       - name: Run tests
         run: cargo test --verbose
 
