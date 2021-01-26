@@ -57,13 +57,22 @@ Dependencies
 
 - [wasm-pack](https://github.com/rustwasm/wasm-pack) - use the [installer](https://rustwasm.github.io/wasm-pack/installer/)
 
-Compiling
----------
+Compiling and running
+---------------------
 
+### Browser version (WASM+canvas) - recommended
 - build with `wasm-pack build --target web --dev`
     - you can replace `--dev` with `--profiling` or `--release` if perf is an issue (see [Cargo.toml](Cargo.toml) for more info)
 - host with `python3 -m http.server` (or any other web server, simply opening `index.html` will *not* work though)
 - open http://localhost:8000/web/
+
+### Native version (macroquad) - WIP
+- `cargo run --features mq`
+
+### Browser version (WASM+macroquad) - WIP
+- `cargo build --bin rec-wars-macroquad --features mq  --target wasm32-unknown-unknown && mv target/wasm32-unknown-unknown/debug/rec-wars-macroquad.wasm rec-wars-macroquad.wasm`
+- host with `python3 -m http.server` (or any other web server, simply opening `macroquad.html` will *not* work though)
+- open http://localhost:8000/macroquad.html
 
 Contributing
 ------------
