@@ -22,7 +22,7 @@ jobs:
       - name: Build
         run: cargo build --verbose --features mq
       - name: Run tests
-        run: cargo test --verbose
+        run: cargo test --verbose --features mq
 
   audit:
     runs-on: ubuntu-latest
