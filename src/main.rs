@@ -292,6 +292,47 @@
 //              - stuff like long chains of iterator ops should be split
 // [ ] all the LATERs - they mean something can be done better but marking it as a todo would be just noise when grepping
 
-fn main() {
-    println!("There is no native binary yet, compile to WASM instead (see lib.rs and readme)");
+use macroquad::prelude::*;
+
+#[macroquad::main("RecWars")]
+async fn main() {
+    let texture = load_texture("assets/tiles/base.bmp").await;
+
+    loop {
+        let start = get_time();
+
+        // clear_background(RED);
+        // // Going 3d!
+        // let t = get_time();
+        // let z = t.sin() as f32 * 20.0;
+        // let x = -t.cos() as f32 * 20.0;
+        // set_camera(Camera3D {
+        //     position: vec3(x, 15., z),
+        //     up: vec3(0., 1., 0.),
+        //     target: vec3(0., 0., 0.),
+        //     ..Default::default()
+        // });
+        // draw_grid(20, 1.);
+        // draw_cube_wires(vec3(0., 1., -6.), vec3(2., 2., 2.), DARKGREEN);
+        // draw_cube_wires(vec3(0., 1., 6.), vec3(2., 2., 2.), DARKBLUE);
+        // set_default_camera();
+
+        let mut y = (get_time() * 100.0 % 64.0) as f32;
+        while y < screen_height() {
+            let mut x = (get_time() * 50.0 % 64.0) as f32;
+            while x < screen_width() {
+                draw_texture(texture, x, y, WHITE);
+                x += 64.0;
+            }
+            y += 64.0;
+        }
+
+        draw_text(&get_fps().to_string(), 400.0, 300.0, 20.0, WHITE);
+        draw_text(&get_frame_time().to_string(), 400.0, 330.0, 20.0, WHITE);
+        draw_text(&get_time().to_string(), 400.0, 360.0, 20.0, WHITE);
+
+        let end = get_time();
+        draw_text(&(end - start).to_string(), 400.0, 390.0, 20.0, WHITE);
+        next_frame().await
+    }
 }
