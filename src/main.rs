@@ -296,6 +296,8 @@ use macroquad::prelude::*;
 
 #[macroquad::main("RecWars")]
 async fn main() {
+    // TODO add CI for all build modes
+
     let texture = load_texture("assets/tiles/base.bmp").await;
 
     loop {

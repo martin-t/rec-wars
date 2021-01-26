@@ -26,10 +26,10 @@ use game_state::ArenaExt;
 use js_sys::Array;
 use rand::prelude::*;
 use thunderdome::Index;
-use timing::{Durations, Fps};
+use timing::{Durations, Fps, RawCanvasTime, Time};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
-use web_sys::{CanvasRenderingContext2d, HtmlCanvasElement, HtmlImageElement, Performance};
+use web_sys::{CanvasRenderingContext2d, HtmlCanvasElement, HtmlImageElement};
 
 use crate::{
     cvars::{Cvars, TickrateMode},
@@ -164,7 +164,9 @@ impl Game {
                 player_handle: player1_handle,
             },
             server: Server {
-                performance: web_sys::window().unwrap().performance().unwrap(),
+                performance: Box::new(RawCanvasTime(
+                    web_sys::window().unwrap().performance().unwrap(),
+                )),
                 map,
                 gs: gs.clone(),
                 dt_carry: 0.0,
@@ -269,7 +271,7 @@ pub struct Server {
     /// I want to track update and render time in Rust so i can draw the FPS counter and keep stats.
     /// Unfortunately, Instant::now() panics in WASM so i have to use performance.now().
     /// And just like in JS, it has limited precision in some browsers like firefox.
-    performance: Performance,
+    performance: Box<dyn Time>,
     map: Map,
     gs: GameState,
     /// Game time left over from previous update.

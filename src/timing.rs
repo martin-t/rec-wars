@@ -1,6 +1,30 @@
-//! Rudimentary time tracking - FPS counter and performance tracker.
+//! Rudimentary time tracking, FPS counter and performance tracker.
 
-use std::collections::VecDeque;
+use std::{collections::VecDeque, fmt::Debug};
+
+pub(crate) trait Time: Debug {
+    fn now(&self) -> f64;
+}
+
+#[derive(Debug, Clone)]
+pub(crate) struct RawCanvasTime(pub(crate) web_sys::Performance);
+
+impl Time for RawCanvasTime {
+    fn now(&self) -> f64 {
+        self.0.now()
+    }
+}
+
+#[cfg(macroquad)]
+#[derive(Debug, Clone)]
+pub(crate) struct MacroquadTime;
+
+#[cfg(macroquad)]
+impl Time for MacroquadTime {
+    fn now(&self) -> f64 {
+        macroquad::time::get_time()
+    }
+}
 
 /// Saves frame times over some period of time to measure FPS.
 #[derive(Debug, Clone)]
