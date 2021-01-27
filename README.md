@@ -61,7 +61,7 @@ Compiling and running
 ---------------------
 
 ### Browser version (WASM+canvas) - recommended
-- build with `wasm-pack build --target web --dev`
+- build with `time wasm-pack build --target web --dev -- --features raw_canvas`
     - you can replace `--dev` with `--profiling` or `--release` if perf is an issue (see [Cargo.toml](Cargo.toml) for more info)
 - host with `python3 -m http.server` (or any other web server, simply opening `index.html` will *not* work though)
 - open http://localhost:8000/web/
@@ -70,7 +70,7 @@ Compiling and running
 - `cargo run --features mq`
 
 ### Browser version (WASM+macroquad) - WIP
-- `cargo build --bin rec-wars-macroquad --features mq  --target wasm32-unknown-unknown && mv target/wasm32-unknown-unknown/debug/rec-wars-macroquad.wasm rec-wars-macroquad.wasm`
+- `cargo build --bin rec-wars-macroquad --features mq --target wasm32-unknown-unknown && mv target/wasm32-unknown-unknown/debug/rec-wars-macroquad.wasm rec-wars-macroquad.wasm`
 - host with `python3 -m http.server` (or any other web server, simply opening `macroquad.html` will *not* work though)
 - open http://localhost:8000/macroquad.html
 

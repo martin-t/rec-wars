@@ -18,11 +18,11 @@ impl Time for RawCanvasTime {
     }
 }
 
-#[cfg(macroquad)]
+#[cfg(feature = "mq")]
 #[derive(Debug, Clone)]
 pub(crate) struct MacroquadTime;
 
-#[cfg(macroquad)]
+#[cfg(feature = "mq")]
 impl Time for MacroquadTime {
     fn now(&self) -> f64 {
         macroquad::time::get_time()

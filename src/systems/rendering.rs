@@ -16,7 +16,7 @@ use crate::{
     map::Vec2f,
     map::VecExt,
     map::{Kind, TILE_SIZE},
-    Client, RawCanvasGame,
+    raw_canvas::{RawCanvasClient, RawCanvasGame},
 };
 
 /// Redraw the whole canvas.
@@ -754,18 +754,18 @@ pub(crate) fn draw(game: &RawCanvasGame, cvars: &Cvars) -> Result<(), JsValue> {
     Ok(())
 }
 
-fn move_to(client: &Client, point: Vec2f) {
+fn move_to(client: &RawCanvasClient, point: Vec2f) {
     client.context.move_to(point.x, point.y);
 }
 
-fn line_to(client: &Client, point: Vec2f) {
+fn line_to(client: &RawCanvasClient, point: Vec2f) {
     client.context.line_to(point.x, point.y);
 }
 
 /// Place the `tile`'s *top-left corner* at `scr_pos`,
 /// rotate it clockwise around its center.
 fn draw_tile(
-    client: &Client,
+    client: &RawCanvasClient,
     tile: &HtmlImageElement,
     scr_pos: Vec2f,
     angle: f64,
@@ -784,7 +784,7 @@ fn draw_tile(
 ///
 /// See Vec2f for more about the coord system and rotations.
 fn draw_img_center(
-    client: &Client,
+    client: &RawCanvasClient,
     img: &HtmlImageElement,
     scr_pos: Vec2f,
     angle: f64,
@@ -798,7 +798,7 @@ fn draw_img_center(
 ///
 /// See Vec2f for more about the coord system and rotations.
 fn draw_img_offset(
-    client: &Client,
+    client: &RawCanvasClient,
     img: &HtmlImageElement,
     scr_pos: Vec2f,
     angle: f64,
