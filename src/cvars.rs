@@ -2,6 +2,7 @@
 
 use std::default::Default;
 
+#[cfg(feature = "raw_canvas")]
 use wasm_bindgen::prelude::*;
 
 use crate::{entities::Hitbox, entities::VehicleType, entities::Weapon, map::Vec2f};
@@ -21,7 +22,7 @@ use crate::{entities::Hitbox, entities::VehicleType, entities::Weapon, map::Vec2
 /// - avoid fields that are structs
 ///     - they compile but can't be changed from JS (the change is thrown away)
 ///     - e.g. `cvars.g_tank.speed` wouldn't work
-#[wasm_bindgen]
+#[cfg_attr(feature = "raw_canvas", wasm_bindgen)]
 #[derive(Debug, Clone)]
 #[allow(missing_copy_implementations)]
 pub struct Cvars {
@@ -357,7 +358,7 @@ pub struct Cvars {
     pub sv_gamelogic_fixed_fps: f64,
 }
 
-#[wasm_bindgen]
+#[cfg_attr(feature = "raw_canvas", wasm_bindgen)]
 impl Cvars {
     /// Create a new Cvars object with the default RecWars settings.
     pub fn new_rec_wars() -> Self {
@@ -1048,7 +1049,7 @@ impl Default for Cvars {
     }
 }
 
-#[wasm_bindgen]
+#[cfg_attr(feature = "raw_canvas", wasm_bindgen)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Hardpoint {
     Chassis,
@@ -1056,7 +1057,7 @@ pub enum Hardpoint {
 }
 
 /// Various options how to handle different physics/gamelogic and rendering framerates.
-#[wasm_bindgen]
+#[cfg_attr(feature = "raw_canvas", wasm_bindgen)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum TickrateMode {
     /// Same FPS as rendering - runs one tick with variable timestep before rendering.

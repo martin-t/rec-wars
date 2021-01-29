@@ -2,7 +2,7 @@
 //! It also exports structs and entry points for the WASM+canvas browser version.
 
 // Additional warnings that are allow by default (`rustc -W help`)
-#![warn(missing_copy_implementations)]
+//#![warn(missing_copy_implementations)] TODO Keep?
 #![warn(missing_debug_implementations)]
 #![warn(trivial_casts)]
 #![warn(trivial_numeric_casts)]
@@ -14,15 +14,16 @@
 #[macro_use]
 mod debugging; // keep first so the macros are available everywhere
 
-mod cvars;
-mod entities;
-mod game_state;
-mod map;
+pub mod cvars;
+pub mod entities;
+pub mod game_state;
+pub mod map;
+pub mod server;
+mod systems;
+pub mod timing;
+
 #[cfg(feature = "raw_canvas")]
 mod raw_canvas;
-mod server;
-mod systems;
-mod timing;
 
 const BOT_NAMES: [&str; 20] = [
     "Dr. Dead",

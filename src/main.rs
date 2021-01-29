@@ -292,49 +292,213 @@
 //              - stuff like long chains of iterator ops should be split
 // [ ] all the LATERs - they mean something can be done better but marking it as a todo would be just noise when grepping
 
+use std::fs; // FIXME mq::fs?
+
+// FIXME breaks WASM+mq
+use ::rand::{prelude::SmallRng, SeedableRng};
 use macroquad::prelude::*;
+use thunderdome::Index;
+
+use rec_wars::{
+    cvars::Cvars,
+    entities::Player,
+    game_state::GameState,
+    map::{self, Kind, Vec2f, TILE_SIZE},
+    server::Server,
+    timing::{Fps, MacroquadTime},
+};
+use vek::Clamp;
+
+#[derive(Debug)]
+struct MacroquadClient {
+    render_fps: Fps,
+    player_handle: Index,
+}
 
 #[macroquad::main("RecWars")]
 async fn main() {
     // TODO add CI for all build modes
+    // TODO add all OSes to CI
+    // TODO move more init stuff from here to Server
+
+    let cvars = Cvars::new_rec_wars();
+    let rng = if cvars.d_seed == 0 {
+        // This requires the `wasm-bindgen` feature on `rand` or it crashes at runtime.
+        SmallRng::from_entropy()
+    } else {
+        SmallRng::seed_from_u64(cvars.d_seed)
+    };
+
+    let mut imgs_tiles = Vec::new();
+    for path in &[
+        "assets/tiles/g1.bmp",
+        "assets/tiles/g2.bmp",
+        "assets/tiles/g3.bmp",
+        "assets/tiles/g_stripes.bmp",
+        "assets/tiles/bunker1.bmp",
+        "assets/tiles/ice1.bmp",
+        "assets/tiles/ice.bmp",
+        "assets/tiles/ice_side.bmp",
+        "assets/tiles/ice_corner.bmp",
+        "assets/tiles/g_spawn.bmp",
+        "assets/tiles/road.bmp",
+        "assets/tiles/water.bmp",
+        "assets/tiles/snow.bmp",
+        "assets/tiles/snow2.bmp",
+        "assets/tiles/bunker2.bmp",
+        "assets/tiles/base.bmp",
+        "assets/tiles/water_side.bmp",
+        "assets/tiles/water_corner.bmp",
+        "assets/tiles/desert.bmp",
+        "assets/tiles/d_rock.bmp",
+        "assets/tiles/g2d.bmp",
+        "assets/tiles/water_middle.bmp",
+    ] {
+        imgs_tiles.push(load_texture(path).await);
+    }
+
+    let tex_list_text = fs::read_to_string("assets/texture_list.txt").unwrap();
+    let surfaces = map::load_tex_list(&tex_list_text);
+    let map_text = fs::read_to_string("maps/Atrium.map").unwrap();
+    let map = map::load_map(&map_text, surfaces);
+
+    let mut gs = GameState::new(rng);
+    let name = "Player 1".to_owned();
+    let player = Player::new(name);
+    let player1_handle = gs.players.insert(player);
+
+    let time = Box::new(MacroquadTime);
+    let client = MacroquadClient {
+        render_fps: Fps::new(),
+        player_handle: player1_handle,
+    };
+    let mut server = Server::new(&cvars, time, map, gs);
+
+    // client: RawCanvasClient {
+    //     canvas,
+    //     context,
+    //     imgs_tiles,
+    //     imgs_vehicles,
+    //     imgs_wrecks,
+    //     imgs_weapon_icons,
+    //     img_rocket,
+    //     img_hm,
+    //     img_gm,
+    //     img_explosion,
+    //     img_explosion_cyan,
+    //     render_fps: Fps::new(),
+    //     render_durations: Durations::new(),
+    //     player_handle: player1_handle,
+    // },
 
     let texture = load_texture("assets/tiles/base.bmp").await;
 
     loop {
         let start = get_time();
 
-        // clear_background(RED);
-        // // Going 3d!
-        // let t = get_time();
-        // let z = t.sin() as f32 * 20.0;
-        // let x = -t.cos() as f32 * 20.0;
-        // set_camera(Camera3D {
-        //     position: vec3(x, 15., z),
-        //     up: vec3(0., 1., 0.),
-        //     target: vec3(0., 0., 0.),
-        //     ..Default::default()
-        // });
-        // draw_grid(20, 1.);
-        // draw_cube_wires(vec3(0., 1., -6.), vec3(2., 2., 2.), DARKGREEN);
-        // draw_cube_wires(vec3(0., 1., 6.), vec3(2., 2., 2.), DARKBLUE);
-        // set_default_camera();
+        server.update(&cvars, start);
 
-        let mut y = (get_time() * 100.0 % 64.0) as f32;
-        while y < screen_height() {
-            let mut x = (get_time() * 50.0 % 64.0) as f32;
-            while x < screen_width() {
-                draw_texture(texture, x, y, WHITE);
-                x += 64.0;
+        // TODO smoothing?
+
+        let player = &server.gs.players[client.player_handle];
+        let player_veh_pos = server.gs.vehicles[player.vehicle.unwrap()].pos;
+        let player_entity_pos = if let Some(gm_handle) = player.guided_missile {
+            server.gs.projectiles[gm_handle].pos
+        } else {
+            player_veh_pos
+        };
+
+        // Don't put the camera so close to the edge that it would render area outside the map.
+        // TODO handle maps smaller than canvas (currently crashes on unreachable)
+        let view_size = Vec2f::new(screen_width() as f64, screen_height() as f64);
+        let camera_min = view_size / 2.0;
+        let map_size = server.map.maxs();
+        let camera_max = map_size - camera_min;
+        let camera_pos = player_entity_pos.clamped(camera_min, camera_max);
+
+        // Position of the camera's top left corner in world coords.
+        // Subtract this from world coords to get screen coords.
+        // Forgetting this is a recurring source of bugs.
+        // I've considered making a special type for screen coords (e.g. struct Vec2screen(Vec2f);)
+        // so you couldn't accidentally pass world coords to drawing fns but it turned out to be more work than expected:
+        // - The newtype had to manually impl all the needed operations of the underlying Vec2 type because ops don't autoderef.
+        // - What would be the result of ops that take one world coord and one screen coord? Lots of cases to think about.
+        // - Which type are sizes? E.g. `center = corner + size/2` makes sense in both screen and world coords.
+        let top_left = camera_pos - camera_min;
+
+        let top_left_tp = server.map.tile_pos(top_left);
+        let top_left_index = top_left_tp.index;
+        let bg_offset = if cvars.r_align_to_pixels_background {
+            top_left_tp.offset.floor()
+        } else {
+            top_left_tp.offset
+        };
+
+        // Draw non-walls
+        let mut r = top_left_index.y;
+        let mut y = -bg_offset.y;
+        while y < view_size.y {
+            let mut c = top_left_index.x;
+            let mut x = -bg_offset.x;
+            while x < view_size.x {
+                let tile = server.map.col_row(c, r);
+
+                if server.map.surface_of(tile).kind != Kind::Wall {
+                    let img = imgs_tiles[tile.surface_index];
+                    draw_tile(img, x, y, tile.angle);
+                }
+
+                c += 1;
+                x += TILE_SIZE;
             }
-            y += 64.0;
+            r += 1;
+            y += TILE_SIZE;
         }
 
+        // Draw walls
+        // They are above explosions and turrets, just like in RecWar.
+        let mut r = top_left_index.y;
+        let mut y = -bg_offset.y;
+        while y < view_size.y {
+            let mut c = top_left_index.x;
+            let mut x = -bg_offset.x;
+            while x < view_size.x {
+                let tile = server.map.col_row(c, r);
+
+                if server.map.surface_of(tile).kind == Kind::Wall {
+                    let img = imgs_tiles[tile.surface_index];
+                    draw_tile(img, x, y, tile.angle);
+                }
+
+                c += 1;
+                x += TILE_SIZE;
+            }
+            r += 1;
+            y += TILE_SIZE;
+        }
+
+        let end = get_time();
         draw_text(&get_fps().to_string(), 400.0, 300.0, 20.0, WHITE);
         draw_text(&get_frame_time().to_string(), 400.0, 330.0, 20.0, WHITE);
         draw_text(&get_time().to_string(), 400.0, 360.0, 20.0, WHITE);
-
-        let end = get_time();
         draw_text(&(end - start).to_string(), 400.0, 390.0, 20.0, WHITE);
         next_frame().await
     }
+}
+
+fn draw_tile(img: Texture2D, x: f64, y: f64, angle: f64) {
+    draw_texture_ex(
+        img,
+        x as f32,
+        y as f32,
+        WHITE,
+        DrawTextureParams {
+            rotation: angle as f32,
+            pivot: Some(Vec2::new(
+                x as f32 + TILE_SIZE as f32 / 2.0,
+                y as f32 + TILE_SIZE as f32 / 2.0,
+            )),
+            ..Default::default()
+        },
+    )
 }

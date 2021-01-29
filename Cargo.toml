@@ -12,11 +12,11 @@ name = "rec-wars-macroquad"
 path = "src/main.rs"
 
 [lib]
-# cdylib is for generatig WASM
-# Add rlib to run doctests (they don't get run with just cdylib)
-# but keep in mind they only work for public items for now:
+# Cdylib is for the WASM+canvas client.
+# Rlib is to run doctests (they don't get run with just cdylib) and for the macroquad native client.
+# Keep in mind doctests only work for public items for now:
 # https://users.rust-lang.org/t/rustdoc-doctests-and-private-documentation/20955
-crate-type = ["cdylib"]
+crate-type = ["cdylib", "rlib"]
 
 [profile.dev.package."*"]
 # Optimize deps but not the rec-wars crate itself (tip from macroquad).
@@ -46,19 +46,19 @@ wasm-opt = ["-O3", "--enable-mutable-globals"]  # see wasm-opt note
 # otherwise it will crash with a TypeError at runtime for some reason.
 # LATER Make mq default so `cargo run` just works?
 mq = ["macroquad", "image"]
-raw_canvas = []
+raw_canvas = ["console_error_panic_hook", "js-sys", "wasm-bindgen", "web-sys"]
 
 [dependencies]
 approx = "0.4.0"
-console_error_panic_hook = "0.1.6"
+console_error_panic_hook = { version = "0.1.6", optional = true }
 enumn = "0.1.3"
 fnv = "1.0.7"
-js-sys = "0.3.42"
+js-sys = { version = "0.3.42", optional = true }
 macroquad = { version = "0.3.0-alpha.14", optional = true }
 rand_distr = "0.4.0"
 thunderdome = "0.4.0"
 vek = "0.13.0"
-wasm-bindgen = "0.2.65"
+wasm-bindgen = { version = "0.2.65", optional = true }
 
 [dependencies.getrandom]
 version = "0.2.0"
@@ -86,6 +86,7 @@ features = [
   "Performance",
   "Window",
 ]
+optional = true
 
 [dev-dependencies]
 walkdir = "2.3.1"

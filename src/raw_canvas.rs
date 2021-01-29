@@ -10,13 +10,12 @@ use web_sys::{CanvasRenderingContext2d, HtmlCanvasElement, HtmlImageElement};
 
 use crate::{
     cvars::Cvars,
-    entities::{Ai, Player},
-    game_state::{ArenaExt, GameState, Input},
+    entities::Player,
+    game_state::{GameState, Input},
     map,
     server::Server,
     systems,
     timing::{Durations, Fps, RawCanvasTime},
-    BOT_NAMES,
 };
 
 #[wasm_bindgen]
@@ -80,30 +79,9 @@ impl RawCanvasGame {
         let player = Player::new(name);
         let player1_handle = gs.players.insert(player);
 
-        let bots_count = map.spawns().len().min(cvars.bots_max);
-        dbg_logf!(
-            "Spawns per bot: {}",
-            map.spawns().len() as f64 / bots_count as f64
-        );
-        dbg_logf!(
-            "Tiles per bot: {}",
-            (map.width() * map.height()) as f64 / bots_count as f64
-        );
-        for i in 0..bots_count {
-            let name = if i < BOT_NAMES.len() {
-                BOT_NAMES[i].to_owned()
-            } else {
-                format!("Bot {}", i + 1)
-            };
-            let player = Player::new(name);
-            let player_handle = gs.players.insert(player);
-            gs.ais.insert(Ai::new(player_handle));
-        }
-
-        for handle in gs.players.iter_handles() {
-            systems::spawn_vehicle(cvars, &mut gs, &map, handle, false);
-        }
-
+        let time = Box::new(RawCanvasTime(
+            web_sys::window().unwrap().performance().unwrap(),
+        ));
         Self {
             client: RawCanvasClient {
                 canvas,
@@ -121,23 +99,7 @@ impl RawCanvasGame {
                 render_durations: Durations::new(),
                 player_handle: player1_handle,
             },
-            server: Server {
-                time: Box::new(RawCanvasTime(
-                    web_sys::window().unwrap().performance().unwrap(),
-                )),
-                map,
-                gs: gs.clone(),
-                dt_carry: 0.0,
-                gs_fixed: gs,
-                real_time: 0.0,
-                real_time_prev: 0.0,
-                real_time_delta: 0.0,
-                paused: false,
-                update_fps: Fps::new(),
-                update_durations: Durations::new(),
-                gamelogic_fps: Fps::new(),
-                gamelogic_durations: Durations::new(),
-            },
+            server: Server::new(cvars, time, map, gs),
         }
     }
 

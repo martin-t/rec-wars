@@ -5,17 +5,19 @@ use thunderdome::Index;
 use crate::{
     cvars::{Cvars, TickrateMode},
     debugging,
-    game_state::{GameState, Input},
+    entities::{Ai, Player},
+    game_state::{ArenaExt, GameState, Input},
     map::Map,
     systems,
     timing::{Durations, Fps, Time},
+    BOT_NAMES,
 };
 
 #[derive(Debug)]
-pub(crate) struct Server {
+pub struct Server {
     pub(crate) time: Box<dyn Time>,
-    pub(crate) map: Map,
-    pub(crate) gs: GameState,
+    pub map: Map,
+    pub gs: GameState,
     /// Game time left over from previous update.
     pub(crate) dt_carry: f64,
     pub(crate) gs_fixed: GameState,
@@ -33,7 +35,50 @@ pub(crate) struct Server {
 }
 
 impl Server {
-    pub(crate) fn input(&mut self, player_handle: Index, input: Input) {
+    pub fn new(cvars: &Cvars, time: Box<dyn Time>, map: Map, mut gs: GameState) -> Self {
+        let bots_count = map.spawns().len().min(cvars.bots_max);
+        // TODO port dbg_* to macroquad
+        // dbg_logf!(
+        //     "Spawns per bot: {}",
+        //     map.spawns().len() as f64 / bots_count as f64
+        // );
+        // dbg_logf!(
+        //     "Tiles per bot: {}",
+        //     (map.width() * map.height()) as f64 / bots_count as f64
+        // );
+        for i in 0..bots_count {
+            let name = if i < BOT_NAMES.len() {
+                BOT_NAMES[i].to_owned()
+            } else {
+                format!("Bot {}", i + 1)
+            };
+            let player = Player::new(name);
+            let player_handle = gs.players.insert(player);
+            gs.ais.insert(Ai::new(player_handle));
+        }
+
+        for handle in gs.players.iter_handles() {
+            systems::spawn_vehicle(cvars, &mut gs, &map, handle, false);
+        }
+
+        Self {
+            time,
+            map,
+            gs: gs.clone(),
+            dt_carry: 0.0,
+            gs_fixed: gs,
+            real_time: 0.0,
+            real_time_prev: 0.0,
+            real_time_delta: 0.0,
+            paused: false,
+            update_fps: Fps::new(),
+            update_durations: Durations::new(),
+            gamelogic_fps: Fps::new(),
+            gamelogic_durations: Durations::new(),
+        }
+    }
+
+    pub fn input(&mut self, player_handle: Index, input: Input) {
         self.gs.inputs_prev.update(&self.gs.players);
         self.gs.players[player_handle].input = input;
         self.gs_fixed.inputs_prev.update(&self.gs_fixed.players);
@@ -41,7 +86,7 @@ impl Server {
     }
 
     /// Run gamelogic frame(s) up to current time (in seconds).
-    pub(crate) fn update(&mut self, cvars: &Cvars, real_time: f64) {
+    pub fn update(&mut self, cvars: &Cvars, real_time: f64) {
         // Recommended reading: https://gafferongames.com/post/fix_your_timestep/
 
         // Update time tracking variables
@@ -102,7 +147,7 @@ impl Server {
                     self.gamelogic_tick(cvars, self.gs.game_time + dt);
                 }
                 if cvars.d_dbg {
-                    dbg_logd!(remaining);
+                    //dbg_logd!(remaining); FIXME
                 }
                 self.gamelogic_tick(cvars, self.gs.game_time + remaining);
                 // TODO skip too small steps?
@@ -128,9 +173,10 @@ impl Server {
 
         debugging::cleanup();
 
-        dbg_textf!("{}", env!("GIT_VERSION"));
-        dbg_textd!(self.gs.game_time);
-        dbg_textd!(self.gs.game_time_prev);
+        // FIXME
+        // dbg_textf!("{}", env!("GIT_VERSION"));
+        // dbg_textd!(self.gs.game_time);
+        // dbg_textd!(self.gs.game_time_prev);
 
         systems::cleanup(cvars, &mut self.gs);
 

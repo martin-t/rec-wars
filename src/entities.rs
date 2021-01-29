@@ -14,8 +14,8 @@ use thunderdome::Index;
 use crate::{cvars::Cvars, game_state::Input, map::Vec2f};
 
 #[derive(Debug, Clone)]
-pub(crate) struct Player {
-    pub(crate) name: String,
+pub struct Player {
+    pub name: String,
     /// NOTE about potential bugs when refactoring:
     /// - vehicle can move while dead (this is a classic at this point)
     /// - can guide missile while dead
@@ -25,14 +25,15 @@ pub(crate) struct Player {
     pub(crate) input: Input,
     pub(crate) respawn: Respawn,
     pub(crate) death_time: f64,
-    pub(crate) vehicle: Option<Index>,
-    pub(crate) guided_missile: Option<Index>,
-    pub(crate) cur_weapon: Weapon,
-    pub(crate) score: Score,
+    pub vehicle: Option<Index>,
+    pub guided_missile: Option<Index>,
+    pub cur_weapon: Weapon,
+    pub score: Score,
 }
 
 impl Player {
-    pub(crate) fn new(name: String) -> Self {
+    // LATER pub(crate)?
+    pub fn new(name: String) -> Self {
         Self {
             name,
             input: Input::new(),
@@ -54,10 +55,10 @@ pub(crate) enum Respawn {
 }
 
 #[derive(Debug, Clone, Default)]
-pub(crate) struct Score {
-    pub(crate) kills: i32,
-    pub(crate) deaths: i32,
-    pub(crate) suicides: i32,
+pub struct Score {
+    pub kills: i32,
+    pub deaths: i32,
+    pub suicides: i32,
 }
 
 #[derive(Debug, Clone)]
@@ -80,12 +81,12 @@ impl Ai {
 }
 
 #[derive(Debug, Clone)]
-pub(crate) struct Vehicle {
-    pub(crate) pos: Vec2f,
+pub struct Vehicle {
+    pub pos: Vec2f,
     pub(crate) vel: Vec2f,
-    pub(crate) angle: f64,
+    pub angle: f64,
     pub(crate) turn_rate: f64,
-    pub(crate) veh_type: VehicleType,
+    pub veh_type: VehicleType,
     pub(crate) hitbox: Hitbox,
     /// Angle from vehicle, see Coord system for more
     pub(crate) turret_angle_current: f64,
@@ -142,7 +143,7 @@ impl Vehicle {
 }
 
 #[derive(Debug, Clone, Copy, N)]
-pub(crate) enum VehicleType {
+pub enum VehicleType {
     Tank,
     Hovercraft,
     Hummer,
@@ -157,11 +158,11 @@ pub(crate) enum Ammo {
 }
 
 #[derive(Debug, Clone)]
-pub(crate) struct Projectile {
-    pub(crate) weapon: Weapon,
-    pub(crate) pos: Vec2f,
+pub struct Projectile {
+    pub weapon: Weapon,
+    pub pos: Vec2f,
     pub(crate) vel: Vec2f,
-    pub(crate) angle: f64,
+    pub angle: f64,
     pub(crate) turn_rate: f64,
     pub(crate) explode_time: f64,
     pub(crate) owner: Index,
@@ -171,7 +172,7 @@ pub(crate) const WEAPS_CNT: u8 = 7;
 
 #[repr(u8)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, N)]
-pub(crate) enum Weapon {
+pub enum Weapon {
     Mg,
     Rail,
     Cb,

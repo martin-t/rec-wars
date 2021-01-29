@@ -2,16 +2,19 @@
 
 use std::{collections::VecDeque, fmt::Debug};
 
-pub(crate) trait Time: Debug {
+// TODO do we need a trait when we have features?
+pub trait Time: Debug {
     fn now(&self) -> f64;
 }
 
 /// I want to track update and render time in Rust so i can draw the FPS counter and keep stats.
 /// Unfortunately, Instant::now() panics in WASM so i have to use performance.now().
 /// And just like in JS, it has limited precision in some browsers like firefox.
+#[cfg(feature = "raw_canvas")]
 #[derive(Debug, Clone)]
 pub(crate) struct RawCanvasTime(pub(crate) web_sys::Performance);
 
+#[cfg(feature = "raw_canvas")]
 impl Time for RawCanvasTime {
     fn now(&self) -> f64 {
         self.0.now()
@@ -20,7 +23,7 @@ impl Time for RawCanvasTime {
 
 #[cfg(feature = "mq")]
 #[derive(Debug, Clone)]
-pub(crate) struct MacroquadTime;
+pub struct MacroquadTime;
 
 #[cfg(feature = "mq")]
 impl Time for MacroquadTime {
@@ -31,7 +34,7 @@ impl Time for MacroquadTime {
 
 /// Saves frame times over some period of time to measure FPS.
 #[derive(Debug, Clone)]
-pub(crate) struct Fps(VecDeque<f64>);
+pub struct Fps(VecDeque<f64>);
 
 /// FPS Counter
 ///
@@ -39,18 +42,18 @@ pub(crate) struct Fps(VecDeque<f64>);
 /// Methods like using 1 / average_ms_per_frame end up with a lot of 59.9 vs 60.1 jitter.
 /// Counting number of frames during the last second seems to give a stable 60.
 impl Fps {
-    pub(crate) fn new() -> Self {
+    pub fn new() -> Self {
         Self(VecDeque::new())
     }
 
-    pub(crate) fn tick(&mut self, period: f64, real_time: f64) {
+    pub fn tick(&mut self, period: f64, real_time: f64) {
         self.0.push_back(real_time);
         while !self.0.is_empty() && self.0.front().unwrap() + period < real_time {
             self.0.pop_front();
         }
     }
 
-    pub(crate) fn get_fps(&self) -> f64 {
+    pub fn get_fps(&self) -> f64 {
         if self.0.is_empty() {
             0.0
         } else {

@@ -16,18 +16,18 @@ use vek::{Clamp, Mat2, Vec2};
 /// (although I believe it's more common for world coords to start in bottom-left so that `y` is up).
 /// The result of having `y` down is that the unit circle in mirrored around the X axis.
 /// As a result, **angles are clockwise**, in radians and 0 is pointing right.
-pub(crate) type Vec2f = Vec2<f64>;
+pub type Vec2f = Vec2<f64>;
 
-pub(crate) type Mat2f = Mat2<f64>;
+pub type Mat2f = Mat2<f64>;
 
 /// Position of a tile in the map.
 ///
 /// To avoid confusion with world positions,
 /// it's sometimes referred to as tile index since it's a pair of indices.
 /// `x` is column, `y` is row to match the order of `Vec2f`.
-pub(crate) type Vec2u = Vec2<usize>;
+pub type Vec2u = Vec2<usize>;
 
-pub(crate) trait VecExt {
+pub trait VecExt {
     fn to_angle(self) -> f64;
 }
 
@@ -37,7 +37,7 @@ impl VecExt for Vec2f {
     }
 }
 
-pub(crate) trait F64Ext {
+pub trait F64Ext {
     /// Rotated unit vector
     fn to_vec2f(self) -> Vec2f;
 
@@ -55,11 +55,11 @@ impl F64Ext for f64 {
     }
 }
 
-pub(crate) const TILE_SIZE: f64 = 64.0;
+pub const TILE_SIZE: f64 = 64.0;
 
 /// A rectangular tile based map with origin in the top-left corner.
 #[derive(Debug, Clone)]
-pub(crate) struct Map {
+pub struct Map {
     surfaces: Vec<Surface>,
     tiles: Vec<Vec<Tile>>,
     spawns: Vec<Vec2u>,
@@ -88,16 +88,16 @@ impl Map {
         }
     }
 
-    pub(crate) fn height(&self) -> usize {
+    pub fn height(&self) -> usize {
         self.tiles.len()
     }
 
-    pub(crate) fn width(&self) -> usize {
+    pub fn width(&self) -> usize {
         self.tiles[0].len()
     }
 
     /// Returns (width, height) / (cols, rows) / (x, y)
-    pub(crate) fn size(&self) -> Vec2u {
+    pub fn size(&self) -> Vec2u {
         Vec2u::new(self.width(), self.height())
     }
 
@@ -105,25 +105,25 @@ impl Map {
     ///
     /// Currently for simplicity always 0,0.
     /// Might change in the future e.g. if symmetry is easier with 0,0 in the center.
-    pub(crate) fn mins(&self) -> Vec2f {
+    pub fn mins(&self) -> Vec2f {
         // NOTE: if changing mins to be negative, check all uses of the modulo operator
         Vec2::new(0.0, 0.0)
     }
 
     /// Highest possible coordinates / bottom right
-    pub(crate) fn maxs(&self) -> Vec2f {
+    pub fn maxs(&self) -> Vec2f {
         self.size().as_() * TILE_SIZE
     }
 
     /// Returns tile at (c,r). Col is x, row is y
-    pub(crate) fn col_row(&self, c: usize, r: usize) -> Tile {
+    pub fn col_row(&self, c: usize, r: usize) -> Tile {
         self[Vec2::new(c, r)]
     }
 
     /// Converts world coords into tile position and offset within it.
     ///
     /// The returned index will always be within bounds.
-    pub(crate) fn tile_pos(&self, pos: Vec2f) -> TilePos {
+    pub fn tile_pos(&self, pos: Vec2f) -> TilePos {
         let epsilon = self.maxs() * Vec2f::default_epsilon();
         let pos = pos.clamped(self.mins(), self.maxs() - epsilon);
         let index = (pos / TILE_SIZE).as_();
@@ -137,7 +137,7 @@ impl Map {
         tile_index.as_() * TILE_SIZE + TILE_SIZE / 2.0
     }
 
-    pub(crate) fn surface_of(&self, tile: Tile) -> &Surface {
+    pub fn surface_of(&self, tile: Tile) -> &Surface {
         &self.surfaces[tile.surface_index]
     }
 
@@ -289,25 +289,25 @@ impl Index<Vec2u> for Map {
 }
 
 #[derive(Debug, Clone, Copy)]
-pub(crate) struct TilePos {
+pub struct TilePos {
     /// Position of the tile in the map
-    pub(crate) index: Vec2u,
+    pub index: Vec2u,
     /// Offset inside the tile
-    pub(crate) offset: Vec2f,
+    pub offset: Vec2f,
 }
 
 #[derive(Debug, Clone, Copy)]
-pub(crate) struct Tile {
+pub struct Tile {
     /// Index into texture_list.txt
-    pub(crate) surface_index: usize,
+    pub surface_index: usize,
     /// Rotation in radians - see Vec2f for how the coord system and angles work.
-    pub(crate) angle: f64,
+    pub angle: f64,
 }
 
 #[derive(Debug, Clone)]
-pub(crate) struct Surface {
+pub struct Surface {
     pub(crate) name: String,
-    pub(crate) kind: Kind,
+    pub kind: Kind,
     /// Seems to affect both turning and acceleration
     pub(crate) friction: f32,
     /// Maybe a multiplier for speed
@@ -330,7 +330,7 @@ impl Surface {
 /// Reverse engineered by modifying RecWar's TextureList.txt and seeing what happens.
 #[repr(u8)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, N)]
-pub(crate) enum Kind {
+pub enum Kind {
     /// No special behavior beyond the normal surface properties
     Normal = 0,
     /// Vehicles spawn on it
@@ -345,8 +345,9 @@ pub(crate) enum Kind {
     Base = 5,
 }
 
-pub(crate) fn load_map(text: &str, surfaces: Vec<Surface>) -> Map {
+pub fn load_map(text: &str, surfaces: Vec<Surface>) -> Map {
     // TODO handle both CRLF and LF properly
+    // TODO move to Map::new()?
     let tiles = text
         .split_terminator("\r\n")
         .map(|line| {
@@ -372,7 +373,7 @@ pub(crate) fn load_map(text: &str, surfaces: Vec<Surface>) -> Map {
     Map::new(tiles, surfaces)
 }
 
-pub(crate) fn load_tex_list(text: &str) -> Vec<Surface> {
+pub fn load_tex_list(text: &str) -> Vec<Surface> {
     // TODO handle both CRLF and LF properly OR use cvars instead
     // if using cvars, update load_map docs
     text.split_terminator("\r\n")

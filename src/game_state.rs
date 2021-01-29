@@ -4,6 +4,7 @@ use fnv::FnvHashMap;
 use rand::prelude::*;
 use rand_distr::Uniform;
 use thunderdome::{Arena, Index};
+#[cfg(feature = "raw_canvas")]
 use wasm_bindgen::prelude::*;
 
 use crate::{
@@ -18,7 +19,7 @@ use crate::{
 /// Ralith (hecs author) says to make all components a Vec but that requires all code to be aware of interpolation.
 /// What does veloren do?
 #[derive(Debug, Clone)]
-pub(crate) struct GameState {
+pub struct GameState {
     /// The RNG for all gamelogic
     pub(crate) rng: SmallRng,
 
@@ -47,20 +48,21 @@ pub(crate) struct GameState {
     ///     3) Make sure the HashMap doesn't grow indefinitely in case we forgot to remove in some cases.
     pub(crate) rail_hits: FnvHashMap<Index, Index>,
 
-    pub(crate) rail_beams: Vec<RailBeam>,
-    pub(crate) bfg_beams: Vec<(Vec2f, Vec2f)>,
-    pub(crate) explosions: Vec<Explosion>,
+    pub rail_beams: Vec<RailBeam>,
+    pub bfg_beams: Vec<(Vec2f, Vec2f)>,
+    pub explosions: Vec<Explosion>,
     pub(crate) ais: Arena<Ai>,
-    pub(crate) players: Arena<Player>,
-    pub(crate) vehicles: Arena<Vehicle>,
-    pub(crate) projectiles: Arena<Projectile>,
+    pub players: Arena<Player>,
+    pub vehicles: Arena<Vehicle>,
+    pub projectiles: Arena<Projectile>,
 
     /// Inputs of players last frame.
     pub(crate) inputs_prev: InputsPrev,
 }
 
 impl GameState {
-    pub(crate) fn new(rng: SmallRng) -> Self {
+    // LATER pub(crate)?
+    pub fn new(rng: SmallRng) -> Self {
         Self {
             rng,
             range_uniform11: Uniform::new_inclusive(-1.0, 1.0),
@@ -81,10 +83,10 @@ impl GameState {
 }
 
 #[derive(Debug, Clone)]
-pub(crate) struct RailBeam {
-    pub(crate) begin: Vec2f,
-    pub(crate) end: Vec2f,
-    pub(crate) start_time: f64,
+pub struct RailBeam {
+    pub begin: Vec2f,
+    pub end: Vec2f,
+    pub start_time: f64,
 }
 
 impl RailBeam {
@@ -98,11 +100,11 @@ impl RailBeam {
 }
 
 #[derive(Debug, Clone)]
-pub(crate) struct Explosion {
-    pub(crate) pos: Vec2f,
-    pub(crate) scale: f64,
-    pub(crate) start_time: f64,
-    pub(crate) bfg: bool,
+pub struct Explosion {
+    pub pos: Vec2f,
+    pub scale: f64,
+    pub start_time: f64,
+    pub bfg: bool,
 }
 
 impl Explosion {
@@ -137,7 +139,7 @@ impl InputsPrev {
     }
 }
 
-#[wasm_bindgen]
+#[cfg_attr(feature = "raw_canvas", wasm_bindgen)]
 #[derive(Clone, Copy, Default)]
 pub struct Input {
     pub left: bool,
@@ -157,9 +159,9 @@ pub struct Input {
     // ^ when adding fields, also add them to Debug
 }
 
-#[wasm_bindgen]
+#[cfg_attr(feature = "raw_canvas", wasm_bindgen)]
 impl Input {
-    #[wasm_bindgen(constructor)]
+    #[cfg_attr(feature = "raw_canvas", wasm_bindgen(constructor))]
     pub fn new() -> Self {
         Self::default()
     }
