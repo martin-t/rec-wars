@@ -292,7 +292,7 @@
 //              - stuff like long chains of iterator ops should be split
 // [ ] all the LATERs - they mean something can be done better but marking it as a todo would be just noise when grepping
 
-use std::fs; // FIXME mq::fs?
+use std::str;
 
 use ::rand::{prelude::SmallRng, SeedableRng};
 use macroquad::prelude::*;
@@ -356,9 +356,11 @@ async fn main() {
         imgs_tiles.push(load_texture(path).await);
     }
 
-    let tex_list_text = fs::read_to_string("assets/texture_list.txt").unwrap();
-    let surfaces = map::load_tex_list(&tex_list_text);
-    let map_text = fs::read_to_string("maps/Atrium.map").unwrap();
+    let tex_list_bytes = load_file("assets/texture_list.txt").await.unwrap();
+    let tex_list_text = str::from_utf8(&tex_list_bytes).unwrap();
+    let surfaces = map::load_tex_list(tex_list_text);
+    let map_bytes = load_file("maps/Atrium.map").await.unwrap();
+    let map_text = str::from_utf8(&map_bytes).unwrap();
     let map = map::load_map(&map_text, surfaces);
 
     let mut gs = GameState::new(rng);
@@ -389,8 +391,6 @@ async fn main() {
     //     render_durations: Durations::new(),
     //     player_handle: player1_handle,
     // },
-
-    let texture = load_texture("assets/tiles/base.bmp").await;
 
     loop {
         let start = get_time();
