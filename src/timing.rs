@@ -33,7 +33,7 @@ impl Time for MacroquadTime {
 }
 
 /// Saves frame times over some period of time to measure FPS.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct Fps(VecDeque<f64>);
 
 /// FPS Counter
@@ -65,7 +65,7 @@ impl Fps {
 }
 
 /// Track durations of some event over time, report max and average.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub(crate) struct Durations(VecDeque<f64>);
 
 impl Durations {

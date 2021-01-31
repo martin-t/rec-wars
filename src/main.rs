@@ -353,6 +353,7 @@ async fn main() {
         "assets/tiles/g2d.bmp",
         "assets/tiles/water_middle.bmp",
     ] {
+        // TODO load in parallel
         imgs_tiles.push(load_texture(path).await);
     }
 
