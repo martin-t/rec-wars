@@ -48,8 +48,11 @@ impl RawCanvasGame {
         console_error_panic_hook::set_once();
 
         let rng = if cvars.d_seed == 0 {
-            // This requires the `wasm-bindgen` feature on `rand` or it crashes at runtime.
-            SmallRng::from_entropy()
+            // Casting with `as` throws away some bits but it doesn't really matter,
+            // better than using unsafe for transmute.
+            // Another option would be SmallRng::from_entropy() but that requires enabling
+            // some of rand's features *only* for raw_canvas because macroquad's WASM doesn't work with them.
+            SmallRng::seed_from_u64(js_sys::Date::now() as u64)
         } else {
             SmallRng::seed_from_u64(cvars.d_seed)
         };

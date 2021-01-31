@@ -55,14 +55,9 @@ enumn = "0.1.3"
 fnv = "1.0.7"
 js-sys = { version = "0.3.42", optional = true }
 macroquad = { version = "0.3.0-alpha.14", optional = true }
-rand_distr = "0.4.0"
 thunderdome = "0.4.0"
 vek = "0.13.0"
 wasm-bindgen = { version = "0.2.65", optional = true }
-
-[dependencies.getrandom]
-version = "0.2.0"
-features = ["js"]
 
 [dependencies.image]
 # Dependency of macroquad with added "bmp" feature
@@ -72,8 +67,13 @@ features = ["png_codec", "tga", "bmp"]
 optional = true
 
 [dependencies.rand]
-version = "0.8.0"
+version = "0.8.3"
+default-features = false
 features = ["small_rng"]
+
+[dependencies.rand_distr]
+version = "0.4.0"
+default-features = false
 
 [dependencies.web-sys]
 version = "0.3.4"

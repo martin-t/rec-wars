@@ -294,7 +294,6 @@
 
 use std::fs; // FIXME mq::fs?
 
-// FIXME breaks WASM+mq
 use ::rand::{prelude::SmallRng, SeedableRng};
 use macroquad::prelude::*;
 use thunderdome::Index;
@@ -324,7 +323,7 @@ async fn main() {
     let cvars = Cvars::new_rec_wars();
     let rng = if cvars.d_seed == 0 {
         // This requires the `wasm-bindgen` feature on `rand` or it crashes at runtime.
-        SmallRng::from_entropy()
+        SmallRng::seed_from_u64(5) // TODO time?
     } else {
         SmallRng::seed_from_u64(cvars.d_seed)
     };
