@@ -111,16 +111,16 @@ async function run() {
         return img;
     });
 
-    let img_explosion = new Image();
-    img_explosion.src = "../assets/explosion.png";
-    let img_explosion_cyan = new Image();
-    img_explosion_cyan.src = "../assets/explosion_cyan.png";
     let img_rocket = new Image();
     img_rocket.src = "../assets/weapons/rocket.png";
     let img_hm = new Image();
     img_hm.src = "../assets/weapons/homing_missile.png";
     let img_gm = new Image();
     img_gm.src = "../assets/weapons/guided_missile.png";
+    let img_explosion = new Image();
+    img_explosion.src = "../assets/explosion.png";
+    let img_explosion_cyan = new Image();
+    img_explosion_cyan.src = "../assets/explosion_cyan.png";
     // https://stackoverflow.com/questions/46399223/async-await-in-image-loading
     // https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/createImageBitmap
     // or better yet, figure out how webpack works

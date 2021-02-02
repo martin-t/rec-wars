@@ -618,7 +618,7 @@ impl Cvars {
 
     /// Where the turret-chassis connection is on the chassis.
     /// E.g. (0, 0) means the turret rotates around the vehicle's origin.
-    pub(crate) fn g_vehicle_turret_offset_chassis(&self, veh_type: VehicleType) -> Vec2f {
+    pub fn g_vehicle_turret_offset_chassis(&self, veh_type: VehicleType) -> Vec2f {
         match veh_type {
             VehicleType::Tank => Vec2f::new(
                 self.g_tank_turret_offset_chassis_x,
@@ -637,7 +637,7 @@ impl Cvars {
 
     /// Where the turret-chassis connection is on the turret.
     /// E.g. (0, 0) means the turret rotates around its center.
-    pub(crate) fn g_vehicle_turret_offset_turret(&self, veh_type: VehicleType) -> Vec2f {
+    pub fn g_vehicle_turret_offset_turret(&self, veh_type: VehicleType) -> Vec2f {
         match veh_type {
             VehicleType::Tank => Vec2f::new(
                 self.g_tank_turret_offset_turret_x,

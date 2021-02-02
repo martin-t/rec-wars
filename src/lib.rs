@@ -1,5 +1,6 @@
 //! The lib contains code which is shared among the browser and native versions.
-//! It also exports structs and entry points for the WASM+canvas browser version.
+//! It also exports structs and entry points for the WASM+canvas browser version
+//! (look for items annotated with `wasm_bindgen`).
 
 // Additional warnings that are allow by default (`rustc -W help`)
 //#![warn(missing_copy_implementations)] TODO Keep?

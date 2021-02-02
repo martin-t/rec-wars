@@ -300,9 +300,9 @@ use thunderdome::Index;
 
 use rec_wars::{
     cvars::Cvars,
-    entities::Player,
-    game_state::GameState,
-    map::{self, Kind, Vec2f, TILE_SIZE},
+    entities::{Player, Weapon},
+    game_state::{GameState, Input},
+    map::{self, F64Ext, Kind, Vec2f, VecExt, TILE_SIZE},
     server::Server,
     timing::{Fps, MacroquadTime},
 };
@@ -323,7 +323,7 @@ async fn main() {
     let cvars = Cvars::new_rec_wars();
     let rng = if cvars.d_seed == 0 {
         // This requires the `wasm-bindgen` feature on `rand` or it crashes at runtime.
-        SmallRng::seed_from_u64(5) // TODO time?
+        SmallRng::seed_from_u64(7) // TODO time?
     } else {
         SmallRng::seed_from_u64(cvars.d_seed)
     };
@@ -357,6 +357,46 @@ async fn main() {
         imgs_tiles.push(load_texture(path).await);
     }
 
+    let mut imgs_vehicles = Vec::new();
+    for path in &[
+        "assets/vehicles/tank_chassis_flames.png",
+        "assets/vehicles/tank_turret_flames.png",
+        "assets/vehicles/hovercraft_chassis_flames.png",
+        "assets/vehicles/hovercraft_turret_flames.png",
+        "assets/vehicles/hummer_chassis_flames.png",
+        "assets/vehicles/hummer_turret_flames.png",
+    ] {
+        imgs_vehicles.push(load_texture(path).await);
+    }
+
+    let mut imgs_wrecks = Vec::new();
+    for path in &[
+        "assets/wrecks/tank.png",
+        "assets/wrecks/hovercraft.png",
+        "assets/wrecks/hummer.png",
+    ] {
+        imgs_wrecks.push(load_texture(path).await);
+    }
+
+    let mut imgs_weapon_icons = Vec::new();
+    for path in &[
+        "assets/weapon_icons/mg.png",
+        "assets/weapon_icons/rail.png",
+        "assets/weapon_icons/cb.png",
+        "assets/weapon_icons/rockets.png",
+        "assets/weapon_icons/hm.png",
+        "assets/weapon_icons/gm.png",
+        "assets/weapon_icons/bfg.png",
+    ] {
+        imgs_weapon_icons.push(load_texture(path).await);
+    }
+
+    let img_explosion = load_texture("assets/explosion.png").await;
+    let img_explosion_cyan = load_texture("assets/explosion_cyan.png").await;
+    let img_rocket = load_texture("assets/weapons/rocket.png").await;
+    let img_hm = load_texture("assets/weapons/homing_missile.png").await;
+    let img_gm = load_texture("assets/weapons/guided_missile.png").await;
+
     let tex_list_bytes = load_file("assets/texture_list.txt").await.unwrap();
     let tex_list_text = str::from_utf8(&tex_list_bytes).unwrap();
     let surfaces = map::load_tex_list(tex_list_text);
@@ -376,26 +416,69 @@ async fn main() {
     };
     let mut server = Server::new(&cvars, time, map, gs);
 
-    // client: RawCanvasClient {
-    //     canvas,
-    //     context,
-    //     imgs_tiles,
-    //     imgs_vehicles,
-    //     imgs_wrecks,
-    //     imgs_weapon_icons,
-    //     img_rocket,
-    //     img_hm,
-    //     img_gm,
-    //     img_explosion,
-    //     img_explosion_cyan,
-    //     render_fps: Fps::new(),
-    //     render_durations: Durations::new(),
-    //     player_handle: player1_handle,
-    // },
-
     loop {
         let start = get_time();
 
+        fn was_input_pressed(key_codes: &[KeyCode]) -> bool {
+            for &key_code in key_codes {
+                // Check both to avoid skipping input if it's pressed and released within one frame.
+                if is_key_pressed(key_code) || is_key_down(key_code) {
+                    return true;
+                }
+            }
+            false
+        }
+
+        let mut input = Input::new();
+        if was_input_pressed(&[KeyCode::Left, KeyCode::A]) {
+            input.left = true;
+        }
+        if was_input_pressed(&[KeyCode::Right, KeyCode::D]) {
+            input.right = true;
+        }
+        if was_input_pressed(&[KeyCode::Up, KeyCode::W]) {
+            input.up = true;
+        }
+        if was_input_pressed(&[KeyCode::Down, KeyCode::S]) {
+            input.down = true;
+        }
+        if was_input_pressed(&[KeyCode::Q, KeyCode::N]) {
+            input.turret_left = true;
+        }
+        if was_input_pressed(&[KeyCode::E, KeyCode::M]) {
+            input.turret_right = true;
+        }
+        if was_input_pressed(&[KeyCode::V, KeyCode::Period]) {
+            input.prev_weapon = true;
+        }
+        if was_input_pressed(&[
+            KeyCode::LeftShift,
+            KeyCode::RightShift,
+            KeyCode::B,
+            KeyCode::Comma,
+        ]) {
+            input.next_weapon = true;
+        }
+        if was_input_pressed(&[KeyCode::Space]) {
+            input.fire = true;
+        }
+        if was_input_pressed(&[KeyCode::J, KeyCode::X]) {
+            input.mine = true;
+        }
+        if was_input_pressed(&[KeyCode::L]) {
+            input.self_destruct = true;
+        }
+        if was_input_pressed(&[KeyCode::H]) {
+            input.horn = true;
+        }
+        if was_input_pressed(&[]) {
+            input.chat = true;
+        }
+        if was_input_pressed(&[KeyCode::Pause, KeyCode::P]) {
+            input.pause = true;
+        }
+        server.input(client.player_handle, input);
+        // TODO time tracking
         server.update(&cvars, start);
 
         // TODO smoothing?
@@ -410,6 +493,7 @@ async fn main() {
 
         // Don't put the camera so close to the edge that it would render area outside the map.
         // TODO handle maps smaller than canvas (currently crashes on unreachable)
+        // TODO any more mentions of canvas? :)
         let view_size = Vec2f::new(screen_width() as f64, screen_height() as f64);
         let camera_min = view_size / 2.0;
         let map_size = server.map.maxs();
@@ -455,6 +539,175 @@ async fn main() {
             y += TILE_SIZE;
         }
 
+        // Helper to filter projectiles by weapon.
+        let weapon_projectiles = |weapon| {
+            server
+                .gs
+                .projectiles
+                .iter()
+                .filter(move |(_, proj)| proj.weapon == weapon)
+        };
+
+        // Is the object certainly outside camera view?
+        let cull = |scr_pos: Vec2f| {
+            // There is no single object bigger than TILE_SIZE (except lines).
+            scr_pos.x < -TILE_SIZE
+                || scr_pos.y < -TILE_SIZE
+                || scr_pos.x > view_size.x + TILE_SIZE
+                || scr_pos.y > view_size.y + TILE_SIZE
+        };
+
+        // Draw MGs
+        for (_, mg) in weapon_projectiles(Weapon::Mg) {
+            let scr_pos = mg.pos - top_left;
+            if cull(scr_pos) {
+                continue;
+            }
+            // we're drawing from the bullet's position backwards
+            let scr_end = scr_pos - mg.vel.normalized() * cvars.g_machine_gun_trail_length;
+            draw_line(scr_pos, scr_end, 1.0, YELLOW);
+        }
+
+        // Draw railguns
+        for beam in &server.gs.rail_beams {
+            let scr_begin = beam.begin - top_left;
+            let scr_end = beam.end - top_left;
+            draw_line(scr_begin, scr_end, 1.0, Color::new(0.0, 0.0, 1.0, 1.0));
+        }
+
+        // Draw cluster bombs
+        // TODO actually, these should be above vehicles, right?
+        // TODO what about shadows (in general)?
+        if cvars.r_draw_cluster_bombs {
+            // client.context.set_fill_style(&"rgb(0, 255, 255)".into());
+            // let shadow_rgba = format!("rgba(0, 0, 0, {})", cvars.g_cluster_bomb_shadow_alpha);
+            // client.context.set_shadow_color(&shadow_rgba);
+            // client
+            //     .context
+            //     .set_shadow_offset_x(cvars.g_cluster_bomb_shadow_x);
+            // client
+            //     .context
+            //     .set_shadow_offset_y(cvars.g_cluster_bomb_shadow_y);
+            fn fill_square(top_left: Vec2f, size: f64, color: Color) {
+                draw_rectangle(
+                    top_left.x as f32,
+                    top_left.y as f32,
+                    size as f32,
+                    size as f32,
+                    color,
+                );
+            }
+            for (_, cb) in weapon_projectiles(Weapon::Cb) {
+                let scr_pos = cb.pos - top_left;
+                if cull(scr_pos) {
+                    continue;
+                }
+                fill_square(
+                    scr_pos - cvars.g_cluster_bomb_size / 2.0,
+                    cvars.g_cluster_bomb_size,
+                    BLUE,
+                );
+            }
+            // client.context.set_shadow_offset_x(0.0);
+            // client.context.set_shadow_offset_y(0.0);
+        }
+
+        // Draw rockets, homing and guided missiles
+        for (_, proj) in weapon_projectiles(Weapon::Rockets) {
+            let scr_pos = proj.pos - top_left;
+            if cull(scr_pos) {
+                continue;
+            }
+            draw_img_center(img_rocket, scr_pos, proj.vel.to_angle());
+        }
+        for (_, proj) in weapon_projectiles(Weapon::Hm) {
+            let scr_pos = proj.pos - top_left;
+            if cull(scr_pos) {
+                continue;
+            }
+            draw_img_center(img_hm, scr_pos, proj.vel.to_angle());
+        }
+        for (_, proj) in weapon_projectiles(Weapon::Gm) {
+            let scr_pos = proj.pos - top_left;
+            if cull(scr_pos) {
+                continue;
+            }
+            draw_img_center(img_gm, scr_pos, proj.vel.to_angle());
+        }
+
+        // Draw BFGs
+        // client.context.set_fill_style(&"lime".into());
+        // client.context.set_stroke_style(&"lime".into());
+        for (_, bfg) in weapon_projectiles(Weapon::Bfg) {
+            let scr_pos = bfg.pos - top_left;
+            if cull(scr_pos) {
+                continue;
+            }
+            draw_circle(
+                scr_pos.x as f32,
+                scr_pos.y as f32,
+                cvars.g_bfg_radius as f32,
+                GREEN,
+            );
+        }
+        for &(src, dest) in &server.gs.bfg_beams {
+            let scr_src = src - top_left;
+            let scr_dest = dest - top_left;
+            draw_line(scr_src, scr_dest, 1.0, GREEN);
+        }
+
+        // Draw chassis
+        for (_, vehicle) in server.gs.vehicles.iter() {
+            let scr_pos = vehicle.pos - top_left;
+            if cull(scr_pos) {
+                continue;
+            }
+            let img;
+            if vehicle.destroyed() {
+                img = imgs_wrecks[vehicle.veh_type as usize];
+            } else {
+                img = imgs_vehicles[vehicle.veh_type as usize * 2];
+            }
+            draw_img_center(img, scr_pos, vehicle.angle);
+            // if cvars.d_draw && cvars.d_draw_hitboxes {
+            //     client.context.set_stroke_style(&"yellow".into());
+            //     client.context.begin_path();
+            //     let corners = vehicle.hitbox.corners(scr_pos, vehicle.angle);
+            //     move_to(client, corners[0]);
+            //     line_to(client, corners[1]);
+            //     line_to(client, corners[2]);
+            //     line_to(client, corners[3]);
+            //     client.context.close_path();
+            //     client.context.stroke();
+            // }
+        }
+
+        // TODO Draw cow
+
+        // Draw turrets
+        for (_, vehicle) in server.gs.vehicles.iter() {
+            if vehicle.destroyed() {
+                continue;
+            }
+
+            let scr_pos = vehicle.pos - top_left;
+            if cull(scr_pos) {
+                continue;
+            }
+
+            let img = imgs_vehicles[vehicle.veh_type as usize * 2 + 1];
+            let offset_chassis =
+                vehicle.angle.to_mat2f() * cvars.g_vehicle_turret_offset_chassis(vehicle.veh_type);
+            let turret_scr_pos = scr_pos + offset_chassis;
+            let offset_turret = cvars.g_vehicle_turret_offset_turret(vehicle.veh_type);
+            draw_img_offset(
+                img,
+                turret_scr_pos,
+                vehicle.angle + vehicle.turret_angle_current,
+                offset_turret,
+            );
+        }
+
         // Draw walls
         // They are above explosions and turrets, just like in RecWar.
         let mut r = top_left_index.y;
@@ -477,13 +730,54 @@ async fn main() {
             y += TILE_SIZE;
         }
 
+        // TODO draw the rest, finish commented blocks above
+
         let end = get_time();
+
         draw_text(&get_fps().to_string(), 400.0, 300.0, 20.0, WHITE);
         draw_text(&get_frame_time().to_string(), 400.0, 330.0, 20.0, WHITE);
         draw_text(&get_time().to_string(), 400.0, 360.0, 20.0, WHITE);
         draw_text(&(end - start).to_string(), 400.0, 390.0, 20.0, WHITE);
+
         next_frame().await
     }
+}
+
+/// Place the image's *center* at `scr_pos`,
+/// rotate it clockwise by `angle`.
+///
+/// See Vec2f for more about the coord system and rotations.
+fn draw_img_center(img: Texture2D, pos: Vec2f, angle: f64) {
+    draw_texture_ex(
+        img,
+        pos.x as f32 - img.width() / 2.0,
+        pos.y as f32 - img.height() / 2.0,
+        WHITE,
+        DrawTextureParams {
+            rotation: angle as f32,
+            ..Default::default()
+        },
+    );
+}
+
+/// Place the `img`'s *center of rotation* at `scr_pos`,
+/// rotate it clockwise by `angle`.
+/// The center of rotation is `img`'s center + `offset`.
+///
+/// See Vec2f for more about the coord system and rotations.
+fn draw_img_offset(img: Texture2D, pos: Vec2f, angle: f64, offset: Vec2f) {
+    draw_texture_ex(
+        img,
+        // This is effectively `pos - (offset + half_size)`, just written differently.
+        (pos.x - offset.x) as f32 - img.width() / 2.0,
+        (pos.y - offset.y) as f32 - img.height() / 2.0,
+        WHITE,
+        DrawTextureParams {
+            rotation: angle as f32,
+            pivot: Some(Vec2::new(pos.x as f32, pos.y as f32)),
+            ..Default::default()
+        },
+    );
 }
 
 fn draw_tile(img: Texture2D, x: f64, y: f64, angle: f64) {
@@ -494,11 +788,18 @@ fn draw_tile(img: Texture2D, x: f64, y: f64, angle: f64) {
         WHITE,
         DrawTextureParams {
             rotation: angle as f32,
-            pivot: Some(Vec2::new(
-                x as f32 + TILE_SIZE as f32 / 2.0,
-                y as f32 + TILE_SIZE as f32 / 2.0,
-            )),
             ..Default::default()
         },
-    )
+    );
+}
+
+fn draw_line(src: Vec2f, dest: Vec2f, thickness: f64, color: Color) {
+    macroquad::shapes::draw_line(
+        src.x as f32,
+        src.y as f32,
+        dest.x as f32,
+        dest.y as f32,
+        thickness as f32,
+        color,
+    );
 }

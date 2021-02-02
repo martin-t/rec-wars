@@ -89,7 +89,7 @@ pub struct Vehicle {
     pub veh_type: VehicleType,
     pub(crate) hitbox: Hitbox,
     /// Angle from vehicle, see Coord system for more
-    pub(crate) turret_angle_current: f64,
+    pub turret_angle_current: f64,
     pub(crate) turret_angle_wanted: f64,
     /// HP between 0 and 1 - saving the fraction here instead of absolute hit points so armor cvars can be adjusted during a match.
     pub(crate) hp_fraction: f64,
@@ -137,7 +137,7 @@ impl Vehicle {
         }
     }
 
-    pub(crate) fn destroyed(&self) -> bool {
+    pub fn destroyed(&self) -> bool {
         self.hp_fraction <= 0.0
     }
 }
@@ -161,7 +161,7 @@ pub(crate) enum Ammo {
 pub struct Projectile {
     pub weapon: Weapon,
     pub pos: Vec2f,
-    pub(crate) vel: Vec2f,
+    pub vel: Vec2f,
     pub angle: f64,
     pub(crate) turn_rate: f64,
     pub(crate) explode_time: f64,

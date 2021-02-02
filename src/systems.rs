@@ -49,6 +49,7 @@ pub(crate) fn respawning(cvars: &Cvars, gs: &mut GameState, map: &Map) {
         // Require the whole press and release cycle to happen while dead
         // so releasing fire after dying doesn't respawn immediately
         // even if respawn delay is 0.
+        // LATER Allow press and release in one frame.
 
         if !input_prev.fire && player.input.fire {
             player.respawn = Respawn::Pressed;

@@ -166,7 +166,7 @@ impl Input {
         Self::default()
     }
 
-    pub fn new_up() -> Self {
+    pub(crate) fn new_up() -> Self {
         Self {
             up: true,
             ..Self::default()
