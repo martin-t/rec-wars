@@ -605,7 +605,7 @@ async fn main() {
                 fill_square(
                     scr_pos - cvars.g_cluster_bomb_size / 2.0,
                     cvars.g_cluster_bomb_size,
-                    BLUE,
+                    Color::new(0.0, 1.0, 1.0, 1.0),
                 );
             }
             // client.context.set_shadow_offset_x(0.0);
