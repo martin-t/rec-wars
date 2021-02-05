@@ -392,7 +392,14 @@ impl Cvars {
             ..Self::new_rec_war()
         }
     }
+}
 
+// Separate impl block without the wasm_bindgen attribute.
+// Some fns need to be pub because of the macroquad client,
+// however wasm-bindgen would then try to generate bindings for them
+// and report errors because they use unsupported types.
+// There's no other way to exclude fns from it - e.g. `#[wasm_bindgen(skip)] does nothing.
+impl Cvars {
     /// Returns whether the weapon is on the chassis or turret and where relative to that part's center.
     pub(crate) fn g_hardpoint(&self, veh_type: VehicleType, weapon: Weapon) -> (Hardpoint, Vec2f) {
         match veh_type {
