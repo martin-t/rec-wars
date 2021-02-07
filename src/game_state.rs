@@ -28,7 +28,7 @@ pub struct GameState {
     pub(crate) range_uniform11: Uniform<f64>,
 
     /// This gamelogic frame's time in seconds. Affected by d_speed and pause.
-    pub(crate) game_time: f64,
+    pub game_time: f64,
 
     /// The previous gamelogic frame's time in seconds. Affected by d_speed and pause.
     pub(crate) game_time_prev: f64,

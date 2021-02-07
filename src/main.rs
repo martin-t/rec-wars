@@ -301,7 +301,7 @@ use thunderdome::Index;
 use rec_wars::{
     cvars::Cvars,
     entities::{Player, Weapon},
-    game_state::{GameState, Input},
+    game_state::{Explosion, GameState, Input},
     map::{self, F64Ext, Kind, Vec2f, VecExt, TILE_SIZE},
     server::Server,
     timing::{Fps, MacroquadTime},
@@ -481,7 +481,7 @@ async fn main() {
         // TODO time tracking
         server.update(&cvars, start);
 
-        // TODO smoothing?
+        // TODO disable smoothing?
 
         let player = &server.gs.players[client.player_handle];
         let player_veh_pos = server.gs.vehicles[player.vehicle.unwrap()].pos;
@@ -705,6 +705,55 @@ async fn main() {
                 turret_scr_pos,
                 vehicle.angle + vehicle.turret_angle_current,
                 offset_turret,
+            );
+        }
+
+        // Draw explosions
+        let iter: Box<dyn Iterator<Item = &Explosion>> = if cvars.r_explosions_reverse {
+            Box::new(server.gs.explosions.iter().rev())
+        } else {
+            Box::new(server.gs.explosions.iter())
+        };
+        for explosion in iter {
+            let scr_pos = explosion.pos - top_left;
+            if cull(scr_pos) {
+                continue;
+            }
+
+            // It looks like the original animation is made for 30 fps.
+            // Single stepping a recording of the original RecWars explosion in blender:
+            // 13 sprites, 31 frames - examples:
+            //      2,2,3,1,3,3,2,3,2,2,3,2,3
+            //      2,2,2,3,1,3,2,2,3,2,2,3,4
+            // Different each time probably because RecWar's and the recorder's framerate don't match exactly.
+            //
+            // This code produces similar results,
+            // though it might display a single sprite for 4 frames slightly more often.
+            let progress =
+                (server.gs.game_time - explosion.start_time) / cvars.r_explosion_duration;
+            // 13 sprites in the sheet, 100x100 pixels per sprite
+            let frame = (progress * 13.0).floor();
+            let (offset, img);
+            if explosion.bfg {
+                offset = (12.0 - frame) * 100.0;
+                img = img_explosion_cyan;
+            } else {
+                offset = frame * 100.0;
+                img = img_explosion;
+            };
+            draw_texture_ex(
+                img,
+                (scr_pos.x - 50.0 * explosion.scale) as f32,
+                (scr_pos.y - 50.0 * explosion.scale) as f32,
+                WHITE,
+                DrawTextureParams {
+                    dest_size: Some(Vec2::new(
+                        100.0 * explosion.scale as f32,
+                        100.0 * explosion.scale as f32,
+                    )),
+                    source: Some(Rect::new(offset as f32, 0.0, 100.0, 100.0)),
+                    ..Default::default()
+                },
             );
         }
 
