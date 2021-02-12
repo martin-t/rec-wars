@@ -792,9 +792,9 @@ async fn main() {
 
                 let name = &server.gs.players[vehicle.owner].name;
                 let size = measure_text(name, None, cvars.hud_names_font_size as u16, 1.0);
+                // LATER remove cvars.hud_names_shadow_x/y when raw_canvas is removed
                 draw_text(
                     name,
-                    // LATER remove cvars.hud_names_x when raw_canvas is removed
                     (scr_pos.x - size.width as f64 / 2.0 + cvars.hud_names_shadow_mq_x) as f32,
                     (scr_pos.y + cvars.hud_names_y + cvars.hud_names_shadow_mq_y) as f32,
                     cvars.hud_names_font_size,
@@ -802,7 +802,6 @@ async fn main() {
                 );
                 draw_text(
                     name,
-                    // LATER remove cvars.hud_names_x when raw_canvas is removed
                     (scr_pos.x - size.width as f64 / 2.0) as f32,
                     (scr_pos.y + cvars.hud_names_y) as f32,
                     cvars.hud_names_font_size,
