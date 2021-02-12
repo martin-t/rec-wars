@@ -66,10 +66,10 @@ impl Fps {
 
 /// Track durations of some event over time, report max and average.
 #[derive(Debug, Clone, Default)]
-pub(crate) struct Durations(VecDeque<f64>);
+pub struct Durations(VecDeque<f64>);
 
 impl Durations {
-    pub(crate) fn new() -> Self {
+    pub fn new() -> Self {
         Self(VecDeque::new())
     }
 
@@ -77,14 +77,14 @@ impl Durations {
     ///
     /// `samples`: How many data points to keep.  
     /// `duration`: The new data point.  
-    pub(crate) fn add(&mut self, samples_max: usize, duration: f64) {
+    pub fn add(&mut self, samples_max: usize, duration: f64) {
         if self.0.len() >= samples_max {
             self.0.pop_front();
         }
         self.0.push_back(duration);
     }
 
-    pub(crate) fn get_stats(&self) -> Option<(f64, f64)> {
+    pub fn get_stats(&self) -> Option<(f64, f64)> {
         if self.0.is_empty() {
             return None;
         }
