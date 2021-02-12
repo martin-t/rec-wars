@@ -815,6 +815,19 @@ async fn main() {
             }
         }
 
+        // Homing missile indicator
+        let player_veh_scr_pos = player_veh_pos - top_left;
+        draw_circle_lines(
+            player_veh_scr_pos.x as f32,
+            player_veh_scr_pos.y as f32,
+            cvars.hud_missile_indicator_radius as f32,
+            1.0,
+            GREEN,
+        );
+        let dir = 0.0.to_vec2f(); // TODO
+        let end = player_veh_scr_pos + dir * cvars.hud_missile_indicator_radius;
+        draw_line(player_veh_scr_pos, end, 1.0, GREEN);
+
         // TODO draw the rest, finish commented blocks above
 
         let end = get_time();
