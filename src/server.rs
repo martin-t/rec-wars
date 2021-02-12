@@ -129,7 +129,7 @@ impl Server {
                 }
             }
             TickrateMode::FixedOrSmaller => {
-                // FIXME Input is ignored or duplicated depending on fixed FPS
+                // TODO Input is ignored or duplicated depending on fixed FPS
                 // http://localhost:8000/web/?map=Atrium&bots_max=5&sv_gamelogic_mode=2&sv_gamelogic_fixed_fps=90
 
                 let dt_fixed = self.gs.game_time - self.gs_fixed.game_time;
@@ -147,7 +147,7 @@ impl Server {
                     self.gamelogic_tick(cvars, self.gs.game_time + dt);
                 }
                 if cvars.d_dbg {
-                    //dbg_logd!(remaining); FIXME
+                    dbg_logd!(remaining);
                 }
                 self.gamelogic_tick(cvars, self.gs.game_time + remaining);
                 // TODO skip too small steps?
@@ -173,10 +173,9 @@ impl Server {
 
         debugging::cleanup();
 
-        // FIXME
-        // dbg_textf!("{}", env!("GIT_VERSION"));
-        // dbg_textd!(self.gs.game_time);
-        // dbg_textd!(self.gs.game_time_prev);
+        dbg_textf!("{}", env!("GIT_VERSION"));
+        dbg_textd!(self.gs.game_time);
+        dbg_textd!(self.gs.game_time_prev);
 
         systems::cleanup(cvars, &mut self.gs);
 

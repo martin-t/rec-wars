@@ -50,8 +50,14 @@ thread_local! {
 #[macro_export]
 macro_rules! dbg_logf {
     ( $( $t:tt )* ) => {
-        let s = format!( $( $t )* );
-        web_sys::console::log_1(&s.into());
+        #[cfg(feature = "mq")]
+        println!( $( $t )* );
+
+        #[cfg(feature = "raw_canvas")]
+        {
+            let s = format!( $( $t )* );
+            web_sys::console::log_1(&s.into());
+        }
     };
 }
 
@@ -60,6 +66,11 @@ macro_rules! dbg_logf {
 macro_rules! dbg_logd {
     ( $( $e:expr ),* ) => {
         let s = $crate::__format_pairs!( $( $e ),* );
+
+        #[cfg(feature = "mq")]
+        println!("{}", s);
+
+        #[cfg(feature = "raw_canvas")]
         web_sys::console::log_1(&s.into());
     };
 }
