@@ -34,7 +34,7 @@ pub struct GameState {
     pub(crate) game_time_prev: f64,
 
     /// Delta time since last gamelogic frame in seconds
-    pub(crate) dt: f64,
+    pub dt: f64,
 
     /// Map of projectile handles to vehicle handles.
     /// Prevents rail hitting the same vehicle twice

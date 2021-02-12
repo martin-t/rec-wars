@@ -16,34 +16,34 @@ use std::cell::RefCell;
 use crate::map::Vec2f;
 
 #[derive(Debug, Clone)]
-pub(crate) struct WorldText {
-    pub(crate) msg: String,
-    pub(crate) pos: Vec2f,
+pub struct WorldText {
+    pub msg: String,
+    pub pos: Vec2f,
 }
 
 #[derive(Debug, Clone)]
-pub(crate) struct Line {
-    pub(crate) begin: Vec2f,
-    pub(crate) end: Vec2f,
+pub struct Line {
+    pub begin: Vec2f,
+    pub end: Vec2f,
     /// Time left (decreases every frame)
-    pub(crate) time: f64,
-    pub(crate) color: &'static str,
+    pub time: f64,
+    pub color: &'static str,
 }
 
 #[derive(Debug, Clone)]
-pub(crate) struct Cross {
-    pub(crate) point: Vec2f,
+pub struct Cross {
+    pub point: Vec2f,
     /// Time left (decreases every frame)
-    pub(crate) time: f64,
-    pub(crate) color: &'static str,
+    pub time: f64,
+    pub color: &'static str,
 }
 
 thread_local! {
     /// Lines of text to be printed onto the screen, cleared after printing.
-    pub(crate) static DEBUG_TEXTS: RefCell<Vec<String>> = RefCell::new(Vec::new());
-    pub(crate) static DEBUG_TEXTS_WORLD: RefCell<Vec<WorldText>> = RefCell::new(Vec::new());
-    pub(crate) static DEBUG_LINES: RefCell<Vec<Line>> = RefCell::new(Vec::new());
-    pub(crate) static DEBUG_CROSSES: RefCell<Vec<Cross>> = RefCell::new(Vec::new());
+    pub static DEBUG_TEXTS: RefCell<Vec<String>> = RefCell::new(Vec::new());
+    pub static DEBUG_TEXTS_WORLD: RefCell<Vec<WorldText>> = RefCell::new(Vec::new());
+    pub static DEBUG_LINES: RefCell<Vec<Line>> = RefCell::new(Vec::new());
+    pub static DEBUG_CROSSES: RefCell<Vec<Cross>> = RefCell::new(Vec::new());
 }
 
 /// Print text into the console. Uses `println!(..)`-style formatting.
@@ -169,7 +169,7 @@ macro_rules! dbg_line {
 }
 
 /// Helper function, prefer `dbg_line!()` instead.
-pub(crate) fn debug_line(begin: Vec2f, end: Vec2f, time: f64, color: &'static str) {
+pub fn debug_line(begin: Vec2f, end: Vec2f, time: f64, color: &'static str) {
     DEBUG_LINES.with(|lines| {
         let line = Line {
             begin,
@@ -199,7 +199,7 @@ macro_rules! dbg_cross {
 }
 
 /// Helper function, prefer `dbg_cross!()` instead.
-pub(crate) fn debug_cross(point: Vec2f, time: f64, color: &'static str) {
+pub fn debug_cross(point: Vec2f, time: f64, color: &'static str) {
     DEBUG_CROSSES.with(|crosses| {
         let cross = Cross { point, time, color };
         crosses.borrow_mut().push(cross);
@@ -213,7 +213,7 @@ pub(crate) fn debug_cross(point: Vec2f, time: f64, color: &'static str) {
 /// ```ignore
 /// for x in [1, 2, 3].iter().dbg_count("element count") { /* loop body */ }
 /// ```
-pub(crate) trait DbgCount<T>
+pub trait DbgCount<T>
 where
     T: Iterator,
 {
@@ -233,7 +233,8 @@ where
     }
 }
 
-pub(crate) struct DbgCounter<T>
+#[derive(Debug)]
+pub struct DbgCounter<T>
 where
     T: Iterator,
 {
@@ -262,7 +263,7 @@ where
     }
 }
 
-pub(crate) fn cleanup() {
+pub fn cleanup() {
     DEBUG_LINES.with(|lines| lines.borrow_mut().retain(|line| line.time > 0.0));
     DEBUG_CROSSES.with(|crosses| crosses.borrow_mut().retain(|cross| cross.time > 0.0));
     DEBUG_TEXTS.with(|texts| texts.borrow_mut().clear());

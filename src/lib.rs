@@ -13,7 +13,7 @@
 #![allow(clippy::needless_range_loop)] // False positives
 
 #[macro_use]
-mod debugging; // keep first so the macros are available everywhere
+pub mod debugging; // keep first so the macros are available everywhere
 
 pub mod cvars;
 pub mod entities;

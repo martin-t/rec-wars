@@ -300,6 +300,7 @@ use thunderdome::Index;
 
 use rec_wars::{
     cvars::Cvars,
+    debugging::{DEBUG_CROSSES, DEBUG_LINES},
     entities::{Player, Weapon},
     game_state::{Explosion, GameState, Input},
     map::{self, F64Ext, Kind, Vec2f, VecExt, TILE_SIZE},
@@ -816,6 +817,7 @@ async fn main() {
         }
 
         // Homing missile indicator
+        // TODO dashed lines
         let player_veh_scr_pos = player_veh_pos - top_left;
         draw_circle_lines(
             player_veh_scr_pos.x as f32,
@@ -827,6 +829,55 @@ async fn main() {
         let dir = 0.0.to_vec2f(); // TODO
         let end = player_veh_scr_pos + dir * cvars.hud_missile_indicator_radius;
         draw_line(player_veh_scr_pos, end, 1.0, GREEN);
+
+        // Debug lines and crosses
+        // TODO colors (also in other places below)
+        DEBUG_LINES.with(|lines| {
+            let mut lines = lines.borrow_mut();
+            for line in lines.iter_mut() {
+                if cvars.d_draw && cvars.d_draw_lines {
+                    let scr_begin = line.begin - top_left;
+                    let scr_end = line.end - top_left;
+                    draw_line(scr_begin, scr_end, 1.0, RED);
+                    if cvars.d_draw_lines_ends_length > 0.0 {
+                        let segment = line.end - line.begin;
+                        let perpendicular = Vec2f::new(-segment.y, segment.x).normalized();
+                        draw_line(
+                            scr_begin + -perpendicular * cvars.d_draw_lines_ends_length,
+                            scr_begin + perpendicular * cvars.d_draw_lines_ends_length,
+                            1.0,
+                            RED,
+                        );
+                        draw_line(
+                            scr_end + -perpendicular * cvars.d_draw_lines_ends_length,
+                            scr_end + perpendicular * cvars.d_draw_lines_ends_length,
+                            1.0,
+                            RED,
+                        );
+                    }
+                }
+                line.time -= server.gs.dt;
+            }
+        });
+        DEBUG_CROSSES.with(|crosses| {
+            let mut crosses = crosses.borrow_mut();
+            for cross in crosses.iter_mut() {
+                if cvars.d_draw && cvars.d_draw_crosses {
+                    let scr_point = cross.point - top_left;
+                    if cull(scr_point) {
+                        continue;
+                    }
+
+                    let top_left = scr_point - Vec2f::new(-3.0, -3.0);
+                    let bottom_right = scr_point - Vec2f::new(3.0, 3.0);
+                    let top_right = scr_point - Vec2f::new(3.0, -3.0);
+                    let bottom_left = scr_point - Vec2f::new(-3.0, 3.0);
+                    draw_line(top_left, bottom_right, 1.0, RED);
+                    draw_line(top_right, bottom_left, 1.0, RED);
+                }
+                cross.time -= server.gs.dt;
+            }
+        });
 
         // TODO draw the rest, finish commented blocks above
 
