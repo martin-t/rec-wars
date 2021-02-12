@@ -779,6 +779,43 @@ async fn main() {
             y += TILE_SIZE;
         }
 
+        // Draw world-space HUD elements:
+
+        // Names
+        if cvars.hud_names {
+            for (_, vehicle) in server.gs.vehicles.iter() {
+                let scr_pos = vehicle.pos - top_left;
+                if cull(scr_pos) {
+                    // LATER, restrict name length
+                    continue;
+                }
+
+                let name = &server.gs.players[vehicle.owner].name;
+                let size = measure_text(name, None, cvars.hud_names_font_size as u16, 1.0);
+                draw_text(
+                    name,
+                    // LATER remove cvars.hud_names_x when raw_canvas is removed
+                    (scr_pos.x - size.width as f64 / 2.0 + cvars.hud_names_shadow_mq_x) as f32,
+                    (scr_pos.y + cvars.hud_names_y + cvars.hud_names_shadow_mq_y) as f32,
+                    cvars.hud_names_font_size,
+                    Color::new(0.0, 0.0, 0.0, cvars.hud_names_shadow_alpha as f32),
+                );
+                draw_text(
+                    name,
+                    // LATER remove cvars.hud_names_x when raw_canvas is removed
+                    (scr_pos.x - size.width as f64 / 2.0) as f32,
+                    (scr_pos.y + cvars.hud_names_y) as f32,
+                    cvars.hud_names_font_size,
+                    Color::new(
+                        cvars.hud_names_brightness as f32,
+                        cvars.hud_names_brightness as f32,
+                        cvars.hud_names_brightness as f32,
+                        cvars.hud_names_alpha as f32,
+                    ),
+                );
+            }
+        }
+
         // TODO draw the rest, finish commented blocks above
 
         let end = get_time();

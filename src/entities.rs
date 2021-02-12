@@ -97,7 +97,7 @@ pub struct Vehicle {
     /// I plan to generalize this and have a cvar to choose between multiple reload mechanisms.
     pub(crate) ammos: Vec<Ammo>,
     pub(crate) spawn_time: f64,
-    pub(crate) owner: Index,
+    pub owner: Index,
 }
 
 impl Vehicle {
