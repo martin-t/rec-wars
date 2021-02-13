@@ -720,7 +720,7 @@ impl Cvars {
         }
     }
 
-    pub(crate) fn g_weapon_reload_ammo(&self, weapon: Weapon) -> u32 {
+    pub fn g_weapon_reload_ammo(&self, weapon: Weapon) -> u32 {
         match weapon {
             Weapon::Mg => self.g_machine_gun_reload_ammo,
             Weapon::Rail => self.g_railgun_reload_ammo,

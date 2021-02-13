@@ -101,7 +101,7 @@ pub struct Vehicle {
     pub hp_fraction: f64,
     /// Each weapon has a separate reload status even if they all reload at the same time.
     /// I plan to generalize this and have a cvar to choose between multiple reload mechanisms.
-    pub(crate) ammos: Vec<Ammo>,
+    pub ammos: Vec<Ammo>,
     pub(crate) spawn_time: f64,
     pub owner: Index,
 }
@@ -156,7 +156,7 @@ pub enum VehicleType {
 }
 
 #[derive(Debug, Clone, Copy)]
-pub(crate) enum Ammo {
+pub enum Ammo {
     /// Refire delay end time, ammo count remaining
     Loaded(f64, u32),
     /// Start time, end time

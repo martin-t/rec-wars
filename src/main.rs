@@ -303,7 +303,7 @@ use thunderdome::Index;
 use rec_wars::{
     cvars::Cvars,
     debugging::{DEBUG_CROSSES, DEBUG_LINES},
-    entities::{Player, Weapon},
+    entities::{Ammo, Player, Weapon},
     game_state::{Explosion, GameState, Input},
     map::{self, F64Ext, Kind, Vec2f, VecExt, TILE_SIZE},
     server::Server,
@@ -989,6 +989,41 @@ async fn main() {
                 &hp_text,
                 hp_pos.x - 25.0,
                 hp_pos.y + cvars.hud_hp_height as f32,
+                15.0,
+                RED,
+            );
+        }
+
+        // Ammo
+        let ammo = player_vehicle.ammos[player.cur_weapon as usize];
+        let ammo_fraction = match ammo {
+            Ammo::Loaded(_ready_time, count) => {
+                let max = cvars.g_weapon_reload_ammo(player.cur_weapon);
+                count as f64 / max as f64
+            }
+            Ammo::Reloading(start, end) => {
+                let max_diff = end - start;
+                let cur_diff = server.gs.game_time - start;
+                cur_diff / max_diff
+            }
+        };
+        let ammo_pos = hud_pos(view_size, cvars.hud_ammo_x, cvars.hud_ammo_y);
+        draw_rectangle(
+            ammo_pos.x,
+            ammo_pos.y,
+            (cvars.hud_ammo_width * ammo_fraction) as f32,
+            cvars.hud_ammo_height as f32,
+            YELLOW,
+        );
+        if cvars.d_draw_text {
+            let ammo_number = match ammo {
+                Ammo::Loaded(_ready_time, count) => count,
+                Ammo::Reloading(_start, _end) => 0,
+            };
+            draw_text(
+                &ammo_number.to_string(),
+                ammo_pos.x - 25.0,
+                ammo_pos.y + cvars.hud_ammo_height as f32,
                 15.0,
                 RED,
             );
