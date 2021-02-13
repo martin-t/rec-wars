@@ -534,7 +534,7 @@ async fn main() {
 
                 if server.map.surface_of(tile).kind != Kind::Wall {
                     let img = imgs_tiles[tile.surface_index];
-                    draw_tile(img, x, y, tile.angle);
+                    render_tile(img, x, y, tile.angle);
                 }
 
                 c += 1;
@@ -570,14 +570,14 @@ async fn main() {
             }
             // we're drawing from the bullet's position backwards
             let scr_end = scr_pos - mg.vel.normalized() * cvars.g_machine_gun_trail_length;
-            draw_line(scr_pos, scr_end, 1.0, YELLOW);
+            render_line(scr_pos, scr_end, 1.0, YELLOW);
         }
 
         // Draw railguns
         for beam in &server.gs.rail_beams {
             let scr_begin = beam.begin - top_left;
             let scr_end = beam.end - top_left;
-            draw_line(scr_begin, scr_end, 1.0, Color::new(0.0, 0.0, 1.0, 1.0));
+            render_line(scr_begin, scr_end, 1.0, Color::new(0.0, 0.0, 1.0, 1.0));
         }
 
         // Draw cluster bombs
@@ -623,21 +623,21 @@ async fn main() {
             if cull(scr_pos) {
                 continue;
             }
-            draw_img_center(img_rocket, scr_pos, proj.vel.to_angle());
+            render_img_center(img_rocket, scr_pos, proj.vel.to_angle());
         }
         for (_, proj) in weapon_projectiles(Weapon::Hm) {
             let scr_pos = proj.pos - top_left;
             if cull(scr_pos) {
                 continue;
             }
-            draw_img_center(img_hm, scr_pos, proj.vel.to_angle());
+            render_img_center(img_hm, scr_pos, proj.vel.to_angle());
         }
         for (_, proj) in weapon_projectiles(Weapon::Gm) {
             let scr_pos = proj.pos - top_left;
             if cull(scr_pos) {
                 continue;
             }
-            draw_img_center(img_gm, scr_pos, proj.vel.to_angle());
+            render_img_center(img_gm, scr_pos, proj.vel.to_angle());
         }
 
         // Draw BFGs
@@ -658,7 +658,7 @@ async fn main() {
         for &(src, dest) in &server.gs.bfg_beams {
             let scr_src = src - top_left;
             let scr_dest = dest - top_left;
-            draw_line(scr_src, scr_dest, 1.0, GREEN);
+            render_line(scr_src, scr_dest, 1.0, GREEN);
         }
 
         // Draw chassis
@@ -673,7 +673,7 @@ async fn main() {
             } else {
                 img = imgs_vehicles[vehicle.veh_type as usize * 2];
             }
-            draw_img_center(img, scr_pos, vehicle.angle);
+            render_img_center(img, scr_pos, vehicle.angle);
             // if cvars.d_draw && cvars.d_draw_hitboxes {
             //     client.context.set_stroke_style(&"yellow".into());
             //     client.context.begin_path();
@@ -705,7 +705,7 @@ async fn main() {
                 vehicle.angle.to_mat2f() * cvars.g_vehicle_turret_offset_chassis(vehicle.veh_type);
             let turret_scr_pos = scr_pos + offset_chassis;
             let offset_turret = cvars.g_vehicle_turret_offset_turret(vehicle.veh_type);
-            draw_img_offset(
+            render_img_offset(
                 img,
                 turret_scr_pos,
                 vehicle.angle + vehicle.turret_angle_current,
@@ -774,7 +774,7 @@ async fn main() {
 
                 if server.map.surface_of(tile).kind == Kind::Wall {
                     let img = imgs_tiles[tile.surface_index];
-                    draw_tile(img, x, y, tile.angle);
+                    render_tile(img, x, y, tile.angle);
                 }
 
                 c += 1;
@@ -832,7 +832,7 @@ async fn main() {
         );
         let dir = 0.0.to_vec2f(); // TODO
         let end = player_veh_scr_pos + dir * cvars.hud_missile_indicator_radius;
-        draw_line(player_veh_scr_pos, end, 1.0, GREEN);
+        render_line(player_veh_scr_pos, end, 1.0, GREEN);
 
         // Debug lines and crosses
         // TODO colors (also in other places below)
@@ -842,17 +842,17 @@ async fn main() {
                 if cvars.d_draw && cvars.d_draw_lines {
                     let scr_begin = line.begin - top_left;
                     let scr_end = line.end - top_left;
-                    draw_line(scr_begin, scr_end, 1.0, RED);
+                    render_line(scr_begin, scr_end, 1.0, RED);
                     if cvars.d_draw_lines_ends_length > 0.0 {
                         let segment = line.end - line.begin;
                         let perpendicular = Vec2f::new(-segment.y, segment.x).normalized();
-                        draw_line(
+                        render_line(
                             scr_begin + -perpendicular * cvars.d_draw_lines_ends_length,
                             scr_begin + perpendicular * cvars.d_draw_lines_ends_length,
                             1.0,
                             RED,
                         );
-                        draw_line(
+                        render_line(
                             scr_end + -perpendicular * cvars.d_draw_lines_ends_length,
                             scr_end + perpendicular * cvars.d_draw_lines_ends_length,
                             1.0,
@@ -876,8 +876,8 @@ async fn main() {
                     let bottom_right = scr_point - Vec2f::new(3.0, 3.0);
                     let top_right = scr_point - Vec2f::new(3.0, -3.0);
                     let bottom_left = scr_point - Vec2f::new(-3.0, 3.0);
-                    draw_line(top_left, bottom_right, 1.0, RED);
-                    draw_line(top_right, bottom_left, 1.0, RED);
+                    render_line(top_left, bottom_right, 1.0, RED);
+                    render_line(top_right, bottom_left, 1.0, RED);
                 }
                 cross.time -= server.gs.dt;
             }
@@ -1100,7 +1100,7 @@ async fn main() {
 /// rotate it clockwise by `angle`.
 ///
 /// See Vec2f for more about the coord system and rotations.
-fn draw_img_center(img: Texture2D, pos: Vec2f, angle: f64) {
+fn render_img_center(img: Texture2D, pos: Vec2f, angle: f64) {
     draw_texture_ex(
         img,
         pos.x as f32 - img.width() / 2.0,
@@ -1118,7 +1118,7 @@ fn draw_img_center(img: Texture2D, pos: Vec2f, angle: f64) {
 /// The center of rotation is `img`'s center + `offset`.
 ///
 /// See Vec2f for more about the coord system and rotations.
-fn draw_img_offset(img: Texture2D, pos: Vec2f, angle: f64, offset: Vec2f) {
+fn render_img_offset(img: Texture2D, pos: Vec2f, angle: f64, offset: Vec2f) {
     draw_texture_ex(
         img,
         // This is effectively `pos - (offset + half_size)`, just written differently.
@@ -1133,7 +1133,7 @@ fn draw_img_offset(img: Texture2D, pos: Vec2f, angle: f64, offset: Vec2f) {
     );
 }
 
-fn draw_tile(img: Texture2D, x: f64, y: f64, angle: f64) {
+fn render_tile(img: Texture2D, x: f64, y: f64, angle: f64) {
     draw_texture_ex(
         img,
         x as f32,
@@ -1146,7 +1146,7 @@ fn draw_tile(img: Texture2D, x: f64, y: f64, angle: f64) {
     );
 }
 
-fn draw_line(src: Vec2f, dest: Vec2f, thickness: f64, color: Color) {
+fn render_line(src: Vec2f, dest: Vec2f, thickness: f64, color: Color) {
     macroquad::shapes::draw_line(
         src.x as f32,
         src.y as f32,
