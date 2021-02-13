@@ -1027,7 +1027,7 @@ impl Default for Cvars {
             hud_pause_x: 600.0,
             hud_pause_y: 400.0,
 
-            hud_ranking_font_size: 15.0,
+            hud_ranking_font_size: 16.0,
             hud_ranking_shadow_mq_x: 1.0,
             hud_ranking_shadow_mq_y: 1.0,
             // keep off because of firefox
@@ -1036,7 +1036,7 @@ impl Default for Cvars {
             hud_ranking_x: 80.0,
             hud_ranking_y: -70.0,
 
-            hud_score_font_size: 25.0,
+            hud_score_font_size: 32.0,
             hud_score_shadow_mq_x: 2.0,
             hud_score_shadow_mq_y: 2.0,
             // keep off because of firefox (even just this one number costs about 5 ms each frame)

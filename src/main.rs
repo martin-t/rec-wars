@@ -989,7 +989,7 @@ async fn main() {
                 &hp_text,
                 hp_pos.x - 25.0,
                 hp_pos.y + cvars.hud_hp_height as f32,
-                15.0,
+                16.0,
                 RED,
             );
         }
@@ -1024,7 +1024,7 @@ async fn main() {
                 &ammo_number.to_string(),
                 ammo_pos.x - 25.0,
                 ammo_pos.y + cvars.hud_ammo_height as f32,
-                15.0,
+                16.0,
                 RED,
             );
         }
@@ -1060,6 +1060,25 @@ async fn main() {
                 (view_size.x as f32 - paused_size.width) / 2.0,
                 (view_size.y as f32 - paused_size.height) / 2.0,
                 cvars.hud_pause_font_size as f32,
+                RED,
+            );
+        }
+
+        // Draw screen space debug info:
+
+        // Draw FPS
+        if cvars.d_fps {
+            let fps_pos = hud_pos(view_size, cvars.d_fps_x, cvars.d_fps_y);
+            draw_text(
+                &format!(
+                    "update FPS: {:.1}   gamelogic FPS: {:.1}   render FPS: {:.1}",
+                    server.update_fps.get_fps(),
+                    server.gamelogic_fps.get_fps(),
+                    client.render_fps.get_fps()
+                ),
+                fps_pos.x - 100.0, // LATER remove the 100 after finding a decent font
+                fps_pos.y,
+                16.0,
                 RED,
             );
         }
