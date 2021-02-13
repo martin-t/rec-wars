@@ -1029,6 +1029,19 @@ async fn main() {
             );
         }
 
+        // Weapon icon
+        // The original shadows were part of the image but this is good enough for now.
+        let weap_img = imgs_weapon_icons[player.cur_weapon as usize];
+        let weap_icon_pos = hud_pos(view_size, cvars.hud_weapon_icon_x, cvars.hud_weapon_icon_y)
+            - Vec2::new(weap_img.width(), weap_img.height()) / 2.0;
+        draw_texture(
+            weap_img,
+            weap_icon_pos.x + cvars.hud_weapon_icon_shadow_mq_x,
+            weap_icon_pos.y + cvars.hud_weapon_icon_shadow_mq_y,
+            Color::new(0.0, 0.0, 0.0, cvars.hud_weapon_icon_shadow_alpha as f32),
+        );
+        draw_texture(weap_img, weap_icon_pos.x, weap_icon_pos.y, WHITE);
+
         // TODO draw the rest, finish commented blocks above
 
         let end = get_time();
@@ -1105,12 +1118,12 @@ fn draw_line(src: Vec2f, dest: Vec2f, thickness: f64, color: Color) {
 
 /// If x or y are negative, count them from the right or bottom respectively.
 /// Useful to make HUD config cvars work for any canvas size.
-fn hud_pos(canvas_size: Vec2f, mut x: f64, mut y: f64) -> Vec2 {
+fn hud_pos(view_size: Vec2f, mut x: f64, mut y: f64) -> Vec2 {
     if x < 0.0 {
-        x += canvas_size.x;
+        x += view_size.x;
     }
     if y < 0.0 {
-        y += canvas_size.y;
+        y += view_size.y;
     }
     Vec2::new(x as f32, y as f32)
 }
