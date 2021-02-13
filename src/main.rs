@@ -1042,6 +1042,28 @@ async fn main() {
         );
         draw_texture(weap_img, weap_icon_pos.x, weap_icon_pos.y, WHITE);
 
+        // TODO scoreboard
+
+        // Pause
+        if server.paused {
+            let paused_size = measure_text("PAUSED", None, cvars.hud_pause_font_size as u16, 1.0);
+            // LATER remove cvars.hud_pause_x/y if raw_canvas removed
+            draw_text(
+                "PAUSED",
+                (view_size.x as f32 - paused_size.width) / 2.0 + cvars.hud_pause_shadow_mq_x,
+                (view_size.y as f32 - paused_size.height) / 2.0 + cvars.hud_pause_shadow_mq_y,
+                cvars.hud_pause_font_size as f32,
+                BLACK,
+            );
+            draw_text(
+                "PAUSED",
+                (view_size.x as f32 - paused_size.width) / 2.0,
+                (view_size.y as f32 - paused_size.height) / 2.0,
+                cvars.hud_pause_font_size as f32,
+                RED,
+            );
+        }
+
         // TODO draw the rest, finish commented blocks above
 
         let end = get_time();

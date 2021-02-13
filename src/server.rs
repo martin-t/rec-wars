@@ -27,7 +27,7 @@ pub struct Server {
     pub(crate) real_time: f64,
     pub(crate) real_time_prev: f64,
     pub(crate) real_time_delta: f64,
-    pub(crate) paused: bool,
+    pub paused: bool,
     pub(crate) update_fps: Fps,
     pub(crate) update_durations: Durations,
     pub(crate) gamelogic_fps: Fps,

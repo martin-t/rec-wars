@@ -315,6 +315,8 @@ pub struct Cvars {
     pub hud_missile_indicator_radius: f64,
 
     pub hud_pause_font_size: f64,
+    pub hud_pause_shadow_mq_x: f32,
+    pub hud_pause_shadow_mq_y: f32,
     pub hud_pause_shadow_x: f64,
     pub hud_pause_shadow_y: f64,
     pub hud_pause_x: f64,
@@ -323,9 +325,9 @@ pub struct Cvars {
     pub hud_ranking_font_size: f64,
     pub hud_ranking_shadow_mq_x: f32,
     pub hud_ranking_shadow_mq_y: f32,
-    /// Origranking RW uses 1
+    /// Original RW uses 1
     pub hud_ranking_shadow_x: f64,
-    /// Origranking RW uses 1
+    /// Original RW uses 1
     pub hud_ranking_shadow_y: f64,
     pub hud_ranking_x: f64,
     pub hud_ranking_y: f64,
@@ -1018,6 +1020,8 @@ impl Default for Cvars {
             hud_missile_indicator_radius: 18.0,
 
             hud_pause_font_size: 50.0,
+            hud_pause_shadow_mq_x: 2.0,
+            hud_pause_shadow_mq_y: 2.0,
             hud_pause_shadow_x: 0.0,
             hud_pause_shadow_y: 0.0,
             hud_pause_x: 600.0,
