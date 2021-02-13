@@ -61,6 +61,12 @@ pub struct Score {
     pub suicides: i32,
 }
 
+impl Score {
+    pub fn points(&self, cvars: &Cvars) -> i32 {
+        self.kills * cvars.g_ffa_score_kill + self.deaths * cvars.g_ffa_score_death
+    }
+}
+
 #[derive(Debug, Clone)]
 pub(crate) struct Ai {
     pub(crate) player: Index,

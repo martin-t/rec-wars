@@ -294,7 +294,7 @@
 //      - They mean something can be done better but marking it as a todo would be just noise when grepping.
 //        They're things I'd do if I had infinite time and wanted to make RecWars perfect.
 
-use std::str;
+use std::{cmp::Reverse, str};
 
 use ::rand::{prelude::SmallRng, SeedableRng};
 use macroquad::prelude::*;
@@ -394,8 +394,8 @@ async fn main() {
         imgs_weapon_icons.push(load_texture(path).await);
     }
 
-    // LATER use r_smoothing
     // LATER smoothing optional and configurable per image
+    // LATER either use or remove r_smoothing (if raw_canvas is removed)
     let img_explosion = load_texture("assets/explosion.png").await;
     set_texture_filter(img_explosion, FilterMode::Nearest);
     let img_explosion_cyan = load_texture("assets/explosion_cyan.png").await;
@@ -800,8 +800,8 @@ async fn main() {
                 // LATER remove cvars.hud_names_shadow_x/y when raw_canvas is removed
                 draw_text(
                     name,
-                    (scr_pos.x - size.width as f64 / 2.0 + cvars.hud_names_shadow_mq_x) as f32,
-                    (scr_pos.y + cvars.hud_names_y + cvars.hud_names_shadow_mq_y) as f32,
+                    scr_pos.x as f32 - size.width / 2.0 + cvars.hud_names_shadow_mq_x,
+                    scr_pos.y as f32 + cvars.hud_names_y as f32 + cvars.hud_names_shadow_mq_y,
                     cvars.hud_names_font_size,
                     Color::new(0.0, 0.0, 0.0, cvars.hud_names_shadow_alpha as f32),
                 );
@@ -883,6 +883,84 @@ async fn main() {
             }
         });
 
+        // Draw screen-space HUD elements:
+
+        let mut player_points: Vec<_> = server
+            .gs
+            .players
+            .iter()
+            .map(|(index, player)| (index, player.score.points(&cvars)))
+            .collect();
+        player_points.sort_by_key(|&(_, points)| Reverse(points));
+
+        // Score
+        let score_pos = hud_pos(view_size, cvars.hud_score_x, cvars.hud_score_y);
+        let points = player.score.points(&cvars).to_string();
+        draw_text(
+            &points,
+            score_pos.x + cvars.hud_score_shadow_mq_x,
+            score_pos.y + cvars.hud_score_shadow_mq_y,
+            cvars.hud_score_font_size as f32,
+            BLACK,
+        );
+        draw_text(
+            &points,
+            score_pos.x,
+            score_pos.y,
+            cvars.hud_score_font_size as f32,
+            WHITE,
+        );
+
+        // Ranking
+        // Original RW shows "current rank / total players (+/- points difference to leader or second)"
+        // as a big but not bold number with a 1px shadow. E.g. "1/3 (+5)" or "2/3 (0)".
+        // There's no special treatement for players with the same number of points.
+        let ranking_pos = hud_pos(view_size, cvars.hud_ranking_x, cvars.hud_ranking_y);
+        let current_index = player_points
+            .iter()
+            .position(|&(handle, _)| handle == client.player_handle)
+            .unwrap();
+        let points_diff = if current_index == 0 {
+            if player_points.len() == 1 {
+                // The player is alone.
+                0
+            } else {
+                player_points[current_index].1 - player_points[1].1
+            }
+        } else {
+            player_points[current_index].1 - player_points[0].1
+        };
+        let ranking = if points_diff > 0 {
+            // Only show the + sign for positive numbers, not 0
+            format!(
+                "{}/{} (+{})",
+                current_index + 1,
+                player_points.len(),
+                points_diff
+            )
+        } else {
+            format!(
+                "{}/{} ({})",
+                current_index + 1,
+                player_points.len(),
+                points_diff
+            )
+        };
+        draw_text(
+            &ranking,
+            ranking_pos.x + cvars.hud_ranking_shadow_mq_x,
+            ranking_pos.y + cvars.hud_ranking_shadow_mq_y,
+            cvars.hud_ranking_font_size as f32,
+            BLACK,
+        );
+        draw_text(
+            &ranking,
+            ranking_pos.x,
+            ranking_pos.y,
+            cvars.hud_ranking_font_size as f32,
+            WHITE,
+        );
+
         // TODO draw the rest, finish commented blocks above
 
         let end = get_time();
@@ -955,4 +1033,16 @@ fn draw_line(src: Vec2f, dest: Vec2f, thickness: f64, color: Color) {
         thickness as f32,
         color,
     );
+}
+
+/// If x or y are negative, count them from the right or bottom respectively.
+/// Useful to make HUD config cvars work for any canvas size.
+fn hud_pos(canvas_size: Vec2f, mut x: f64, mut y: f64) -> Vec2 {
+    if x < 0.0 {
+        x += canvas_size.x;
+    }
+    if y < 0.0 {
+        y += canvas_size.y;
+    }
+    Vec2::new(x as f32, y as f32)
 }

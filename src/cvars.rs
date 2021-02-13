@@ -303,8 +303,8 @@ pub struct Cvars {
     pub hud_names_brightness: f64,
     pub hud_names_font_size: f32,
     pub hud_names_shadow_alpha: f64,
-    pub hud_names_shadow_mq_x: f64,
-    pub hud_names_shadow_mq_y: f64,
+    pub hud_names_shadow_mq_x: f32,
+    pub hud_names_shadow_mq_y: f32,
     /// NB: these shadows absolutely murder performance in firefox (chromum is ok)
     pub hud_names_shadow_x: f64,
     pub hud_names_shadow_y: f64,
@@ -321,6 +321,8 @@ pub struct Cvars {
     pub hud_pause_y: f64,
 
     pub hud_ranking_font_size: f64,
+    pub hud_ranking_shadow_mq_x: f32,
+    pub hud_ranking_shadow_mq_y: f32,
     /// Origranking RW uses 1
     pub hud_ranking_shadow_x: f64,
     /// Origranking RW uses 1
@@ -329,6 +331,8 @@ pub struct Cvars {
     pub hud_ranking_y: f64,
 
     pub hud_score_font_size: f64,
+    pub hud_score_shadow_mq_x: f32,
+    pub hud_score_shadow_mq_y: f32,
     /// Original RW uses 2
     pub hud_score_shadow_x: f64,
     /// Original RW uses 2
@@ -1018,6 +1022,8 @@ impl Default for Cvars {
             hud_pause_y: 400.0,
 
             hud_ranking_font_size: 15.0,
+            hud_ranking_shadow_mq_x: 1.0,
+            hud_ranking_shadow_mq_y: 1.0,
             // keep off because of firefox
             hud_ranking_shadow_x: 0.0,
             hud_ranking_shadow_y: 0.0,
@@ -1025,6 +1031,8 @@ impl Default for Cvars {
             hud_ranking_y: -70.0,
 
             hud_score_font_size: 25.0,
+            hud_score_shadow_mq_x: 2.0,
+            hud_score_shadow_mq_y: 2.0,
             // keep off because of firefox (even just this one number costs about 5 ms each frame)
             hud_score_shadow_x: 0.0,
             hud_score_shadow_y: 0.0,

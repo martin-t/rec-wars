@@ -453,11 +453,7 @@ pub(crate) fn draw(game: &RawCanvasGame, cvars: &Cvars) -> Result<(), JsValue> {
         .gs
         .players
         .iter()
-        .map(|(index, player)| {
-            let points = player.score.kills * cvars.g_ffa_score_kill
-                + player.score.deaths * cvars.g_ffa_score_death;
-            (index, points)
-        })
+        .map(|(index, player)| (index, player.score.points(cvars)))
         .collect();
     player_points.sort_by_key(|&(_, points)| Reverse(points));
 
@@ -469,7 +465,7 @@ pub(crate) fn draw(game: &RawCanvasGame, cvars: &Cvars) -> Result<(), JsValue> {
     client.context.set_font(&score_font);
     let score_pos = hud_pos(canvas_size, cvars.hud_score_x, cvars.hud_score_y);
     client.context.fill_text(
-        &(player.score.kills - player.score.deaths).to_string(),
+        &player.score.points(cvars).to_string(),
         score_pos.x,
         score_pos.y,
     )?;
