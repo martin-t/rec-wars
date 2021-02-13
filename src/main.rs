@@ -307,13 +307,14 @@ use rec_wars::{
     game_state::{Explosion, GameState, Input},
     map::{self, F64Ext, Kind, Vec2f, VecExt, TILE_SIZE},
     server::Server,
-    timing::{Fps, MacroquadTime},
+    timing::{Durations, Fps, MacroquadTime},
 };
 use vek::Clamp;
 
 #[derive(Debug)]
 struct MacroquadClient {
     render_fps: Fps,
+    render_cmds_durations: Durations,
     player_handle: Index,
 }
 
@@ -417,8 +418,9 @@ async fn main() {
     let player1_handle = gs.players.insert(player);
 
     let time = Box::new(MacroquadTime);
-    let client = MacroquadClient {
+    let mut client = MacroquadClient {
         render_fps: Fps::new(),
+        render_cmds_durations: Durations::new(),
         player_handle: player1_handle,
     };
     let mut server = Server::new(&cvars, time, map, gs);
@@ -1083,9 +1085,50 @@ async fn main() {
             );
         }
 
+        // Draw perf info
+        if cvars.d_draw && cvars.d_draw_perf {
+            draw_text(
+                &format!("last {} frames (in ms):", cvars.d_timing_samples),
+                view_size.x as f32 - 250.0,
+                view_size.y as f32 - 90.0,
+                16.0,
+                RED,
+            );
+            if let Some((avg, max)) = server.update_durations.get_stats() {
+                draw_text(
+                    &format!("update avg: {:.1}, max: {:.1}", avg, max),
+                    view_size.x as f32 - 250.0,
+                    view_size.y as f32 - 75.0,
+                    16.0,
+                    RED,
+                );
+            }
+            if let Some((avg, max)) = server.gamelogic_durations.get_stats() {
+                draw_text(
+                    &format!("gamelogic avg: {:.1}, max: {:.1}", avg, max),
+                    view_size.x as f32 - 250.0,
+                    view_size.y as f32 - 60.0,
+                    16.0,
+                    RED,
+                );
+            }
+            if let Some((avg, max)) = client.render_cmds_durations.get_stats() {
+                draw_text(
+                    &format!("render cmds avg: {:.1}, max: {:.1}", avg, max),
+                    view_size.x as f32 - 250.0,
+                    view_size.y as f32 - 45.0,
+                    16.0,
+                    RED,
+                );
+            }
+        }
+
         // TODO draw the rest, finish commented blocks above
 
         let end = get_time();
+        client
+            .render_cmds_durations
+            .add(cvars.d_timing_samples, end - start);
 
         draw_text(&get_fps().to_string(), 400.0, 300.0, 20.0, WHITE);
         draw_text(&get_frame_time().to_string(), 400.0, 330.0, 20.0, WHITE);
