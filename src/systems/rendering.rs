@@ -529,7 +529,7 @@ pub(crate) fn draw(game: &RawCanvasGame, cvars: &Cvars) -> Result<(), JsValue> {
     // 0.5 = yellow
     // 0.5..1.0 -> decrease red channel
     // 1.0 = green
-    let player_vehicle = &server.gs.vehicles[player.vehicle.unwrap()]; // TODO what if no vehicle
+    let player_vehicle = &server.gs.vehicles[player.vehicle.unwrap()];
     let r = 1.0 - (player_vehicle.hp_fraction.clamped(0.5, 1.0) - 0.5) * 2.0;
     let g = player_vehicle.hp_fraction.clamped(0.0, 0.5) * 2.0;
     let rgb = format!("rgb({}, {}, 0)", r * 255.0, g * 255.0);

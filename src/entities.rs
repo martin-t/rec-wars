@@ -98,7 +98,7 @@ pub struct Vehicle {
     pub turret_angle_current: f64,
     pub(crate) turret_angle_wanted: f64,
     /// HP between 0 and 1 - saving the fraction here instead of absolute hit points so armor cvars can be adjusted during a match.
-    pub(crate) hp_fraction: f64,
+    pub hp_fraction: f64,
     /// Each weapon has a separate reload status even if they all reload at the same time.
     /// I plan to generalize this and have a cvar to choose between multiple reload mechanisms.
     pub(crate) ammos: Vec<Ammo>,

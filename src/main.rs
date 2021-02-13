@@ -961,6 +961,39 @@ async fn main() {
             WHITE,
         );
 
+        // Hit points (goes from green to red)
+        // Might wanna use https://crates.io/crates/colorsys if I need more color operations.
+        // Hit points to color (poor man's HSV):
+        // 0.0 = red
+        // 0.0..0.5 -> increase green channel
+        // 0.5 = yellow
+        // 0.5..1.0 -> decrease red channel
+        // 1.0 = green
+        let player_vehicle = &server.gs.vehicles[player.vehicle.unwrap()];
+        let r = 1.0 - (player_vehicle.hp_fraction.clamped(0.5, 1.0) - 0.5) * 2.0;
+        let g = player_vehicle.hp_fraction.clamped(0.0, 0.5) * 2.0;
+        let rgb = Color::new(r as f32, g as f32, 0.0, 1.0);
+        let hp_pos = hud_pos(view_size, cvars.hud_hp_x, cvars.hud_hp_y);
+        draw_rectangle(
+            hp_pos.x,
+            hp_pos.y,
+            (cvars.hud_hp_width * player_vehicle.hp_fraction) as f32,
+            cvars.hud_hp_height as f32,
+            rgb,
+        );
+        if cvars.d_draw_text {
+            let hp_number =
+                player_vehicle.hp_fraction * cvars.g_vehicle_hp(player_vehicle.veh_type);
+            let hp_text = format!("{}", hp_number);
+            draw_text(
+                &hp_text,
+                hp_pos.x - 25.0,
+                hp_pos.y + cvars.hud_hp_height as f32,
+                15.0,
+                RED,
+            );
+        }
+
         // TODO draw the rest, finish commented blocks above
 
         let end = get_time();

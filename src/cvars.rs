@@ -577,7 +577,7 @@ impl Cvars {
         }
     }
 
-    pub(crate) fn g_vehicle_hp(&self, veh_type: VehicleType) -> f64 {
+    pub fn g_vehicle_hp(&self, veh_type: VehicleType) -> f64 {
         let base = match veh_type {
             VehicleType::Tank => self.g_tank_base_hp,
             VehicleType::Hovercraft => self.g_hovercraft_base_hp,
