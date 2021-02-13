@@ -290,7 +290,9 @@
 //      [ ] find a way to increase rustfmt line length - the arbitrary line breaks are dumb
 //              - stuff like setting canvas shadow offset should be one line
 //              - stuff like long chains of iterator ops should be split
-// [ ] all the LATERs - they mean something can be done better but marking it as a todo would be just noise when grepping
+// [ ] all the LATERs
+//      - They mean something can be done better but marking it as a todo would be just noise when grepping.
+//        They're things I'd do if I had infinite time and wanted to make RecWars perfect.
 
 use std::str;
 
@@ -392,8 +394,12 @@ async fn main() {
         imgs_weapon_icons.push(load_texture(path).await);
     }
 
+    // LATER use r_smoothing
+    // LATER smoothing optional and configurable per image
     let img_explosion = load_texture("assets/explosion.png").await;
+    set_texture_filter(img_explosion, FilterMode::Nearest);
     let img_explosion_cyan = load_texture("assets/explosion_cyan.png").await;
+    set_texture_filter(img_explosion_cyan, FilterMode::Nearest);
     let img_rocket = load_texture("assets/weapons/rocket.png").await;
     let img_hm = load_texture("assets/weapons/homing_missile.png").await;
     let img_gm = load_texture("assets/weapons/guided_missile.png").await;
@@ -481,8 +487,6 @@ async fn main() {
         server.input(client.player_handle, input);
         // TODO time tracking
         server.update(&cvars, start);
-
-        // TODO disable smoothing?
 
         let player = &server.gs.players[client.player_handle];
         let player_veh_pos = server.gs.vehicles[player.vehicle.unwrap()].pos;
