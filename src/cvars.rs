@@ -1006,7 +1006,7 @@ impl Default for Cvars {
             hud_names: true,
             hud_names_alpha: 1.0,
             hud_names_brightness: 255.0,
-            hud_names_font_size: 18.0,
+            hud_names_font_size: 16.0,
             hud_names_shadow_alpha: 1.0,
             hud_names_shadow_mq_x: 2.0,
             hud_names_shadow_mq_y: 2.0,
@@ -1019,7 +1019,7 @@ impl Default for Cvars {
             hud_missile_indicator_dash_length: 3.3,
             hud_missile_indicator_radius: 18.0,
 
-            hud_pause_font_size: 50.0,
+            hud_pause_font_size: 64.0,
             hud_pause_shadow_mq_x: 2.0,
             hud_pause_shadow_mq_y: 2.0,
             hud_pause_shadow_x: 0.0,
@@ -1045,7 +1045,7 @@ impl Default for Cvars {
             hud_score_x: 30.0,
             hud_score_y: -70.0,
 
-            hud_scoreboard_font_size: 15.0,
+            hud_scoreboard_font_size: 16.0,
             hud_scoreboard_line_height: 18.0,
             // keep off because of firefox
             hud_scoreboard_shadow_x: 0.0,
