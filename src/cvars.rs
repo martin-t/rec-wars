@@ -301,7 +301,7 @@ pub struct Cvars {
     pub hud_names: bool,
     pub hud_names_alpha: f64,
     pub hud_names_brightness: f64,
-    pub hud_names_font_size: f32,
+    pub hud_names_font_size: f64,
     pub hud_names_shadow_alpha: f64,
     pub hud_names_shadow_mq_x: f32,
     pub hud_names_shadow_mq_y: f32,

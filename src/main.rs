@@ -804,16 +804,9 @@ async fn main() {
                 let name = &server.gs.players[vehicle.owner].name;
                 let size = measure_text(name, None, cvars.hud_names_font_size as u16, 1.0);
                 // LATER remove cvars.hud_names_shadow_x/y when raw_canvas is removed
-                draw_text(
+                render_text_with_shadow(
                     name,
-                    scr_pos.x as f32 - size.width / 2.0 + cvars.hud_names_shadow_mq_x,
-                    scr_pos.y as f32 + cvars.hud_names_y as f32 + cvars.hud_names_shadow_mq_y,
-                    cvars.hud_names_font_size,
-                    Color::new(0.0, 0.0, 0.0, cvars.hud_names_shadow_alpha as f32),
-                );
-                draw_text(
-                    name,
-                    (scr_pos.x - size.width as f64 / 2.0) as f32,
+                    scr_pos.x as f32 - size.width / 2.0,
                     (scr_pos.y + cvars.hud_names_y) as f32,
                     cvars.hud_names_font_size,
                     Color::new(
@@ -822,6 +815,9 @@ async fn main() {
                         cvars.hud_names_brightness as f32,
                         cvars.hud_names_alpha as f32,
                     ),
+                    cvars.hud_names_shadow_mq_x,
+                    cvars.hud_names_shadow_mq_y,
+                    cvars.hud_names_shadow_alpha,
                 );
             }
         }
@@ -902,19 +898,15 @@ async fn main() {
         // Score
         let score_pos = hud_pos(view_size, cvars.hud_score_x, cvars.hud_score_y);
         let points = player.score.points(&cvars).to_string();
-        draw_text(
-            &points,
-            score_pos.x + cvars.hud_score_shadow_mq_x,
-            score_pos.y + cvars.hud_score_shadow_mq_y,
-            cvars.hud_score_font_size as f32,
-            BLACK,
-        );
-        draw_text(
+        render_text_with_shadow(
             &points,
             score_pos.x,
             score_pos.y,
-            cvars.hud_score_font_size as f32,
+            cvars.hud_score_font_size,
             WHITE,
+            cvars.hud_score_shadow_mq_x,
+            cvars.hud_score_shadow_mq_y,
+            1.0,
         );
 
         // Ranking
@@ -952,19 +944,15 @@ async fn main() {
                 points_diff
             )
         };
-        draw_text(
-            &ranking,
-            ranking_pos.x + cvars.hud_ranking_shadow_mq_x,
-            ranking_pos.y + cvars.hud_ranking_shadow_mq_y,
-            cvars.hud_ranking_font_size as f32,
-            BLACK,
-        );
-        draw_text(
+        render_text_with_shadow(
             &ranking,
             ranking_pos.x,
             ranking_pos.y,
-            cvars.hud_ranking_font_size as f32,
+            cvars.hud_ranking_font_size,
             WHITE,
+            cvars.hud_ranking_shadow_mq_x,
+            cvars.hud_ranking_shadow_mq_y,
+            1.0,
         );
 
         // Hit points (goes from green to red)
@@ -1054,19 +1042,15 @@ async fn main() {
         if server.paused {
             let paused_size = measure_text("PAUSED", None, cvars.hud_pause_font_size as u16, 1.0);
             // LATER remove cvars.hud_pause_x/y if raw_canvas removed
-            draw_text(
-                "PAUSED",
-                (view_size.x as f32 - paused_size.width) / 2.0 + cvars.hud_pause_shadow_mq_x,
-                (view_size.y as f32 - paused_size.height) / 2.0 + cvars.hud_pause_shadow_mq_y,
-                cvars.hud_pause_font_size as f32,
-                BLACK,
-            );
-            draw_text(
+            render_text_with_shadow(
                 "PAUSED",
                 (view_size.x as f32 - paused_size.width) / 2.0,
                 (view_size.y as f32 - paused_size.height) / 2.0,
-                cvars.hud_pause_font_size as f32,
+                cvars.hud_pause_font_size,
                 RED,
+                cvars.hud_pause_shadow_mq_x,
+                cvars.hud_pause_shadow_mq_y,
+                1.0,
             );
         }
 
@@ -1215,6 +1199,27 @@ fn render_line(src: Vec2f, dest: Vec2f, thickness: f64, color: Color) {
         thickness as f32,
         color,
     );
+}
+
+#[allow(clippy::too_many_arguments)]
+fn render_text_with_shadow(
+    text: &str,
+    x: f32,
+    y: f32,
+    font_size: f64,
+    color: Color,
+    shadow_offset_x: f32,
+    shadow_offset_y: f32,
+    shadow_alpha: f64,
+) {
+    draw_text(
+        &text,
+        x + shadow_offset_x,
+        y + shadow_offset_y,
+        font_size as f32,
+        Color::new(0.0, 0.0, 0.0, shadow_alpha as f32),
+    );
+    draw_text(&text, x, y, font_size as f32, color);
 }
 
 /// If x or y are negative, count them from the right or bottom respectively.
