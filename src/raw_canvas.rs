@@ -1,4 +1,4 @@
-//! The browser version using WASM and the canvas 2D API.
+//! The browser version using WASM and the canvas 2D API (without macroquad).
 
 use std::fmt::Debug;
 
@@ -124,27 +124,9 @@ impl RawCanvasGame {
         // LATER Keep timestamps of input events. When splitting frame into multiple steps, update input each step.
         self.server.input(self.client.player_handle, *input);
 
-        let start = self.server.time.now();
-
-        self.server
-            .update_fps
-            .tick(cvars.d_fps_period, self.server.real_time);
         self.server.update(cvars, real_time);
 
-        let updated = self.server.time.now();
-        self.server
-            .update_durations
-            .add(cvars.d_timing_samples, updated - start);
-
-        self.client
-            .render_fps
-            .tick(cvars.d_fps_period, self.server.real_time);
-        systems::rendering::draw(self, cvars)?;
-
-        let rendered = self.server.time.now();
-        self.client
-            .render_durations
-            .add(cvars.d_timing_samples, rendered - updated);
+        self.client.render(&self.server, cvars)?;
 
         Ok(())
     }
@@ -174,6 +156,21 @@ pub(crate) struct RawCanvasClient {
     pub(crate) render_durations: Durations,
     pub(crate) player_handle: Index,
     // ^ When adding fields, consider adding them to Debug
+}
+
+impl RawCanvasClient {
+    fn render(&mut self, server: &Server, cvars: &Cvars) -> Result<(), JsValue> {
+        self.render_fps.tick(cvars.d_fps_period, server.real_time);
+        let start = server.time.now();
+
+        systems::rendering::draw(self, server, cvars)?;
+
+        let end = server.time.now();
+        self.render_durations
+            .add(cvars.d_timing_samples, end - start);
+
+        Ok(())
+    }
 }
 
 impl Debug for RawCanvasClient {

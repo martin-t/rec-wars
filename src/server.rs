@@ -24,7 +24,7 @@ pub struct Server {
     /// Time since game started in seconds. Increases at wall clock speed even when paused.
     ///
     /// This is not meant to be used for anything that affects gameplay - use `gs.game_time` instead.
-    pub(crate) real_time: f64,
+    pub real_time: f64,
     pub(crate) real_time_prev: f64,
     pub(crate) real_time_delta: f64,
     pub paused: bool,
@@ -89,6 +89,9 @@ impl Server {
     pub fn update(&mut self, cvars: &Cvars, real_time: f64) {
         // Recommended reading: https://gafferongames.com/post/fix_your_timestep/
 
+        self.update_fps.tick(cvars.d_fps_period, self.real_time);
+        let start = self.time.now();
+
         // Update time tracking variables
         self.real_time_prev = self.real_time;
         self.real_time = real_time;
@@ -104,6 +107,10 @@ impl Server {
             let dt_update = self.real_time_delta * cvars.d_speed;
             self.gamelogic(cvars, dt_update);
         }
+
+        let end = self.time.now();
+        self.update_durations
+            .add(cvars.d_timing_samples, end - start);
     }
 
     fn gamelogic(&mut self, cvars: &Cvars, dt_update: f64) {

@@ -315,6 +315,7 @@ use vek::Clamp;
 struct MacroquadClient {
     render_fps: Fps,
     render_cmds_durations: Durations,
+    rest_durations: Durations,
     player_handle: Index,
 }
 
@@ -421,6 +422,7 @@ async fn main() {
     let mut client = MacroquadClient {
         render_fps: Fps::new(),
         render_cmds_durations: Durations::new(),
+        rest_durations: Durations::new(),
         player_handle: player1_handle,
     };
     let mut server = Server::new(&cvars, time, map, gs);
@@ -489,6 +491,8 @@ async fn main() {
         server.input(client.player_handle, input);
         // TODO time tracking
         server.update(&cvars, start);
+
+        client.render_fps.tick(cvars.d_fps_period, server.real_time);
 
         let player = &server.gs.players[client.player_handle];
         let player_veh_pos = server.gs.vehicles[player.vehicle.unwrap()].pos;
@@ -1089,33 +1093,44 @@ async fn main() {
         if cvars.d_draw && cvars.d_draw_perf {
             draw_text(
                 &format!("last {} frames (in ms):", cvars.d_timing_samples),
-                view_size.x as f32 - 250.0,
-                view_size.y as f32 - 90.0,
+                view_size.x as f32 - 280.0,
+                view_size.y as f32 - 105.0,
                 16.0,
                 RED,
             );
             if let Some((avg, max)) = server.update_durations.get_stats() {
                 draw_text(
-                    &format!("update avg: {:.1}, max: {:.1}", avg, max),
-                    view_size.x as f32 - 250.0,
-                    view_size.y as f32 - 75.0,
+                    &format!("update avg: {:.4}, max: {:.4}", avg, max),
+                    view_size.x as f32 - 280.0,
+                    view_size.y as f32 - 90.0,
                     16.0,
                     RED,
                 );
             }
             if let Some((avg, max)) = server.gamelogic_durations.get_stats() {
                 draw_text(
-                    &format!("gamelogic avg: {:.1}, max: {:.1}", avg, max),
-                    view_size.x as f32 - 250.0,
-                    view_size.y as f32 - 60.0,
+                    &format!("gamelogic avg: {:.4}, max: {:.4}", avg, max),
+                    view_size.x as f32 - 280.0,
+                    view_size.y as f32 - 75.0,
                     16.0,
                     RED,
                 );
             }
             if let Some((avg, max)) = client.render_cmds_durations.get_stats() {
+                // Normally, this takes microseconds, so it should always show 0.0
+                // but I still wanna display it in case there's a bug and it takes way too long.
                 draw_text(
-                    &format!("render cmds avg: {:.1}, max: {:.1}", avg, max),
-                    view_size.x as f32 - 250.0,
+                    &format!("render cmds avg: {:.4}, max: {:.4}", avg, max),
+                    view_size.x as f32 - 280.0,
+                    view_size.y as f32 - 60.0,
+                    16.0,
+                    RED,
+                );
+            }
+            if let Some((avg, max)) = client.rest_durations.get_stats() {
+                draw_text(
+                    &format!("rest avg: {:.4}, max: {:.4}", avg, max),
+                    view_size.x as f32 - 280.0,
                     view_size.y as f32 - 45.0,
                     16.0,
                     RED,
@@ -1130,12 +1145,14 @@ async fn main() {
             .render_cmds_durations
             .add(cvars.d_timing_samples, end - start);
 
-        draw_text(&get_fps().to_string(), 400.0, 300.0, 20.0, WHITE);
         draw_text(&get_frame_time().to_string(), 400.0, 330.0, 20.0, WHITE);
-        draw_text(&get_time().to_string(), 400.0, 360.0, 20.0, WHITE);
-        draw_text(&(end - start).to_string(), 400.0, 390.0, 20.0, WHITE);
 
-        next_frame().await
+        next_frame().await;
+
+        let real_end = get_time();
+        client
+            .rest_durations
+            .add(cvars.d_timing_samples, real_end - end);
     }
 }
 
