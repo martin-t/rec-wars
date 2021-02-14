@@ -302,7 +302,7 @@ use thunderdome::Index;
 
 use rec_wars::{
     cvars::Cvars,
-    debugging::{DEBUG_CROSSES, DEBUG_LINES},
+    debugging::{DEBUG_CROSSES, DEBUG_LINES, DEBUG_TEXTS, DEBUG_TEXTS_WORLD},
     entities::{Ammo, Player, Weapon},
     game_state::{Explosion, GameState, Input},
     map::{self, F64Ext, Kind, Vec2f, VecExt, TILE_SIZE},
@@ -1122,7 +1122,34 @@ async fn main() {
             }
         }
 
-        // TODO draw the rest, finish commented blocks above
+        // Draw world debug text
+        DEBUG_TEXTS_WORLD.with(|texts| {
+            let texts = texts.borrow();
+            if cvars.d_draw && cvars.d_draw_world_text {
+                for text in texts.iter() {
+                    let scr_pos = text.pos - top_left;
+                    if cull(scr_pos) {
+                        // Technically the text can be so long
+                        // that it's culled overzealously but meh, perf is more important.
+                        continue;
+                    }
+
+                    draw_text(&text.msg, scr_pos.x as f32, scr_pos.y as f32, 16.0, RED);
+                }
+            }
+        });
+
+        // Draw debug text
+        let mut y = 25.0;
+        DEBUG_TEXTS.with(|texts| {
+            let texts = texts.borrow();
+            if cvars.d_draw && cvars.d_draw_text {
+                for text in texts.iter() {
+                    draw_text(text, 20.0, y as f32, 16.0, RED);
+                    y += cvars.d_draw_text_line_height;
+                }
+            }
+        });
 
         let end = get_time();
         client
