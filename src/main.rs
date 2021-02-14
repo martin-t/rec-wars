@@ -319,7 +319,19 @@ struct MacroquadClient {
     player_handle: Index,
 }
 
-#[macroquad::main("RecWars")]
+fn window_conf() -> Conf {
+    Conf {
+        window_title: "RecWars".to_owned(),
+        // Setting width and height to the size of the screen or larger
+        // creates a maximized window. Tested on Kubuntu 20.10.
+        // Not using larger values (or i32::MAX) in case other platforms behave differently.
+        window_width: 1920,
+        window_height: 1080,
+        ..Default::default()
+    }
+}
+
+#[macroquad::main(window_conf)]
 async fn main() {
     // TODO add CI for all build modes
     // TODO add all OSes to CI
