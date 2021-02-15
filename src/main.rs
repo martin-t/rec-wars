@@ -600,43 +600,6 @@ async fn main() {
             render_line(scr_begin, scr_end, 1.0, Color::new(0.0, 0.0, 1.0, 1.0));
         }
 
-        // Draw cluster bombs
-        // TODO actually, these should be above vehicles, right?
-        // TODO what about shadows (in general)?
-        if cvars.r_draw_cluster_bombs {
-            // client.context.set_fill_style(&"rgb(0, 255, 255)".into());
-            // let shadow_rgba = format!("rgba(0, 0, 0, {})", cvars.g_cluster_bomb_shadow_alpha);
-            // client.context.set_shadow_color(&shadow_rgba);
-            // client
-            //     .context
-            //     .set_shadow_offset_x(cvars.g_cluster_bomb_shadow_x);
-            // client
-            //     .context
-            //     .set_shadow_offset_y(cvars.g_cluster_bomb_shadow_y);
-            fn fill_square(top_left: Vec2f, size: f64, color: Color) {
-                draw_rectangle(
-                    top_left.x as f32,
-                    top_left.y as f32,
-                    size as f32,
-                    size as f32,
-                    color,
-                );
-            }
-            for (_, cb) in weapon_projectiles(Weapon::Cb) {
-                let scr_pos = cb.pos - top_left;
-                if cull(scr_pos) {
-                    continue;
-                }
-                fill_square(
-                    scr_pos - cvars.g_cluster_bomb_size / 2.0,
-                    cvars.g_cluster_bomb_size,
-                    Color::new(0.0, 1.0, 1.0, 1.0),
-                );
-            }
-            // client.context.set_shadow_offset_x(0.0);
-            // client.context.set_shadow_offset_y(0.0);
-        }
-
         // Draw rockets, homing and guided missiles
         for (_, proj) in weapon_projectiles(Weapon::Rockets) {
             let scr_pos = proj.pos - top_left;
@@ -803,6 +766,35 @@ async fn main() {
             }
             r += 1;
             y += TILE_SIZE;
+        }
+
+        // Draw cluster bombs
+        // TODO what about shadows (in general)?
+        if cvars.r_draw_cluster_bombs {
+            for (_, cb) in weapon_projectiles(Weapon::Cb) {
+                let scr_pos = cb.pos - top_left;
+                if cull(scr_pos) {
+                    continue;
+                }
+
+                let corner = scr_pos - cvars.g_cluster_bomb_size / 2.0;
+                // Tecnically, we should draw all shadows first, then all the projectiles,
+                // but actually it barely matters and I think RecWar does it this way too.
+                draw_rectangle(
+                    (corner.x + cvars.g_cluster_bomb_shadow_x) as f32,
+                    (corner.y + cvars.g_cluster_bomb_shadow_y) as f32,
+                    cvars.g_cluster_bomb_size as f32,
+                    cvars.g_cluster_bomb_size as f32,
+                    Color::new(0.0, 0.0, 0.0, cvars.g_cluster_bomb_shadow_alpha as f32),
+                );
+                draw_rectangle(
+                    corner.x as f32,
+                    corner.y as f32,
+                    cvars.g_cluster_bomb_size as f32,
+                    cvars.g_cluster_bomb_size as f32,
+                    Color::new(0.0, 1.0, 1.0, 1.0),
+                );
+            }
         }
 
         // Draw world-space HUD elements:

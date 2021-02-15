@@ -139,33 +139,6 @@ pub(crate) fn draw(
         client.context.stroke();
     }
 
-    // Draw cluster bombs
-    if cvars.r_draw_cluster_bombs {
-        client.context.set_fill_style(&"rgb(0, 255, 255)".into());
-        let shadow_rgba = format!("rgba(0, 0, 0, {})", cvars.g_cluster_bomb_shadow_alpha);
-        client.context.set_shadow_color(&shadow_rgba);
-        client
-            .context
-            .set_shadow_offset_x(cvars.g_cluster_bomb_shadow_x);
-        client
-            .context
-            .set_shadow_offset_y(cvars.g_cluster_bomb_shadow_y);
-        for (_, cb) in weapon_projectiles(Weapon::Cb) {
-            let scr_pos = cb.pos - top_left;
-            if cull(scr_pos) {
-                continue;
-            }
-            client.context.fill_rect(
-                scr_pos.x - cvars.g_cluster_bomb_size / 2.0,
-                scr_pos.y - cvars.g_cluster_bomb_size / 2.0,
-                cvars.g_cluster_bomb_size,
-                cvars.g_cluster_bomb_size,
-            );
-        }
-        client.context.set_shadow_offset_x(0.0);
-        client.context.set_shadow_offset_y(0.0);
-    }
-
     // Draw rockets, homing and guided missiles
     for (_, proj) in weapon_projectiles(Weapon::Rockets) {
         let scr_pos = proj.pos - top_left;
@@ -332,6 +305,33 @@ pub(crate) fn draw(
         }
         r += 1;
         y += TILE_SIZE;
+    }
+
+    // Draw cluster bombs
+    if cvars.r_draw_cluster_bombs {
+        client.context.set_fill_style(&"rgb(0, 255, 255)".into());
+        let shadow_rgba = format!("rgba(0, 0, 0, {})", cvars.g_cluster_bomb_shadow_alpha);
+        client.context.set_shadow_color(&shadow_rgba);
+        client
+            .context
+            .set_shadow_offset_x(cvars.g_cluster_bomb_shadow_x);
+        client
+            .context
+            .set_shadow_offset_y(cvars.g_cluster_bomb_shadow_y);
+        for (_, cb) in weapon_projectiles(Weapon::Cb) {
+            let scr_pos = cb.pos - top_left;
+            if cull(scr_pos) {
+                continue;
+            }
+            client.context.fill_rect(
+                scr_pos.x - cvars.g_cluster_bomb_size / 2.0,
+                scr_pos.y - cvars.g_cluster_bomb_size / 2.0,
+                cvars.g_cluster_bomb_size,
+                cvars.g_cluster_bomb_size,
+            );
+        }
+        client.context.set_shadow_offset_x(0.0);
+        client.context.set_shadow_offset_y(0.0);
     }
 
     // Draw world-space HUD elements:
