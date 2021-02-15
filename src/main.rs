@@ -501,8 +501,10 @@ async fn main() {
             input.pause = true;
         }
         server.input(client.player_handle, input);
-        // TODO time tracking
+
         server.update(&cvars, start);
+
+        // LATER when raw_canvas is removed, clean up all the casts here
 
         client.render_fps.tick(cvars.d_fps_period, server.real_time);
 
@@ -692,6 +694,7 @@ async fn main() {
                 img = imgs_vehicles[vehicle.veh_type as usize * 2];
             }
             render_img_center(img, scr_pos, vehicle.angle);
+            // LATER draw hitboxes
             // if cvars.d_draw && cvars.d_draw_hitboxes {
             //     client.context.set_stroke_style(&"yellow".into());
             //     client.context.begin_path();
@@ -1048,7 +1051,58 @@ async fn main() {
         );
         draw_texture(weap_img, weap_icon_pos.x, weap_icon_pos.y, WHITE);
 
-        // TODO scoreboard
+        // Scoreboard
+        if player_vehicle.destroyed() {
+            let width = cvars.hud_scoreboard_width_name
+                + cvars.hud_scoreboard_width_kills
+                + cvars.hud_scoreboard_width_deaths
+                + cvars.hud_scoreboard_width_points;
+            let height =
+                (server.gs.players.len() + 1) as f32 * cvars.hud_scoreboard_line_height as f32;
+            let x_start = (view_size.x as f32 - width) / 2.0;
+            // Floor because macroquad makes text blurry if it ends up .5
+            let mut x = x_start.floor();
+            let mut y = ((view_size.y as f32 - height) / 2.0).floor();
+
+            let fs = cvars.hud_scoreboard_font_size;
+            let sx = cvars.hud_scoreboard_shadow_mq_x;
+            let sy = cvars.hud_scoreboard_shadow_mq_y;
+
+            // LATER bold header
+            render_text_with_shadow("Name", x, y, fs, WHITE, sx, sy, 1.0);
+            x += cvars.hud_scoreboard_width_name;
+            render_text_with_shadow("Kills", x, y, fs, WHITE, sx, sy, 1.0);
+            x += cvars.hud_scoreboard_width_kills;
+            render_text_with_shadow("Deaths", x, y, fs, WHITE, sx, sy, 1.0);
+            x += cvars.hud_scoreboard_width_deaths;
+            render_text_with_shadow("Points", x, y, fs, WHITE, sx, sy, 1.0);
+
+            y += cvars.hud_scoreboard_line_height as f32;
+
+            for (player_handle, points) in player_points {
+                let color = if player_handle == client.player_handle {
+                    WHITE
+                } else {
+                    Color::new(0.8, 0.8, 0.8, 1.0)
+                };
+                let player = &server.gs.players[player_handle];
+                let name = &player.name;
+                let kills = &player.score.kills.to_string();
+                let deaths = &player.score.deaths.to_string();
+                let points = &points.to_string();
+
+                x = x_start;
+                render_text_with_shadow(name, x, y, fs, color, sx, sy, 1.0);
+                x += cvars.hud_scoreboard_width_name;
+                render_text_with_shadow(kills, x, y, fs, color, sx, sy, 1.0);
+                x += cvars.hud_scoreboard_width_kills;
+                render_text_with_shadow(deaths, x, y, fs, color, sx, sy, 1.0);
+                x += cvars.hud_scoreboard_width_deaths;
+                render_text_with_shadow(points, x, y, fs, color, sx, sy, 1.0);
+
+                y += cvars.hud_scoreboard_line_height as f32;
+            }
+        }
 
         // Pause
         if server.paused {
@@ -1167,8 +1221,6 @@ async fn main() {
         client
             .render_cmds_durations
             .add(cvars.d_timing_samples, end - start);
-
-        draw_text(&get_frame_time().to_string(), 400.0, 330.0, 20.0, WHITE);
 
         next_frame().await;
 
