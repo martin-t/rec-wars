@@ -8,6 +8,7 @@ use std::{collections::VecDeque, fmt::Debug};
 // That would, however, mean they can't be enabled at the same time
 // so I couldn't use `"rust-analyzer.cargo.allFeatures": true`.
 pub trait Time: Debug {
+    /// Seconds since start.
     fn now(&self) -> f64;
 }
 
@@ -21,7 +22,7 @@ pub(crate) struct RawCanvasTime(pub(crate) web_sys::Performance);
 #[cfg(feature = "raw_canvas")]
 impl Time for RawCanvasTime {
     fn now(&self) -> f64 {
-        self.0.now()
+        self.0.now() / 1000.0
     }
 }
 

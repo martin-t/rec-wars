@@ -696,21 +696,25 @@ pub(crate) fn draw(
         )?;
         if let Some((avg, max)) = server.update_durations.get_stats() {
             client.context.fill_text(
-                &format!("update avg: {:.1}, max: {:.1}", avg, max),
+                &format!("update avg: {:.1}, max: {:.1}", avg * 1000.0, max * 1000.0),
                 canvas_size.x - 150.0,
                 canvas_size.y - 75.0,
             )?;
         }
         if let Some((avg, max)) = server.gamelogic_durations.get_stats() {
             client.context.fill_text(
-                &format!("gamelogic avg: {:.1}, max: {:.1}", avg, max),
+                &format!(
+                    "gamelogic avg: {:.1}, max: {:.1}",
+                    avg * 1000.0,
+                    max * 1000.0
+                ),
                 canvas_size.x - 150.0,
                 canvas_size.y - 60.0,
             )?;
         }
         if let Some((avg, max)) = client.render_durations.get_stats() {
             client.context.fill_text(
-                &format!("render avg: {:.1}, max: {:.1}", avg, max),
+                &format!("render avg: {:.1}, max: {:.1}", avg * 1000.0, max * 1000.0),
                 canvas_size.x - 150.0,
                 canvas_size.y - 45.0,
             )?;

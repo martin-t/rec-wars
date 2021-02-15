@@ -1160,9 +1160,10 @@ async fn main() {
                 0.5,
             );
             if let Some((avg, max)) = server.update_durations.get_stats() {
+                let text = format!("update avg: {:.1}, max: {:.1}", avg * 1000.0, max * 1000.0);
                 render_text_with_shadow(
                     &cvars,
-                    &format!("update avg: {:.4}, max: {:.4}", avg, max),
+                    &text,
                     view_size.x as f32 - 280.0,
                     view_size.y as f32 - 90.0,
                     16.0,
@@ -1173,9 +1174,14 @@ async fn main() {
                 );
             }
             if let Some((avg, max)) = server.gamelogic_durations.get_stats() {
+                let text = format!(
+                    "gamelogic avg: {:.1}, max: {:.1}",
+                    avg * 1000.0,
+                    max * 1000.0
+                );
                 render_text_with_shadow(
                     &cvars,
-                    &format!("gamelogic avg: {:.4}, max: {:.4}", avg, max),
+                    &text,
                     view_size.x as f32 - 280.0,
                     view_size.y as f32 - 75.0,
                     16.0,
@@ -1186,11 +1192,14 @@ async fn main() {
                 );
             }
             if let Some((avg, max)) = client.render_cmds_durations.get_stats() {
-                // Normally, this takes microseconds, so it should always show 0.0
-                // but I still wanna display it in case there's a bug and it takes way too long.
+                let text = format!(
+                    "render cmds avg: {:.1}, max: {:.1}",
+                    avg * 1000.0,
+                    max * 1000.0
+                );
                 render_text_with_shadow(
                     &cvars,
-                    &format!("render cmds avg: {:.4}, max: {:.4}", avg, max),
+                    &text,
                     view_size.x as f32 - 280.0,
                     view_size.y as f32 - 60.0,
                     16.0,
@@ -1201,9 +1210,10 @@ async fn main() {
                 );
             }
             if let Some((avg, max)) = client.rest_durations.get_stats() {
+                let text = format!("rest avg: {:.1}, max: {:.1}", avg * 1000.0, max * 1000.0);
                 render_text_with_shadow(
                     &cvars,
-                    &format!("rest avg: {:.4}, max: {:.4}", avg, max),
+                    &text,
                     view_size.x as f32 - 280.0,
                     view_size.y as f32 - 45.0,
                     16.0,
