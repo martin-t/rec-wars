@@ -367,6 +367,8 @@ pub struct Cvars {
     pub r_explosion_duration: f64,
     pub r_explosions_reverse: bool,
     pub r_smoothing: bool,
+    /// This if effectively the oppsite for smoothing but for text.
+    pub r_text_integer_positions: bool,
 
     pub sv_auto_pause_on_minimize: bool,
     pub sv_auto_unpause_on_restore: bool,
@@ -1080,6 +1082,7 @@ impl Default for Cvars {
             // - Rockets look better if hitting the same spot.
             r_explosions_reverse: false,
             r_smoothing: false,
+            r_text_integer_positions: true,
 
             sv_auto_pause_on_minimize: true,
             sv_auto_unpause_on_restore: false,

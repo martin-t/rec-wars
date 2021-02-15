@@ -820,6 +820,7 @@ async fn main() {
                 let size = measure_text(name, None, cvars.hud_names_font_size as u16, 1.0);
                 // LATER remove cvars.hud_names_shadow_x/y when raw_canvas is removed
                 render_text_with_shadow(
+                    &cvars,
                     name,
                     scr_pos.x as f32 - size.width / 2.0,
                     (scr_pos.y + cvars.hud_names_y) as f32,
@@ -914,6 +915,7 @@ async fn main() {
         let score_pos = hud_pos(view_size, cvars.hud_score_x, cvars.hud_score_y);
         let points = player.score.points(&cvars).to_string();
         render_text_with_shadow(
+            &cvars,
             &points,
             score_pos.x,
             score_pos.y,
@@ -960,6 +962,7 @@ async fn main() {
             )
         };
         render_text_with_shadow(
+            &cvars,
             &ranking,
             ranking_pos.x,
             ranking_pos.y,
@@ -995,6 +998,7 @@ async fn main() {
                 player_vehicle.hp_fraction * cvars.g_vehicle_hp(player_vehicle.veh_type);
             let hp_text = format!("{}", hp_number);
             render_text_with_shadow(
+                &cvars,
                 &hp_text,
                 hp_pos.x - 25.0,
                 hp_pos.y + cvars.hud_hp_height as f32,
@@ -1033,6 +1037,7 @@ async fn main() {
                 Ammo::Reloading(_start, _end) => 0,
             };
             render_text_with_shadow(
+                &cvars,
                 &ammo_number.to_string(),
                 ammo_pos.x - 25.0,
                 ammo_pos.y + cvars.hud_ammo_height as f32,
@@ -1066,7 +1071,6 @@ async fn main() {
             let height =
                 (server.gs.players.len() + 1) as f32 * cvars.hud_scoreboard_line_height as f32;
             let x_start = (view_size.x as f32 - width) / 2.0;
-            // Floor because macroquad makes text blurry if it ends up .5
             let mut x = x_start.floor();
             let mut y = ((view_size.y as f32 - height) / 2.0).floor();
 
@@ -1075,13 +1079,13 @@ async fn main() {
             let sy = cvars.hud_scoreboard_shadow_mq_y;
 
             // LATER bold header
-            render_text_with_shadow("Name", x, y, fs, WHITE, sx, sy, 1.0);
+            render_text_with_shadow(&cvars, "Name", x, y, fs, WHITE, sx, sy, 1.0);
             x += cvars.hud_scoreboard_width_name;
-            render_text_with_shadow("Kills", x, y, fs, WHITE, sx, sy, 1.0);
+            render_text_with_shadow(&cvars, "Kills", x, y, fs, WHITE, sx, sy, 1.0);
             x += cvars.hud_scoreboard_width_kills;
-            render_text_with_shadow("Deaths", x, y, fs, WHITE, sx, sy, 1.0);
+            render_text_with_shadow(&cvars, "Deaths", x, y, fs, WHITE, sx, sy, 1.0);
             x += cvars.hud_scoreboard_width_deaths;
-            render_text_with_shadow("Points", x, y, fs, WHITE, sx, sy, 1.0);
+            render_text_with_shadow(&cvars, "Points", x, y, fs, WHITE, sx, sy, 1.0);
 
             y += cvars.hud_scoreboard_line_height as f32;
 
@@ -1098,13 +1102,13 @@ async fn main() {
                 let points = &points.to_string();
 
                 x = x_start;
-                render_text_with_shadow(name, x, y, fs, color, sx, sy, 1.0);
+                render_text_with_shadow(&cvars, name, x, y, fs, color, sx, sy, 1.0);
                 x += cvars.hud_scoreboard_width_name;
-                render_text_with_shadow(kills, x, y, fs, color, sx, sy, 1.0);
+                render_text_with_shadow(&cvars, kills, x, y, fs, color, sx, sy, 1.0);
                 x += cvars.hud_scoreboard_width_kills;
-                render_text_with_shadow(deaths, x, y, fs, color, sx, sy, 1.0);
+                render_text_with_shadow(&cvars, deaths, x, y, fs, color, sx, sy, 1.0);
                 x += cvars.hud_scoreboard_width_deaths;
-                render_text_with_shadow(points, x, y, fs, color, sx, sy, 1.0);
+                render_text_with_shadow(&cvars, points, x, y, fs, color, sx, sy, 1.0);
 
                 y += cvars.hud_scoreboard_line_height as f32;
             }
@@ -1115,6 +1119,7 @@ async fn main() {
             let paused_size = measure_text("PAUSED", None, cvars.hud_pause_font_size as u16, 1.0);
             // LATER remove cvars.hud_pause_x/y if raw_canvas removed
             render_text_with_shadow(
+                &cvars,
                 "PAUSED",
                 (view_size.x as f32 - paused_size.width) / 2.0,
                 (view_size.y as f32 - paused_size.height) / 2.0,
@@ -1132,6 +1137,7 @@ async fn main() {
         if cvars.d_fps {
             let fps_pos = hud_pos(view_size, cvars.d_fps_x, cvars.d_fps_y);
             render_text_with_shadow(
+                &cvars,
                 &format!(
                     "update FPS: {:.1}   gamelogic FPS: {:.1}   render FPS: {:.1}",
                     server.update_fps.get_fps(),
@@ -1151,6 +1157,7 @@ async fn main() {
         // Draw perf info
         if cvars.d_draw && cvars.d_draw_perf {
             render_text_with_shadow(
+                &cvars,
                 &format!("last {} frames (in ms):", cvars.d_timing_samples),
                 view_size.x as f32 - 280.0,
                 view_size.y as f32 - 105.0,
@@ -1162,6 +1169,7 @@ async fn main() {
             );
             if let Some((avg, max)) = server.update_durations.get_stats() {
                 render_text_with_shadow(
+                    &cvars,
                     &format!("update avg: {:.4}, max: {:.4}", avg, max),
                     view_size.x as f32 - 280.0,
                     view_size.y as f32 - 90.0,
@@ -1174,6 +1182,7 @@ async fn main() {
             }
             if let Some((avg, max)) = server.gamelogic_durations.get_stats() {
                 render_text_with_shadow(
+                    &cvars,
                     &format!("gamelogic avg: {:.4}, max: {:.4}", avg, max),
                     view_size.x as f32 - 280.0,
                     view_size.y as f32 - 75.0,
@@ -1188,6 +1197,7 @@ async fn main() {
                 // Normally, this takes microseconds, so it should always show 0.0
                 // but I still wanna display it in case there's a bug and it takes way too long.
                 render_text_with_shadow(
+                    &cvars,
                     &format!("render cmds avg: {:.4}, max: {:.4}", avg, max),
                     view_size.x as f32 - 280.0,
                     view_size.y as f32 - 60.0,
@@ -1200,6 +1210,7 @@ async fn main() {
             }
             if let Some((avg, max)) = client.rest_durations.get_stats() {
                 render_text_with_shadow(
+                    &cvars,
                     &format!("rest avg: {:.4}, max: {:.4}", avg, max),
                     view_size.x as f32 - 280.0,
                     view_size.y as f32 - 45.0,
@@ -1225,6 +1236,7 @@ async fn main() {
                     }
 
                     render_text_with_shadow(
+                        &cvars,
                         &text.msg,
                         scr_pos.x as f32,
                         scr_pos.y as f32,
@@ -1244,7 +1256,7 @@ async fn main() {
             let texts = texts.borrow();
             if cvars.d_draw && cvars.d_draw_text {
                 for text in texts.iter() {
-                    render_text_with_shadow(text, 20.0, y as f32, 16.0, RED, 1.0, 1.0, 0.5);
+                    render_text_with_shadow(&cvars, text, 20.0, y as f32, 16.0, RED, 1.0, 1.0, 0.5);
                     y += cvars.d_draw_text_line_height;
                 }
             }
@@ -1327,15 +1339,20 @@ fn render_line(src: Vec2f, dest: Vec2f, thickness: f64, color: Color) {
 
 #[allow(clippy::too_many_arguments)]
 fn render_text_with_shadow(
+    cvars: &Cvars,
     text: &str,
-    x: f32,
-    y: f32,
+    mut x: f32,
+    mut y: f32,
     font_size: f64,
     color: Color,
     shadow_offset_x: f32,
     shadow_offset_y: f32,
     shadow_alpha: f64,
 ) {
+    if cvars.r_text_integer_positions {
+        x = x.floor();
+        y = y.floor();
+    }
     if shadow_offset_x != 0.0 || shadow_offset_y != 0.0 {
         draw_text(
             &text,
