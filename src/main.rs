@@ -994,12 +994,15 @@ async fn main() {
             let hp_number =
                 player_vehicle.hp_fraction * cvars.g_vehicle_hp(player_vehicle.veh_type);
             let hp_text = format!("{}", hp_number);
-            draw_text(
+            render_text_with_shadow(
                 &hp_text,
                 hp_pos.x - 25.0,
                 hp_pos.y + cvars.hud_hp_height as f32,
                 16.0,
                 RED,
+                1.0,
+                1.0,
+                0.5,
             );
         }
 
@@ -1029,12 +1032,15 @@ async fn main() {
                 Ammo::Loaded(_ready_time, count) => count,
                 Ammo::Reloading(_start, _end) => 0,
             };
-            draw_text(
+            render_text_with_shadow(
                 &ammo_number.to_string(),
                 ammo_pos.x - 25.0,
                 ammo_pos.y + cvars.hud_ammo_height as f32,
                 16.0,
                 RED,
+                1.0,
+                1.0,
+                0.5,
             );
         }
 
@@ -1125,65 +1131,83 @@ async fn main() {
         // Draw FPS
         if cvars.d_fps {
             let fps_pos = hud_pos(view_size, cvars.d_fps_x, cvars.d_fps_y);
-            draw_text(
+            render_text_with_shadow(
                 &format!(
                     "update FPS: {:.1}   gamelogic FPS: {:.1}   render FPS: {:.1}",
                     server.update_fps.get_fps(),
                     server.gamelogic_fps.get_fps(),
                     client.render_fps.get_fps()
                 ),
-                fps_pos.x - 100.0, // LATER remove the 100 after finding a decent font
+                fps_pos.x - 120.0, // LATER remove the offset after finding a decent font
                 fps_pos.y,
                 16.0,
                 RED,
+                1.0,
+                1.0,
+                0.5,
             );
         }
 
         // Draw perf info
         if cvars.d_draw && cvars.d_draw_perf {
-            draw_text(
+            render_text_with_shadow(
                 &format!("last {} frames (in ms):", cvars.d_timing_samples),
                 view_size.x as f32 - 280.0,
                 view_size.y as f32 - 105.0,
                 16.0,
                 RED,
+                1.0,
+                1.0,
+                0.5,
             );
             if let Some((avg, max)) = server.update_durations.get_stats() {
-                draw_text(
+                render_text_with_shadow(
                     &format!("update avg: {:.4}, max: {:.4}", avg, max),
                     view_size.x as f32 - 280.0,
                     view_size.y as f32 - 90.0,
                     16.0,
                     RED,
+                    1.0,
+                    1.0,
+                    0.5,
                 );
             }
             if let Some((avg, max)) = server.gamelogic_durations.get_stats() {
-                draw_text(
+                render_text_with_shadow(
                     &format!("gamelogic avg: {:.4}, max: {:.4}", avg, max),
                     view_size.x as f32 - 280.0,
                     view_size.y as f32 - 75.0,
                     16.0,
                     RED,
+                    1.0,
+                    1.0,
+                    0.5,
                 );
             }
             if let Some((avg, max)) = client.render_cmds_durations.get_stats() {
                 // Normally, this takes microseconds, so it should always show 0.0
                 // but I still wanna display it in case there's a bug and it takes way too long.
-                draw_text(
+                render_text_with_shadow(
                     &format!("render cmds avg: {:.4}, max: {:.4}", avg, max),
                     view_size.x as f32 - 280.0,
                     view_size.y as f32 - 60.0,
                     16.0,
                     RED,
+                    1.0,
+                    1.0,
+                    0.5,
                 );
             }
             if let Some((avg, max)) = client.rest_durations.get_stats() {
-                draw_text(
+                render_text_with_shadow(
                     &format!("rest avg: {:.4}, max: {:.4}", avg, max),
                     view_size.x as f32 - 280.0,
                     view_size.y as f32 - 45.0,
                     16.0,
                     RED,
+                    1.0,
+                    1.0,
+                    0.5,
                 );
             }
         }
@@ -1200,7 +1224,16 @@ async fn main() {
                         continue;
                     }
 
-                    draw_text(&text.msg, scr_pos.x as f32, scr_pos.y as f32, 16.0, RED);
+                    render_text_with_shadow(
+                        &text.msg,
+                        scr_pos.x as f32,
+                        scr_pos.y as f32,
+                        16.0,
+                        RED,
+                        1.0,
+                        1.0,
+                        0.5,
+                    );
                 }
             }
         });
@@ -1211,7 +1244,7 @@ async fn main() {
             let texts = texts.borrow();
             if cvars.d_draw && cvars.d_draw_text {
                 for text in texts.iter() {
-                    draw_text(text, 20.0, y as f32, 16.0, RED);
+                    render_text_with_shadow(text, 20.0, y as f32, 16.0, RED, 1.0, 1.0, 0.5);
                     y += cvars.d_draw_text_line_height;
                 }
             }
@@ -1303,13 +1336,15 @@ fn render_text_with_shadow(
     shadow_offset_y: f32,
     shadow_alpha: f64,
 ) {
-    draw_text(
-        &text,
-        x + shadow_offset_x,
-        y + shadow_offset_y,
-        font_size as f32,
-        Color::new(0.0, 0.0, 0.0, shadow_alpha as f32),
-    );
+    if shadow_offset_x != 0.0 || shadow_offset_y != 0.0 {
+        draw_text(
+            &text,
+            x + shadow_offset_x,
+            y + shadow_offset_y,
+            font_size as f32,
+            Color::new(0.0, 0.0, 0.0, shadow_alpha as f32),
+        );
+    }
     draw_text(&text, x, y, font_size as f32, color);
 }
 
