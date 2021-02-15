@@ -2,7 +2,11 @@
 
 use std::{collections::VecDeque, fmt::Debug};
 
-// TODO do we need a trait when we have features?
+// Using a trait so both raw_canvas and mq features can be enabled at the same time.
+// The alternative is to use `struct Time` directly in both features
+// and pick one implementation based on which of the two is enabled.
+// That would, however, mean they can't be enabled at the same time
+// so I couldn't use `"rust-analyzer.cargo.allFeatures": true`.
 pub trait Time: Debug {
     fn now(&self) -> f64;
 }
