@@ -44,11 +44,8 @@ The ultimate goal is to create a moddable multiplayer game playable in the brows
 Build Dependencies
 ------------------
 
-### Macroquad versions
-- see [Miniquad dependencies](https://github.com/not-fl3/miniquad/#building-examples))
-
-### Raw canvas version
-- [wasm-pack](https://github.com/rustwasm/wasm-pack) - use the [installer](https://rustwasm.github.io/wasm-pack/installer/)
+- Macroquad versions: see [Miniquad dependencies](https://github.com/not-fl3/miniquad/#building-examples))
+- Raw canvas version: [wasm-pack](https://github.com/rustwasm/wasm-pack) - use the [installer](https://rustwasm.github.io/wasm-pack/installer/)
 
 Compiling and running
 ---------------------
