@@ -34,8 +34,8 @@ pub(crate) fn draw(
     // No smoothing makes nicer rockets (more like original RW).
     // This also means everything is aligned to pixels
     // without the need to explicitly round x and y in draw calls to whole numbers.
-    // TODO revisit when drawing vehicles - maybe make configurable per drawn object
-    //      if disabling, try changing quality
+    // LATER revisit when drawing vehicles - maybe make configurable per drawn object
+    //       if disabling, try changing quality
     client
         .context
         .set_image_smoothing_enabled(cvars.r_smoothing);
@@ -211,7 +211,7 @@ pub(crate) fn draw(
         }
     }
 
-    // TODO Draw cow
+    // LATER Draw cow
 
     // Draw turrets
     for (_, vehicle) in server.gs.vehicles.iter() {
@@ -381,7 +381,7 @@ pub(crate) fn draw(
     )?;
     move_to(client, player_veh_scr_pos);
     //let dir = (game.gs.gm.pos - player_veh_pos.0).normalized();
-    let dir = 0.0.to_vec2f(); // TODO
+    let dir = 0.0.to_vec2f(); // LATER
     let end = player_veh_scr_pos + dir * cvars.hud_missile_indicator_radius;
     line_to(client, end);
     client.context.stroke();

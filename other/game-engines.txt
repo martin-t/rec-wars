@@ -1,0 +1,32 @@
+Engines and rendering crates I evaluated for RWs - especially whether they support WASM.
+
+Up to date as of 2021-02-16.
+
+Engines
+    godot
+    https://crates.io/crates/amethyst
+        WASM in progress: https://github.com/amethyst/amethyst/issues/2260
+    https://crates.io/crates/bevy
+        no WASM yet: https://github.com/bevyengine/bevy/issues/88
+    https://crates.io/crates/coffee
+        no WASM: https://github.com/hecrj/coffee/issues/135 (not even a reply)
+    https://crates.io/crates/ggez
+        WASM in progress: https://github.com/ggez/ggez/issues/71
+    https://crates.io/crates/macroquad
+        win/lin/mac + WASM + android
+        bad docs, some examples
+    https://crates.io/crates/piston
+        no WASM: https://github.com/PistonDevelopers/piston/issues/1131
+    https://crates.io/crates/quicksilver
+        win/lin/max + WASM
+        no audio in 0.4?
+            https://github.com/ryanisaacg/quicksilver/issues/552
+            https://github.com/RustyVolley/RustyVolleySrc in 0.3 has sound
+            2021-02 update
+                - can't find any mentions of sound anymore
+                - quicksilver is no longer developed
+            8 example games in readme (mostly bad)
+rendering only
+    https://crates.io/crates/luminance - mentions webgl/canvas
+    https://crates.io/crates/miniquad - should support WASM
+    wgpu?

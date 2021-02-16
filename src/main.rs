@@ -7,22 +7,6 @@
 //          no tab completion in js console
 //          https://crates.io/crates/amethyst-console - uses cvar and imgui
 // [x] some way to have references between entities
-//      hecs
-//          - can't delete while iterating
-//          - no clone / snapshots
-//          + ffa example
-//          + nested queries (takes &World even for write access)
-//          + slightly faster in WASM, especially debug mode
-//          - no resources, commands
-//      legion
-//          - can't delete while iterating
-//          + should be able to make a clone of the world (clone_from)
-//          - bad docs / no examples / 0.3 transition
-//          - how to do nested queries without copying? split world? maybe systems make this easier?
-//          + slightly slower in WASM, especially debug mode
-//          + resources, commands?
-//      generational arena
-//          + statically typed, simple
 // [x] explosions
 //      [x] sizes
 // [x] hp/health
@@ -37,45 +21,7 @@
 // [ ] primitive bots
 // [ ] splitscreen
 // [ ] decent default binds (2x for splitscreen)
-// [ ] fix perf - canvas 2D is slow, pick an engine or rendering crate
-//      option 1: optimize canvas (but still need something else for the native client)
-//          https://isaacsukin.com/news/2015/01/detailed-explanation-javascript-game-loops-and-timing
-//          render background to off-screen canvas, draw part of it to the main canvas in one call (actually 2 for nonwalls + walls)
-//      option 2: pick a rust engine / rendering crate
-//      engines
-//          [x] check https://arewegameyet.rs/ecosystem/engines/
-//          [x] check https://github.com/dasifefe/rust-game-development-frameworks
-//          godot
-//          https://crates.io/crates/amethyst
-//              WASM in progress: https://github.com/amethyst/amethyst/issues/2260
-//          https://crates.io/crates/bevy
-//              no WASM yet: https://github.com/bevyengine/bevy/issues/88
-//          https://crates.io/crates/coffee
-//              no WASM: https://github.com/hecrj/coffee/issues/135 (not even a reply)
-//          https://crates.io/crates/ggez
-//              WASM in progress: https://github.com/ggez/ggez/issues/71
-//          https://crates.io/crates/macroquad
-//              win/lin/mac + WASM + android
-//              bad docs, some examples
-//          https://crates.io/crates/piston
-//              no WASM: https://github.com/PistonDevelopers/piston/issues/1131
-//          https://crates.io/crates/quicksilver
-//              win/lin/max + WASM
-//              no audio in 0.4?
-//                  https://github.com/ryanisaacg/quicksilver/issues/552
-//                  https://github.com/RustyVolley/RustyVolleySrc in 0.3 has sound
-//              8 example games in readme (mostly bad)
-//      rendering only
-//          https://crates.io/crates/luminance - mentions webgl/canvas
-//          https://crates.io/crates/miniquad - should support WASM
-//          wgpu?
-//      profiling
-//          [ ] make explosion sprite smaller
-//          https://github.com/EmbarkStudios/puffin
-//          https://github.com/bombomby/optick-rs
-//          list of tools: Instruction counts @ https://blog.mozilla.org/nnethercote/2020/09/08/how-to-speed-up-the-rust-compiler-one-last-time/
-//      note to self - renderdoc for graphics debugging
-//      [ ] FAQ - stuttering/tearing due to compositor - Alt+Shift+f12 - somehow this doesn't work anymore
+// [x] pick an engine
 // 1.0:
 // [x] CI - GH actions
 // [ ] extract/screenshot/record assets from RecWar or find alternatives
@@ -93,7 +39,6 @@
 // [ ] render vehicles
 //      [x] basic tank
 //      [ ] skins, colors
-//              canvas imageData?
 //      [x] vehicle types
 // [ ] indicators for off-screen vehicles
 // [ ] movement
@@ -234,6 +179,13 @@
 //      [ ] map
 //      [ ] cvars
 // [ ] focus canvas on (re)load (e.g. after touching browser console and reloading)
+// profiling
+//      [ ] make explosion sprite smaller
+//      https://github.com/EmbarkStudios/puffin
+//      https://github.com/bombomby/optick-rs
+//      list of tools: Instruction counts @ https://blog.mozilla.org/nnethercote/2020/09/08/how-to-speed-up-the-rust-compiler-one-last-time/
+//      renderdoc for graphics debugging
+// [ ] FAQ - stuttering/tearing due to compositor - Alt+Shift+f12 - somehow this doesn't work anymore
 // nice to have:
 // [ ] logo (RecWars spelled out by in-game entities?)
 // [ ] GM - presing fire again switches back to tank
@@ -518,7 +470,6 @@ async fn main() {
 
         // Don't put the camera so close to the edge that it would render area outside the map.
         // TODO handle maps smaller than canvas (currently crashes on unreachable)
-        // TODO any more mentions of canvas? :)
         let view_size = Vec2f::new(screen_width() as f64, screen_height() as f64);
         let camera_min = view_size / 2.0;
         let map_size = server.map.maxs();
@@ -1368,7 +1319,7 @@ fn render_text_with_shadow(
 }
 
 /// If x or y are negative, count them from the right or bottom respectively.
-/// Useful to make HUD config cvars work for any canvas size.
+/// Useful to make HUD config cvars work for any view size.
 fn hud_pos(view_size: Vec2f, mut x: f64, mut y: f64) -> Vec2 {
     if x < 0.0 {
         x += view_size.x;
