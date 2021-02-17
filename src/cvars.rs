@@ -362,6 +362,7 @@ pub struct Cvars {
     pub hud_weapon_icon_x: f64,
     pub hud_weapon_icon_y: f64,
 
+    // LATER unify naming - align_to_pixels vs smoothing vs integer_positions
     pub r_align_to_pixels_background: bool,
     pub r_draw_cluster_bombs: bool,
     pub r_explosion_duration: f64,

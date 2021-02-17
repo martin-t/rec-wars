@@ -182,9 +182,11 @@
 // profiling
 //      [ ] make explosion sprite smaller
 //      https://github.com/EmbarkStudios/puffin
-//      https://github.com/bombomby/optick-rs
+//      https://github.com/bombomby/optick-rs (Windows only)
 //      list of tools: Instruction counts @ https://blog.mozilla.org/nnethercote/2020/09/08/how-to-speed-up-the-rust-compiler-one-last-time/
 //      renderdoc for graphics debugging
+//      cargo flamegraph (internally uses perf on linux)
+//      firestorm
 // [ ] FAQ - stuttering/tearing due to compositor - Alt+Shift+f12 - somehow this doesn't work anymore
 // nice to have:
 // [ ] logo (RecWars spelled out by in-game entities?)
