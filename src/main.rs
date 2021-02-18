@@ -471,24 +471,32 @@ async fn main() {
         };
 
         // Don't put the camera so close to the edge that it would render area outside the map.
-        // TODO handle maps smaller than canvas (currently crashes on unreachable)
-        let view_size = Vec2f::new(screen_width() as f64, screen_height() as f64);
-        let camera_min = view_size / 2.0;
+        // Also properly handle maps smaller than view size. Note they can be smaller along X, Y or both.
+        // Example maps for testing: Joust (2), extra/OK Corral (2)
+        let screen_size = Vec2f::new(screen_width() as f64, screen_height() as f64);
         let map_size = server.map.maxs();
-        let camera_max = map_size - camera_min;
-        let camera_pos = player_entity_pos.clamped(camera_min, camera_max);
+        let view_size = Vec2f::new(screen_size.x.min(map_size.x), screen_size.y.min(map_size.y));
+        let empty_space_size = screen_size - view_size;
+        dbg!(screen_size, map_size, view_size, empty_space_size);
+
+        // Camera center in world coords.
+        let camera_pos_min = view_size / 2.0;
+        let camera_pos_max = map_size - camera_pos_min;
+        let camera_pos = player_entity_pos.clamped(camera_pos_min, camera_pos_max);
+        dbg!(camera_pos_min, camera_pos_max);
 
         // Position of the camera's top left corner in world coords.
-        // Subtract this from world coords to get screen coords.
-        // Forgetting this is a recurring source of bugs.
+        let camera_top_left = camera_pos - camera_pos_min;
+        // Add this to world coords to get screen coords.
+        // Forgetting to do this is a recurring source of bugs.
         // I've considered making a special type for screen coords (e.g. struct Vec2screen(Vec2f);)
         // so you couldn't accidentally pass world coords to drawing fns but it turned out to be more work than expected:
         // - The newtype had to manually impl all the needed operations of the underlying Vec2 type because ops don't autoderef.
         // - What would be the result of ops that take one world coord and one screen coord? Lots of cases to think about.
-        // - Which type are sizes? E.g. `center = corner + size/2` makes sense in both screen and world coords.
-        let top_left = camera_pos - camera_min;
+        // - Which type are sizes? Another type? E.g. `center = corner + size/2` makes sense in both screen and world coords.
+        let camera_offset = -camera_top_left + empty_space_size / 2.0;
 
-        let top_left_tp = server.map.tile_pos(top_left);
+        let top_left_tp = server.map.tile_pos(camera_top_left);
         let top_left_index = top_left_tp.index;
         let bg_offset = if cvars.r_align_to_pixels_background {
             top_left_tp.offset.floor()
@@ -507,7 +515,12 @@ async fn main() {
 
                 if server.map.surface_of(tile).kind != Kind::Wall {
                     let img = imgs_tiles[tile.surface_index];
-                    render_tile(img, x, y, tile.angle);
+                    render_tile(
+                        img,
+                        empty_space_size.x / 2.0 + x,
+                        empty_space_size.y / 2.0 + y,
+                        tile.angle,
+                    );
                 }
 
                 c += 1;
@@ -526,18 +539,21 @@ async fn main() {
                 .filter(move |(_, proj)| proj.weapon == weapon)
         };
 
+        let outside_view_top_left = empty_space_size / 2.0 - TILE_SIZE;
+        let outside_view_bottom_right = empty_space_size / 2.0 + view_size + TILE_SIZE;
         // Is the object certainly outside camera view?
+        // Only works on objects smaller that tile size, which is most.
+        // Exceptions are lines and text.
         let cull = |scr_pos: Vec2f| {
-            // There is no single object bigger than TILE_SIZE (except lines).
-            scr_pos.x < -TILE_SIZE
-                || scr_pos.y < -TILE_SIZE
-                || scr_pos.x > view_size.x + TILE_SIZE
-                || scr_pos.y > view_size.y + TILE_SIZE
+            scr_pos.x < outside_view_top_left.x
+                || scr_pos.y < outside_view_top_left.y
+                || scr_pos.x > outside_view_bottom_right.x
+                || scr_pos.y > outside_view_bottom_right.y
         };
 
         // Draw MGs
         for (_, mg) in weapon_projectiles(Weapon::Mg) {
-            let scr_pos = mg.pos - top_left;
+            let scr_pos = mg.pos + camera_offset;
             if cull(scr_pos) {
                 continue;
             }
@@ -548,28 +564,28 @@ async fn main() {
 
         // Draw railguns
         for beam in &server.gs.rail_beams {
-            let scr_begin = beam.begin - top_left;
-            let scr_end = beam.end - top_left;
+            let scr_begin = beam.begin + camera_offset;
+            let scr_end = beam.end + camera_offset;
             render_line(scr_begin, scr_end, 1.0, Color::new(0.0, 0.0, 1.0, 1.0));
         }
 
         // Draw rockets, homing and guided missiles
         for (_, proj) in weapon_projectiles(Weapon::Rockets) {
-            let scr_pos = proj.pos - top_left;
+            let scr_pos = proj.pos + camera_offset;
             if cull(scr_pos) {
                 continue;
             }
             render_img_center(img_rocket, scr_pos, proj.vel.to_angle());
         }
         for (_, proj) in weapon_projectiles(Weapon::Hm) {
-            let scr_pos = proj.pos - top_left;
+            let scr_pos = proj.pos + camera_offset;
             if cull(scr_pos) {
                 continue;
             }
             render_img_center(img_hm, scr_pos, proj.vel.to_angle());
         }
         for (_, proj) in weapon_projectiles(Weapon::Gm) {
-            let scr_pos = proj.pos - top_left;
+            let scr_pos = proj.pos + camera_offset;
             if cull(scr_pos) {
                 continue;
             }
@@ -580,7 +596,7 @@ async fn main() {
         // client.context.set_fill_style(&"lime".into());
         // client.context.set_stroke_style(&"lime".into());
         for (_, bfg) in weapon_projectiles(Weapon::Bfg) {
-            let scr_pos = bfg.pos - top_left;
+            let scr_pos = bfg.pos + camera_offset;
             if cull(scr_pos) {
                 continue;
             }
@@ -592,14 +608,14 @@ async fn main() {
             );
         }
         for &(src, dest) in &server.gs.bfg_beams {
-            let scr_src = src - top_left;
-            let scr_dest = dest - top_left;
+            let scr_src = src + camera_offset;
+            let scr_dest = dest + camera_offset;
             render_line(scr_src, scr_dest, 1.0, GREEN);
         }
 
         // Draw chassis
         for (_, vehicle) in server.gs.vehicles.iter() {
-            let scr_pos = vehicle.pos - top_left;
+            let scr_pos = vehicle.pos + camera_offset;
             if cull(scr_pos) {
                 continue;
             }
@@ -632,7 +648,7 @@ async fn main() {
                 continue;
             }
 
-            let scr_pos = vehicle.pos - top_left;
+            let scr_pos = vehicle.pos + camera_offset;
             if cull(scr_pos) {
                 continue;
             }
@@ -657,7 +673,7 @@ async fn main() {
             Box::new(server.gs.explosions.iter())
         };
         for explosion in iter {
-            let scr_pos = explosion.pos - top_left;
+            let scr_pos = explosion.pos + camera_offset;
             if cull(scr_pos) {
                 continue;
             }
@@ -711,7 +727,12 @@ async fn main() {
 
                 if server.map.surface_of(tile).kind == Kind::Wall {
                     let img = imgs_tiles[tile.surface_index];
-                    render_tile(img, x, y, tile.angle);
+                    render_tile(
+                        img,
+                        empty_space_size.x / 2.0 + x,
+                        empty_space_size.y / 2.0 + y,
+                        tile.angle,
+                    );
                 }
 
                 c += 1;
@@ -725,7 +746,7 @@ async fn main() {
         // TODO what about shadows (in general)?
         if cvars.r_draw_cluster_bombs {
             for (_, cb) in weapon_projectiles(Weapon::Cb) {
-                let scr_pos = cb.pos - top_left;
+                let scr_pos = cb.pos + camera_offset;
                 if cull(scr_pos) {
                     continue;
                 }
@@ -755,7 +776,7 @@ async fn main() {
         // Names
         if cvars.hud_names {
             for (_, vehicle) in server.gs.vehicles.iter() {
-                let scr_pos = vehicle.pos - top_left;
+                let scr_pos = vehicle.pos + camera_offset;
                 if cull(scr_pos) {
                     // LATER, restrict name length
                     continue;
@@ -784,8 +805,8 @@ async fn main() {
         }
 
         // Homing missile indicator
-        // TODO dashed lines
-        let player_veh_scr_pos = player_veh_pos - top_left;
+        // TODO dashed lines (maybe use image)
+        let player_veh_scr_pos = player_veh_pos + camera_offset;
         draw_circle_lines(
             player_veh_scr_pos.x as f32,
             player_veh_scr_pos.y as f32,
@@ -803,8 +824,8 @@ async fn main() {
             let mut lines = lines.borrow_mut();
             for line in lines.iter_mut() {
                 if cvars.d_draw && cvars.d_draw_lines {
-                    let scr_begin = line.begin - top_left;
-                    let scr_end = line.end - top_left;
+                    let scr_begin = line.begin + camera_offset;
+                    let scr_end = line.end + camera_offset;
                     render_line(scr_begin, scr_end, 1.0, RED);
                     if cvars.d_draw_lines_ends_length > 0.0 {
                         let segment = line.end - line.begin;
@@ -830,7 +851,7 @@ async fn main() {
             let mut crosses = crosses.borrow_mut();
             for cross in crosses.iter_mut() {
                 if cvars.d_draw && cvars.d_draw_crosses {
-                    let scr_point = cross.point - top_left;
+                    let scr_point = cross.point + camera_offset;
                     if cull(scr_point) {
                         continue;
                     }
@@ -1183,7 +1204,7 @@ async fn main() {
             let texts = texts.borrow();
             if cvars.d_draw && cvars.d_draw_world_text {
                 for text in texts.iter() {
-                    let scr_pos = text.pos - top_left;
+                    let scr_pos = text.pos + camera_offset;
                     if cull(scr_pos) {
                         // Technically the text can be so long
                         // that it's culled overzealously but meh, perf is more important.
