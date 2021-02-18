@@ -248,7 +248,7 @@
 //      - They mean something can be done better but marking it as a todo would be just noise when grepping.
 //        They're things I'd do if I had infinite time and wanted to make RecWars perfect.
 
-use std::{cmp::Reverse, str};
+use std::{cmp::Reverse, env, str};
 
 use ::rand::{prelude::SmallRng, SeedableRng};
 use macroquad::prelude::*;
@@ -291,9 +291,15 @@ async fn main() {
     // TODO add all OSes to CI
     // TODO move more init stuff from here to Server
 
+    let mut args = env::args();
+    args.next(); // Skip path of the executable
+    let maybe_map = args.next();
+    let maybe_seed = args.next();
+
     let cvars = Cvars::new_rec_wars();
-    let rng = if cvars.d_seed == 0 {
-        // This requires the `wasm-bindgen` feature on `rand` or it crashes at runtime.
+    let rng = if let Some(seed) = maybe_seed {
+        SmallRng::seed_from_u64(seed.parse().unwrap())
+    } else if cvars.d_seed == 0 {
         SmallRng::seed_from_u64(7) // TODO time?
     } else {
         SmallRng::seed_from_u64(cvars.d_seed)
@@ -375,7 +381,8 @@ async fn main() {
     let tex_list_bytes = load_file("assets/texture_list.txt").await.unwrap();
     let tex_list_text = str::from_utf8(&tex_list_bytes).unwrap();
     let surfaces = map::load_tex_list(tex_list_text);
-    let map_bytes = load_file("maps/Atrium.map").await.unwrap();
+    let map_path = maybe_map.unwrap_or_else(|| "maps/Atrium.map".to_owned());
+    let map_bytes = load_file(&map_path).await.unwrap();
     let map_text = str::from_utf8(&map_bytes).unwrap();
     let map = map::load_map(&map_text, surfaces);
 
