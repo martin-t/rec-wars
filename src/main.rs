@@ -1108,7 +1108,7 @@ async fn main() {
 
         // Draw FPS
         if cvars.d_fps {
-            let fps_pos = hud_pos(view_size, cvars.d_fps_x, cvars.d_fps_y);
+            let fps_pos = hud_pos(screen_size, cvars.d_fps_x, cvars.d_fps_y);
             render_text_with_shadow(
                 &cvars,
                 &format!(
@@ -1132,8 +1132,8 @@ async fn main() {
             render_text_with_shadow(
                 &cvars,
                 &format!("last {} frames (in ms):", cvars.d_timing_samples),
-                view_size.x as f32 - 280.0,
-                view_size.y as f32 - 105.0,
+                screen_size.x as f32 - 280.0,
+                screen_size.y as f32 - 105.0,
                 16.0,
                 RED,
                 1.0,
@@ -1145,8 +1145,8 @@ async fn main() {
                 render_text_with_shadow(
                     &cvars,
                     &text,
-                    view_size.x as f32 - 280.0,
-                    view_size.y as f32 - 90.0,
+                    screen_size.x as f32 - 280.0,
+                    screen_size.y as f32 - 90.0,
                     16.0,
                     RED,
                     1.0,
@@ -1163,8 +1163,8 @@ async fn main() {
                 render_text_with_shadow(
                     &cvars,
                     &text,
-                    view_size.x as f32 - 280.0,
-                    view_size.y as f32 - 75.0,
+                    screen_size.x as f32 - 280.0,
+                    screen_size.y as f32 - 75.0,
                     16.0,
                     RED,
                     1.0,
@@ -1181,8 +1181,8 @@ async fn main() {
                 render_text_with_shadow(
                     &cvars,
                     &text,
-                    view_size.x as f32 - 280.0,
-                    view_size.y as f32 - 60.0,
+                    screen_size.x as f32 - 280.0,
+                    screen_size.y as f32 - 60.0,
                     16.0,
                     RED,
                     1.0,
@@ -1195,8 +1195,8 @@ async fn main() {
                 render_text_with_shadow(
                     &cvars,
                     &text,
-                    view_size.x as f32 - 280.0,
-                    view_size.y as f32 - 45.0,
+                    screen_size.x as f32 - 280.0,
+                    screen_size.y as f32 - 45.0,
                     16.0,
                     RED,
                     1.0,
@@ -1349,13 +1349,13 @@ fn render_text_with_shadow(
 }
 
 /// If x or y are negative, count them from the right or bottom respectively.
-/// Useful to make HUD config cvars work for any view size.
-fn hud_pos(view_size: Vec2f, mut x: f64, mut y: f64) -> Vec2 {
+/// Useful to make HUD config cvars work for any screen/view size.
+fn hud_pos(size: Vec2f, mut x: f64, mut y: f64) -> Vec2 {
     if x < 0.0 {
-        x += view_size.x;
+        x += size.x;
     }
     if y < 0.0 {
-        y += view_size.y;
+        y += size.y;
     }
     Vec2::new(x as f32, y as f32)
 }
