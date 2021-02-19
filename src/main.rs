@@ -484,13 +484,12 @@ async fn main() {
         let map_size = server.map.maxs();
         let view_size = Vec2f::new(screen_size.x.min(map_size.x), screen_size.y.min(map_size.y));
         let empty_space_size = screen_size - view_size;
-        dbg!(screen_size, map_size, view_size, empty_space_size);
+        let view_pos = empty_space_size / 2.0;
 
         // Camera center in world coords.
         let camera_pos_min = view_size / 2.0;
         let camera_pos_max = map_size - camera_pos_min;
         let camera_pos = player_entity_pos.clamped(camera_pos_min, camera_pos_max);
-        dbg!(camera_pos_min, camera_pos_max);
 
         // Position of the camera's top left corner in world coords.
         let camera_top_left = camera_pos - camera_pos_min;
@@ -501,7 +500,7 @@ async fn main() {
         // - The newtype had to manually impl all the needed operations of the underlying Vec2 type because ops don't autoderef.
         // - What would be the result of ops that take one world coord and one screen coord? Lots of cases to think about.
         // - Which type are sizes? Another type? E.g. `center = corner + size/2` makes sense in both screen and world coords.
-        let camera_offset = -camera_top_left + empty_space_size / 2.0;
+        let camera_offset = -camera_top_left + view_pos;
 
         let top_left_tp = server.map.tile_pos(camera_top_left);
         let top_left_index = top_left_tp.index;
@@ -522,12 +521,7 @@ async fn main() {
 
                 if server.map.surface_of(tile).kind != Kind::Wall {
                     let img = imgs_tiles[tile.surface_index];
-                    render_tile(
-                        img,
-                        empty_space_size.x / 2.0 + x,
-                        empty_space_size.y / 2.0 + y,
-                        tile.angle,
-                    );
+                    render_tile(img, view_pos.x + x, view_pos.y + y, tile.angle);
                 }
 
                 c += 1;
@@ -546,8 +540,8 @@ async fn main() {
                 .filter(move |(_, proj)| proj.weapon == weapon)
         };
 
-        let outside_view_top_left = empty_space_size / 2.0 - TILE_SIZE;
-        let outside_view_bottom_right = empty_space_size / 2.0 + view_size + TILE_SIZE;
+        let outside_view_top_left = view_pos - TILE_SIZE;
+        let outside_view_bottom_right = view_pos + view_size + TILE_SIZE;
         // Is the object certainly outside camera view?
         // Only works on objects smaller that tile size, which is most.
         // Exceptions are lines and text.
@@ -734,12 +728,7 @@ async fn main() {
 
                 if server.map.surface_of(tile).kind == Kind::Wall {
                     let img = imgs_tiles[tile.surface_index];
-                    render_tile(
-                        img,
-                        empty_space_size.x / 2.0 + x,
-                        empty_space_size.y / 2.0 + y,
-                        tile.angle,
-                    );
+                    render_tile(img, view_pos.x + x, view_pos.y + y, tile.angle);
                 }
 
                 c += 1;
