@@ -874,7 +874,7 @@ async fn main() {
         player_points.sort_by_key(|&(_, points)| Reverse(points));
 
         // Score
-        let score_pos = hud_pos(view_size, cvars.hud_score_x, cvars.hud_score_y);
+        let score_pos = hud_pos(view_pos, view_size, cvars.hud_score_x, cvars.hud_score_y);
         let points = player.score.points(&cvars).to_string();
         render_text_with_shadow(
             &cvars,
@@ -892,7 +892,12 @@ async fn main() {
         // Original RW shows "current rank / total players (+/- points difference to leader or second)"
         // as a big but not bold number with a 1px shadow. E.g. "1/3 (+5)" or "2/3 (0)".
         // There's no special treatement for players with the same number of points.
-        let ranking_pos = hud_pos(view_size, cvars.hud_ranking_x, cvars.hud_ranking_y);
+        let ranking_pos = hud_pos(
+            view_pos,
+            view_size,
+            cvars.hud_ranking_x,
+            cvars.hud_ranking_y,
+        );
         let current_index = player_points
             .iter()
             .position(|&(handle, _)| handle == client.player_handle)
@@ -947,7 +952,7 @@ async fn main() {
         let r = 1.0 - (player_vehicle.hp_fraction.clamped(0.5, 1.0) - 0.5) * 2.0;
         let g = player_vehicle.hp_fraction.clamped(0.0, 0.5) * 2.0;
         let rgb = Color::new(r as f32, g as f32, 0.0, 1.0);
-        let hp_pos = hud_pos(view_size, cvars.hud_hp_x, cvars.hud_hp_y);
+        let hp_pos = hud_pos(view_pos, view_size, cvars.hud_hp_x, cvars.hud_hp_y);
         draw_rectangle(
             hp_pos.x,
             hp_pos.y,
@@ -985,7 +990,7 @@ async fn main() {
                 cur_diff / max_diff
             }
         };
-        let ammo_pos = hud_pos(view_size, cvars.hud_ammo_x, cvars.hud_ammo_y);
+        let ammo_pos = hud_pos(view_pos, view_size, cvars.hud_ammo_x, cvars.hud_ammo_y);
         draw_rectangle(
             ammo_pos.x,
             ammo_pos.y,
@@ -1014,8 +1019,12 @@ async fn main() {
         // Weapon icon
         // The original shadows were part of the image but this is good enough for now.
         let weap_img = imgs_weapon_icons[player.cur_weapon as usize];
-        let weap_icon_pos = hud_pos(view_size, cvars.hud_weapon_icon_x, cvars.hud_weapon_icon_y)
-            - Vec2::new(weap_img.width(), weap_img.height()) / 2.0;
+        let weap_icon_pos = hud_pos(
+            view_pos,
+            view_size,
+            cvars.hud_weapon_icon_x,
+            cvars.hud_weapon_icon_y,
+        ) - Vec2::new(weap_img.width(), weap_img.height()) / 2.0;
         draw_texture(
             weap_img,
             weap_icon_pos.x + cvars.hud_weapon_icon_shadow_mq_x,
@@ -1032,9 +1041,10 @@ async fn main() {
                 + cvars.hud_scoreboard_width_points;
             let height =
                 (server.gs.players.len() + 1) as f32 * cvars.hud_scoreboard_line_height as f32;
-            let x_start = (view_size.x as f32 - width) / 2.0;
+            let x_start = view_pos.x as f32 + (view_size.x as f32 - width) / 2.0;
             let mut x = x_start.floor();
-            let mut y = ((view_size.y as f32 - height) / 2.0).floor();
+            let mut y = view_pos.y as f32 + (view_size.y as f32 - height) / 2.0;
+            y = y.floor();
 
             let fs = cvars.hud_scoreboard_font_size;
             let sx = cvars.hud_scoreboard_shadow_mq_x;
@@ -1097,7 +1107,12 @@ async fn main() {
 
         // Draw FPS
         if cvars.d_fps {
-            let fps_pos = hud_pos(screen_size, cvars.d_fps_x, cvars.d_fps_y);
+            let fps_pos = hud_pos(
+                Vec2f::new(0.0, 0.0),
+                screen_size,
+                cvars.d_fps_x,
+                cvars.d_fps_y,
+            );
             render_text_with_shadow(
                 &cvars,
                 &format!(
@@ -1339,12 +1354,12 @@ fn render_text_with_shadow(
 
 /// If x or y are negative, count them from the right or bottom respectively.
 /// Useful to make HUD config cvars work for any screen/view size.
-fn hud_pos(size: Vec2f, mut x: f64, mut y: f64) -> Vec2 {
+fn hud_pos(rect_pos: Vec2f, rect_size: Vec2f, mut x: f64, mut y: f64) -> Vec2 {
     if x < 0.0 {
-        x += size.x;
+        x += rect_size.x;
     }
     if y < 0.0 {
-        y += size.y;
+        y += rect_size.y;
     }
-    Vec2::new(x as f32, y as f32)
+    Vec2::new((rect_pos.x + x) as f32, (rect_pos.y + y) as f32)
 }
