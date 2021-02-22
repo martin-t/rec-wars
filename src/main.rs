@@ -1107,12 +1107,7 @@ async fn main() {
 
         // Draw FPS
         if cvars.d_fps {
-            let fps_pos = hud_pos(
-                Vec2f::new(0.0, 0.0),
-                screen_size,
-                cvars.d_fps_x,
-                cvars.d_fps_y,
-            );
+            let fps_pos = hud_pos(Vec2f::zero(), screen_size, cvars.d_fps_x, cvars.d_fps_y);
             render_text_with_shadow(
                 &cvars,
                 &format!(

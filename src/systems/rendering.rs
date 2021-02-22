@@ -49,24 +49,31 @@ pub(crate) fn draw(
     };
 
     // Don't put the camera so close to the edge that it would render area outside the map.
-    // TODO handle maps smaller than canvas (currently crashes on unreachable)
-    let canvas_size = Vec2f::new(client.canvas.width() as f64, client.canvas.height() as f64);
-    let camera_min = canvas_size / 2.0;
+    // Also properly handle maps smaller than view size. Note they can be smaller along X, Y or both.
+    // Example maps for testing: Joust (2), extra/OK Corral (2)
+    let screen_size = Vec2f::new(client.canvas.width() as f64, client.canvas.height() as f64);
     let map_size = server.map.maxs();
-    let camera_max = map_size - camera_min;
-    let camera_pos = player_entity_pos.clamped(camera_min, camera_max);
+    let view_size = Vec2f::new(screen_size.x.min(map_size.x), screen_size.y.min(map_size.y));
+    let empty_space_size = screen_size - view_size;
+    let view_pos = empty_space_size / 2.0;
+
+    // Camera center in world coords.
+    let camera_pos_min = view_size / 2.0;
+    let camera_pos_max = map_size - camera_pos_min;
+    let camera_pos = player_entity_pos.clamped(camera_pos_min, camera_pos_max);
 
     // Position of the camera's top left corner in world coords.
-    // Subtract this from world coords to get screen coords.
-    // Forgetting this is a recurring source of bugs.
+    let camera_top_left = camera_pos - camera_pos_min;
+    // Add this to world coords to get screen coords.
+    // Forgetting to do this is a recurring source of bugs.
     // I've considered making a special type for screen coords (e.g. struct Vec2screen(Vec2f);)
     // so you couldn't accidentally pass world coords to drawing fns but it turned out to be more work than expected:
     // - The newtype had to manually impl all the needed operations of the underlying Vec2 type because ops don't autoderef.
     // - What would be the result of ops that take one world coord and one screen coord? Lots of cases to think about.
-    // - Which type are sizes? E.g. `center = corner + size/2` makes sense in both screen and world coords.
-    let top_left = camera_pos - camera_min;
+    // - Which type are sizes? Another type? E.g. `center = corner + size/2` makes sense in both screen and world coords.
+    let camera_offset = -camera_top_left + view_pos;
 
-    let top_left_tp = server.map.tile_pos(top_left);
+    let top_left_tp = server.map.tile_pos(camera_top_left);
     let top_left_index = top_left_tp.index;
     let bg_offset = if cvars.r_align_to_pixels_background {
         top_left_tp.offset.floor()
@@ -77,15 +84,20 @@ pub(crate) fn draw(
     // Draw non-walls
     let mut r = top_left_index.y;
     let mut y = -bg_offset.y;
-    while y < canvas_size.y {
+    while y < view_size.y {
         let mut c = top_left_index.x;
         let mut x = -bg_offset.x;
-        while x < canvas_size.x {
+        while x < view_size.x {
             let tile = server.map.col_row(c, r);
 
             if server.map.surface_of(tile).kind != Kind::Wall {
                 let img = &client.imgs_tiles[tile.surface_index];
-                draw_tile(client, img, Vec2::new(x, y), tile.angle)?;
+                draw_tile(
+                    client,
+                    img,
+                    Vec2::new(view_pos.x + x, view_pos.y + y),
+                    tile.angle,
+                )?;
             }
 
             c += 1;
@@ -104,19 +116,22 @@ pub(crate) fn draw(
             .filter(move |(_, proj)| proj.weapon == weapon)
     };
 
+    let outside_view_top_left = view_pos - TILE_SIZE;
+    let outside_view_bottom_right = view_pos + view_size + TILE_SIZE;
     // Is the object certainly outside camera view?
+    // Only works on objects smaller that tile size, which is most.
+    // Exceptions are lines and text.
     let cull = |scr_pos: Vec2f| {
-        // There is no single object bigger than TILE_SIZE (except lines).
-        scr_pos.x < -TILE_SIZE
-            || scr_pos.y < -TILE_SIZE
-            || scr_pos.x > canvas_size.x + TILE_SIZE
-            || scr_pos.y > canvas_size.y + TILE_SIZE
+        scr_pos.x < outside_view_top_left.x
+            || scr_pos.y < outside_view_top_left.y
+            || scr_pos.x > outside_view_bottom_right.x
+            || scr_pos.y > outside_view_bottom_right.y
     };
 
     // Draw MGs
     client.context.set_stroke_style(&"yellow".into());
     for (_, mg) in weapon_projectiles(Weapon::Mg) {
-        let scr_pos = mg.pos - top_left;
+        let scr_pos = mg.pos + camera_offset;
         if cull(scr_pos) {
             continue;
         }
@@ -131,8 +146,8 @@ pub(crate) fn draw(
     // Draw railguns
     client.context.set_stroke_style(&"blue".into());
     for beam in &server.gs.rail_beams {
-        let scr_begin = beam.begin - top_left;
-        let scr_end = beam.end - top_left;
+        let scr_begin = beam.begin + camera_offset;
+        let scr_end = beam.end + camera_offset;
         client.context.begin_path();
         move_to(client, scr_begin);
         line_to(client, scr_end);
@@ -141,21 +156,21 @@ pub(crate) fn draw(
 
     // Draw rockets, homing and guided missiles
     for (_, proj) in weapon_projectiles(Weapon::Rockets) {
-        let scr_pos = proj.pos - top_left;
+        let scr_pos = proj.pos + camera_offset;
         if cull(scr_pos) {
             continue;
         }
         draw_img_center(client, &client.img_rocket, scr_pos, proj.vel.to_angle())?;
     }
     for (_, proj) in weapon_projectiles(Weapon::Hm) {
-        let scr_pos = proj.pos - top_left;
+        let scr_pos = proj.pos + camera_offset;
         if cull(scr_pos) {
             continue;
         }
         draw_img_center(client, &client.img_hm, scr_pos, proj.vel.to_angle())?;
     }
     for (_, proj) in weapon_projectiles(Weapon::Gm) {
-        let scr_pos = proj.pos - top_left;
+        let scr_pos = proj.pos + camera_offset;
         if cull(scr_pos) {
             continue;
         }
@@ -166,7 +181,7 @@ pub(crate) fn draw(
     client.context.set_fill_style(&"lime".into());
     client.context.set_stroke_style(&"lime".into());
     for (_, bfg) in weapon_projectiles(Weapon::Bfg) {
-        let scr_pos = bfg.pos - top_left;
+        let scr_pos = bfg.pos + camera_offset;
         if cull(scr_pos) {
             continue;
         }
@@ -177,8 +192,8 @@ pub(crate) fn draw(
         client.context.fill();
     }
     for &(src, dest) in &server.gs.bfg_beams {
-        let scr_src = src - top_left;
-        let scr_dest = dest - top_left;
+        let scr_src = src + camera_offset;
+        let scr_dest = dest + camera_offset;
         client.context.begin_path();
         move_to(client, scr_src);
         line_to(client, scr_dest);
@@ -187,7 +202,7 @@ pub(crate) fn draw(
 
     // Draw chassis
     for (_, vehicle) in server.gs.vehicles.iter() {
-        let scr_pos = vehicle.pos - top_left;
+        let scr_pos = vehicle.pos + camera_offset;
         if cull(scr_pos) {
             continue;
         }
@@ -219,7 +234,7 @@ pub(crate) fn draw(
             continue;
         }
 
-        let scr_pos = vehicle.pos - top_left;
+        let scr_pos = vehicle.pos + camera_offset;
         if cull(scr_pos) {
             continue;
         }
@@ -245,7 +260,7 @@ pub(crate) fn draw(
         Box::new(server.gs.explosions.iter())
     };
     for explosion in iter {
-        let scr_pos = explosion.pos - top_left;
+        let scr_pos = explosion.pos + camera_offset;
         if cull(scr_pos) {
             continue;
         }
@@ -289,15 +304,20 @@ pub(crate) fn draw(
     // They are above explosions and turrets, just like in RecWar.
     let mut r = top_left_index.y;
     let mut y = -bg_offset.y;
-    while y < canvas_size.y {
+    while y < view_size.y {
         let mut c = top_left_index.x;
         let mut x = -bg_offset.x;
-        while x < canvas_size.x {
+        while x < view_size.x {
             let tile = server.map.col_row(c, r);
 
             if server.map.surface_of(tile).kind == Kind::Wall {
                 let img = &client.imgs_tiles[tile.surface_index];
-                draw_tile(client, img, Vec2::new(x, y), tile.angle)?;
+                draw_tile(
+                    client,
+                    img,
+                    Vec2::new(view_pos.x + x, view_pos.y + y),
+                    tile.angle,
+                )?;
             }
 
             c += 1;
@@ -319,7 +339,7 @@ pub(crate) fn draw(
             .context
             .set_shadow_offset_y(cvars.g_cluster_bomb_shadow_y);
         for (_, cb) in weapon_projectiles(Weapon::Cb) {
-            let scr_pos = cb.pos - top_left;
+            let scr_pos = cb.pos + camera_offset;
             if cull(scr_pos) {
                 continue;
             }
@@ -348,7 +368,7 @@ pub(crate) fn draw(
         client.context.set_shadow_offset_y(cvars.hud_names_shadow_y);
         client.context.set_fill_style(&names_rgba.into());
         for (_, vehicle) in server.gs.vehicles.iter() {
-            let scr_pos = vehicle.pos - top_left;
+            let scr_pos = vehicle.pos + camera_offset;
             if cull(scr_pos) {
                 // LATER, restrict name length
                 continue;
@@ -366,7 +386,7 @@ pub(crate) fn draw(
     }
 
     // Homing missile indicator
-    let player_veh_scr_pos = player_veh_pos - top_left;
+    let player_veh_scr_pos = player_veh_pos + camera_offset;
     client.context.set_stroke_style(&"rgb(0, 255, 0)".into());
     let dash_len = cvars.hud_missile_indicator_dash_length.into();
     let dash_pattern = Array::of2(&dash_len, &dash_len);
@@ -394,8 +414,8 @@ pub(crate) fn draw(
             if cvars.d_draw && cvars.d_draw_lines {
                 client.context.set_stroke_style(&line.color.into());
 
-                let scr_begin = line.begin - top_left;
-                let scr_end = line.end - top_left;
+                let scr_begin = line.begin + camera_offset;
+                let scr_end = line.end + camera_offset;
                 client.context.begin_path();
                 move_to(client, scr_begin);
                 line_to(client, scr_end);
@@ -428,7 +448,7 @@ pub(crate) fn draw(
         let mut crosses = crosses.borrow_mut();
         for cross in crosses.iter_mut() {
             if cvars.d_draw && cvars.d_draw_crosses {
-                let scr_point = cross.point - top_left;
+                let scr_point = cross.point + camera_offset;
                 if cull(scr_point) {
                     continue;
                 }
@@ -465,7 +485,7 @@ pub(crate) fn draw(
     client.context.set_shadow_offset_y(cvars.hud_score_shadow_y);
     let score_font = format!("{}px sans-serif", cvars.hud_score_font_size);
     client.context.set_font(&score_font);
-    let score_pos = hud_pos(canvas_size, cvars.hud_score_x, cvars.hud_score_y);
+    let score_pos = hud_pos(view_pos, view_size, cvars.hud_score_x, cvars.hud_score_y);
     client.context.fill_text(
         &player.score.points(cvars).to_string(),
         score_pos.x,
@@ -484,7 +504,12 @@ pub(crate) fn draw(
         .set_shadow_offset_y(cvars.hud_ranking_shadow_y);
     let ranking_font = format!("{}px sans-serif", cvars.hud_ranking_font_size);
     client.context.set_font(&ranking_font);
-    let ranking_pos = hud_pos(canvas_size, cvars.hud_ranking_x, cvars.hud_ranking_y);
+    let ranking_pos = hud_pos(
+        view_pos,
+        view_size,
+        cvars.hud_ranking_x,
+        cvars.hud_ranking_y,
+    );
     let current_index = player_points
         .iter()
         .position(|&(handle, _)| handle == client.player_handle)
@@ -536,7 +561,7 @@ pub(crate) fn draw(
     let g = player_vehicle.hp_fraction.clamped(0.0, 0.5) * 2.0;
     let rgb = format!("rgb({}, {}, 0)", r * 255.0, g * 255.0);
     client.context.set_fill_style(&rgb.into());
-    let hp_pos = hud_pos(canvas_size, cvars.hud_hp_x, cvars.hud_hp_y);
+    let hp_pos = hud_pos(view_pos, view_size, cvars.hud_hp_x, cvars.hud_hp_y);
     client.context.fill_rect(
         hp_pos.x,
         hp_pos.y,
@@ -566,7 +591,7 @@ pub(crate) fn draw(
             cur_diff / max_diff
         }
     };
-    let ammo_pos = hud_pos(canvas_size, cvars.hud_ammo_x, cvars.hud_ammo_y);
+    let ammo_pos = hud_pos(view_pos, view_size, cvars.hud_ammo_x, cvars.hud_ammo_y);
     client.context.fill_rect(
         ammo_pos.x,
         ammo_pos.y,
@@ -600,7 +625,8 @@ pub(crate) fn draw(
         client,
         &client.imgs_weapon_icons[player.cur_weapon as usize],
         hud_pos(
-            canvas_size,
+            view_pos,
+            view_size,
             cvars.hud_weapon_icon_x,
             cvars.hud_weapon_icon_y,
         ),
@@ -620,8 +646,8 @@ pub(crate) fn draw(
         client.context.set_fill_style(&"white".into());
 
         let height = (server.gs.players.len() + 1) as f64 * cvars.hud_scoreboard_line_height;
-        let mut y = (canvas_size.y - height) / 2.0;
-        let x = (canvas_size.x - 200.0) / 2.0;
+        let mut y = view_pos.y + (view_size.y - height) / 2.0;
+        let x = view_pos.x + (view_size.x - 200.0) / 2.0;
 
         let header_font = format!("bold {}px sans-serif", cvars.hud_scoreboard_font_size);
         client.context.set_font(&header_font);
@@ -674,7 +700,7 @@ pub(crate) fn draw(
 
     // Draw FPS
     if cvars.d_fps {
-        let fps_pos = hud_pos(canvas_size, cvars.d_fps_x, cvars.d_fps_y);
+        let fps_pos = hud_pos(Vec2f::zero(), screen_size, cvars.d_fps_x, cvars.d_fps_y);
         client.context.fill_text(
             &format!(
                 "update FPS: {:.1}   gamelogic FPS: {:.1}   render FPS: {:.1}",
@@ -691,14 +717,14 @@ pub(crate) fn draw(
     if cvars.d_draw && cvars.d_draw_perf {
         client.context.fill_text(
             &format!("last {} frames (in ms):", cvars.d_timing_samples),
-            canvas_size.x - 150.0,
-            canvas_size.y - 90.0,
+            screen_size.x - 150.0,
+            screen_size.y - 90.0,
         )?;
         if let Some((avg, max)) = server.update_durations.get_stats() {
             client.context.fill_text(
                 &format!("update avg: {:.1}, max: {:.1}", avg * 1000.0, max * 1000.0),
-                canvas_size.x - 150.0,
-                canvas_size.y - 75.0,
+                screen_size.x - 150.0,
+                screen_size.y - 75.0,
             )?;
         }
         if let Some((avg, max)) = server.gamelogic_durations.get_stats() {
@@ -708,15 +734,15 @@ pub(crate) fn draw(
                     avg * 1000.0,
                     max * 1000.0
                 ),
-                canvas_size.x - 150.0,
-                canvas_size.y - 60.0,
+                screen_size.x - 150.0,
+                screen_size.y - 60.0,
             )?;
         }
         if let Some((avg, max)) = client.render_durations.get_stats() {
             client.context.fill_text(
                 &format!("render avg: {:.1}, max: {:.1}", avg * 1000.0, max * 1000.0),
-                canvas_size.x - 150.0,
-                canvas_size.y - 45.0,
+                screen_size.x - 150.0,
+                screen_size.y - 45.0,
             )?;
         }
     }
@@ -726,7 +752,7 @@ pub(crate) fn draw(
         let texts = texts.borrow();
         if cvars.d_draw && cvars.d_draw_world_text {
             for text in texts.iter() {
-                let scr_pos = text.pos - top_left;
+                let scr_pos = text.pos + camera_offset;
                 if cull(scr_pos) {
                     // Technically the text can be so long
                     // that it's culled overzealously but meh, perf is more important.
@@ -820,12 +846,12 @@ fn draw_img_offset(
 
 /// If x or y are negative, count them from the right or bottom respectively.
 /// Useful to make HUD config cvars work for any canvas size.
-fn hud_pos(canvas_size: Vec2f, mut x: f64, mut y: f64) -> Vec2f {
+fn hud_pos(rect_pos: Vec2f, rect_size: Vec2f, mut x: f64, mut y: f64) -> Vec2f {
     if x < 0.0 {
-        x += canvas_size.x;
+        x += rect_size.x;
     }
     if y < 0.0 {
-        y += canvas_size.y;
+        y += rect_size.y;
     }
-    Vec2f::new(x, y)
+    Vec2f::new(rect_pos.x + x, rect_pos.y + y)
 }
