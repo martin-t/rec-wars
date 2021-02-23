@@ -678,6 +678,40 @@ pub(crate) fn draw(
         client.context.set_shadow_offset_y(0.0);
     }
 
+    // Clear background if map is smaller than screen.
+    // This clears previously drawn debug text
+    // and covers up any game entities which were drawn outside view.
+    if empty_space_size.x > 0.0 {
+        // Draw 4 black stripes (rectangles) around view:
+        // +----+------------+----+
+        // |    |            |    |
+        // |    +------------+    |
+        // |    |            |    |
+        // |    |    view    |    |
+        // |    |            |    |
+        // |    +------------+    |
+        // |    |            |    |
+        // +----+------------+----+
+        // view_pos.x is width of vertical stripe
+        // view_pos.y is height of horizontal stripe
+        client.context.set_fill_style(&"black".into());
+        client
+            .context
+            .fill_rect(0.0, 0.0, view_pos.x, screen_size.y);
+        client
+            .context
+            .fill_rect(view_pos.x + view_size.x, 0.0, view_pos.x, screen_size.y);
+        client
+            .context
+            .fill_rect(view_pos.x, 0.0, view_size.x, view_pos.y);
+        client.context.fill_rect(
+            view_pos.x,
+            view_pos.y + view_size.y,
+            view_size.x,
+            view_pos.y,
+        );
+    }
+
     // Pause
     if server.paused {
         client.context.set_shadow_offset_x(cvars.hud_pause_shadow_x);
