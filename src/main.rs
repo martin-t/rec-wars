@@ -44,7 +44,7 @@
 // [ ] movement
 //      [x] tank
 //      [x] hovercraft
-//      [ ] hummer + reverse steering
+//      [x] hummer + reverse steering
 //          https://engineeringdotnet.blogspot.com/2010/04/simple-2d-car-physics-in-games.html
 //          https://www.asawicki.info/Mirror/Car%20Physics%20for%20Games/Car%20Physics%20for%20Games.html
 //      [ ] measure exact values to replicate RecWar
@@ -85,7 +85,7 @@
 //          [ ] hummer more + refire + entire width
 //          [ ] orig RW: only direct hit does dmg, not explosion
 //      [ ] homing missile
-//      [ ] guided missile
+//      [x] guided missile
 //      [ ] BFG
 //          [ ] shot delay + random dir when dead
 //          [ ] beam range
@@ -100,10 +100,11 @@
 //      [ ] rockets?, missiles and bfg seem to have terminal velocity - force+friction?
 //      [x] avoid hitting self (orig RW had hummer chassis hardpoint more forward)
 //          [ ] allow hitting self if missile comes back after clearing the hitbox
-//      [ ] entity culling? faster to render?
+//      [x] entity culling? faster to render?
 //      [ ] check collision detection works if gun is inside another vehicle
 // [ ] mines
-//      [ ] not within radius of base and/or cow
+//      [ ] optionally not within radius of base and/or cow
+//      [ ] optionally not on/near spawms
 // [x] turrets
 //      [x] 8 angles
 //      [ ] better control scheme - changing direction cancels the queue, starts counting from current position
@@ -112,8 +113,6 @@
 //      [ ] HUD - all text for readability (score, scoreboard, names), weap, optionally hp/ammo
 //      [ ] vehicles (is turret "higher"?), cow?, projectiles?
 //      [x] CB
-//      [ ] solve perf issues - firefox (78.0.2) *really* hates shadows (maybe only on text)
-//              - try prerendering text into offscreen canvas
 // [ ] self destruct
 //      [x] bigger explosion
 //      [ ] countdown
@@ -131,7 +130,6 @@
 //              comfortable for 2 players, discoverable
 //              check all the downloaded RW configs, RW2 and RW3 (copy config / firejail)
 //      maybe https://www.sitepoint.com/css-layouts-floats-flexbox-grid/
-// [ ] fullscreen
 // [ ] FFA
 // [ ] TW
 // [ ] CTC
@@ -179,6 +177,9 @@
 //      [ ] map
 //      [ ] cvars
 // [ ] focus canvas on (re)load (e.g. after touching browser console and reloading)
+// [ ] FAQ - stuttering/tearing due to compositor - Alt+Shift+f12 - somehow this doesn't work anymore
+// nice to have:
+// [ ] fullscreen
 // profiling
 //      [ ] make explosion sprite smaller
 //      https://github.com/EmbarkStudios/puffin
@@ -187,8 +188,8 @@
 //      renderdoc for graphics debugging
 //      cargo flamegraph (internally uses perf on linux)
 //      firestorm
-// [ ] FAQ - stuttering/tearing due to compositor - Alt+Shift+f12 - somehow this doesn't work anymore
-// nice to have:
+// [ ] if raw_canvas kept: solve perf issues - firefox (78.0.2) *really* hates shadows (maybe only on text)
+//      - try prerendering text into offscreen canvas
 // [ ] logo (RecWars spelled out by in-game entities?)
 // [ ] GM - presing fire again switches back to tank
 // [ ] replays (also easier debugging)
