@@ -41,6 +41,8 @@ The ultimate goal is to create a moddable multiplayer game playable in the brows
     - [ ] Capture The Cow
 - [x] [Highly configurable](#cvars)
 
+See [TODO.md](TODO.md) for details.
+
 Build Dependencies
 ------------------
 
