@@ -1,5 +1,7 @@
 //! The browser version using WASM and the canvas 2D API (without macroquad).
 
+mod rendering;
+
 use std::fmt::Debug;
 
 use js_sys::Array;
@@ -14,7 +16,6 @@ use crate::{
     game_state::{GameState, Input},
     map,
     server::Server,
-    systems,
     timing::{Durations, Fps, RawCanvasTime},
 };
 
@@ -163,7 +164,7 @@ impl RawCanvasClient {
         self.render_fps.tick(cvars.d_fps_period, server.real_time);
         let start = server.time.now();
 
-        systems::rendering::draw(self, server, cvars)?;
+        rendering::draw(self, server, cvars)?;
 
         let end = server.time.now();
         self.render_durations

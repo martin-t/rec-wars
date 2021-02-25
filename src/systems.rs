@@ -5,8 +5,6 @@
 //! Most game behavior (code that changes state) goes here.
 
 pub(crate) mod ai;
-#[cfg(feature = "raw_canvas")]
-pub(crate) mod rendering;
 
 use std::f64::consts::PI;
 
