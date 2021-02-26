@@ -20,8 +20,9 @@ pub mod entities;
 pub mod game_state;
 pub mod map;
 pub mod server;
-mod systems;
 pub mod timing;
+
+mod systems;
 
 #[cfg(feature = "raw_canvas")]
 mod raw_canvas;
