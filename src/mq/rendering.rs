@@ -18,7 +18,7 @@ use crate::mq::MacroquadClient;
 
 // LATER when raw_canvas is removed, clean up all the casts here
 
-pub(crate) fn draw(client: &MacroquadClient, server: &Server, cvars: &Cvars) {
+pub(crate) fn render(client: &MacroquadClient, server: &Server, cvars: &Cvars) {
     let player = &server.gs.players[client.player_handle];
     let player_veh_pos = server.gs.vehicles[player.vehicle.unwrap()].pos;
     let player_entity_pos = if let Some(gm_handle) = player.guided_missile {
