@@ -12,10 +12,7 @@ use crate::{
     debugging::{DEBUG_CROSSES, DEBUG_LINES, DEBUG_TEXTS, DEBUG_TEXTS_WORLD},
     entities::{Ammo, Weapon},
     game_state::Explosion,
-    map::F64Ext,
-    map::Vec2f,
-    map::VecExt,
-    map::{Kind, TILE_SIZE},
+    map::{F64Ext, Kind, Vec2f, VecExt, TILE_SIZE},
     raw_canvas::RawCanvasClient,
     server::Server,
 };
