@@ -11,7 +11,11 @@
 //! Quake code: https://github.com/id-Software/Quake-III-Arena/blob/master/code/game/bg_pmove.c
 //!
 //! This example shows that the effect, however, is much smaller than I expected.
-//! Compare distance travelled: the error in Quake physics is only about twice bigger than in mine.
+//! The upper table shows that I have chosen parameters for which custom and Quake give almost the same results at 60 FPS.
+//! Then compare it to the lower table - it shows what happens at 15 FPS.
+//! With my algorithm, the speed at a given time (compare rows with the same `i`) is the same regardless of FPS.
+//! However, the total distance trvavelled at the end is different.
+//! The error in Quake physics is only about twice bigger than in mine though.
 fn main() {
     // Custom friction uses values between 0 and 1,
     // Quake friction can increase to infinity.
