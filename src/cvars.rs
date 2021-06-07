@@ -72,7 +72,9 @@ pub struct Cvars {
 
     pub g_bfg_beam_damage_per_sec: f64,
     pub g_bfg_beam_range: f64,
-    pub g_bfg_damage: f64,
+    pub g_bfg_damage_direct: f64,
+    pub g_bfg_explosion_damage: f64,
+    pub g_bfg_explosion_radius: f64,
     pub g_bfg_explosion_scale: f64,
     pub g_bfg_radius: f64,
     pub g_bfg_reload_ammo: u32,
@@ -81,7 +83,9 @@ pub struct Cvars {
     pub g_bfg_vehicle_velocity_factor: f64,
 
     pub g_cluster_bomb_count: i32,
-    pub g_cluster_bomb_damage: f64,
+    pub g_cluster_bomb_damage_direct: f64,
+    pub g_cluster_bomb_explosion_damage: f64,
+    pub g_cluster_bomb_explosion_radius: f64,
     pub g_cluster_bomb_explosion_scale: f64,
     pub g_cluster_bomb_reload_ammo: u32,
     pub g_cluster_bomb_reload_time: f64,
@@ -100,7 +104,10 @@ pub struct Cvars {
     pub g_ffa_score_kill: i32,
     pub g_ffa_score_death: i32,
 
-    pub g_homing_missile_damage: f64,
+    pub g_homing_missile_damage_direct: f64,
+    pub g_homing_missile_explosion_damage: f64,
+    pub g_homing_missile_explosion_radius: f64,
+    pub g_homing_missile_explosion_scale: f64,
     pub g_homing_missile_reload_ammo: u32,
     pub g_homing_missile_reload_time: f64,
     pub g_homing_missile_speed_initial: f64,
@@ -116,7 +123,10 @@ pub struct Cvars {
     pub g_machine_gun_vehicle_velocity_factor: f64,
 
     pub g_guided_missile_accel_forward: f64,
-    pub g_guided_missile_damage: f64,
+    pub g_guided_missile_damage_direct: f64,
+    pub g_guided_missile_explosion_damage: f64,
+    pub g_guided_missile_explosion_radius: f64,
+    pub g_guided_missile_explosion_scale: f64,
     pub g_guided_missile_friction_const: f64,
     pub g_guided_missile_friction_linear: f64,
     pub g_guided_missile_reload_ammo: u32,
@@ -250,7 +260,9 @@ pub struct Cvars {
 
     pub g_respawn_delay: f64,
 
-    pub g_rockets_damage: f64,
+    pub g_rockets_damage_direct: f64,
+    pub g_rockets_explosion_damage: f64,
+    pub g_rockets_explosion_radius: f64,
     pub g_rockets_explosion_scale: f64,
     pub g_rockets_refire: f64,
     pub g_rockets_reload_ammo: u32,
@@ -260,7 +272,7 @@ pub struct Cvars {
 
     pub g_self_destruct_damage_center: f64,
     pub g_self_destruct_damage_edge: f64,
-    pub g_self_destruct_explosion_scale: f64,
+    pub g_self_destruct_explosion_scale: f64, // TODO radius
     pub g_self_destruct_radius: f64,
 
     pub g_tank_accel_backward: f64,
@@ -286,8 +298,6 @@ pub struct Cvars {
 
     pub g_turret_turn_speed_deg: f64,
     pub g_turret_turn_step_angle_deg: f64,
-
-    pub g_weapon_explosion_scale_to_radius: f64,
 
     pub hud_ammo_x: f64,
     pub hud_ammo_y: f64,
@@ -686,15 +696,39 @@ impl Cvars {
         }
     }
 
-    pub(crate) fn g_weapon_damage(&self, weapon: Weapon) -> f64 {
+    pub(crate) fn g_weapon_damage_direct(&self, weapon: Weapon) -> f64 {
         match weapon {
             Weapon::Mg => self.g_machine_gun_damage,
             Weapon::Rail => self.g_railgun_damage,
-            Weapon::Cb => self.g_cluster_bomb_damage,
-            Weapon::Rockets => self.g_rockets_damage,
-            Weapon::Hm => self.g_homing_missile_damage,
-            Weapon::Gm => self.g_guided_missile_damage,
-            Weapon::Bfg => self.g_bfg_damage,
+            Weapon::Cb => self.g_cluster_bomb_damage_direct,
+            Weapon::Rockets => self.g_rockets_damage_direct,
+            Weapon::Hm => self.g_homing_missile_damage_direct,
+            Weapon::Gm => self.g_guided_missile_damage_direct,
+            Weapon::Bfg => self.g_bfg_damage_direct,
+        }
+    }
+
+    pub(crate) fn g_weapon_explosion_damage(&self, weapon: Weapon) -> f64 {
+        match weapon {
+            Weapon::Mg => 0.0,
+            Weapon::Rail => 0.0,
+            Weapon::Cb => self.g_cluster_bomb_explosion_damage,
+            Weapon::Rockets => self.g_rockets_explosion_damage,
+            Weapon::Hm => self.g_homing_missile_explosion_damage,
+            Weapon::Gm => self.g_guided_missile_explosion_damage,
+            Weapon::Bfg => self.g_bfg_explosion_damage,
+        }
+    }
+
+    pub(crate) fn g_weapon_explosion_radius(&self, weapon: Weapon) -> f64 {
+        match weapon {
+            Weapon::Mg => 0.0,
+            Weapon::Rail => 0.0,
+            Weapon::Cb => self.g_cluster_bomb_explosion_radius,
+            Weapon::Rockets => self.g_rockets_explosion_radius,
+            Weapon::Hm => self.g_homing_missile_explosion_radius,
+            Weapon::Gm => self.g_guided_missile_explosion_radius,
+            Weapon::Bfg => self.g_bfg_explosion_radius,
         }
     }
 
@@ -704,9 +738,9 @@ impl Cvars {
             Weapon::Rail => 0.0,
             Weapon::Cb => self.g_cluster_bomb_explosion_scale,
             Weapon::Rockets => self.g_rockets_explosion_scale,
-            Weapon::Hm => 1.0,
-            Weapon::Gm => 1.0,
-            Weapon::Bfg => 1.0,
+            Weapon::Hm => self.g_homing_missile_explosion_scale,
+            Weapon::Gm => self.g_guided_missile_explosion_scale,
+            Weapon::Bfg => self.g_bfg_explosion_scale,
         }
     }
 
@@ -795,7 +829,9 @@ impl Default for Cvars {
 
             g_bfg_beam_damage_per_sec: 25.0,
             g_bfg_beam_range: 125.0,
-            g_bfg_damage: 100.0, // pretty sure from orig RW testing
+            g_bfg_damage_direct: 0.0,
+            g_bfg_explosion_damage: 100.0, // pretty sure from orig RW testing
+            g_bfg_explosion_radius: 40.0,
             g_bfg_explosion_scale: 1.0,
             g_bfg_radius: 4.0,
             g_bfg_reload_ammo: 1,
@@ -804,7 +840,9 @@ impl Default for Cvars {
             g_bfg_vehicle_velocity_factor: 1.0,
 
             g_cluster_bomb_count: 40,
-            g_cluster_bomb_damage: 25.0, // best guess - same as rockets
+            g_cluster_bomb_damage_direct: 0.0, // best guess - same as rockets
+            g_cluster_bomb_explosion_damage: 25.0,
+            g_cluster_bomb_explosion_radius: 20.0,
             g_cluster_bomb_explosion_scale: 0.5,
             g_cluster_bomb_reload_ammo: 1,
             g_cluster_bomb_reload_time: 1.5,
@@ -823,7 +861,10 @@ impl Default for Cvars {
             g_ffa_score_kill: 1,
             g_ffa_score_death: -1,
 
-            g_homing_missile_damage: 56.0, // assumed same as GM
+            g_homing_missile_damage_direct: 0.0,
+            g_homing_missile_explosion_damage: 56.0, // assumed same as GM
+            g_homing_missile_explosion_radius: 40.0,
+            g_homing_missile_explosion_scale: 1.0,
             g_homing_missile_reload_ammo: 1,
             g_homing_missile_reload_time: 1.5,
             g_homing_missile_speed_initial: 360.0,
@@ -839,7 +880,10 @@ impl Default for Cvars {
             g_machine_gun_vehicle_velocity_factor: 1.0,
 
             g_guided_missile_accel_forward: 2000.0,
-            g_guided_missile_damage: 56.0, // exact from orig RW
+            g_guided_missile_damage_direct: 0.0,
+            g_guided_missile_explosion_damage: 56.0, // exact from orig RW
+            g_guided_missile_explosion_radius: 40.0,
+            g_guided_missile_explosion_scale: 1.0,
             g_guided_missile_friction_const: 0.0,
             g_guided_missile_friction_linear: 0.99,
             g_guided_missile_reload_ammo: 1,
@@ -973,7 +1017,9 @@ impl Default for Cvars {
 
             g_respawn_delay: 2.0,
 
-            g_rockets_damage: 25.0, // pretty sure from orig RW testing
+            g_rockets_damage_direct: 25.0, // pretty sure from orig RW testing
+            g_rockets_explosion_damage: 0.0,
+            g_rockets_explosion_radius: 20.0,
             g_rockets_explosion_scale: 0.5,
             g_rockets_refire: 0.200,
             g_rockets_reload_ammo: 6,
@@ -1009,8 +1055,6 @@ impl Default for Cvars {
 
             g_turret_turn_speed_deg: 120.0,
             g_turret_turn_step_angle_deg: 45.0,
-
-            g_weapon_explosion_scale_to_radius: 40.0,
 
             hud_ammo_x: 30.0,
             hud_ammo_y: -30.0,

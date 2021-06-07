@@ -494,14 +494,13 @@ pub(crate) fn projectiles(cvars: &Cvars, gs: &mut GameState, map: &Map) {
                 if cvars.d_tracing {
                     dbg_cross!(nearest_point, 0.5);
                 }
-                let dmg = cvars.g_weapon_damage(projectile.weapon);
+                let dmg = cvars.g_weapon_damage_direct(projectile.weapon);
 
                 if is_rail {
                     gs.rail_hits.insert(proj_handle, vehicle_handle);
                     vehicle.vel += step_dir * cvars.g_railgun_push;
                 }
 
-                // Vehicle explosion first so it's below projectile explosion because it looks better.
                 let attacker_handle = projectile.owner;
                 damage(cvars, gs, attacker_handle, vehicle_handle, dmg);
                 if !is_rail {
@@ -590,6 +589,7 @@ fn projectile_impact(cvars: &Cvars, gs: &mut GameState, projectile_handle: Index
     let weapon = projectile.weapon;
     let owner = projectile.owner;
 
+    // Vehicle explosion first so it's below projectile explosion because it looks better.
     let expl_scale = cvars.g_weapon_explosion_scale(weapon);
     if expl_scale > 0.0 {
         gs.explosions.push(Explosion::new(
@@ -598,13 +598,15 @@ fn projectile_impact(cvars: &Cvars, gs: &mut GameState, projectile_handle: Index
             gs.game_time,
             weapon == Weapon::Bfg,
         ));
+    }
 
-        let expl_radius = expl_scale * cvars.g_weapon_explosion_scale_to_radius;
-        if cvars.d_explosion_radius {
-            dbg_line!(hit_pos, hit_pos + Vec2f::new(expl_radius, 0.0), 5.0);
-        }
+    let expl_damage = expl_scale * cvars.g_weapon_explosion_damage(weapon);
+    let expl_radius = expl_scale * cvars.g_weapon_explosion_radius(weapon);
+    if cvars.d_explosion_radius {
+        dbg_line!(hit_pos, hit_pos + Vec2f::new(expl_radius, 0.0), 5.0);
+    }
 
-        let expl_dmg = cvars.g_weapon_damage(weapon);
+    if expl_damage > 0.0 || expl_radius > 0.0 {
         for vehicle_handle in gs.vehicles.iter_handles() {
             let vehicle = &gs.vehicles[vehicle_handle];
             if vehicle.destroyed() {
@@ -613,10 +615,11 @@ fn projectile_impact(cvars: &Cvars, gs: &mut GameState, projectile_handle: Index
 
             let fake_radius = expl_radius + cvars.g_hitcircle_radius;
             if (vehicle.pos - hit_pos).magnitude_squared() < fake_radius * fake_radius {
-                damage(cvars, gs, owner, vehicle_handle, expl_dmg);
+                damage(cvars, gs, owner, vehicle_handle, expl_damage);
             }
         }
     }
+
     if weapon == Weapon::Gm {
         let player = &mut gs.players[owner];
         if player.guided_missile == Some(projectile_handle) {

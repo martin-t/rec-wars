@@ -17,7 +17,7 @@
 - [x] player separate from vehicle
 - [x] icon
 - [x] version info
-- [ ] mostly working weapons
+- [x] mostly working weapons
 - [x] respawning
 - [x] scores
 - [ ] primitive bots

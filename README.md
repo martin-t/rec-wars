@@ -36,7 +36,7 @@ The ultimate goal is to create a moddable multiplayer game playable in the brows
 - [x] [Browser client](https://martin-t.gitlab.io/gitlab-pages/rec-wars/web)
 - [x] Native client (Linux, Windows, macOS)
 - [ ] Game modes
-    - [ ] Free For All
+    - [x] Free For All
     - [ ] Team War
     - [ ] Capture The Cow
 - [x] [Highly configurable](#cvars)
