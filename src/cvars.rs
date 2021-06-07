@@ -815,7 +815,7 @@ impl Default for Cvars {
             d_draw_text: true,
             d_draw_text_line_height: 14.0,
             d_draw_world_text: true,
-            d_explosion_radius: true,
+            d_explosion_radius: false,
             d_fps: true,
             d_fps_period: 1.0,
             d_fps_x: -300.0,
