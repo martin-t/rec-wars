@@ -46,13 +46,18 @@ See [TODO.md](TODO.md) for details.
 Build Dependencies
 ------------------
 
-- Macroquad versions: see [Miniquad dependencies](https://github.com/not-fl3/miniquad/#building-examples))
-- Raw canvas version: [wasm-pack](https://github.com/rustwasm/wasm-pack) - use the [installer](https://rustwasm.github.io/wasm-pack/installer/)
+The first RecWars prototype drew to an HTML canvas directly, later I switched to the [macroquad](https://github.com/not-fl3/macroquad) engine. I am keeping both versions for now but new development (especially sound and UI) is gonna happen in macroquad. The benefit of the raw canvas version is that you can change any [cvars](#cvars) at runtime using the browser console. Eventually the macroquad version is gonna get a console too.
+
+### Macroquad versions
+
+Install [Miniquad's dependencies](https://github.com/not-fl3/miniquad/#building-examples).
+
+### Raw canvas version
+
+Install [wasm-pack](https://github.com/rustwasm/wasm-pack) - use the [installer](https://rustwasm.github.io/wasm-pack/installer/).
 
 Compiling and running
 ---------------------
-
-The first RecWars prototype drew to an HTML canvas directly, later I switched to the [macroquad](https://github.com/not-fl3/macroquad) engine. I am keeping both versions for now but new development (especially sound and UI) is gonna happen in macroquad. The benefit of the raw canvas version is that you can change any [cvars](#cvars) at runtime using the browser console. Eventually the macroquad version is gonna get a console too.
 
 ### Native version (macroquad)
 
@@ -76,7 +81,7 @@ This version is hosted [here](https://martin-t.gitlab.io/gitlab-pages/rec-wars/w
 Might have [performance issues](https://bugzilla.mozilla.org/show_bug.cgi?id=1010527#c0) in firefox on linux - making the canvas element smaller might help.
 
 How to run locally:
-- build with `time wasm-pack build --target web --dev -- --features raw_canvas`
+- build with `wasm-pack build --target web --dev -- --features raw_canvas`
     - you can replace `--dev` with `--profiling` or `--release` if perf is an issue (see [Cargo.toml](Cargo.toml) for more info)
 - host with `python3 -m http.server` (or any other web server, simply opening `index.html` will *not* work though)
 - open http://localhost:8000/web/
