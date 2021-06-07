@@ -351,7 +351,6 @@ dependencies = [
 name = "rec-wars"
 version = "0.1.0"
 dependencies = [
- "approx",
  "console_error_panic_hook",
  "enumn",
  "fnv",
@@ -517,9 +516,9 @@ checksum = "f7fe0bb3479651439c9112f72b6c505038574c9fbb575ed1bf3b797fa39dd564"
 
 [[package]]
 name = "vek"
-version = "0.15.0"
+version = "0.15.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f81127863e367afd5e8e527cb193edd4bd95abdd7f0f5ddd6bfb6c6d1d10ff2b"
+checksum = "406232f6fe819cbaa5b04c5004deabb870346e83262d29e52970260fca3e5c3b"
 dependencies = [
  "approx",
  "num-integer",
