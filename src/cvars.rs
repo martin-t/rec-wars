@@ -49,6 +49,7 @@ pub struct Cvars {
     pub d_draw_text: bool,
     pub d_draw_text_line_height: f64,
     pub d_draw_world_text: bool,
+    pub d_explosion_radius: bool,
     /// Draw FPS counter. Intentionally not in the d_draw_* group
     /// so I can easily check perf with and without the other debug output.
     pub d_fps: bool,
@@ -195,6 +196,8 @@ pub struct Cvars {
     pub g_hardpoint_tank_bfg_x: f64,
     pub g_hardpoint_tank_bfg_y: f64,
 
+    pub g_hitcircle_radius: f64, // TODO proper hitbox
+
     pub g_hovercraft_accel_backward: f64,
     pub g_hovercraft_accel_forward: f64,
     pub g_hovercraft_friction_const: f64,
@@ -283,6 +286,8 @@ pub struct Cvars {
 
     pub g_turret_turn_speed_deg: f64,
     pub g_turret_turn_step_angle_deg: f64,
+
+    pub g_weapon_explosion_scale_to_radius: f64,
 
     pub hud_ammo_x: f64,
     pub hud_ammo_y: f64,
@@ -693,15 +698,15 @@ impl Cvars {
         }
     }
 
-    pub(crate) fn g_weapon_explosion_scale(&self, weapon: Weapon) -> Option<f64> {
+    pub(crate) fn g_weapon_explosion_scale(&self, weapon: Weapon) -> f64 {
         match weapon {
-            Weapon::Mg => None,
-            Weapon::Rail => None,
-            Weapon::Cb => Some(self.g_cluster_bomb_explosion_scale),
-            Weapon::Rockets => Some(self.g_rockets_explosion_scale),
-            Weapon::Hm => Some(1.0),
-            Weapon::Gm => Some(1.0),
-            Weapon::Bfg => Some(1.0),
+            Weapon::Mg => 0.0,
+            Weapon::Rail => 0.0,
+            Weapon::Cb => self.g_cluster_bomb_explosion_scale,
+            Weapon::Rockets => self.g_rockets_explosion_scale,
+            Weapon::Hm => 1.0,
+            Weapon::Gm => 1.0,
+            Weapon::Bfg => 1.0,
         }
     }
 
@@ -776,6 +781,7 @@ impl Default for Cvars {
             d_draw_text: true,
             d_draw_text_line_height: 14.0,
             d_draw_world_text: true,
+            d_explosion_radius: true,
             d_fps: true,
             d_fps_period: 1.0,
             d_fps_x: -300.0,
@@ -913,6 +919,8 @@ impl Default for Cvars {
             g_hardpoint_tank_bfg_x: 35.0,
             g_hardpoint_tank_bfg_y: 0.0,
 
+            g_hitcircle_radius: 24.0,
+
             g_hovercraft_accel_backward: 400.0,
             g_hovercraft_accel_forward: 400.0,
             g_hovercraft_friction_const: 0.0,
@@ -1001,6 +1009,8 @@ impl Default for Cvars {
 
             g_turret_turn_speed_deg: 120.0,
             g_turret_turn_step_angle_deg: 45.0,
+
+            g_weapon_explosion_scale_to_radius: 40.0,
 
             hud_ammo_x: 30.0,
             hud_ammo_y: -30.0,

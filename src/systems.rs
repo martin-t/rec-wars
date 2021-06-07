@@ -490,8 +490,7 @@ pub(crate) fn projectiles(cvars: &Cvars, gs: &mut GameState, map: &Map) {
 
             let nearest_point = step.projected_point(vehicle.pos);
             let dist2 = nearest_point.distance_squared(vehicle.pos);
-            // TODO proper hitbox
-            if dist2 <= 24.0 * 24.0 {
+            if dist2 <= cvars.g_hitcircle_radius * cvars.g_hitcircle_radius {
                 if cvars.d_tracing {
                     dbg_cross!(nearest_point, 0.5);
                 }
@@ -583,16 +582,42 @@ pub(crate) fn projectiles_timeout(cvars: &Cvars, gs: &mut GameState) {
 
 fn projectile_impact(cvars: &Cvars, gs: &mut GameState, projectile_handle: Index, hit_pos: Vec2f) {
     let projectile = &mut gs.projectiles[projectile_handle];
-    if let Some(expl_scale) = cvars.g_weapon_explosion_scale(projectile.weapon) {
+
+    // borrowck dance
+    let weapon = projectile.weapon;
+    let owner = projectile.owner;
+
+    let expl_scale = cvars.g_weapon_explosion_scale(weapon);
+    if expl_scale > 0.0 {
         gs.explosions.push(Explosion::new(
             hit_pos,
             expl_scale,
             gs.game_time,
-            projectile.weapon == Weapon::Bfg,
+            weapon == Weapon::Bfg,
         ));
+
+        let expl_radius = expl_scale * cvars.g_weapon_explosion_scale_to_radius;
+        if cvars.d_explosion_radius {
+            dbg_line!(hit_pos, hit_pos + Vec2f::new(expl_radius, 0.0), 5.0);
+        }
+
+        let expl_dmg = cvars.g_weapon_damage(weapon);
+        for vehicle_handle in gs.vehicles.iter_handles() {
+            let vehicle = &gs.vehicles[vehicle_handle];
+
+            // FIXME
+            //if vehicle.destroyed() {
+            //    continue;
+            //}
+
+            let fake_radius = expl_radius + cvars.g_hitcircle_radius;
+            if (vehicle.pos - hit_pos).magnitude_squared() < fake_radius * fake_radius {
+                damage(cvars, gs, owner, vehicle_handle, expl_dmg);
+            }
+        }
     }
-    if projectile.weapon == Weapon::Gm {
-        let player = &mut gs.players[projectile.owner];
+    if weapon == Weapon::Gm {
+        let player = &mut gs.players[owner];
         if player.guided_missile == Some(projectile_handle) {
             player.guided_missile = None;
         }
