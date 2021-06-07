@@ -107,7 +107,7 @@
     - [ ] check collision detection works if gun is inside another vehicle
 - [ ] mines
     - [ ] optionally not within radius of base and/or cow
-    - [ ] optionally not on/near spawms
+    - [ ] optionally not on/near spawns
 - [x] turrets
     - [x] 8 angles
     - [ ] better control scheme - changing direction cancels the queue, starts counting from current position

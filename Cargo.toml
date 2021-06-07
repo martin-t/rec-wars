@@ -59,7 +59,7 @@ vek = "0.15.1"
 wasm-bindgen = { version = "0.2.65", optional = true }
 
 [dependencies.image]
-# Dependency of macroquad with added "bmp" feature
+# Dependency of macroquad with added "bmp" feature so we can load RecWar's original assets
 version = "0.23.12"
 default-features = false
 features = ["png", "tga", "bmp"]
