@@ -607,11 +607,9 @@ fn projectile_impact(cvars: &Cvars, gs: &mut GameState, projectile_handle: Index
         let expl_dmg = cvars.g_weapon_damage(weapon);
         for vehicle_handle in gs.vehicles.iter_handles() {
             let vehicle = &gs.vehicles[vehicle_handle];
-
-            // FIXME
-            //if vehicle.destroyed() {
-            //    continue;
-            //}
+            if vehicle.destroyed() {
+                continue;
+            }
 
             let fake_radius = expl_radius + cvars.g_hitcircle_radius;
             if (vehicle.pos - hit_pos).magnitude_squared() < fake_radius * fake_radius {
