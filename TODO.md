@@ -113,14 +113,14 @@
     - [ ] better control scheme - changing direction cancels the queue, starts counting from current position
         - original RW has a bug: quick left,left,right would result in turning the longer way around
 - [ ] shadows
-    - [ ] HUD - all text for readability (score, scoreboard, names), weap, optionally hp/ammo
+    - [x] HUD - all text for readability (score, scoreboard, names), weap, optionally hp/ammo
     - [ ] vehicles (is turret "higher"?), cow?, projectiles?
     - [x] CB
 - [ ] self destruct
     - [x] bigger explosion
     - [ ] countdown
     - [ ] sounds
-    - [ ] works through walls
+    - [x] works through walls
     - [ ] seems damage depends on distance:
         - ~150 at center
         - range more than 64+64+32 with 40 health - maybe 0 dmg at ~175
@@ -132,7 +132,7 @@
         - binds (show keyboard image?)
             - comfortable for 2 players, discoverable
             - check all the downloaded RW configs, RW2 and RW3 (copy config / firejail)
-- [ ] FFA
+- [x] FFA
 - [ ] TW
 - [ ] CTC
     - [ ] cow movement
@@ -179,7 +179,8 @@
     - [ ] map
     - [ ] cvars
 - [ ] focus canvas on (re)load (e.g. after touching browser console and reloading)
-- [ ] FAQ - stuttering/tearing due to compositor - Alt+Shift+f12 - somehow this doesn't work anymore
+- [ ] FAQ - stuttering/tearing due to compositor - Alt+Shift+f12
+    - update: somehow this doesn't help anymore
 
 ## nice to have
 
@@ -213,7 +214,7 @@
     - note to self for dealing with npm on debian:
         - https://stackoverflow.com/questions/16151018/npm-throws-error-without-sudo/24404451#24404451
         - put in the *beginning* of PATH or it uses old debian npm which breaks everything
-- [ ] native binary
+- [x] native binary
 - [ ] make parsing return errors instead of crashing
 - [x] pause, variable speed
 - [ ] frame debug mode - only render gamelogic frames, no interpolation

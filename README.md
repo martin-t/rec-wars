@@ -21,7 +21,7 @@ RecWars is a free and open source clone of [RecWar](#the-original-game) - you co
 
 RecWars aims to have gameplay similar but not identical to RecWar. I suspect RecWar was balanced for playing against bots and might result in annoying strats being the most effective when people start [playing to win](http://www.sirlin.net/articles/playing-to-win). However, almost everything in RecWars is [configurable](#cvars) and you can switch to the original RecWar balance to [compare](#recwars-vs-recwar-differences).
 
-**Currently this is very much a work-in-progress**: only some weapons work, the driving physics don't feel right, there are no collisions between vehicles, ...
+**Currently this is very much a work-in-progress**: the driving physics don't feel right, there are no collisions between vehicles, bots move randomly ...
 
 The ultimate goal is to create a moddable multiplayer game playable in the browser and natively on Linux, Windows and macOS. This might be tricky since WASM in the browser doesn't allow UDP. I have some ideas how to solve that.
 
