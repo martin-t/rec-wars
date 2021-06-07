@@ -43,8 +43,9 @@ wasm-opt = ["-O3", "--enable-mutable-globals"]  # see wasm-opt note
 
 [features]
 # The macroquad dependency must *not* be present when compiling to WASM+canvas,
-# otherwise it will crash with a TypeError at runtime for some reason.
-# LATER Make mq default so `cargo run` just works?
+# otherwise it will crash with a TypeError at runtime for some reason,
+# explicitly use `--no-default-features` to disable it when compiling WASM+canvas.
+default = ["mq"]
 mq = ["macroquad", "image"]
 raw_canvas = ["console_error_panic_hook", "js-sys", "wasm-bindgen", "web-sys"]
 

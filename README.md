@@ -62,7 +62,7 @@ Compiling and running
 ### Native version (macroquad)
 
 How to run:
-- `cargo run --features mq`
+- `cargo run`
 
 ### Browser version (macroquad + WASM)
 
@@ -70,7 +70,7 @@ Might have [performance issues](https://bugzilla.mozilla.org/show_bug.cgi?id=101
 
 How to run locally:
 
-- `cargo build --bin rec-wars-macroquad --features mq --target wasm32-unknown-unknown && mv target/wasm32-unknown-unknown/debug/rec-wars-macroquad.wasm rec-wars-macroquad.wasm`
+- `cargo build --bin rec-wars-macroquad --target wasm32-unknown-unknown && mv target/wasm32-unknown-unknown/debug/rec-wars-macroquad.wasm rec-wars-macroquad.wasm`
 - host with `python3 -m http.server` (or any other web server, simply opening `macroquad.html` will *not* work though)
 - open http://localhost:8000/macroquad.html
 
@@ -81,7 +81,7 @@ This version is hosted [here](https://martin-t.gitlab.io/gitlab-pages/rec-wars/w
 Might have [performance issues](https://bugzilla.mozilla.org/show_bug.cgi?id=1010527#c0) in firefox on linux - making the canvas element smaller might help.
 
 How to run locally:
-- build with `wasm-pack build --target web --dev -- --features raw_canvas`
+- build with `wasm-pack build --target web --dev -- --no-default-features --features raw_canvas`
     - you can replace `--dev` with `--profiling` or `--release` if perf is an issue (see [Cargo.toml](Cargo.toml) for more info)
 - host with `python3 -m http.server` (or any other web server, simply opening `index.html` will *not* work though)
 - open http://localhost:8000/web/
