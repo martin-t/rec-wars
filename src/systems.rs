@@ -541,6 +541,9 @@ pub(crate) fn damage(
     dmg_amount: f64,
 ) {
     let vehicle = &mut gs.vehicles[vehicle_handle];
+
+    soft_assert!(!vehicle.destroyed());
+
     vehicle.hp_fraction -= dmg_amount / cvars.g_vehicle_hp(vehicle.veh_type);
 
     // Not using 0.0 here because of floating point errors.
