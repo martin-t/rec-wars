@@ -46,11 +46,11 @@ See [TODO.md](TODO.md) for details.
 Build Dependencies
 ------------------
 
-The first RecWars prototype drew to an HTML canvas directly, later I switched to the [macroquad](https://github.com/not-fl3/macroquad) engine. I am keeping both versions for now but new development (especially sound and UI) is gonna happen in macroquad. The benefit of the raw canvas version is that you can change any [cvars](#cvars) at runtime using the browser console. Eventually the macroquad version is gonna get a console too.
+The first RecWars prototype drew to an HTML canvas directly, later I switched to the [macroquad](https://github.com/not-fl3/macroquad) engine which can run both natively and in the browser. I am keeping both versions for now but new development (especially sound and UI) is gonna happen in macroquad. The benefit of the raw canvas version is that you can change any [cvars](#cvars) at runtime using the browser console. Eventually the macroquad version is gonna get a console too.
 
-### Macroquad versions
+### Macroquad versions (native and WASM)
 
-Install [Miniquad's dependencies](https://github.com/not-fl3/miniquad/#building-examples).
+Install [Macroquad's dependencies](https://github.com/not-fl3/macroquad#linux).
 
 ### Raw canvas version
 
