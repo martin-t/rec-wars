@@ -66,8 +66,7 @@ features = ["png", "tga", "bmp"]
 optional = true
 
 [dependencies.macroquad]
-git = "https://github.com/not-fl3/macroquad"
-rev = "d2c1f0e14e8ed8b9df51c4c5fe729153f80a5a54"
+version = "0.3.7"
 optional = true
 
 [dependencies.rand]

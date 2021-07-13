@@ -114,9 +114,9 @@ async function run() {
     let img_rocket = new Image();
     img_rocket.src = "../assets/weapons/rocket.png";
     let img_hm = new Image();
-    img_hm.src = "../assets/weapons/homing_missile.png";
+    img_hm.src = "../assets/weapons/hm.png";
     let img_gm = new Image();
-    img_gm.src = "../assets/weapons/guided_missile.png";
+    img_gm.src = "../assets/weapons/gm.png";
     let img_explosion = new Image();
     img_explosion.src = "../assets/explosion.png";
     let img_explosion_cyan = new Image();

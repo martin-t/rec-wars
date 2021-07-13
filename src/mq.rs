@@ -59,7 +59,7 @@ impl MacroquadClient {
             "assets/tiles/g2d.bmp",
             "assets/tiles/water_middle.bmp",
         ] {
-            imgs_tiles.push(load_texture(path).await);
+            imgs_tiles.push(load_texture(path).await.unwrap());
         }
 
         let mut imgs_vehicles = Vec::new();
@@ -71,7 +71,7 @@ impl MacroquadClient {
             "assets/vehicles/hummer_chassis_flames.png",
             "assets/vehicles/hummer_turret_flames.png",
         ] {
-            imgs_vehicles.push(load_texture(path).await);
+            imgs_vehicles.push(load_texture(path).await.unwrap());
         }
 
         let mut imgs_wrecks = Vec::new();
@@ -80,7 +80,7 @@ impl MacroquadClient {
             "assets/wrecks/hovercraft.png",
             "assets/wrecks/hummer.png",
         ] {
-            imgs_wrecks.push(load_texture(path).await);
+            imgs_wrecks.push(load_texture(path).await.unwrap());
         }
 
         let mut imgs_weapon_icons = Vec::new();
@@ -93,18 +93,18 @@ impl MacroquadClient {
             "assets/weapon_icons/gm.png",
             "assets/weapon_icons/bfg.png",
         ] {
-            imgs_weapon_icons.push(load_texture(path).await);
+            imgs_weapon_icons.push(load_texture(path).await.unwrap());
         }
 
         // LATER smoothing optional and configurable per image
         // LATER either use or remove r_smoothing (if raw_canvas is removed)
-        let img_rocket = load_texture("assets/weapons/rocket.png").await;
-        let img_hm = load_texture("assets/weapons/homing_missile.png").await;
-        let img_gm = load_texture("assets/weapons/guided_missile.png").await;
-        let img_explosion = load_texture("assets/explosion.png").await;
-        set_texture_filter(img_explosion, FilterMode::Nearest);
-        let img_explosion_cyan = load_texture("assets/explosion_cyan.png").await;
-        set_texture_filter(img_explosion_cyan, FilterMode::Nearest);
+        let img_rocket = load_texture("assets/weapons/rocket.png").await.unwrap();
+        let img_hm = load_texture("assets/weapons/hm.png").await.unwrap();
+        let img_gm = load_texture("assets/weapons/gm.png").await.unwrap();
+        let img_explosion = load_texture("assets/explosion.png").await.unwrap();
+        img_explosion.set_filter(FilterMode::Nearest);
+        let img_explosion_cyan = load_texture("assets/explosion_cyan.png").await.unwrap();
+        img_explosion_cyan.set_filter(FilterMode::Nearest);
 
         Self {
             imgs_tiles,
