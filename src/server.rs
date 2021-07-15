@@ -166,6 +166,7 @@ impl Server {
                     self.gamelogic_tick(cvars, self.gs.game_time + dt);
                 }
                 if cvars.d_dbg {
+                    // RA false positive: https://github.com/rust-analyzer/rust-analyzer/issues/9576
                     dbg_logd!(remaining);
                 }
                 self.gamelogic_tick(cvars, self.gs.game_time + remaining);
