@@ -3,10 +3,11 @@
 
 mod mq;
 
-use std::{env, str};
+use std::str;
 
 use ::rand::{prelude::SmallRng, SeedableRng};
 use macroquad::prelude::*;
+use structopt::StructOpt;
 
 use rec_wars::{
     cvars::Cvars, entities::Player, game_state::GameState, map, server::Server,
@@ -14,6 +15,19 @@ use rec_wars::{
 };
 
 use crate::mq::MacroquadClient;
+
+#[derive(StructOpt, Debug)]
+// #[structopt(name = "basic")]
+struct Opts {
+    #[structopt(long)]
+    splitscreen: bool,
+
+    #[structopt(long, default_value = "maps/Atrium.map")]
+    map: String,
+
+    #[structopt(long, default_value = "7")] // TODO time?
+    seed: u64,
+}
 
 fn window_conf() -> Conf {
     Conf {
@@ -36,25 +50,16 @@ async fn main() {
     // TODO add all OSes to CI
     // TODO move more init stuff from here to Server
 
-    let mut args = env::args();
-    args.next(); // Skip path of the executable
-    let maybe_map = args.next();
-    let maybe_seed = args.next();
+    let opts = Opts::from_args();
 
-    let cvars = Cvars::new_rec_wars();
-    let rng = if let Some(seed) = maybe_seed {
-        SmallRng::seed_from_u64(seed.parse().unwrap())
-    } else if cvars.d_seed == 0 {
-        SmallRng::seed_from_u64(7) // TODO time?
-    } else {
-        SmallRng::seed_from_u64(cvars.d_seed)
-    };
+    let mut cvars = Cvars::new_rec_wars();
+    cvars.d_seed = opts.seed;
+    let rng = SmallRng::seed_from_u64(cvars.d_seed);
 
     let tex_list_bytes = load_file("assets/texture_list.txt").await.unwrap();
     let tex_list_text = str::from_utf8(&tex_list_bytes).unwrap();
     let surfaces = map::load_tex_list(tex_list_text);
-    let map_path = maybe_map.unwrap_or_else(|| "maps/Atrium.map".to_owned());
-    let map_bytes = load_file(&map_path).await.unwrap();
+    let map_bytes = load_file(&opts.map).await.unwrap();
     let map_text = str::from_utf8(&map_bytes).unwrap();
     let map = map::load_map(&map_text, surfaces);
 
