@@ -9,10 +9,7 @@ use ::rand::{prelude::SmallRng, SeedableRng};
 use macroquad::prelude::*;
 use structopt::StructOpt;
 
-use rec_wars::{
-    cvars::Cvars, entities::Player, game_state::GameState, map, server::Server,
-    timing::MacroquadTime,
-};
+use rec_wars::{cvars::Cvars, map, server::Server, timing::MacroquadTime};
 
 use crate::mq::MacroquadClient;
 
@@ -48,7 +45,6 @@ fn window_conf() -> Conf {
 async fn main() {
     // TODO add CI for all build modes
     // TODO add all OSes to CI
-    // TODO move more init stuff from here to Server
 
     let opts = Opts::from_args();
 
@@ -63,14 +59,11 @@ async fn main() {
     let map_text = str::from_utf8(&map_bytes).unwrap();
     let map = map::load_map(&map_text, surfaces);
 
-    let mut gs = GameState::new(rng);
-    let name = "Player 1".to_owned();
-    let player = Player::new(name);
-    let player1_handle = gs.players.insert(player);
-
     let time = Box::new(MacroquadTime);
+    let mut server = Server::new(&cvars, time, map, rng);
+
+    let player1_handle = server.connect(&cvars, "Player 1");
     let mut client = MacroquadClient::new(&cvars, player1_handle).await;
-    let mut server = Server::new(&cvars, time, map, gs);
 
     loop {
         let real_time = get_time();

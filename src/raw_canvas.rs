@@ -12,8 +12,7 @@ use web_sys::{CanvasRenderingContext2d, HtmlCanvasElement, HtmlImageElement};
 
 use crate::{
     cvars::Cvars,
-    entities::Player,
-    game_state::{GameState, Input},
+    game_state::Input,
     map,
     server::Server,
     timing::{Durations, Fps, RawCanvasTime},
@@ -78,14 +77,13 @@ impl RawCanvasGame {
         let surfaces = map::load_tex_list(tex_list_text);
         let map = map::load_map(map_text, surfaces);
 
-        let mut gs = GameState::new(rng);
-        let name = "Player 1".to_owned();
-        let player = Player::new(name);
-        let player1_handle = gs.players.insert(player);
-
         let time = Box::new(RawCanvasTime(
             web_sys::window().unwrap().performance().unwrap(),
         ));
+        let mut server = Server::new(cvars, time, map, rng);
+
+        let player1_handle = server.connect(cvars, "Player 1");
+
         Self {
             client: RawCanvasClient {
                 canvas,
@@ -103,7 +101,7 @@ impl RawCanvasGame {
                 render_durations: Durations::new(),
                 player_handle: player1_handle,
             },
-            server: Server::new(cvars, time, map, gs),
+            server,
         }
     }
 

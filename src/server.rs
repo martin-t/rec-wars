@@ -1,5 +1,6 @@
 //! The authoritative server in a client-server game architecture - all data affecting gameplay, no networking yet.
 
+use rand::prelude::SmallRng;
 use thunderdome::Index;
 
 use crate::{
@@ -35,7 +36,9 @@ pub struct Server {
 }
 
 impl Server {
-    pub fn new(cvars: &Cvars, time: Box<dyn Time>, map: Map, mut gs: GameState) -> Self {
+    pub fn new(cvars: &Cvars, time: Box<dyn Time>, map: Map, rng: SmallRng) -> Self {
+        let mut gs = GameState::new(rng);
+
         let bots_count = map.spawns().len().min(cvars.bots_max);
         // TODO port dbg_* to macroquad
         // dbg_logf!(
@@ -78,11 +81,20 @@ impl Server {
         }
     }
 
-    pub fn input(&mut self, player_handle: Index, input: Input) {
+    pub fn connect(&mut self, cvars: &Cvars, name: &str) -> Index {
+        let player = Player::new(name.to_owned());
+        let player_handle = self.gs.players.insert(player.clone());
+        let player_handle2 = self.gs_fixed.players.insert(player);
+        assert_eq!(player_handle, player_handle2);
+        systems::spawn_vehicle(cvars, &mut self.gs, &self.map, player_handle, true);
+        player_handle
+    }
+
+    pub fn input(&mut self, local_player_handle: Index, input: Input) {
         self.gs.inputs_prev.update(&self.gs.players);
-        self.gs.players[player_handle].input = input;
+        self.gs.players[local_player_handle].input = input;
         self.gs_fixed.inputs_prev.update(&self.gs_fixed.players);
-        self.gs_fixed.players[player_handle].input = input;
+        self.gs_fixed.players[local_player_handle].input = input;
     }
 
     /// Run gamelogic frame(s) up to current time (in seconds).
