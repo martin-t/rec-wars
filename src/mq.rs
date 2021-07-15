@@ -29,12 +29,26 @@ pub(crate) struct MacroquadClient {
     pub(crate) render_cmds_durations: Durations,
     pub(crate) rest_durations: Durations,
     pub(crate) viewport_size: Vec2f,
-    pub(crate) render_targets: Option<(RenderTarget, RenderTarget)>,
-    pub(crate) player_handle: Index,
+    pub(crate) client_mode: ClientMode,
+}
+
+#[derive(Debug)]
+pub(crate) enum ClientMode {
+    Singleplayer {
+        player_handle: Index,
+    },
+    Splitscreen {
+        render_targets: (RenderTarget, RenderTarget),
+        player_handles: (Index, Index),
+    },
 }
 
 impl MacroquadClient {
-    pub(crate) async fn new(cvars: &Cvars, player1_handle: Index) -> Self {
+    pub(crate) async fn new(
+        cvars: &Cvars,
+        player1_handle: Index,
+        player2_handle: Option<Index>,
+    ) -> Self {
         // TODO load all in parallel
 
         let mut imgs_tiles = Vec::new();
@@ -114,10 +128,27 @@ impl MacroquadClient {
             screen_width(),
             screen_height()
         );
-        let viewport_width = (screen_width() as f64 - cvars.r_splitscreen_gap) / 2.0;
-        let viewport_size = Vec2f::new(viewport_width, screen_height() as f64);
-        let viewport_left = render_target(viewport_size.x as u32, viewport_size.y as u32);
-        let viewport_right = render_target(viewport_size.x as u32, viewport_size.y as u32);
+        let (viewport_size, client_mode) = if let Some(player2_handle) = player2_handle {
+            let viewport_width = (screen_width() as f64 - cvars.r_splitscreen_gap) / 2.0;
+            let viewport_size = Vec2f::new(viewport_width, screen_height() as f64);
+            let viewport_left = render_target(viewport_size.x as u32, viewport_size.y as u32);
+            let viewport_right = render_target(viewport_size.x as u32, viewport_size.y as u32);
+
+            let client_mode = ClientMode::Splitscreen {
+                render_targets: (viewport_left, viewport_right),
+                player_handles: (player1_handle, player2_handle),
+            };
+
+            (viewport_size, client_mode)
+        } else {
+            let viewport_size = Vec2f::new(screen_width() as f64, screen_height() as f64);
+
+            let client_mode = ClientMode::Singleplayer {
+                player_handle: player1_handle,
+            };
+
+            (viewport_size, client_mode)
+        };
 
         Self {
             imgs_tiles,
@@ -133,8 +164,7 @@ impl MacroquadClient {
             render_cmds_durations: Durations::new(),
             rest_durations: Durations::new(),
             viewport_size,
-            render_targets: Some((viewport_left, viewport_right)),
-            player_handle: player1_handle,
+            client_mode,
         }
     }
 

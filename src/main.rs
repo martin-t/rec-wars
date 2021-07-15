@@ -63,12 +63,17 @@ async fn main() {
     let mut server = Server::new(&cvars, time, map, rng);
 
     let player1_handle = server.connect(&cvars, "Player 1");
-    let mut client = MacroquadClient::new(&cvars, player1_handle).await;
+    let player2_handle = if opts.splitscreen {
+        Some(player1_handle) // TODO
+    } else {
+        None
+    };
+    let mut client = MacroquadClient::new(&cvars, player1_handle, player2_handle).await;
 
     loop {
         let real_time = get_time();
 
-        server.input(client.player_handle, mq::get_input());
+        server.input(player1_handle, mq::get_input());
 
         server.update(&cvars, real_time);
 

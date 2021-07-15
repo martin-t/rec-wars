@@ -3,6 +3,7 @@
 use std::{cmp::Reverse, str};
 
 use macroquad::prelude::*;
+use thunderdome::Index;
 use vek::Clamp;
 
 use rec_wars::{
@@ -14,46 +15,55 @@ use rec_wars::{
     server::Server,
 };
 
-use crate::mq::MacroquadClient;
+use crate::mq::{ClientMode, MacroquadClient};
 
 // LATER when raw_canvas is removed, clean up all the casts here
 
 pub(crate) fn render(client: &MacroquadClient, server: &Server, cvars: &Cvars) {
-    if let Some((view_left, view_right)) = client.render_targets {
-        let rect = Rect::new(
-            0.0,
-            0.0,
-            client.viewport_size.x as f32,
-            client.viewport_size.y as f32,
-        );
-        let mut camera = Camera2D::from_display_rect(rect);
-        camera.zoom.y = -camera.zoom.y; // Macroquad bug https://github.com/not-fl3/macroquad/issues/171
+    match client.client_mode {
+        ClientMode::Singleplayer { player_handle } => {
+            render_viewport(client, server, cvars, player_handle)
+        }
+        ClientMode::Splitscreen {
+            render_targets,
+            player_handles,
+        } => {
+            let rect = Rect::new(
+                0.0,
+                0.0,
+                client.viewport_size.x as f32,
+                client.viewport_size.y as f32,
+            );
+            let mut camera = Camera2D::from_display_rect(rect);
+            camera.zoom.y = -camera.zoom.y; // Macroquad bug https://github.com/not-fl3/macroquad/issues/171
 
-        camera.render_target = Some(view_left);
-        set_camera(&camera);
+            camera.render_target = Some(render_targets.0);
+            set_camera(&camera);
+            clear_background(BLANK);
+            render_viewport(client, server, cvars, player_handles.0);
 
-        clear_background(BLANK);
-        render_viewport(client, server, cvars);
+            camera.render_target = Some(render_targets.1);
+            set_camera(&camera);
+            clear_background(BLANK);
+            render_viewport(client, server, cvars, player_handles.1);
 
-        camera.render_target = Some(view_right);
-        set_camera(&camera);
-
-        clear_background(BLANK);
-        render_viewport(client, server, cvars);
-
-        set_default_camera();
-        draw_texture(view_left.texture, 0.0, 0.0, WHITE);
-        let offset_x = (client.viewport_size.x + cvars.r_splitscreen_gap) as f32;
-        draw_texture(view_right.texture, offset_x, 0.0, WHITE);
-    } else {
-        render_viewport(client, server, cvars);
+            set_default_camera();
+            draw_texture(render_targets.0.texture, 0.0, 0.0, WHITE);
+            let offset_x = (client.viewport_size.x + cvars.r_splitscreen_gap) as f32;
+            draw_texture(render_targets.1.texture, offset_x, 0.0, WHITE);
+        }
     }
 
     render_shared(client, server, cvars);
 }
 
-fn render_viewport(client: &MacroquadClient, server: &Server, cvars: &Cvars) {
-    let player = &server.gs.players[client.player_handle];
+fn render_viewport(
+    client: &MacroquadClient,
+    server: &Server,
+    cvars: &Cvars,
+    local_player_handle: Index,
+) {
+    let player = &server.gs.players[local_player_handle];
     let player_veh_pos = server.gs.vehicles[player.vehicle.unwrap()].pos;
     let player_entity_pos = if let Some(gm_handle) = player.guided_missile {
         server.gs.projectiles[gm_handle].pos
@@ -485,7 +495,7 @@ fn render_viewport(client: &MacroquadClient, server: &Server, cvars: &Cvars) {
     );
     let current_index = player_points
         .iter()
-        .position(|&(handle, _)| handle == client.player_handle)
+        .position(|&(handle, _)| handle == local_player_handle)
         .unwrap();
     let points_diff = if current_index == 0 {
         if player_points.len() == 1 {
@@ -645,7 +655,7 @@ fn render_viewport(client: &MacroquadClient, server: &Server, cvars: &Cvars) {
         y += cvars.hud_scoreboard_line_height as f32;
 
         for (player_handle, points) in player_points {
-            let color = if player_handle == client.player_handle {
+            let color = if player_handle == local_player_handle {
                 WHITE
             } else {
                 Color::new(0.8, 0.8, 0.8, 1.0)
