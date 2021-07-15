@@ -9,6 +9,7 @@ use macroquad::prelude::*;
 use rec_wars::{
     cvars::Cvars,
     game_state::Input,
+    map::Vec2f,
     server::Server,
     timing::{Durations, Fps},
 };
@@ -27,11 +28,13 @@ pub(crate) struct MacroquadClient {
     pub(crate) render_fps: Fps,
     pub(crate) render_cmds_durations: Durations,
     pub(crate) rest_durations: Durations,
+    pub(crate) viewport_size: Vec2f,
+    pub(crate) render_targets: Option<(RenderTarget, RenderTarget)>,
     pub(crate) player_handle: Index,
 }
 
 impl MacroquadClient {
-    pub(crate) async fn new(player1_handle: Index) -> Self {
+    pub(crate) async fn new(cvars: &Cvars, player1_handle: Index) -> Self {
         // TODO load all in parallel
 
         let mut imgs_tiles = Vec::new();
@@ -106,6 +109,16 @@ impl MacroquadClient {
         let img_explosion_cyan = load_texture("assets/explosion_cyan.png").await.unwrap();
         img_explosion_cyan.set_filter(FilterMode::Nearest);
 
+        println!(
+            "Detected screen size: {}x{}",
+            screen_width(),
+            screen_height()
+        );
+        let viewport_width = (screen_width() as f64 - cvars.r_splitscreen_gap) / 2.0;
+        let viewport_size = Vec2f::new(viewport_width, screen_height() as f64);
+        let viewport_left = render_target(viewport_size.x as u32, viewport_size.y as u32);
+        let viewport_right = render_target(viewport_size.x as u32, viewport_size.y as u32);
+
         Self {
             imgs_tiles,
             imgs_vehicles,
@@ -119,6 +132,8 @@ impl MacroquadClient {
             render_fps: Fps::new(),
             render_cmds_durations: Durations::new(),
             rest_durations: Durations::new(),
+            viewport_size,
+            render_targets: Some((viewport_left, viewport_right)),
             player_handle: player1_handle,
         }
     }

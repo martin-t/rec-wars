@@ -64,7 +64,7 @@ async fn main() {
     let player1_handle = gs.players.insert(player);
 
     let time = Box::new(MacroquadTime);
-    let mut client = MacroquadClient::new(player1_handle).await;
+    let mut client = MacroquadClient::new(&cvars, player1_handle).await;
     let mut server = Server::new(&cvars, time, map, gs);
 
     loop {

@@ -19,6 +19,40 @@ use crate::mq::MacroquadClient;
 // LATER when raw_canvas is removed, clean up all the casts here
 
 pub(crate) fn render(client: &MacroquadClient, server: &Server, cvars: &Cvars) {
+    if let Some((view_left, view_right)) = client.render_targets {
+        let rect = Rect::new(
+            0.0,
+            0.0,
+            client.viewport_size.x as f32,
+            client.viewport_size.y as f32,
+        );
+        let mut camera = Camera2D::from_display_rect(rect);
+        camera.zoom.y = -camera.zoom.y; // Macroquad bug https://github.com/not-fl3/macroquad/issues/171
+
+        camera.render_target = Some(view_left);
+        set_camera(&camera);
+
+        clear_background(BLANK);
+        render_viewport(client, server, cvars);
+
+        camera.render_target = Some(view_right);
+        set_camera(&camera);
+
+        clear_background(BLANK);
+        render_viewport(client, server, cvars);
+
+        set_default_camera();
+        draw_texture(view_left.texture, 0.0, 0.0, WHITE);
+        let offset_x = (client.viewport_size.x + cvars.r_splitscreen_gap) as f32;
+        draw_texture(view_right.texture, offset_x, 0.0, WHITE);
+    } else {
+        render_viewport(client, server, cvars);
+    }
+
+    render_shared(client, server, cvars);
+}
+
+fn render_viewport(client: &MacroquadClient, server: &Server, cvars: &Cvars) {
     let player = &server.gs.players[client.player_handle];
     let player_veh_pos = server.gs.vehicles[player.vehicle.unwrap()].pos;
     let player_entity_pos = if let Some(gm_handle) = player.guided_missile {
@@ -30,10 +64,12 @@ pub(crate) fn render(client: &MacroquadClient, server: &Server, cvars: &Cvars) {
     // Don't put the camera so close to the edge that it would render area outside the map.
     // Also properly handle maps smaller than view size. Note they can be smaller along X, Y or both.
     // Example maps for testing: Joust (2), extra/OK Corral (2)
-    let screen_size = Vec2f::new(screen_width() as f64, screen_height() as f64);
     let map_size = server.map.maxs();
-    let view_size = Vec2f::new(screen_size.x.min(map_size.x), screen_size.y.min(map_size.y));
-    let empty_space_size = screen_size - view_size;
+    let view_size = Vec2f::new(
+        client.viewport_size.x.min(map_size.x),
+        client.viewport_size.y.min(map_size.y),
+    );
+    let empty_space_size = client.viewport_size - view_size;
     let view_pos = empty_space_size / 2.0;
 
     // Camera center in world coords.
@@ -650,7 +686,38 @@ pub(crate) fn render(client: &MacroquadClient, server: &Server, cvars: &Cvars) {
         );
     }
 
+    // Draw world debug text
+    DEBUG_TEXTS_WORLD.with(|texts| {
+        let texts = texts.borrow();
+        if cvars.d_draw && cvars.d_draw_world_text {
+            for text in texts.iter() {
+                let scr_pos = text.pos + camera_offset;
+                if cull(scr_pos) {
+                    // LATER Technically the text can be so long
+                    // that it's culled overzealously but meh, perf is more important.
+                    continue;
+                }
+
+                render_text_with_shadow(
+                    &cvars,
+                    &text.msg,
+                    scr_pos.x as f32,
+                    scr_pos.y as f32,
+                    16.0,
+                    RED,
+                    1.0,
+                    1.0,
+                    0.5,
+                );
+            }
+        }
+    });
+}
+
+fn render_shared(client: &MacroquadClient, server: &Server, cvars: &Cvars) {
     // Draw screen space debug info:
+
+    let screen_size = Vec2f::new(screen_width() as f64, screen_height() as f64);
 
     // Draw FPS
     if cvars.d_fps {
@@ -751,33 +818,6 @@ pub(crate) fn render(client: &MacroquadClient, server: &Server, cvars: &Cvars) {
             );
         }
     }
-
-    // Draw world debug text
-    DEBUG_TEXTS_WORLD.with(|texts| {
-        let texts = texts.borrow();
-        if cvars.d_draw && cvars.d_draw_world_text {
-            for text in texts.iter() {
-                let scr_pos = text.pos + camera_offset;
-                if cull(scr_pos) {
-                    // Technically the text can be so long
-                    // that it's culled overzealously but meh, perf is more important.
-                    continue;
-                }
-
-                render_text_with_shadow(
-                    &cvars,
-                    &text.msg,
-                    scr_pos.x as f32,
-                    scr_pos.y as f32,
-                    16.0,
-                    RED,
-                    1.0,
-                    1.0,
-                    0.5,
-                );
-            }
-        }
-    });
 
     // Draw debug text
     let mut y = 25.0;
