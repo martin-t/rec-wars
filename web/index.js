@@ -143,7 +143,7 @@ async function run() {
     // It's a good idea to avoid Ctrl and Alt:
     // - it's not possible to disable some browser shortcuts like Ctrl+W
     // - Alt shows/hides the menu bar on linux
-    // TODO IE/edge?
+    // LATER IE/edge?
     //  https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key
     //  https://www.w3.org/TR/uievents-key
     const binds = {
@@ -420,7 +420,7 @@ async function run() {
         window.requestAnimationFrame(frame);
     }
 
-    // TODO load assets at the same time - in parallel or packed into an archive
+    // LATER load assets at the same time - in parallel or packed into an archive
     load_tex_list();
 }
 
