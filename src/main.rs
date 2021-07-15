@@ -73,6 +73,8 @@ async fn main() {
     loop {
         let real_time = get_time();
 
+        server.snapshot_inputs();
+
         server.input(player1_handle, mq::get_input());
 
         server.update(&cvars, real_time);

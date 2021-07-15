@@ -131,7 +131,7 @@ impl InputsPrev {
         }
     }
 
-    pub(crate) fn update(&mut self, players: &Arena<Player>) {
+    pub(crate) fn snapshot(&mut self, players: &Arena<Player>) {
         self.0.clear();
         for (handle, player) in players.iter() {
             self.0.insert(handle, player.input);

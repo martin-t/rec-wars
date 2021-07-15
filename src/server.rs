@@ -90,10 +90,13 @@ impl Server {
         player_handle
     }
 
+    pub fn snapshot_inputs(&mut self) {
+        self.gs.inputs_prev.snapshot(&self.gs.players);
+        self.gs_fixed.inputs_prev.snapshot(&self.gs_fixed.players);
+    }
+
     pub fn input(&mut self, local_player_handle: Index, input: Input) {
-        self.gs.inputs_prev.update(&self.gs.players);
         self.gs.players[local_player_handle].input = input;
-        self.gs_fixed.inputs_prev.update(&self.gs_fixed.players);
         self.gs_fixed.players[local_player_handle].input = input;
     }
 
@@ -150,6 +153,7 @@ impl Server {
             TickrateMode::FixedOrSmaller => {
                 // TODO Input is ignored or duplicated depending on fixed FPS
                 // http://localhost:8000/web/?map=Atrium&bots_max=5&sv_gamelogic_mode=2&sv_gamelogic_fixed_fps=90
+                // TODO Related: gs_fixed should only be used here, the rest of the code shouldn't know about it.
 
                 let dt_fixed = self.gs.game_time - self.gs_fixed.game_time;
                 let game_time_target = self.gs_fixed.game_time + dt_fixed + dt_update;
