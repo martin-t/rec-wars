@@ -64,8 +64,7 @@ async fn main() {
 
     let player1_handle = server.connect(&cvars, "Player 1");
     let player2_handle = if opts.splitscreen {
-        let handle = server.connect(&cvars, "Player 2");
-        Some(handle)
+        Some(server.connect(&cvars, "Player 2"))
     } else {
         None
     };
