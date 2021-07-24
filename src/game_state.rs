@@ -173,6 +173,25 @@ impl Input {
         }
     }
 
+    pub fn merged(&self, other: Input) -> Self {
+        Self {
+            left: self.left | other.left,
+            right: self.right | other.right,
+            up: self.up | other.up,
+            down: self.down | other.down,
+            turret_left: self.turret_left | other.turret_left,
+            turret_right: self.turret_right | other.turret_right,
+            prev_weapon: self.prev_weapon | other.prev_weapon,
+            next_weapon: self.next_weapon | other.next_weapon,
+            fire: self.fire | other.fire,
+            mine: self.mine | other.mine,
+            self_destruct: self.self_destruct | other.self_destruct,
+            horn: self.horn | other.horn,
+            chat: self.chat | other.chat,
+            pause: self.pause | other.pause,
+        }
+    }
+
     pub(crate) fn right_left(&self) -> f64 {
         self.right as i32 as f64 - self.left as i32 as f64
     }

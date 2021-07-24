@@ -180,55 +180,101 @@ impl MacroquadClient {
     }
 }
 
-pub(crate) fn get_input() -> Input {
+// Keys to avoid in defaults:
+//  - CTRL - CTRL+W closes the browser tab
+//  - Numpad - Some keyboards might not have it
+//  - Keys that depend on layout (QWERTZ/QWERTY)
+// LATER Configurable input
+
+pub(crate) fn get_input1() -> Input {
     let mut input = Input::new();
-    if was_input_pressed(&[KeyCode::Left, KeyCode::A]) {
+    if was_input_pressed(&[KeyCode::A]) {
         input.left = true;
     }
-    if was_input_pressed(&[KeyCode::Right, KeyCode::D]) {
+    if was_input_pressed(&[KeyCode::D]) {
         input.right = true;
     }
-    if was_input_pressed(&[KeyCode::Up, KeyCode::W]) {
+    if was_input_pressed(&[KeyCode::W]) {
         input.up = true;
     }
-    if was_input_pressed(&[KeyCode::Down, KeyCode::S]) {
+    if was_input_pressed(&[KeyCode::S]) {
         input.down = true;
     }
-    if was_input_pressed(&[KeyCode::Q, KeyCode::N]) {
+    if was_input_pressed(&[KeyCode::Q]) {
         input.turret_left = true;
     }
-    if was_input_pressed(&[KeyCode::E, KeyCode::M]) {
+    if was_input_pressed(&[KeyCode::E]) {
         input.turret_right = true;
     }
-    if was_input_pressed(&[KeyCode::V, KeyCode::Period]) {
+    if was_input_pressed(&[KeyCode::V]) {
         input.prev_weapon = true;
     }
-    if was_input_pressed(&[
-        KeyCode::LeftShift,
-        KeyCode::RightShift,
-        KeyCode::B,
-        KeyCode::Comma,
-    ]) {
+    if was_input_pressed(&[KeyCode::LeftShift, KeyCode::C]) {
         input.next_weapon = true;
     }
     if was_input_pressed(&[KeyCode::Space]) {
         input.fire = true;
     }
-    if was_input_pressed(&[KeyCode::J, KeyCode::X]) {
+    if was_input_pressed(&[KeyCode::X]) {
         input.mine = true;
     }
-    if was_input_pressed(&[KeyCode::L]) {
+    if was_input_pressed(&[KeyCode::G]) {
         input.self_destruct = true;
     }
-    if was_input_pressed(&[KeyCode::H]) {
+    if was_input_pressed(&[KeyCode::R]) {
         input.horn = true;
     }
-    if was_input_pressed(&[]) {
+    if was_input_pressed(&[KeyCode::T]) {
         input.chat = true;
     }
     if was_input_pressed(&[KeyCode::Pause, KeyCode::P]) {
         input.pause = true;
     }
+    input
+}
+
+pub(crate) fn get_input2() -> Input {
+    let mut input = Input::new();
+    if was_input_pressed(&[KeyCode::Left]) {
+        input.left = true;
+    }
+    if was_input_pressed(&[KeyCode::Right]) {
+        input.right = true;
+    }
+    if was_input_pressed(&[KeyCode::Up]) {
+        input.up = true;
+    }
+    if was_input_pressed(&[KeyCode::Down]) {
+        input.down = true;
+    }
+    if was_input_pressed(&[KeyCode::Comma]) {
+        input.turret_left = true;
+    }
+    if was_input_pressed(&[KeyCode::Period]) {
+        input.turret_right = true;
+    }
+    if was_input_pressed(&[KeyCode::L]) {
+        input.prev_weapon = true;
+    }
+    if was_input_pressed(&[
+        KeyCode::Slash, // US layout
+        KeyCode::Minus, // Same key, CZ layout
+    ]) {
+        input.next_weapon = true;
+    }
+    if was_input_pressed(&[KeyCode::RightShift]) {
+        input.fire = true;
+    }
+    if was_input_pressed(&[KeyCode::M]) {
+        input.mine = true;
+    }
+    if was_input_pressed(&[KeyCode::J]) {
+        input.self_destruct = true;
+    }
+    if was_input_pressed(&[KeyCode::K]) {
+        input.horn = true;
+    }
+    // No binds for chat and pause - they're shared and defined on player 1.
     input
 }
 

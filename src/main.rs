@@ -70,16 +70,26 @@ async fn main() {
     };
     let mut client = MacroquadClient::new(&cvars, player1_handle, player2_handle).await;
 
+    let mut k = None;
     loop {
         let real_time = get_time();
 
         server.snapshot_inputs();
 
-        server.input(player1_handle, mq::get_input());
+        if let Some(player2_handle) = player2_handle {
+            server.input(player1_handle, mq::get_input1());
+            server.input(player2_handle, mq::get_input2());
+        } else {
+            let input = mq::get_input1().merged(mq::get_input2());
+            server.input(player1_handle, input);
+        }
 
         server.update(&cvars, real_time);
 
         client.render(&server, &cvars);
+
+        k = get_last_key_pressed().or(k);
+        draw_text(&format!("{:?}", k), 200.0, 200.0, 32.0, RED);
 
         let before = get_time();
         next_frame().await;
