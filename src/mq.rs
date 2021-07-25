@@ -181,9 +181,10 @@ impl MacroquadClient {
 }
 
 // Keys to avoid in defaults:
-//  - CTRL - CTRL+W closes the browser tab
+//  - Ctrl - ctrl+W closes the browser tab
+//  - Alt - shows/hides the firefox menu bar on linux
 //  - Numpad - Some keyboards might not have it
-//  - Keys that depend on layout (QWERTZ/QWERTY)
+//  - Keys that often depend on layout - https://github.com/not-fl3/macroquad/issues/260
 // LATER Configurable input
 
 pub(crate) fn get_input1() -> Input {

@@ -140,9 +140,7 @@ async function run() {
     const input = new Input();
 
     // This can't be part of Cvars - there is no way to expose rust's String to JS as a struct field.
-    // It's a good idea to avoid Ctrl and Alt:
-    // - it's not possible to disable some browser shortcuts like Ctrl+W
-    // - Alt shows/hides the menu bar on linux
+    // See comment in the macroquad client for keys to avoid.
     // LATER IE/edge?
     //  https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key
     //  https://www.w3.org/TR/uievents-key
@@ -151,13 +149,13 @@ async function run() {
         right: ["arrowright", "d"],
         up: ["arrowup", "w"],
         down: ["arrowdown", "s"],
-        turret_left: ["q", "n"],
-        turret_right: ["e", "m"],
-        prev_weapon: ["v", "."],
-        next_weapon: ["shift", "b", ","],
+        turret_left: ["q", ","],
+        turret_right: ["e", "."],
+        prev_weapon: ["v", "l"],
+        next_weapon: ["shift", "-", "/"],
         fire: [" "],
-        mine: ["j", "x"],
-        self_destruct: ["l"],
+        mine: ["m", "x"],
+        self_destruct: ["j"],
         horn: ["h"],
         chat: [],
         pause: ["pause", "p"],
