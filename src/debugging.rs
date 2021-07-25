@@ -63,7 +63,7 @@ thread_local! {
 macro_rules! dbg_logf {
     ( $( $t:tt )* ) => {
         #[cfg(feature = "mq")]
-        println!( $( $t )* );
+        macroquad::logging::debug!( $( $t )* );
 
         #[cfg(feature = "raw_canvas")]
         {
@@ -80,7 +80,7 @@ macro_rules! dbg_logd {
         let s = $crate::__format_pairs!( $( $e ),* );
 
         #[cfg(feature = "mq")]
-        println!("{}", s);
+        macroquad::logging::debug!("{}", s);
 
         #[cfg(feature = "raw_canvas")]
         web_sys::console::log_1(&s.into());

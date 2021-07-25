@@ -40,15 +40,14 @@ impl Server {
         let mut gs = GameState::new(rng);
 
         let bots_count = map.spawns().len().min(cvars.bots_max);
-        // TODO port dbg_* to macroquad
-        // dbg_logf!(
-        //     "Spawns per bot: {}",
-        //     map.spawns().len() as f64 / bots_count as f64
-        // );
-        // dbg_logf!(
-        //     "Tiles per bot: {}",
-        //     (map.width() * map.height()) as f64 / bots_count as f64
-        // );
+        dbg_logf!(
+            "Spawns per bot: {}",
+            map.spawns().len() as f64 / bots_count as f64
+        );
+        dbg_logf!(
+            "Tiles per bot: {}",
+            (map.width() * map.height()) as f64 / bots_count as f64
+        );
         for i in 0..bots_count {
             let name = if i < BOT_NAMES.len() {
                 BOT_NAMES[i].to_owned()
