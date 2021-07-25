@@ -64,6 +64,8 @@ Compiling and running
 How to run:
 - `cargo run`
 
+See `cargo run -- --help` for more options (splitscreen, map, ...)
+
 ### Browser version (macroquad + WASM)
 
 Might have [performance issues](https://bugzilla.mozilla.org/show_bug.cgi?id=1010527#c0) in firefox on linux - making the window smaller might help.
