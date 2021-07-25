@@ -14,7 +14,6 @@ use rec_wars::{cvars::Cvars, map, server::Server, timing::MacroquadTime};
 use crate::mq::MacroquadClient;
 
 #[derive(StructOpt, Debug)]
-// #[structopt(name = "basic")]
 struct Opts {
     #[structopt(long)]
     splitscreen: bool,
