@@ -96,6 +96,7 @@ impl Server {
     }
 
     pub fn input(&mut self, local_player_handle: Index, input: Input) {
+        // LATER Keep timestamps of input events. When splitting frame into multiple steps, update input each step.
         self.gs.players[local_player_handle].input = input;
         self.gs_fixed.players[local_player_handle].input = input;
     }
@@ -112,6 +113,7 @@ impl Server {
         self.real_time = real_time;
         self.real_time_delta = self.real_time - self.real_time_prev;
 
+        // Handle pause outside gamelogic so it works properly.
         for (handle, player) in self.gs.players.iter() {
             let input_prev = self.gs.inputs_prev.get(handle);
             if !input_prev.pause && player.input.pause {

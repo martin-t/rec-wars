@@ -119,8 +119,8 @@ impl RawCanvasGame {
         input: &Input,
         cvars: &Cvars,
     ) -> Result<(), JsValue> {
-        // Handle input early so pause works immediately.
-        // LATER Keep timestamps of input events. When splitting frame into multiple steps, update input each step.
+        self.server.snapshot_inputs();
+
         self.server.input(self.client.player_handle, *input);
 
         self.server.update(cvars, real_time);
