@@ -1,5 +1,5 @@
 //! Debugging tools for logging and visualizing what is going on.
-//! Use the `dbg_*` macros since they don't need to be imported explicitly
+//! Use the `dbg_*` macros since they don't need to be imported explicitly (at least in the lib)
 //! and they allow a primitive version of overloading.
 //! The fns and structs are only public because the macros need them.
 //!
