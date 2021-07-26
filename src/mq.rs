@@ -51,6 +51,8 @@ impl MacroquadClient {
     ) -> Self {
         // TODO load all in parallel
 
+        let loading_started = get_time();
+
         let mut imgs_tiles = Vec::new();
         for path in &[
             "assets/tiles/g1.bmp",
@@ -123,7 +125,10 @@ impl MacroquadClient {
         let img_explosion_cyan = load_texture("assets/explosion_cyan.png").await.unwrap();
         img_explosion_cyan.set_filter(FilterMode::Nearest);
 
-        println!(
+        let loading_done = get_time();
+        debug!("Loaded assets in {} s", loading_done - loading_started);
+
+        debug!(
             "Detected screen size: {}x{}",
             screen_width(),
             screen_height()
