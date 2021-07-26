@@ -316,7 +316,7 @@ async function run() {
     let play = (tex_list_text, map_text) => {
         // Ping master server
         let request = new XMLHttpRequest();
-        request.open("GET", "https://rec-wars-master.herokuapp.com/");
+        request.open("GET", "https://rec-wars-master.herokuapp.com/canvas");
         request.onloadend = () => {
             if (request.status !== 200) {
                 console.log("Failed to ping master server");

@@ -24,6 +24,19 @@
     <!-- Minified and statically hosted version of https://github.com/not-fl3/miniquad/blob/master/native/sapp-wasm/js/gl.js -->
     <script src="https://not-fl3.github.io/miniquad-samples/gl.js"></script>
     <script>load("rec-wars-macroquad.wasm");</script> <!-- Your compiled wasm file -->
+    <script>
+        // Ping master server
+        let request = new XMLHttpRequest();
+        request.open("GET", "https://rec-wars-master.herokuapp.com/");
+        request.onloadend = () => {
+            if (request.status !== 200) {
+                console.log("Failed to ping master server");
+            } else {
+                console.log(request.responseText);
+            }
+        }
+        request.send();
+    </script>
 </body>
 
 </html>
