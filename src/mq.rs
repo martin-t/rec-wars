@@ -2,9 +2,9 @@
 
 mod rendering;
 
-use thunderdome::Index;
-
+use futures::future;
 use macroquad::prelude::*;
+use thunderdome::Index;
 
 use rec_wars::{
     cvars::Cvars,
@@ -49,12 +49,9 @@ impl MacroquadClient {
         player1_handle: Index,
         player2_handle: Option<Index>,
     ) -> Self {
-        // TODO load all in parallel
-
         let loading_started = get_time();
 
-        let mut imgs_tiles = Vec::new();
-        for path in &[
+        let paths_tiles = [
             "assets/tiles/g1.bmp",
             "assets/tiles/g2.bmp",
             "assets/tiles/g3.bmp",
@@ -77,33 +74,21 @@ impl MacroquadClient {
             "assets/tiles/d_rock.bmp",
             "assets/tiles/g2d.bmp",
             "assets/tiles/water_middle.bmp",
-        ] {
-            imgs_tiles.push(load_texture(path).await.unwrap());
-        }
-
-        let mut imgs_vehicles = Vec::new();
-        for path in &[
+        ];
+        let paths_vehicles = [
             "assets/vehicles/tank_chassis_flames.png",
             "assets/vehicles/tank_turret_flames.png",
             "assets/vehicles/hovercraft_chassis_flames.png",
             "assets/vehicles/hovercraft_turret_flames.png",
             "assets/vehicles/hummer_chassis_flames.png",
             "assets/vehicles/hummer_turret_flames.png",
-        ] {
-            imgs_vehicles.push(load_texture(path).await.unwrap());
-        }
-
-        let mut imgs_wrecks = Vec::new();
-        for path in &[
+        ];
+        let paths_wrecks = [
             "assets/wrecks/tank.png",
             "assets/wrecks/hovercraft.png",
             "assets/wrecks/hummer.png",
-        ] {
-            imgs_wrecks.push(load_texture(path).await.unwrap());
-        }
-
-        let mut imgs_weapon_icons = Vec::new();
-        for path in &[
+        ];
+        let paths_weapon_icons = [
             "assets/weapon_icons/mg.png",
             "assets/weapon_icons/rail.png",
             "assets/weapon_icons/cb.png",
@@ -111,18 +96,41 @@ impl MacroquadClient {
             "assets/weapon_icons/hm.png",
             "assets/weapon_icons/gm.png",
             "assets/weapon_icons/bfg.png",
-        ] {
-            imgs_weapon_icons.push(load_texture(path).await.unwrap());
-        }
+        ];
+        let paths_rest = [
+            "assets/weapons/rocket.png",
+            "assets/weapons/hm.png",
+            "assets/weapons/gm.png",
+            "assets/explosion.png",
+            "assets/explosion_cyan.png",
+        ];
+        let paths = [
+            &paths_tiles[..],
+            &paths_vehicles[..],
+            &paths_wrecks[..],
+            &paths_weapon_icons[..],
+            &paths_rest[..],
+        ]
+        .concat();
+
+        let mut textures = future::try_join_all(paths.into_iter().map(|path| load_texture(path)))
+            .await
+            .unwrap()
+            .into_iter();
+
+        let imgs_tiles = textures.by_ref().take(paths_tiles.len()).collect();
+        let imgs_vehicles = textures.by_ref().take(paths_vehicles.len()).collect();
+        let imgs_wrecks = textures.by_ref().take(paths_wrecks.len()).collect();
+        let imgs_weapon_icons = textures.by_ref().take(paths_weapon_icons.len()).collect();
+        let img_rocket = textures.next().unwrap();
+        let img_hm = textures.next().unwrap();
+        let img_gm = textures.next().unwrap();
+        let img_explosion = textures.next().unwrap();
+        let img_explosion_cyan = textures.next().unwrap();
 
         // LATER smoothing optional and configurable per image
         // LATER either use or remove r_smoothing (if raw_canvas is removed)
-        let img_rocket = load_texture("assets/weapons/rocket.png").await.unwrap();
-        let img_hm = load_texture("assets/weapons/hm.png").await.unwrap();
-        let img_gm = load_texture("assets/weapons/gm.png").await.unwrap();
-        let img_explosion = load_texture("assets/explosion.png").await.unwrap();
         img_explosion.set_filter(FilterMode::Nearest);
-        let img_explosion_cyan = load_texture("assets/explosion_cyan.png").await.unwrap();
         img_explosion_cyan.set_filter(FilterMode::Nearest);
 
         let loading_done = get_time();
