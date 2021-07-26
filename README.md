@@ -19,7 +19,7 @@ _**[Play in the Browser](https://martin-t.gitlab.io/gitlab-pages/rec-wars/web) |
 
 RecWars is a free and open source clone of [RecWar](#the-original-game) - you control a vehicle and fight other vehicles in a variety of game modes using an arsenal of several distinct weapons. You can play against bots, in splitscreen and over the network.
 
-RecWars aims to have gameplay similar but not identical to RecWar. I suspect RecWar was balanced for playing against bots and might result in annoying strats being the most effective when people start [playing to win](http://www.sirlin.net/articles/playing-to-win). However, almost everything in RecWars is [configurable](#cvars) and you can switch to the original RecWar balance to [compare](#recwars-vs-recwar-differences).
+RecWars aims to have gameplay similar, but not identical, to RecWar. I suspect RecWar was balanced for playing against bots and might result in annoying strats being the most effective when people start [playing to win](http://www.sirlin.net/articles/playing-to-win). However, almost everything in RecWars is [configurable](#cvars) and you can switch to the original RecWar balance to [compare](#recwars-vs-recwar-differences).
 
 **Currently this is very much a work-in-progress**: the driving physics don't feel right, there are no collisions between vehicles, bots move randomly ...
 
@@ -30,7 +30,7 @@ The ultimate goal is to create a moddable multiplayer game playable in the brows
 
 - [ ] Bots
 - [ ] Multiplayer
-    - [ ] Splitscreen
+    - [x] Splitscreen
     - [ ] Network
     - [ ] Combination of both (plus bots)
 - [x] [Browser client](https://martin-t.gitlab.io/gitlab-pages/rec-wars/web)
