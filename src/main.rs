@@ -67,6 +67,8 @@ async fn main() {
     } else {
         None
     };
+    // LATER It can take some time for assets to load but the game is already running on the server.
+    //       Load assets first, then connect.
     let mut client = MacroquadClient::new(&cvars, player1_handle, player2_handle).await;
 
     let mut k = None;
