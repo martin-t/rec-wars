@@ -27,6 +27,7 @@
         }
 
         #ff {
+            display: none;
             position: fixed;
             width: 100%;
             margin-top: 40%;
@@ -50,7 +51,7 @@
         Loading...
     </p>
     <p id="ff" disabled>
-        If the framerate is below 60, consider using Chrome. <br>
+        If the framerate is below 60, consider using Chromium. <br>
         The canvas element is too slow in Firefox on Linux due to
         <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1010527#c0">a bug in Firefox</a>.
     </p>
@@ -60,11 +61,14 @@
         // There's no way to draw directly on the canvas without breaking MQ, I think,
         // so I just use this text and hardcode it to disappear so at least people know something is (hopefully) happening.
         let loading = document.getElementById("loading");
-        setTimeout(function () { loading.style.display = "none"; }, 1500);
+        setTimeout(function () { loading.style.display = "none"; }, 1000);
 
         // Also let users know the bad perf is something i can't fix.
-        if (window.navigator.userAgent.indexOf("Linux") != -1) {
-            let ff = document.getElementById("ff");
+        let ff = document.getElementById("ff");
+        let isFirefox = window.navigator.userAgent.indexOf("Firefox") != -1;
+        let isLinux = window.navigator.userAgent.indexOf("Linux") != -1;
+        if (isFirefox && isLinux) {
+            ff.style.display = "inline";
             setTimeout(function () { ff.style.display = "none"; }, 15000);
         }
 
