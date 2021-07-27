@@ -18,24 +18,21 @@
             z-index: 0;
         }
 
-        #overlay {
-            position: fixed;
-            /*display: none;*/
-            width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            z-index: 2;
-            font: 32px sans-serif;
-            color: white;
-        }
-
         #loading {
             position: fixed;
             top: 300px;
             left: 300px;
+            font: 32px sans-serif;
+            color: white;
+        }
+
+        #ff {
+            position: fixed;
+            width: 100%;
+            margin-top: 40%;
+            text-align: center;
+            font: 16px sans-serif;
+            color: red;
         }
     </style>
 </head>
@@ -49,20 +46,34 @@
         element.
     </canvas>
 
-    <!--
-        This is a hack.
-        It takes a few seconds to load the WASM (using GitLab as host: ~1.5 s in release mode, up to 10 s in debug mode).
-        There's no way to draw directly on the canvas without breaking MQ, I think,
-        so I just use this text and hardcode it to disappear so at least people know something is (hopefully) happening.
-    -->
-    <div id="overlay">
-        <p id="loading">
-            Loading...
-        </p>
-    </div>
+    <p id="loading">
+        Loading...
+    </p>
+    <p id="ff" disabled>
+        If the framerate is below 60, consider using Chrome. <br>
+        The canvas element is too slow in Firefox on Linux due to
+        <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1010527#c0">a bug in Firefox</a>.
+    </p>
     <script>
-        let overlay = document.getElementById("overlay");
-        setTimeout(function () { overlay.style.display = "none"; }, 1000);
+        // This is a hack.
+        // It takes a few seconds to load the WASM (using GitLab as host: ~1.5 s in release mode, up to 10 s in debug mode).
+        // There's no way to draw directly on the canvas without breaking MQ, I think,
+        // so I just use this text and hardcode it to disappear so at least people know something is (hopefully) happening.
+        let loading = document.getElementById("loading");
+        setTimeout(function () { loading.style.display = "none"; }, 1500);
+
+        // Also let users know the bad perf is something i can't fix.
+        if (window.navigator.userAgent.indexOf("Linux") != -1) {
+            let ff = document.getElementById("ff");
+            setTimeout(function () { ff.style.display = "none"; }, 15000);
+        }
+
+        // I am tired of looking for clean solutions in webdev because it's all a hacky mess and there are none.
+        // When the user clicks the link to the firefox bug, the canvas loses focus.
+        // For some reason refocusing it in its onblur event doesn't work
+        // so let's do this and be done with it.
+        let glcanvas = document.getElementById("glcanvas");
+        setInterval(function () { glcanvas.focus(); }, 500);
     </script>
 
     <!-- Minified and statically hosted version of https://github.com/not-fl3/miniquad/blob/master/native/sapp-wasm/js/gl.js -->
