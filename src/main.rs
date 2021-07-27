@@ -71,7 +71,6 @@ async fn main() {
     //       Load assets first, then connect.
     let mut client = MacroquadClient::new(&cvars, player1_handle, player2_handle).await;
 
-    let mut k = None;
     loop {
         let real_time = get_time();
 
@@ -88,9 +87,6 @@ async fn main() {
         server.update(&cvars, real_time);
 
         client.render(&server, &cvars);
-
-        k = get_last_key_pressed().or(k);
-        draw_text(&format!("{:?}", k), 200.0, 200.0, 32.0, RED);
 
         let before = get_time();
         next_frame().await;
