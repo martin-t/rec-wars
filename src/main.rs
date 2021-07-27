@@ -47,14 +47,22 @@ async fn main() {
 
     let opts = Opts::from_args();
 
+    // This is a hack.
+    // It seems that in the browser, MQ redraws the screen several times between here and the main loop
+    // (even though there are no next_frame().await calls) so this doesn't stay up for long.
+    // Let's just redraw it a few times during the loading process so the player sees something is happening.
+    draw_text("Loading...", 400.0, 400.0, 32.0, RED);
+
     let mut cvars = Cvars::new_rec_wars();
     cvars.d_seed = opts.seed;
     let rng = SmallRng::seed_from_u64(cvars.d_seed);
 
     let tex_list_bytes = load_file("assets/texture_list.txt").await.unwrap();
+    draw_text("Loading...", 400.0, 400.0, 32.0, PURPLE);
     let tex_list_text = str::from_utf8(&tex_list_bytes).unwrap();
     let surfaces = map::load_tex_list(tex_list_text);
     let map_bytes = load_file(&opts.map).await.unwrap();
+    draw_text("Loading...", 400.0, 400.0, 32.0, PURPLE);
     let map_text = str::from_utf8(&map_bytes).unwrap();
     let map = map::load_map(&map_text, surfaces);
 
@@ -70,6 +78,7 @@ async fn main() {
     // LATER It can take some time for assets to load but the game is already running on the server.
     //       Load assets first, then connect.
     let mut client = MacroquadClient::new(&cvars, player1_handle, player2_handle).await;
+    draw_text("Loading...", 400.0, 400.0, 32.0, PURPLE);
 
     loop {
         let real_time = get_time();

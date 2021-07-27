@@ -17,11 +17,54 @@
             background: black;
             z-index: 0;
         }
+
+        #overlay {
+            position: fixed;
+            /*display: none;*/
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 2;
+            font: 32px sans-serif;
+            color: white;
+        }
+
+        #loading {
+            position: fixed;
+            top: 300px;
+            left: 300px;
+        }
     </style>
 </head>
 
 <body>
-    <canvas id="glcanvas" tabindex='1'></canvas>
+    <noscript>
+        RecWars requires JavaScript ... yes, I know JS sucks, that's why it's actually written in Rust/WASM ;)
+    </noscript>
+    <canvas id="glcanvas" tabindex='1'>
+        To play RecWars, you need JavaScript enabled and your browser needs to support WebAssembly and the canvas
+        element.
+    </canvas>
+
+    <!--
+        This is a hack.
+        It takes a few seconds to load the WASM (using GitLab as host: ~1.5 s in release mode, up to 10 s in debug mode).
+        There's no way to draw directly on the canvas without breaking MQ, I think,
+        so I just use this text and hardcode it to disappear so at least people know something is (hopefully) happening.
+    -->
+    <div id="overlay">
+        <p id="loading">
+            Loading...
+        </p>
+    </div>
+    <script>
+        let overlay = document.getElementById("overlay");
+        setTimeout(function () { overlay.style.display = "none"; }, 1000);
+    </script>
+
     <!-- Minified and statically hosted version of https://github.com/not-fl3/miniquad/blob/master/native/sapp-wasm/js/gl.js -->
     <script src="https://not-fl3.github.io/miniquad-samples/gl.js"></script>
     <script>load("rec-wars-macroquad.wasm");</script> <!-- Your compiled wasm file -->

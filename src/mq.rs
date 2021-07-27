@@ -113,10 +113,16 @@ impl MacroquadClient {
         ]
         .concat();
 
-        let mut textures = future::try_join_all(paths.into_iter().map(|path| load_texture(path)))
-            .await
-            .unwrap()
-            .into_iter();
+        let mut textures = future::try_join_all(paths.into_iter().map(|path| {
+            draw_text("Loading...", 400.0, 400.0, 32.0, YELLOW);
+            let tex = load_texture(path);
+            draw_text("Loading...", 400.0, 400.0, 32.0, GREEN);
+            tex
+        }))
+        .await
+        .unwrap()
+        .into_iter();
+        draw_text("Loading...", 400.0, 400.0, 32.0, WHITE);
 
         let imgs_tiles = textures.by_ref().take(paths_tiles.len()).collect();
         let imgs_vehicles = textures.by_ref().take(paths_vehicles.len()).collect();
