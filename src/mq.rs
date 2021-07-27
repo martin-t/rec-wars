@@ -134,9 +134,9 @@ impl MacroquadClient {
         img_explosion_cyan.set_filter(FilterMode::Nearest);
 
         let loading_done = get_time();
-        debug!("Loaded assets in {:.2} s", loading_done - loading_started);
+        rec_wars::dbg_logf!("Loaded assets in {:.2} s", loading_done - loading_started);
 
-        debug!(
+        rec_wars::dbg_logf!(
             "Detected screen size: {}x{}",
             screen_width(),
             screen_height()

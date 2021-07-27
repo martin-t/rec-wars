@@ -63,7 +63,8 @@ thread_local! {
 macro_rules! dbg_logf {
     ( $( $t:tt )* ) => {
         #[cfg(feature = "mq")]
-        macroquad::logging::debug!( $( $t )* );
+        // Use info so it shows up by default in chromium, debug doesn't.
+        macroquad::logging::info!( $( $t )* );
 
         #[cfg(feature = "raw_canvas")]
         {
@@ -80,7 +81,7 @@ macro_rules! dbg_logd {
         let s = $crate::__format_pairs!( $( $e ),* );
 
         #[cfg(feature = "mq")]
-        macroquad::logging::debug!("{}", s);
+        macroquad::logging::info!("{}", s);
 
         #[cfg(feature = "raw_canvas")]
         web_sys::console::log_1(&s.into());
