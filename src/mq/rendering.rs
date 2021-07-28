@@ -64,11 +64,11 @@ fn render_viewport(
     local_player_handle: Index,
 ) {
     let player = &server.gs.players[local_player_handle];
-    let player_veh_pos = server.gs.vehicles[player.vehicle.unwrap()].pos;
+    let player_vehicle = &server.gs.vehicles[player.vehicle.unwrap()];
     let player_entity_pos = if let Some(gm_handle) = player.guided_missile {
         server.gs.projectiles[gm_handle].pos
     } else {
-        player_veh_pos
+        player_vehicle.pos
     };
 
     // Don't put the camera so close to the edge that it would render area outside the map.
@@ -397,7 +397,7 @@ fn render_viewport(
 
     // Homing missile indicator
     // TODO dashed lines (maybe use image)
-    let player_veh_scr_pos = player_veh_pos + camera_offset;
+    let player_veh_scr_pos = player_vehicle.pos + camera_offset;
     draw_circle_lines(
         player_veh_scr_pos.x as f32,
         player_veh_scr_pos.y as f32,
@@ -408,6 +408,27 @@ fn render_viewport(
     let dir = 0.0.to_vec2f(); // TODO
     let end = player_veh_scr_pos + dir * cvars.hud_missile_indicator_radius;
     render_line(player_veh_scr_pos, end, 1.0, GREEN);
+
+    // Spawn location indicator
+    if server.gs.game_time - player_vehicle.spawn_time < 2.0 {
+        let vehicle_scr_pos = player_vehicle.pos + camera_offset;
+        draw_line(
+            0.0,
+            vehicle_scr_pos.y as f32,
+            client.viewport_size.x as f32,
+            vehicle_scr_pos.y as f32,
+            2.0,
+            GREEN,
+        );
+        draw_line(
+            vehicle_scr_pos.x as f32,
+            0.0,
+            vehicle_scr_pos.x as f32,
+            client.viewport_size.y as f32,
+            2.0,
+            GREEN,
+        );
+    }
 
     // Debug lines and crosses
     // TODO colors (also in other places below)

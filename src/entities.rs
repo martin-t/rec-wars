@@ -102,7 +102,7 @@ pub struct Vehicle {
     /// Each weapon has a separate reload status even if they all reload at the same time.
     /// I plan to generalize this and have a cvar to choose between multiple reload mechanisms.
     pub ammos: Vec<Ammo>,
-    pub(crate) spawn_time: f64,
+    pub spawn_time: f64,
     pub owner: Index,
 }
 
