@@ -22,9 +22,9 @@ pub struct Player {
     /// - can guide multiple missiles (LATER optionally allow by cvar)
     /// - missile input is not reset after death / launching another (results in flying in circles)
     /// - missile stops after player dies / launches another
-    pub(crate) input: Input,
-    pub(crate) respawn: Respawn,
-    pub(crate) death_time: f64,
+    pub input: Input,
+    pub respawn: Respawn,
+    pub death_time: f64,
     pub vehicle: Option<Index>,
     pub guided_missile: Option<Index>,
     pub cur_weapon: Weapon,
@@ -32,8 +32,7 @@ pub struct Player {
 }
 
 impl Player {
-    // LATER pub(crate)?
-    pub fn new(name: String) -> Self {
+    pub(crate) fn new(name: String) -> Self {
         Self {
             name,
             input: Input::new(),
@@ -48,7 +47,7 @@ impl Player {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub(crate) enum Respawn {
+pub enum Respawn {
     No,
     Pressed,
     Scheduled,
@@ -68,11 +67,11 @@ impl Score {
 }
 
 #[derive(Debug, Clone)]
-pub(crate) struct Ai {
-    pub(crate) player: Index,
-    pub(crate) movement: i32,
-    pub(crate) turning: i32,
-    pub(crate) firing: bool,
+pub struct Ai {
+    pub player: Index,
+    pub movement: i32,
+    pub turning: i32,
+    pub firing: bool,
 }
 
 impl Ai {
@@ -89,14 +88,14 @@ impl Ai {
 #[derive(Debug, Clone)]
 pub struct Vehicle {
     pub pos: Vec2f,
-    pub(crate) vel: Vec2f,
+    pub vel: Vec2f,
     pub angle: f64,
-    pub(crate) turn_rate: f64,
+    pub turn_rate: f64,
     pub veh_type: VehicleType,
-    pub(crate) hitbox: Hitbox,
+    pub hitbox: Hitbox,
     /// Angle from vehicle, see Coord system for more
     pub turret_angle_current: f64,
-    pub(crate) turret_angle_wanted: f64,
+    pub turret_angle_wanted: f64,
     /// HP between 0 and 1 - saving the fraction here instead of absolute hit points so armor cvars can be adjusted during a match.
     pub hp_fraction: f64,
     /// Each weapon has a separate reload status even if they all reload at the same time.
@@ -169,9 +168,9 @@ pub struct Projectile {
     pub pos: Vec2f,
     pub vel: Vec2f,
     pub angle: f64,
-    pub(crate) turn_rate: f64,
-    pub(crate) explode_time: f64,
-    pub(crate) owner: Index,
+    pub turn_rate: f64,
+    pub explode_time: f64,
+    pub owner: Index,
 }
 
 pub(crate) const WEAPS_CNT: u8 = 7;
@@ -189,13 +188,13 @@ pub enum Weapon {
 }
 
 #[derive(Debug, Clone, Copy)]
-pub(crate) struct Hitbox {
-    pub(crate) mins: Vec2f,
-    pub(crate) maxs: Vec2f,
+pub struct Hitbox {
+    pub mins: Vec2f,
+    pub maxs: Vec2f,
 }
 
 impl Hitbox {
-    pub(crate) fn corners(self, pos: Vec2f, angle: f64) -> [Vec2f; 4] {
+    pub fn corners(self, pos: Vec2f, angle: f64) -> [Vec2f; 4] {
         let back_left = pos + Vec2f::new(self.mins.x, self.mins.y).rotated_z(angle);
         let front_left = pos + Vec2f::new(self.maxs.x, self.mins.y).rotated_z(angle);
         let front_right = pos + Vec2f::new(self.maxs.x, self.maxs.y).rotated_z(angle);
