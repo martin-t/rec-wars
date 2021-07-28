@@ -13,9 +13,9 @@
 [![Lines of comments](https://tokei.rs/b1/github/martin-t/rec-wars?category=comments)](https://github.com/martin-t/rec-wars#architecture-overview)
 
 <!-- Note to my future OCD: The ideal image width for github is 838 pixels -->
-[![Gameplay](media/screenshot.jpg)](https://martin-t.gitlab.io/gitlab-pages/rec-wars/web)
+[![Gameplay](media/screenshot.jpg)](https://martin-t.gitlab.io/gitlab-pages/rec-wars/macroquad.html)
 
-_**[Play in the Browser](https://martin-t.gitlab.io/gitlab-pages/rec-wars/web) | [Join Discord](https://discord.gg/9BQVVgV)**_
+_**[Play in the Browser](https://martin-t.gitlab.io/gitlab-pages/rec-wars/macroquad.html) | [Join Discord](https://discord.gg/9BQVVgV)**_
 
 RecWars is a free and open source clone of [RecWar](#the-original-game) - you control a vehicle and fight other vehicles in a variety of game modes using an arsenal of several distinct weapons. You can play against bots, in splitscreen and over the network.
 
@@ -33,7 +33,7 @@ The ultimate goal is to create a moddable multiplayer game playable in the brows
     - [x] Splitscreen
     - [ ] Network
     - [ ] Combination of both (plus bots)
-- [x] [Browser client](https://martin-t.gitlab.io/gitlab-pages/rec-wars/web)
+- [x] [Browser client](https://martin-t.gitlab.io/gitlab-pages/rec-wars/macroquad.html)
 - [x] Native client (Linux, Windows, macOS)
 - [ ] Game modes
     - [x] Free For All
@@ -67,6 +67,8 @@ How to run:
 See `cargo run -- --help` for more options (splitscreen, map, ...)
 
 ### Browser version (macroquad + WASM)
+
+This version is hosted [here](https://martin-t.gitlab.io/gitlab-pages/rec-wars/macroquad.html).
 
 Might have [performance issues](https://bugzilla.mozilla.org/show_bug.cgi?id=1010527#c0) in firefox on linux - making the window smaller might help.
 
