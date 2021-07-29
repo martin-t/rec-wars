@@ -18,6 +18,7 @@ jobs:
 
     steps:
       - run: sudo apt-get install --no-install-recommends -y pkg-config libx11-dev libxi-dev libgl1-mesa-dev libasound2-dev
+      - run: rustup target add wasm32-unknown-unknown
       - uses: actions/checkout@v2
       - uses: jetli/wasm-pack-action@v0.3.0
       - name: Build macroquad native
