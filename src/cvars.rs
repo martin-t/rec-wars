@@ -382,7 +382,7 @@ pub struct Cvars {
     pub r_align_to_pixels_text: bool,
     pub r_draw_cluster_bombs: bool,
     pub r_explosion_duration: f64,
-    pub r_explosions_reverse: bool,
+    pub r_explosions_reverse_order: bool,
     pub r_smoothing: bool,
     pub r_splitscreen_gap: f64,
 
@@ -1136,7 +1136,7 @@ impl Default for Cvars {
             // - CB looks smoother. With true it sometimes looked like it had 2 stages
             //   because the later explosions were suddenly revealed after the first ones disappeared.
             // - Rockets look better if hitting the same spot.
-            r_explosions_reverse: false,
+            r_explosions_reverse_order: false,
             r_smoothing: false,
             r_splitscreen_gap: 8.0,
 

@@ -251,7 +251,7 @@ pub(crate) fn draw(
     }
 
     // Draw explosions
-    let iter: Box<dyn Iterator<Item = &Explosion>> = if cvars.r_explosions_reverse {
+    let iter: Box<dyn Iterator<Item = &Explosion>> = if cvars.r_explosions_reverse_order {
         Box::new(server.gs.explosions.iter().rev())
     } else {
         Box::new(server.gs.explosions.iter())
