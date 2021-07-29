@@ -443,13 +443,13 @@ fn render_viewport(
                     let segment = line.end - line.begin;
                     let perpendicular = Vec2f::new(-segment.y, segment.x).normalized();
                     render_line(
-                        scr_begin + -perpendicular * cvars.d_draw_lines_ends_length,
+                        scr_begin - perpendicular * cvars.d_draw_lines_ends_length,
                         scr_begin + perpendicular * cvars.d_draw_lines_ends_length,
                         1.0,
                         RED,
                     );
                     render_line(
-                        scr_end + -perpendicular * cvars.d_draw_lines_ends_length,
+                        scr_end - perpendicular * cvars.d_draw_lines_ends_length,
                         scr_end + perpendicular * cvars.d_draw_lines_ends_length,
                         1.0,
                         RED,
