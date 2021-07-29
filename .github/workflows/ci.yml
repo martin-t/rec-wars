@@ -37,6 +37,15 @@ jobs:
       - name: Check formatting
         run: cargo fmt -- --check
 
+  clippy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run clippy
+        # Technically --all-features doesn't check all code when something is *disabled* by a feature
+        # but that is discouraged and no such feature existed at the time this was added.
+        run: cargo clippy --all-features -- --deny warnings
+
   audit:
     runs-on: ubuntu-latest
     steps:
