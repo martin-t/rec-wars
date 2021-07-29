@@ -19,10 +19,15 @@ jobs:
     steps:
       - run: sudo apt-get install --no-install-recommends -y pkg-config libx11-dev libxi-dev libgl1-mesa-dev libasound2-dev
       - uses: actions/checkout@v2
-      - name: Build
-        run: cargo build --verbose --features mq
+      - uses: jetli/wasm-pack-action@v0.3.0
+      - name: Build macroquad native
+        run: cargo build --verbose
+      - name: Build macroquad web
+        run: cargo build --verbose --target wasm32-unknown-unknown
+      - name: Build raw canvas
+        run: wasm-pack build --target web --dev -- --no-default-features --features raw_canvas
       - name: Run tests
-        run: cargo test --verbose --features mq
+        run: cargo test --verbose --all-features
 
   audit:
     runs-on: ubuntu-latest
