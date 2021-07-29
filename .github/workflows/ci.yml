@@ -30,6 +30,13 @@ jobs:
       - name: Run tests
         run: cargo test --verbose --all-features
 
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Check formatting
+        run: cargo fmt -- --check
+
   audit:
     runs-on: ubuntu-latest
     steps:
