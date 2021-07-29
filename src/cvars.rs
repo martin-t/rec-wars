@@ -10,6 +10,7 @@ use crate::{entities::Hitbox, entities::VehicleType, entities::Weapon, map::Vec2
 /// Console variables - configuration options for anything and everything.
 ///
 /// Prefix meanings:
+/// cl_ is client
 /// d_ is debug
 /// g_ is gameplay
 /// hud_ is the heads-up display
@@ -34,6 +35,9 @@ pub struct Cvars {
     pub ai: bool,
 
     pub bots_max: usize,
+
+    pub cl_spawn_indicator_duration: f64,
+    pub cl_spawn_indicator_thickness: f32,
 
     /// "Temporary" cvar for quick testing. Normally unused but kept here
     /// so I don't have to add a cvar each time I want a quick toggle.
@@ -803,6 +807,9 @@ impl Default for Cvars {
             ai: true,
 
             bots_max: 20,
+
+            cl_spawn_indicator_duration: 1.0,
+            cl_spawn_indicator_thickness: 2.0,
 
             d_dbg: false,
 

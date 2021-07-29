@@ -410,14 +410,14 @@ fn render_viewport(
     render_line(player_veh_scr_pos, end, 1.0, GREEN);
 
     // Spawn location indicator
-    if server.gs.game_time - player_vehicle.spawn_time < 2.0 {
+    if server.gs.game_time - player_vehicle.spawn_time < cvars.cl_spawn_indicator_duration {
         let vehicle_scr_pos = player_vehicle.pos + camera_offset;
         draw_line(
             0.0,
             vehicle_scr_pos.y as f32,
             client.viewport_size.x as f32,
             vehicle_scr_pos.y as f32,
-            2.0,
+            cvars.cl_spawn_indicator_thickness,
             GREEN,
         );
         draw_line(
@@ -425,7 +425,7 @@ fn render_viewport(
             0.0,
             vehicle_scr_pos.x as f32,
             client.viewport_size.y as f32,
-            2.0,
+            cvars.cl_spawn_indicator_thickness,
             GREEN,
         );
     }
