@@ -431,7 +431,8 @@ fn render_viewport(
     }
 
     // Debug lines and crosses
-    // TODO colors (also in other places below)
+    // LATER colors (also in other places below)
+    //  It would be nice to use MQ's Color struct in debugging but then everything depends on MQ.
     DEBUG_LINES.with(|lines| {
         let mut lines = lines.borrow_mut();
         for line in lines.iter_mut() {
