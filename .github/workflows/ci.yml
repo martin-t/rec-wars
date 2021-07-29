@@ -40,6 +40,7 @@ jobs:
   clippy:
     runs-on: ubuntu-latest
     steps:
+      - run: sudo apt-get install --no-install-recommends -y pkg-config libx11-dev libxi-dev libgl1-mesa-dev libasound2-dev
       - uses: actions/checkout@v2
       - name: Run clippy
         # Technically --all-features doesn't check all code when something is *disabled* by a feature
