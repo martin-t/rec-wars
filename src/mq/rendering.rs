@@ -936,7 +936,7 @@ fn render_text_with_shadow(
     shadow_offset_y: f32,
     shadow_alpha: f64,
 ) {
-    if cvars.r_text_integer_positions {
+    if cvars.r_align_to_pixels_text {
         x = x.floor();
         y = y.floor();
     }

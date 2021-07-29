@@ -377,15 +377,14 @@ pub struct Cvars {
     pub hud_weapon_icon_x: f64,
     pub hud_weapon_icon_y: f64,
 
-    // LATER unify naming - align_to_pixels vs smoothing vs integer_positions
+    /// This is in a way the opposite of smoothing
     pub r_align_to_pixels_background: bool,
+    pub r_align_to_pixels_text: bool,
     pub r_draw_cluster_bombs: bool,
     pub r_explosion_duration: f64,
     pub r_explosions_reverse: bool,
     pub r_smoothing: bool,
     pub r_splitscreen_gap: f64,
-    /// This if effectively the oppsite for smoothing but for text.
-    pub r_text_integer_positions: bool,
 
     pub sv_auto_pause_on_minimize: bool,
     pub sv_auto_unpause_on_restore: bool,
@@ -1130,6 +1129,7 @@ impl Default for Cvars {
             hud_weapon_icon_y: -28.0,
 
             r_align_to_pixels_background: true,
+            r_align_to_pixels_text: true,
             r_draw_cluster_bombs: true,
             r_explosion_duration: 0.5,
             // After trying true for a while, I think false looks better:
@@ -1139,7 +1139,6 @@ impl Default for Cvars {
             r_explosions_reverse: false,
             r_smoothing: false,
             r_splitscreen_gap: 8.0,
-            r_text_integer_positions: true,
 
             sv_auto_pause_on_minimize: true,
             sv_auto_unpause_on_restore: false,
