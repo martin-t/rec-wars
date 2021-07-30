@@ -54,11 +54,11 @@ async fn main() {
         cvars.d_seed = seed;
     }
 
-    let unix_time = macroquad::miniquad::date::now();
+    let time_seed = macroquad::miniquad::date::now();
     if cvars.d_seed == 0 {
         // Casting with `as` throws away some bits but it doesn't really matter,
         // better than using unsafe for transmute.
-        cvars.d_seed = unix_time as u64;
+        cvars.d_seed = time_seed as u64;
     }
 
     // LATER Load texture list and map in parallel with other assets
@@ -121,7 +121,9 @@ async fn main() {
         //"extra2/World War (2)",
     ];
     let mut map_path = opts.map.unwrap_or_else(|| {
-        let index = unix_time as usize % maps.len();
+        // Intentionally not using cvars.d_seed here
+        // so that setting the seed doesn't force a specific map.
+        let index = time_seed as usize % maps.len();
         maps[index].to_owned()
     });
     if !map_path.ends_with(".map") {
