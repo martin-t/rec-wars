@@ -21,8 +21,8 @@
 - [x] respawning
 - [x] scores
 - [ ] primitive bots
-- [ ] splitscreen
-- [ ] decent default binds (2x for splitscreen)
+- [x] splitscreen
+- [x] decent default binds (2x for splitscreen)
 - [x] pick an engine
 
 ## 1.0
