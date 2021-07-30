@@ -1,6 +1,6 @@
 //! The authoritative server in a client-server game architecture - all data affecting gameplay, no networking yet.
 
-use rand::prelude::SmallRng;
+use rand::{prelude::SmallRng, SeedableRng};
 use thunderdome::Index;
 
 use crate::{
@@ -36,7 +36,8 @@ pub struct Server {
 }
 
 impl Server {
-    pub fn new(cvars: &Cvars, time: Box<dyn Time>, map: Map, rng: SmallRng) -> Self {
+    pub fn new(cvars: &Cvars, time: Box<dyn Time>, map: Map) -> Self {
+        let rng = SmallRng::seed_from_u64(cvars.d_seed);
         let mut gs = GameState::new(rng);
 
         let bots_count = map.spawns().len().min(cvars.bots_max);

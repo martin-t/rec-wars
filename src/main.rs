@@ -3,9 +3,8 @@
 
 mod mq;
 
-use std::str;
+use std::{str, time::UNIX_EPOCH};
 
-use ::rand::{prelude::SmallRng, SeedableRng};
 use macroquad::prelude::*;
 use structopt::StructOpt;
 
@@ -21,8 +20,8 @@ struct Opts {
     #[structopt(long, default_value = "maps/Atrium.map")]
     map: String,
 
-    #[structopt(long, default_value = "7")] // TODO time?
-    seed: u64,
+    #[structopt(long)]
+    seed: Option<u64>,
 }
 
 fn window_conf() -> Conf {
@@ -51,8 +50,14 @@ async fn main() {
     draw_text("Loading...", 400.0, 400.0, 32.0, RED);
 
     let mut cvars = Cvars::new_rec_wars();
-    cvars.d_seed = opts.seed;
-    let rng = SmallRng::seed_from_u64(cvars.d_seed);
+    if let Some(seed) = opts.seed {
+        cvars.d_seed = seed;
+    }
+    if cvars.d_seed == 0 {
+        let now = std::time::SystemTime::now();
+        let secs = now.duration_since(UNIX_EPOCH).unwrap().as_secs();
+        cvars.d_seed = secs;
+    }
 
     let tex_list_bytes = load_file("assets/texture_list.txt").await.unwrap();
     draw_text("Loading...", 400.0, 400.0, 32.0, PURPLE);
@@ -64,7 +69,7 @@ async fn main() {
     let map = map::load_map(&map_text, surfaces);
 
     let time = Box::new(MacroquadTime);
-    let mut server = Server::new(&cvars, time, map, rng);
+    let mut server = Server::new(&cvars, time, map);
 
     let player1_handle = server.connect(&cvars, "Player 1");
     let player2_handle = if opts.splitscreen {

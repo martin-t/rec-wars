@@ -5,7 +5,6 @@ mod rendering;
 use std::fmt::Debug;
 
 use js_sys::Array;
-use rand::prelude::*;
 use thunderdome::Index;
 use wasm_bindgen::{prelude::*, JsCast};
 use web_sys::{CanvasRenderingContext2d, HtmlCanvasElement, HtmlImageElement};
@@ -30,7 +29,7 @@ impl RawCanvasGame {
     #[wasm_bindgen(constructor)]
     #[allow(clippy::too_many_arguments)]
     pub fn new(
-        cvars: &Cvars,
+        cvars: &mut Cvars,
         canvas: HtmlCanvasElement,
         context: CanvasRenderingContext2d,
         array_tiles: Array,
@@ -47,15 +46,13 @@ impl RawCanvasGame {
     ) -> Self {
         console_error_panic_hook::set_once();
 
-        let rng = if cvars.d_seed == 0 {
+        if cvars.d_seed == 0 {
             // Casting with `as` throws away some bits but it doesn't really matter,
             // better than using unsafe for transmute.
             // Another option would be SmallRng::from_entropy() but that requires enabling
             // some of rand's features *only* for raw_canvas because macroquad's WASM doesn't work with them.
-            SmallRng::seed_from_u64(js_sys::Date::now() as u64)
-        } else {
-            SmallRng::seed_from_u64(cvars.d_seed)
-        };
+            cvars.d_seed = js_sys::Date::now() as u64;
+        }
 
         let imgs_tiles = array_tiles
             .iter()
@@ -80,7 +77,7 @@ impl RawCanvasGame {
         let time = Box::new(RawCanvasTime(
             web_sys::window().unwrap().performance().unwrap(),
         ));
-        let mut server = Server::new(cvars, time, map, rng);
+        let mut server = Server::new(cvars, time, map);
 
         let player1_handle = server.connect(cvars, "Player 1");
 
