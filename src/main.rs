@@ -59,6 +59,7 @@ async fn main() {
         cvars.d_seed = secs;
     }
 
+    // LATER Load texture list and map in parallel with other assets
     let tex_list_bytes = load_file("assets/texture_list.txt").await.unwrap();
     draw_text("Loading...", 400.0, 400.0, 32.0, PURPLE);
     let tex_list_text = str::from_utf8(&tex_list_bytes).unwrap();
