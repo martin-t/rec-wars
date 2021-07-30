@@ -42,9 +42,6 @@ fn window_conf() -> Conf {
 
 #[macroquad::main(window_conf)]
 async fn main() {
-    // TODO add CI for all build modes
-    // TODO add all OSes to CI
-
     let opts = Opts::from_args();
 
     // This is a hack.
