@@ -1023,7 +1023,7 @@ impl Default for Cvars {
             g_railgun_push: 300.0,
             g_railgun_reload_ammo: 1,
             g_railgun_reload_time: 1.0,
-            g_railgun_speed: 2000.0,
+            g_railgun_speed: 2500.0,
             g_railgun_vehicle_velocity_factor: 0.0,
 
             g_respawn_delay: 2.0,
