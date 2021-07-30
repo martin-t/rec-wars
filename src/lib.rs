@@ -1,4 +1,6 @@
 //! The lib contains code which is shared among the browser and native versions.
+//! That means all game logic is in the lib.
+//!
 //! It also exports structs and entry points for the WASM+canvas browser version
 //! (look for items annotated with `wasm_bindgen`).
 
