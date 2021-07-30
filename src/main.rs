@@ -3,7 +3,7 @@
 
 mod mq;
 
-use std::{str, time::UNIX_EPOCH};
+use std::str;
 
 use macroquad::prelude::*;
 use structopt::StructOpt;
@@ -53,10 +53,12 @@ async fn main() {
     if let Some(seed) = opts.seed {
         cvars.d_seed = seed;
     }
-    let now = std::time::SystemTime::now();
-    let unix_secs = now.duration_since(UNIX_EPOCH).unwrap().as_secs();
+
+    let unix_time = macroquad::miniquad::date::now();
     if cvars.d_seed == 0 {
-        cvars.d_seed = unix_secs;
+        // Casting with `as` throws away some bits but it doesn't really matter,
+        // better than using unsafe for transmute.
+        cvars.d_seed = unix_time as u64;
     }
 
     // LATER Load texture list and map in parallel with other assets
@@ -118,9 +120,10 @@ async fn main() {
         //"extra2/Winter (4)",
         //"extra2/World War (2)",
     ];
-    let mut map_path = opts
-        .map
-        .unwrap_or_else(|| maps[unix_secs as usize % maps.len()].to_owned());
+    let mut map_path = opts.map.unwrap_or_else(|| {
+        let index = unix_time as usize % maps.len();
+        maps[index].to_owned()
+    });
     if !map_path.ends_with(".map") {
         map_path.push_str(".map");
     }
