@@ -36,6 +36,7 @@ pub struct Cvars {
 
     pub bots_max: usize,
 
+    pub cl_spawn_indicator_blinking_period: f64,
     pub cl_spawn_indicator_duration: f64,
     pub cl_spawn_indicator_square_side: f32,
     pub cl_spawn_indicator_thickness: f32,
@@ -813,7 +814,8 @@ impl Default for Cvars {
 
             bots_max: 20,
 
-            cl_spawn_indicator_duration: 1.0,
+            cl_spawn_indicator_blinking_period: 0.3,
+            cl_spawn_indicator_duration: 1.5,
             cl_spawn_indicator_square_side: 40.0,
             cl_spawn_indicator_thickness: 2.0,
 

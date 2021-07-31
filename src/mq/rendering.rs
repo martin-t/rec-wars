@@ -410,7 +410,8 @@ fn render_viewport(
     render_line(player_veh_scr_pos, end, 1.0, GREEN);
 
     // Spawn location indicator
-    if server.gs.game_time - player_vehicle.spawn_time < cvars.cl_spawn_indicator_duration {
+    let alive_time = server.gs.game_time - player_vehicle.spawn_time;
+    if alive_time < cvars.cl_spawn_indicator_duration {
         let vehicle_scr_pos = player_vehicle.pos + camera_offset;
         let radius = cvars.cl_spawn_indicator_square_side / 2.0;
 
@@ -448,14 +449,17 @@ fn render_viewport(
             GREEN,
         );
 
-        draw_rectangle_lines(
-            vehicle_scr_pos.x as f32 - radius,
-            vehicle_scr_pos.y as f32 - radius,
-            cvars.cl_spawn_indicator_square_side,
-            cvars.cl_spawn_indicator_square_side,
-            cvars.cl_spawn_indicator_thickness * 2.0,
-            GREEN,
-        );
+        let period = cvars.cl_spawn_indicator_blinking_period;
+        if period == 0.0 || alive_time % period < period / 2.0 {
+            draw_rectangle_lines(
+                vehicle_scr_pos.x as f32 - radius,
+                vehicle_scr_pos.y as f32 - radius,
+                cvars.cl_spawn_indicator_square_side,
+                cvars.cl_spawn_indicator_square_side,
+                cvars.cl_spawn_indicator_thickness * 2.0,
+                GREEN,
+            );
+        }
     }
 
     // Debug lines and crosses
