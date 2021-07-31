@@ -56,7 +56,7 @@ jobs:
       - name: Run clippy
         # Technically --all-features doesn't check all code when something is *disabled* by a feature
         # but that is discouraged and no such feature existed at the time this was added.
-        run: cargo clippy --all-features -- --deny warnings
+        run: cargo clippy --all-features --all-targets -- --deny warnings
 
   audit:
     runs-on: ubuntu-latest
