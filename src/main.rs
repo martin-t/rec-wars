@@ -135,7 +135,7 @@ async fn main() {
     let map_bytes = load_file(&map_path).await.unwrap();
     draw_text("Loading...", 400.0, 400.0, 32.0, PURPLE);
     let map_text = str::from_utf8(&map_bytes).unwrap();
-    let map = map::load_map(&map_text, surfaces);
+    let map = map::load_map(map_text, surfaces);
 
     let time = Box::new(MacroquadTime);
     let mut server = Server::new(&cvars, time, map);

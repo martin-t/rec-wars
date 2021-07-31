@@ -191,7 +191,7 @@ impl MacroquadClient {
         self.render_fps.tick(cvars.d_fps_period, server.real_time);
         let start = get_time();
 
-        rendering::render(&self, &server, &cvars);
+        rendering::render(self, server, cvars);
 
         let end = get_time();
         self.render_cmds_durations

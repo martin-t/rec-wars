@@ -377,7 +377,7 @@ fn render_viewport(
             let size = measure_text(name, None, cvars.hud_names_font_size as u16, 1.0);
             // LATER remove cvars.hud_names_shadow_x/y when raw_canvas is removed
             render_text_with_shadow(
-                &cvars,
+                cvars,
                 name,
                 scr_pos.x as f32 - size.width / 2.0,
                 (scr_pos.y + cvars.hud_names_y) as f32,
@@ -518,15 +518,15 @@ fn render_viewport(
         .gs
         .players
         .iter()
-        .map(|(index, player)| (index, player.score.points(&cvars)))
+        .map(|(index, player)| (index, player.score.points(cvars)))
         .collect();
     player_points.sort_by_key(|&(_, points)| Reverse(points));
 
     // Score
     let score_pos = hud_pos(view_pos, view_size, cvars.hud_score_x, cvars.hud_score_y);
-    let points = player.score.points(&cvars).to_string();
+    let points = player.score.points(cvars).to_string();
     render_text_with_shadow(
-        &cvars,
+        cvars,
         &points,
         score_pos.x,
         score_pos.y,
@@ -578,7 +578,7 @@ fn render_viewport(
         )
     };
     render_text_with_shadow(
-        &cvars,
+        cvars,
         &ranking,
         ranking_pos.x,
         ranking_pos.y,
@@ -613,7 +613,7 @@ fn render_viewport(
         let hp_number = player_vehicle.hp_fraction * cvars.g_vehicle_hp(player_vehicle.veh_type);
         let hp_text = format!("{}", hp_number);
         render_text_with_shadow(
-            &cvars,
+            cvars,
             &hp_text,
             hp_pos.x - 25.0,
             hp_pos.y + cvars.hud_hp_height as f32,
@@ -652,7 +652,7 @@ fn render_viewport(
             Ammo::Reloading(_start, _end) => 0,
         };
         render_text_with_shadow(
-            &cvars,
+            cvars,
             &ammo_number.to_string(),
             ammo_pos.x - 25.0,
             ammo_pos.y + cvars.hud_ammo_height as f32,
@@ -698,13 +698,13 @@ fn render_viewport(
         let sy = cvars.hud_scoreboard_shadow_mq_y;
 
         // LATER bold header
-        render_text_with_shadow(&cvars, "Name", x, y, fs, WHITE, sx, sy, 1.0);
+        render_text_with_shadow(cvars, "Name", x, y, fs, WHITE, sx, sy, 1.0);
         x += cvars.hud_scoreboard_width_name;
-        render_text_with_shadow(&cvars, "Kills", x, y, fs, WHITE, sx, sy, 1.0);
+        render_text_with_shadow(cvars, "Kills", x, y, fs, WHITE, sx, sy, 1.0);
         x += cvars.hud_scoreboard_width_kills;
-        render_text_with_shadow(&cvars, "Deaths", x, y, fs, WHITE, sx, sy, 1.0);
+        render_text_with_shadow(cvars, "Deaths", x, y, fs, WHITE, sx, sy, 1.0);
         x += cvars.hud_scoreboard_width_deaths;
-        render_text_with_shadow(&cvars, "Points", x, y, fs, WHITE, sx, sy, 1.0);
+        render_text_with_shadow(cvars, "Points", x, y, fs, WHITE, sx, sy, 1.0);
 
         y += cvars.hud_scoreboard_line_height as f32;
 
@@ -721,13 +721,13 @@ fn render_viewport(
             let points = &points.to_string();
 
             x = x_start;
-            render_text_with_shadow(&cvars, name, x, y, fs, color, sx, sy, 1.0);
+            render_text_with_shadow(cvars, name, x, y, fs, color, sx, sy, 1.0);
             x += cvars.hud_scoreboard_width_name;
-            render_text_with_shadow(&cvars, kills, x, y, fs, color, sx, sy, 1.0);
+            render_text_with_shadow(cvars, kills, x, y, fs, color, sx, sy, 1.0);
             x += cvars.hud_scoreboard_width_kills;
-            render_text_with_shadow(&cvars, deaths, x, y, fs, color, sx, sy, 1.0);
+            render_text_with_shadow(cvars, deaths, x, y, fs, color, sx, sy, 1.0);
             x += cvars.hud_scoreboard_width_deaths;
-            render_text_with_shadow(&cvars, points, x, y, fs, color, sx, sy, 1.0);
+            render_text_with_shadow(cvars, points, x, y, fs, color, sx, sy, 1.0);
 
             y += cvars.hud_scoreboard_line_height as f32;
         }
@@ -738,7 +738,7 @@ fn render_viewport(
         let paused_size = measure_text("PAUSED", None, cvars.hud_pause_font_size as u16, 1.0);
         // LATER remove cvars.hud_pause_x/y if raw_canvas removed
         render_text_with_shadow(
-            &cvars,
+            cvars,
             "PAUSED",
             (view_size.x as f32 - paused_size.width) / 2.0,
             (view_size.y as f32 - paused_size.height) / 2.0,
@@ -763,7 +763,7 @@ fn render_viewport(
                 }
 
                 render_text_with_shadow(
-                    &cvars,
+                    cvars,
                     &text.msg,
                     scr_pos.x as f32,
                     scr_pos.y as f32,
@@ -787,7 +787,7 @@ fn render_shared(client: &MacroquadClient, server: &Server, cvars: &Cvars) {
     if cvars.d_fps {
         let fps_pos = hud_pos(Vec2f::zero(), screen_size, cvars.d_fps_x, cvars.d_fps_y);
         render_text_with_shadow(
-            &cvars,
+            cvars,
             &format!(
                 "update FPS: {:.1}   gamelogic FPS: {:.1}   render FPS: {:.1}",
                 server.update_fps.get_fps(),
@@ -807,7 +807,7 @@ fn render_shared(client: &MacroquadClient, server: &Server, cvars: &Cvars) {
     // Draw perf info
     if cvars.d_draw && cvars.d_draw_perf {
         render_text_with_shadow(
-            &cvars,
+            cvars,
             &format!("last {} frames (in ms):", cvars.d_timing_samples),
             screen_size.x as f32 - 280.0,
             screen_size.y as f32 - 105.0,
@@ -820,7 +820,7 @@ fn render_shared(client: &MacroquadClient, server: &Server, cvars: &Cvars) {
         if let Some((avg, max)) = server.update_durations.get_stats() {
             let text = format!("update avg: {:.1}, max: {:.1}", avg * 1000.0, max * 1000.0);
             render_text_with_shadow(
-                &cvars,
+                cvars,
                 &text,
                 screen_size.x as f32 - 280.0,
                 screen_size.y as f32 - 90.0,
@@ -838,7 +838,7 @@ fn render_shared(client: &MacroquadClient, server: &Server, cvars: &Cvars) {
                 max * 1000.0
             );
             render_text_with_shadow(
-                &cvars,
+                cvars,
                 &text,
                 screen_size.x as f32 - 280.0,
                 screen_size.y as f32 - 75.0,
@@ -856,7 +856,7 @@ fn render_shared(client: &MacroquadClient, server: &Server, cvars: &Cvars) {
                 max * 1000.0
             );
             render_text_with_shadow(
-                &cvars,
+                cvars,
                 &text,
                 screen_size.x as f32 - 280.0,
                 screen_size.y as f32 - 60.0,
@@ -870,7 +870,7 @@ fn render_shared(client: &MacroquadClient, server: &Server, cvars: &Cvars) {
         if let Some((avg, max)) = client.rest_durations.get_stats() {
             let text = format!("rest avg: {:.1}, max: {:.1}", avg * 1000.0, max * 1000.0);
             render_text_with_shadow(
-                &cvars,
+                cvars,
                 &text,
                 screen_size.x as f32 - 280.0,
                 screen_size.y as f32 - 45.0,
@@ -889,7 +889,7 @@ fn render_shared(client: &MacroquadClient, server: &Server, cvars: &Cvars) {
         let texts = texts.borrow();
         if cvars.d_draw && cvars.d_draw_text {
             for text in texts.iter() {
-                render_text_with_shadow(&cvars, text, 20.0, y as f32, 16.0, RED, 1.0, 1.0, 0.5);
+                render_text_with_shadow(cvars, text, 20.0, y as f32, 16.0, RED, 1.0, 1.0, 0.5);
                 y += cvars.d_draw_text_line_height;
             }
         }
@@ -975,14 +975,14 @@ fn render_text_with_shadow(
     }
     if shadow_offset_x != 0.0 || shadow_offset_y != 0.0 {
         draw_text(
-            &text,
+            text,
             x + shadow_offset_x,
             y + shadow_offset_y,
             font_size as f32,
             Color::new(0.0, 0.0, 0.0, shadow_alpha as f32),
         );
     }
-    draw_text(&text, x, y, font_size as f32, color);
+    draw_text(text, x, y, font_size as f32, color);
 }
 
 /// If x or y are negative, count them from the right or bottom respectively.

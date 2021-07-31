@@ -31,7 +31,7 @@ fn main() {
         let mut dist_cus = 0.0;
         let mut dist_q3 = 0.0;
         for i in (0..=steps).skip(1) {
-            v_cus = v_cus * (1.0 - friction_cus).powf(dt);
+            v_cus *= (1.0 - friction_cus).powf(dt);
             dist_cus += v_cus * dt;
 
             let drop = v_q3 * friction_q3 * dt;
@@ -61,7 +61,7 @@ fn main() {
         let mut dist_cus = 0.0;
         let mut dist_q3 = 0.0;
         for i in (0..=steps).step_by(multiplier).skip(1) {
-            v_cus = v_cus * (1.0 - friction_cus).powf(dt);
+            v_cus *= (1.0 - friction_cus).powf(dt);
             dist_cus += v_cus * dt;
 
             let drop = v_q3 * friction_q3 * dt;
