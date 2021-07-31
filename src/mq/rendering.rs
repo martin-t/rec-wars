@@ -451,7 +451,7 @@ fn render_viewport(
 
         let period = cvars.cl_spawn_indicator_blinking_period;
         if period == 0.0 || alive_time % period < period / 2.0 {
-            // We have to use thickness*2 here: // https://github.com/not-fl3/macroquad/issues/271
+            // We have to use thickness*2 here: https://github.com/not-fl3/macroquad/issues/271
             draw_rectangle_lines(
                 vehicle_scr_pos.x as f32 - radius,
                 vehicle_scr_pos.y as f32 - radius,
