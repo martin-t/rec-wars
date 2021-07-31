@@ -26,6 +26,8 @@ jobs:
       - run: rustup target add wasm32-unknown-unknown
       - uses: actions/checkout@v2
       - uses: jetli/wasm-pack-action@v0.3.0
+      - name: Print versions
+        run: rustc --version && cargo --version && wasm-pack --version
       - name: Build macroquad native
         run: cargo build --verbose
       - name: Build macroquad web
@@ -39,6 +41,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - name: Print version
+        run: cargo fmt --version
       - name: Check formatting
         run: cargo fmt -- --check
 
@@ -47,6 +51,8 @@ jobs:
     steps:
       - run: sudo apt-get install --no-install-recommends -y pkg-config libx11-dev libxi-dev libgl1-mesa-dev libasound2-dev
       - uses: actions/checkout@v2
+      - name: Print version
+        run: cargo clippy --version
       - name: Run clippy
         # Technically --all-features doesn't check all code when something is *disabled* by a feature
         # but that is discouraged and no such feature existed at the time this was added.
@@ -60,5 +66,7 @@ jobs:
         with:
           crate: cargo-audit
           version: latest
+      - name: Print version
+        run: cargo audit --version
       # https://github.com/rust-random/getrandom/issues/175
       - run: cargo audit --deny warnings --ignore RUSTSEC-2020-0056
