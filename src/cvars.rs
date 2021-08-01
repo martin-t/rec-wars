@@ -36,9 +36,11 @@ pub struct Cvars {
 
     pub bots_max: usize,
 
+    pub cl_spawn_indicator_animation_time: f64,
     pub cl_spawn_indicator_blinking_period: f64,
     pub cl_spawn_indicator_duration: f64,
-    pub cl_spawn_indicator_square_side: f32,
+    pub cl_spawn_indicator_square_side_begin: f32,
+    pub cl_spawn_indicator_square_side_end: f32,
     pub cl_spawn_indicator_thickness: f32,
 
     /// "Temporary" cvar for quick testing. Normally unused but kept here
@@ -814,9 +816,11 @@ impl Default for Cvars {
 
             bots_max: 20,
 
+            cl_spawn_indicator_animation_time: 0.3,
             cl_spawn_indicator_blinking_period: 0.3,
             cl_spawn_indicator_duration: 1.5,
-            cl_spawn_indicator_square_side: 40.0,
+            cl_spawn_indicator_square_side_begin: 800.0,
+            cl_spawn_indicator_square_side_end: 40.0,
             cl_spawn_indicator_thickness: 2.0,
 
             d_dbg: false,

@@ -413,50 +413,60 @@ fn render_viewport(
     let alive_time = server.gs.game_time - player_vehicle.spawn_time;
     if alive_time < cvars.cl_spawn_indicator_duration {
         let vehicle_scr_pos = player_vehicle.pos + camera_offset;
-        let radius = cvars.cl_spawn_indicator_square_side / 2.0;
 
+        // Radius here is distance from the square's center to its side.
+        let max_radius = cvars.cl_spawn_indicator_square_side_begin / 2.0;
+        let min_radius = cvars.cl_spawn_indicator_square_side_end / 2.0;
+        let fraction_complete =
+            (alive_time / cvars.cl_spawn_indicator_animation_time).clamp(0.0, 1.0) as f32;
+        let radius = (max_radius - min_radius) * (1.0 - fraction_complete) + min_radius;
+
+        // Horizontal and verzical lines pointing at the vehicle.
         draw_line(
             0.0,
             vehicle_scr_pos.y as f32,
-            vehicle_scr_pos.x as f32 - radius,
+            vehicle_scr_pos.x as f32 - min_radius,
             vehicle_scr_pos.y as f32,
             cvars.cl_spawn_indicator_thickness,
             GREEN,
         );
         draw_line(
-            vehicle_scr_pos.x as f32 + radius,
+            vehicle_scr_pos.x as f32 + min_radius,
             vehicle_scr_pos.y as f32,
             client.viewport_size.x as f32,
             vehicle_scr_pos.y as f32,
             cvars.cl_spawn_indicator_thickness,
             GREEN,
         );
-
         draw_line(
             vehicle_scr_pos.x as f32,
             0.0,
             vehicle_scr_pos.x as f32,
-            vehicle_scr_pos.y as f32 - radius,
+            vehicle_scr_pos.y as f32 - min_radius,
             cvars.cl_spawn_indicator_thickness,
             GREEN,
         );
         draw_line(
             vehicle_scr_pos.x as f32,
-            vehicle_scr_pos.y as f32 + radius,
+            vehicle_scr_pos.y as f32 + min_radius,
             vehicle_scr_pos.x as f32,
             client.viewport_size.y as f32,
             cvars.cl_spawn_indicator_thickness,
             GREEN,
         );
 
+        // Square with the vehicle in the center - first shrinks, then blinks.
         let period = cvars.cl_spawn_indicator_blinking_period;
-        if period == 0.0 || alive_time % period < period / 2.0 {
+        let still_shrinking = alive_time < cvars.cl_spawn_indicator_animation_time; // Don't blink during the animation
+        let blinking_disabled = period == 0.0;
+        let visible = alive_time % period < period / 2.0;
+        if still_shrinking || blinking_disabled || visible {
             // We have to use thickness*2 here: https://github.com/not-fl3/macroquad/issues/271
             draw_rectangle_lines(
                 vehicle_scr_pos.x as f32 - radius,
                 vehicle_scr_pos.y as f32 - radius,
-                cvars.cl_spawn_indicator_square_side,
-                cvars.cl_spawn_indicator_square_side,
+                radius * 2.0,
+                radius * 2.0,
                 cvars.cl_spawn_indicator_thickness * 2.0,
                 GREEN,
             );
