@@ -7,6 +7,8 @@ use wasm_bindgen::prelude::*;
 
 use crate::{entities::Hitbox, entities::VehicleType, entities::Weapon, map::Vec2f};
 
+use cvars_derive::Cvars;
+
 /// Console variables - configuration options for anything and everything.
 ///
 /// Prefix meanings:
@@ -24,7 +26,7 @@ use crate::{entities::Hitbox, entities::VehicleType, entities::Weapon, map::Vec2
 ///     - they compile but can't be changed from JS (the change is thrown away)
 ///     - e.g. `cvars.g_tank.speed` wouldn't work
 #[cfg_attr(feature = "raw_canvas", wasm_bindgen)]
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Cvars)]
 #[allow(missing_copy_implementations)]
 pub struct Cvars {
     // Long-term this needs some kind of better system to reduce duplication / manual work.
