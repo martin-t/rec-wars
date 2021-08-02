@@ -2,6 +2,7 @@ use cvars_derive::Cvars;
 
 #[derive(Debug, Clone, Cvars)]
 struct Cvars {
+    // TODO parse all
     //pub g_bool: bool,
     pub g_int: i32,
     //pub g_usize: usize,
@@ -16,4 +17,7 @@ pub enum Enum {
     Two,
 }
 
-fn main() {}
+fn main() {
+    let cvars = Cvars { g_int: 42 };
+    assert_eq!(cvars.get("g_int"), cvars.g_int);
+}
