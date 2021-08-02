@@ -322,6 +322,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "cvars-derive"
+version = "0.0.0"
+dependencies = [
+ "quote",
+ "syn",
+]
+
+[[package]]
 name = "darling"
 version = "0.10.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1134,6 +1142,7 @@ name = "rec-wars"
 version = "0.1.0"
 dependencies = [
  "console_error_panic_hook",
+ "cvars-derive",
  "enumn",
  "fnv",
  "futures",
