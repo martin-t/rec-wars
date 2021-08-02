@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 use proc_macro::TokenStream;
 use quote::quote;
 use syn::{parse_macro_input, DeriveInput};
@@ -32,17 +34,47 @@ pub fn derive(input: TokenStream) -> TokenStream {
         tys.push(&field.ty);
     }
 
-    let expanded = quote! {
-        impl #struct_name {
-            fn get(&self, cvar_name: &str) -> i32 {
-                match cvar_name{
-                    #(
-                        stringify!(#fields) => self.#fields,
-                    )*
-                    other => panic!("Unknown cvar {}", other),
-                }
+    let unique_tys: HashSet<_> = tys.iter().collect();
+    let mut trait_impls = Vec::new();
+    for unique_ty in unique_tys {
+        let mut match_arms = Vec::new();
+
+        for i in 0..fields.len() {
+            let field = fields[i];
+            let ty = tys[i];
+            if ty == *unique_ty {
+                let arm = quote! {
+                    stringify!(#field) => cvars.#field,
+                };
+                match_arms.push(arm);
             }
         }
+
+        let trait_impl = quote! {
+            impl CvarValue for #unique_ty {
+                fn get(cvars: &Cvars, cvar_name: &str) -> Self {
+                    match cvar_name {
+                        #( #match_arms )*
+                        _ => panic!("TODO"),
+                    }
+                }
+            }
+        };
+        trait_impls.push(trait_impl);
+    }
+
+    let expanded = quote! {
+        impl #struct_name {
+            fn get<T: CvarValue>(&self, cvar_name: &str) -> T {
+                CvarValue::get(self, cvar_name)
+            }
+        }
+
+        trait CvarValue {
+            fn get(cvars: &Cvars, cvar_name: &str) -> Self;
+        }
+
+        #( #trait_impls )*
     };
     TokenStream::from(expanded)
 }

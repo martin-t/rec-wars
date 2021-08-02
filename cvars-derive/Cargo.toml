@@ -7,6 +7,10 @@ autotests = false
 [lib]
 proc-macro = true
 
+[[bin]]
+name = "testing"
+path = "main.rs"
+
 [[test]]
 name = "tests"
 path = "tests/progress.rs"
@@ -15,5 +19,5 @@ path = "tests/progress.rs"
 trybuild = { version = "1.0", features = ["diff"] }
 
 [dependencies]
-syn = "1.0.74"
+syn = { version = "1.0.74", features = ["extra-traits"] }
 quote = "1.0.9"
