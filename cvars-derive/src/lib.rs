@@ -37,25 +37,40 @@ pub fn derive(input: TokenStream) -> TokenStream {
     let unique_tys: HashSet<_> = tys.iter().collect();
     let mut trait_impls = Vec::new();
     for unique_ty in unique_tys {
-        let mut match_arms = Vec::new();
+        let mut getter_arms = Vec::new();
+        let mut setter_arms = Vec::new();
 
         for i in 0..fields.len() {
             let field = fields[i];
             let ty = tys[i];
             if ty == *unique_ty {
-                let arm = quote! {
+                let getter_arm = quote! {
                     stringify!(#field) => cvars.#field,
                 };
-                match_arms.push(arm);
+                getter_arms.push(getter_arm);
+
+                let setter_arm = quote! {
+                    stringify!(#field) => cvars.#field = value,
+                };
+                setter_arms.push(setter_arm);
             }
         }
 
+        // TODO Better error messages (report type of value and of field if both exist)
+        // TODO Is there a sane way to automatically convert?
         let trait_impl = quote! {
             impl CvarValue for #unique_ty {
                 fn get(cvars: &Cvars, cvar_name: &str) -> Self {
                     match cvar_name {
-                        #( #match_arms )*
-                        _ => panic!("TODO"),
+                        #( #getter_arms )*
+                        _ => panic!("Cvar named {} with type {} not found", cvar_name, stringify!(#unique_ty)),
+                    }
+                }
+
+                fn set(cvars: &mut Cvars, cvar_name: &str, value: Self) {
+                    match cvar_name {
+                        #( #setter_arms )*
+                        _ => panic!("Cvar named {} with type {} not found", cvar_name, stringify!(#unique_ty)),
                     }
                 }
             }
@@ -68,10 +83,15 @@ pub fn derive(input: TokenStream) -> TokenStream {
             fn get<T: CvarValue>(&self, cvar_name: &str) -> T {
                 CvarValue::get(self, cvar_name)
             }
+
+            fn set<T: CvarValue>(&mut self, cvar_name: &str, value: T) {
+                CvarValue::set(self, cvar_name, value);
+            }
         }
 
         trait CvarValue {
             fn get(cvars: &Cvars, cvar_name: &str) -> Self;
+            fn set(cvars: &mut Cvars, cvar_name: &str, value: Self);
         }
 
         #( #trait_impls )*

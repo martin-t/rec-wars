@@ -7,31 +7,6 @@ use wasm_bindgen::prelude::*;
 
 use crate::{entities::Hitbox, entities::VehicleType, entities::Weapon, map::Vec2f};
 
-trait CvarValue {
-    fn get(cvars: &Cvars, cvar_name: &str) -> Self;
-}
-
-impl CvarValue for bool {
-    fn get(cvars: &Cvars, cvar_name: &str) -> Self {
-        match cvar_name {
-            "ai" => cvars.ai,
-            _ => panic!("TODO"),
-        }
-    }
-}
-
-impl Cvars {
-    fn get<T: CvarValue>(&self, cvar_name: &str) -> T {
-        CvarValue::get(self, cvar_name)
-    }
-}
-
-pub fn test() {
-    let cvars = Cvars::default();
-    let x: bool = cvars.get("ai");
-    dbg!(x);
-}
-
 /// Console variables - configuration options for anything and everything.
 ///
 /// Prefix meanings:
