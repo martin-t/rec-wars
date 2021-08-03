@@ -1,0 +1,3 @@
+mod shared;
+
+fn main() {}

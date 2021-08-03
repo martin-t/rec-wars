@@ -1,7 +1,7 @@
 use cvars_derive::Cvars;
 
-#[derive(Debug, Clone, Cvars)]
-struct Cvars {
+#[derive(Debug, Clone, Default, Cvars)]
+pub struct Cvars {
     pub g_bool: bool,
     pub g_int: i32,
     pub g_usize: usize,
@@ -16,4 +16,8 @@ pub enum Enum {
     Two,
 }
 
-fn main() {}
+impl Default for Enum {
+    fn default() -> Self {
+        Enum::One
+    }
+}
