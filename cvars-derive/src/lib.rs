@@ -91,6 +91,14 @@ pub fn derive(input: TokenStream) -> TokenStream {
             pub fn set<T: CvarValue>(&mut self, cvar_name: &str, value: T) {
                 CvarValue::set(self, cvar_name, value);
             }
+
+            pub fn set_str(&mut self, cvar_name: &str, str_value: &str) {
+                match cvar_name {
+                    // This doesn't need to be dispatched via CvarValue, it uses FromStr instead.
+                    #( stringify!(#fields) => self.#fields = str_value.parse().unwrap(), )*
+                    _ => panic!("Cvar named {} not found", cvar_name),
+                }
+            }
         }
 
         /// This trait is needed to dispatch cvar get/set based on its type.

@@ -1,3 +1,5 @@
+use std::str::FromStr;
+
 use cvars_derive::Cvars;
 
 #[derive(Debug, Clone, Default, Cvars)]
@@ -19,5 +21,16 @@ pub enum Enum {
 impl Default for Enum {
     fn default() -> Self {
         Enum::One
+    }
+}
+
+impl FromStr for Enum {
+    type Err = String;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s.to_lowercase().as_ref() {
+            "one" => Ok(Enum::One),
+            "two" => Ok(Enum::Two),
+            _ => Err(format!("Couldn't parse {} as Enum", s)),
+        }
     }
 }
