@@ -20,8 +20,8 @@ struct Opts {
     #[structopt(long)]
     map: Option<String>,
 
-    #[structopt(long)]
-    seed: Option<u64>,
+    #[structopt()]
+    cvars: Vec<String>,
 }
 
 fn window_conf() -> Conf {
@@ -50,8 +50,11 @@ async fn main() {
     draw_text("Loading...", 400.0, 400.0, 32.0, RED);
 
     let mut cvars = Cvars::new_rec_wars();
-    if let Some(seed) = opts.seed {
-        cvars.d_seed = seed;
+    let mut cvars_iter = opts.cvars.iter();
+    while let Some(cvar_name) = cvars_iter.next() {
+        let str_value = cvars_iter.next().unwrap();
+        cvars.set_str(cvar_name, str_value);
+        rec_wars::dbg_logf!("{} = {}", cvar_name, cvars.get_string(cvar_name));
     }
 
     let time_seed = macroquad::miniquad::date::now();

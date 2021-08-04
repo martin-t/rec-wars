@@ -88,6 +88,14 @@ pub fn derive(input: TokenStream) -> TokenStream {
                 CvarValue::get(self, cvar_name)
             }
 
+            pub fn get_string(&self, cvar_name: &str) -> String {
+                match cvar_name {
+                    // This doesn't need to be dispatched via CvarValue, it uses Display instead.
+                    #( stringify!(#fields) => self.#fields.to_string(), )*
+                    _ => panic!("Cvar named {} not found", cvar_name),
+                }
+            }
+
             pub fn set<T: CvarValue>(&mut self, cvar_name: &str, value: T) {
                 CvarValue::set(self, cvar_name, value);
             }

@@ -2,7 +2,7 @@
 
 use std::default::Default;
 
-use strum_macros::EnumString;
+use strum_macros::{Display, EnumString};
 #[cfg(feature = "raw_canvas")]
 use wasm_bindgen::prelude::*;
 
@@ -1172,7 +1172,7 @@ impl Default for Cvars {
 }
 
 #[cfg_attr(feature = "raw_canvas", wasm_bindgen)]
-#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumString)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumString, Display)]
 pub enum Hardpoint {
     Chassis,
     Turret,
@@ -1180,7 +1180,7 @@ pub enum Hardpoint {
 
 /// Various options how to handle different physics/gamelogic and rendering framerates.
 #[cfg_attr(feature = "raw_canvas", wasm_bindgen)]
-#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumString)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumString, Display)]
 pub enum TickrateMode {
     /// Same FPS as rendering - runs one tick with variable timestep before rendering.
     /// This means simulation always catches up to rendering (wall-clock time) exactly.
