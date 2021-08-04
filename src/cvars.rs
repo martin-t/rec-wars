@@ -82,7 +82,10 @@ pub struct Cvars {
     /// Change speed of everything in the game
     pub d_speed: f64,
 
-    /// Scale hit points of all vehicles
+    /// Hit points. Recommended values are between 1 and 500, original RecWar used 100 as default.
+    ///
+    /// Note that the actual number of hitpoints depends on vehicle type, this is just the base value.
+    /// By default, the tank uses this value, other vehicles scale it by some multiplier.
     pub g_armor: f64,
 
     pub g_bfg_beam_damage_per_sec: f64,
@@ -223,11 +226,11 @@ pub struct Cvars {
 
     pub g_hitcircle_radius: f64, // TODO proper hitbox
 
+    pub g_hovercraft_armor_scale: f64,
     pub g_hovercraft_accel_backward: f64,
     pub g_hovercraft_accel_forward: f64,
     pub g_hovercraft_friction_const: f64,
     pub g_hovercraft_friction_linear: f64,
-    pub g_hovercraft_base_hp: f64,
     pub g_hovercraft_maxs_x: f64,
     pub g_hovercraft_maxs_y: f64,
     pub g_hovercraft_mins_x: f64,
@@ -244,11 +247,11 @@ pub struct Cvars {
     pub g_hovercraft_turret_offset_turret_x: f64,
     pub g_hovercraft_turret_offset_turret_y: f64,
 
+    pub g_hummer_armor_scale: f64,
     pub g_hummer_accel_backward: f64,
     pub g_hummer_accel_forward: f64,
     pub g_hummer_friction_const: f64,
     pub g_hummer_friction_linear: f64,
-    pub g_hummer_base_hp: f64,
     pub g_hummer_maxs_x: f64,
     pub g_hummer_maxs_y: f64,
     pub g_hummer_mins_x: f64,
@@ -290,11 +293,11 @@ pub struct Cvars {
     pub g_self_destruct_explosion_scale: f64, // TODO radius
     pub g_self_destruct_radius: f64,
 
+    pub g_tank_armor_scale: f64,
     pub g_tank_accel_backward: f64,
     pub g_tank_accel_forward: f64,
     pub g_tank_friction_const: f64,
     pub g_tank_friction_linear: f64,
-    pub g_tank_base_hp: f64,
     pub g_tank_maxs_x: f64,
     pub g_tank_maxs_y: f64,
     pub g_tank_mins_x: f64,
@@ -401,7 +404,9 @@ pub struct Cvars {
     pub r_smoothing: bool,
     pub r_splitscreen_gap: f64,
 
+    /// Does not work in MQ: https://github.com/not-fl3/macroquad/issues/264
     pub sv_auto_pause_on_minimize: bool,
+    /// Does not work in MQ: https://github.com/not-fl3/macroquad/issues/264
     pub sv_auto_unpause_on_restore: bool,
 
     pub sv_gamelogic_mode: TickrateMode,
@@ -621,12 +626,12 @@ impl Cvars {
     }
 
     pub fn g_vehicle_hp(&self, veh_type: VehicleType) -> f64 {
-        let base = match veh_type {
-            VehicleType::Tank => self.g_tank_base_hp,
-            VehicleType::Hovercraft => self.g_hovercraft_base_hp,
-            VehicleType::Hummer => self.g_hummer_base_hp,
+        let scale = match veh_type {
+            VehicleType::Tank => self.g_tank_armor_scale,
+            VehicleType::Hovercraft => self.g_hovercraft_armor_scale,
+            VehicleType::Hummer => self.g_hummer_armor_scale,
         };
-        base * self.g_armor
+        self.g_armor * scale
     }
 
     pub(crate) fn g_vehicle_movement_stats(&self, veh_type: VehicleType) -> MovementStats {
@@ -987,11 +992,11 @@ impl Default for Cvars {
 
             g_hitcircle_radius: 24.0,
 
+            g_hovercraft_armor_scale: 0.65,
             g_hovercraft_accel_backward: 400.0,
             g_hovercraft_accel_forward: 400.0,
             g_hovercraft_friction_const: 0.0,
             g_hovercraft_friction_linear: 0.6,
-            g_hovercraft_base_hp: 0.65,
             g_hovercraft_maxs_x: 22.0,
             g_hovercraft_maxs_y: 14.0,
             g_hovercraft_mins_x: -22.0,
@@ -1008,11 +1013,11 @@ impl Default for Cvars {
             g_hovercraft_turret_offset_turret_x: -8.0,
             g_hovercraft_turret_offset_turret_y: 0.0,
 
+            g_hummer_armor_scale: 0.625,
             g_hummer_accel_backward: 600.0,
             g_hummer_accel_forward: 600.0,
             g_hummer_friction_const: 11.0,
             g_hummer_friction_linear: 0.8,
-            g_hummer_base_hp: 0.625,
             g_hummer_maxs_x: 20.0,
             g_hummer_maxs_y: 9.0,
             g_hummer_mins_x: -20.0,
@@ -1054,11 +1059,11 @@ impl Default for Cvars {
             g_self_destruct_explosion_scale: 2.0,
             g_self_destruct_radius: 175.0,
 
+            g_tank_armor_scale: 1.0,
             g_tank_accel_backward: 550.0,
             g_tank_accel_forward: 550.0,
             g_tank_friction_const: 50.0,
             g_tank_friction_linear: 0.9,
-            g_tank_base_hp: 1.0,
             g_tank_maxs_x: 19.0,
             g_tank_maxs_y: 12.0,
             g_tank_mins_x: -19.0,

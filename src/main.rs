@@ -14,12 +14,16 @@ use crate::mq::MacroquadClient;
 
 #[derive(StructOpt, Debug)]
 struct Opts {
+    /// 2 player local multiplayer
     #[structopt(long)]
     splitscreen: bool,
 
+    /// Set the map to play on (instead of random)
     #[structopt(long)]
     map: Option<String>,
 
+    /// Set cvar values - use key value pairs (separated by space).
+    /// Example: g_armor 150 hud_names false
     #[structopt()]
     cvars: Vec<String>,
 }
