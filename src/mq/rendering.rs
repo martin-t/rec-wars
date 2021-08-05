@@ -83,12 +83,12 @@ fn render_viewport(
     let view_pos = empty_space_size / 2.0;
 
     // Camera center in world coords.
-    let camera_pos_min = view_size / 2.0;
-    let camera_pos_max = map_size - camera_pos_min;
-    let camera_pos = player_entity_pos.clamped(camera_pos_min, camera_pos_max);
+    let camera_center_min = view_size / 2.0;
+    let camera_center_max = map_size - camera_center_min;
+    let camera_center = player_entity_pos.clamped(camera_center_min, camera_center_max);
 
     // Position of the camera's top left corner in world coords.
-    let camera_top_left = camera_pos - camera_pos_min;
+    let camera_top_left = camera_center - camera_center_min;
     // Add this to world coords to get screen coords.
     // Forgetting to do this is a recurring source of bugs.
     // I've considered making a special type for screen coords (e.g. struct Vec2screen(Vec2f);)
