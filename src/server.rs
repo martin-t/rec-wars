@@ -103,7 +103,9 @@ impl Server {
 
     /// Run gamelogic frame(s) up to current time (in seconds).
     pub fn update(&mut self, cvars: &Cvars, real_time: f64) {
-        // Recommended reading: https://gafferongames.com/post/fix_your_timestep/
+        // Recommended reading:
+        // https://gafferongames.com/post/fix_your_timestep/
+        // https://medium.com/@tglaiel/how-to-make-your-game-run-at-60fps-24c61210fe75
 
         self.update_fps.tick(cvars.d_fps_period, self.real_time);
         let start = self.time.now();
