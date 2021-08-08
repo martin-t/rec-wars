@@ -322,8 +322,9 @@ dependencies = [
 ]
 
 [[package]]
-name = "cvars-derive"
+name = "cvars"
 version = "0.0.0"
+source = "git+https://github.com/martin-t/cvars#b0565123b9954aa9c980eec4111a68767f61acad"
 dependencies = [
  "quote",
  "syn",
@@ -1142,7 +1143,7 @@ name = "rec-wars"
 version = "0.1.0"
 dependencies = [
  "console_error_panic_hook",
- "cvars-derive",
+ "cvars",
  "enumn",
  "fnv",
  "futures",

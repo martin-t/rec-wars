@@ -6,7 +6,7 @@ use strum_macros::{Display, EnumString};
 #[cfg(feature = "raw_canvas")]
 use wasm_bindgen::prelude::*;
 
-use cvars_derive::Cvars;
+use cvars::SetGet;
 
 use crate::{entities::Hitbox, entities::VehicleType, entities::Weapon, map::Vec2f};
 
@@ -27,7 +27,7 @@ use crate::{entities::Hitbox, entities::VehicleType, entities::Weapon, map::Vec2
 ///     - they compile but can't be changed from JS (the change is thrown away)
 ///     - e.g. `cvars.g_tank.speed` wouldn't work
 #[cfg_attr(feature = "raw_canvas", wasm_bindgen)]
-#[derive(Debug, Clone, Cvars)]
+#[derive(Debug, Clone, SetGet)]
 #[allow(missing_copy_implementations)]
 pub struct Cvars {
     // Long-term this needs some kind of better system to reduce duplication / manual work.
