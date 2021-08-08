@@ -1,3 +1,0 @@
-mod shared;
-
-fn main() {}
