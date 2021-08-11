@@ -53,6 +53,8 @@ async fn main() {
     // Let's just redraw it a few times during the loading process so the player sees something is happening.
     draw_text("Loading...", 400.0, 400.0, 32.0, RED);
 
+    show_mouse(false);
+
     let mut cvars = Cvars::new_rec_wars();
     let mut cvars_iter = opts.cvars.iter();
     while let Some(cvar_name) = cvars_iter.next() {
