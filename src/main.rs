@@ -57,8 +57,8 @@ async fn main() {
     let mut cvars_iter = opts.cvars.iter();
     while let Some(cvar_name) = cvars_iter.next() {
         let str_value = cvars_iter.next().unwrap();
-        cvars.set_str(cvar_name, str_value);
-        rec_wars::dbg_logf!("{} = {}", cvar_name, cvars.get_string(cvar_name));
+        cvars.set_str(cvar_name, str_value).unwrap();
+        rec_wars::dbg_logf!("{} = {}", cvar_name, cvars.get_string(cvar_name).unwrap());
     }
 
     let time_seed = macroquad::miniquad::date::now();

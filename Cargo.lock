@@ -323,8 +323,9 @@ dependencies = [
 
 [[package]]
 name = "cvars"
-version = "0.0.0"
-source = "git+https://github.com/martin-t/cvars#b0565123b9954aa9c980eec4111a68767f61acad"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1f38e0641d1103148828aef276ca249d50a905812a7e70f54cc62ccf877a6a53"
 dependencies = [
  "quote",
  "syn",
