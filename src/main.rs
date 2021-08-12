@@ -165,13 +165,7 @@ async fn main() {
 
         server.snapshot_inputs();
 
-        if let Some(player2_handle) = player2_handle {
-            server.input(player1_handle, mq::get_input1());
-            server.input(player2_handle, mq::get_input2());
-        } else {
-            let input = mq::get_input1().merged(mq::get_input2());
-            server.input(player1_handle, input);
-        }
+        client.process_input(&mut server);
 
         server.update(&cvars, real_time);
 

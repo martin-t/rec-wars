@@ -156,6 +156,8 @@ pub struct Input {
     pub horn: bool,
     pub chat: bool,
     pub pause: bool,
+    pub console: bool,
+    pub esc: bool,
     // ^ when adding fields, also add them to Debug
 }
 
@@ -189,6 +191,8 @@ impl Input {
             horn: self.horn | other.horn,
             chat: self.chat | other.chat,
             pause: self.pause | other.pause,
+            console: self.console | other.console,
+            esc: self.esc | other.esc,
         }
     }
 
@@ -270,6 +274,12 @@ impl Debug for Input {
         }
         if self.pause {
             write!(f, "pause ")?;
+        }
+        if self.console {
+            write!(f, "console ")?;
+        }
+        if self.esc {
+            write!(f, "esc ")?;
         }
         write!(f, "}}")?;
         Ok(())

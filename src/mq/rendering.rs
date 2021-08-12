@@ -905,6 +905,37 @@ fn render_shared(client: &MacroquadClient, server: &Server, cvars: &Cvars) {
             }
         }
     });
+
+    // Draw console
+    render_console(client);
+}
+
+fn render_console(client: &MacroquadClient) {
+    if !client.console_visible {
+        return;
+    }
+
+    // Background
+    let console_height = screen_height() / 2.0;
+    draw_rectangle(
+        0.0,
+        0.0,
+        screen_width(),
+        console_height,
+        Color::new(0.0, 0.0, 0.0, 0.8),
+    );
+    draw_line(
+        0.0,
+        console_height,
+        screen_width(),
+        console_height,
+        1.0,
+        RED,
+    );
+
+    // Prompt
+    let line_height = 10.0;
+    draw_text("> ", 5.0, console_height - line_height, 16.0, WHITE);
 }
 
 /// Place the image's *center* at `scr_pos`,

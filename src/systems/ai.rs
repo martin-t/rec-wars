@@ -58,6 +58,8 @@ pub(crate) fn ai(cvars: &Cvars, gs: &mut GameState) {
             horn: gs.rng.gen_bool(0.0001),
             chat: false,
             pause: false, // :)
+            console: false,
+            esc: false,
         }
     }
 }
