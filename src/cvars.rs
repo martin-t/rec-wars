@@ -46,6 +46,16 @@ pub struct Cvars {
     pub cl_spawn_indicator_square_side_end: f32,
     pub cl_spawn_indicator_thickness: f32,
 
+    pub con_group_x: f32,
+    pub con_group_y_offset: f32,
+    pub con_height_fraction: f32,
+    pub con_history_line_font_size: f32,
+    pub con_history_line_height: f32,
+    pub con_history_x: f32,
+    pub con_history_y_offset: f32,
+    pub con_label_x: f32,
+    pub con_label_y_offset: f32,
+
     /// "Temporary" cvar for quick testing. Normally unused but kept here
     /// so I don't have to add a cvar each time I want a quick toggle.
     pub d_dbg: bool,
@@ -830,6 +840,16 @@ impl Default for Cvars {
             cl_spawn_indicator_square_side_begin: 800.0,
             cl_spawn_indicator_square_side_end: 40.0,
             cl_spawn_indicator_thickness: 2.0,
+
+            con_group_x: 16.0,
+            con_group_y_offset: 26.0,
+            con_height_fraction: 0.45,
+            con_history_line_font_size: 16.0,
+            con_history_line_height: 14.0,
+            con_history_x: 8.0,
+            con_history_y_offset: 25.0,
+            con_label_x: 8.0,
+            con_label_y_offset: 22.0,
 
             d_dbg: false,
 

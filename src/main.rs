@@ -170,6 +170,7 @@ async fn main() {
         server.update(&cvars, real_time);
 
         client.render(&server, &cvars);
+        client.console.update(&mut cvars);
 
         let before = get_time();
         next_frame().await;

@@ -1,5 +1,6 @@
 //! Native and WASM versions using the macroquad engine.
 
+mod console;
 mod rendering;
 
 use futures::future;
@@ -13,6 +14,8 @@ use rec_wars::{
     server::Server,
     timing::{Durations, Fps},
 };
+
+use crate::mq::console::Console;
 
 #[derive(Debug)]
 pub(crate) struct MacroquadClient {
@@ -30,9 +33,9 @@ pub(crate) struct MacroquadClient {
     pub(crate) rest_durations: Durations,
     pub(crate) viewport_size: Vec2f,
     pub(crate) client_mode: ClientMode,
-    pub(crate) input_prev: Input,
+    pub(crate) input1: Input,
+    pub(crate) input1_prev: Input,
     pub(crate) console: Console,
-    pub(crate) console_visible: bool,
 }
 
 #[derive(Debug)]
@@ -187,22 +190,22 @@ impl MacroquadClient {
             rest_durations: Durations::new(),
             viewport_size,
             client_mode,
-            input_prev: Input::new(),
+            input1: Input::new(),
+            input1_prev: Input::new(),
             console: Console::new(),
-            console_visible: false,
         }
     }
 
     pub(crate) fn process_input(&mut self, server: &mut Server) {
+        if self.console.is_open() {
+            return;
+        }
+
         let input1 = get_input1();
         let input2 = get_input2();
 
-        if (input1.console && !self.input_prev.console)
-            || (self.console_visible && input1.esc && !self.input_prev.esc)
-        {
-            self.console_visible = !self.console_visible;
-        }
-        self.input_prev = input1;
+        self.input1_prev = self.input1;
+        self.input1 = input1;
 
         match self.client_mode {
             ClientMode::Singleplayer { player_handle } => {
@@ -228,21 +231,6 @@ impl MacroquadClient {
         let end = get_time();
         self.render_cmds_durations
             .add(cvars.d_timing_samples, end - start);
-    }
-}
-
-#[derive(Debug)]
-pub(crate) struct Console {
-    prompt: String,
-    history: Vec<String>,
-}
-
-impl Console {
-    fn new() -> Self {
-        Self {
-            prompt: String::new(),
-            history: Vec::new(),
-        }
     }
 }
 
@@ -291,18 +279,16 @@ fn get_input1() -> Input {
     if was_input_pressed(&[KeyCode::R]) {
         input.horn = true;
     }
+
+    // The rest is player 1 only
+
     if was_input_pressed(&[KeyCode::T]) {
         input.chat = true;
     }
     if was_input_pressed(&[KeyCode::Pause, KeyCode::P]) {
         input.pause = true;
     }
-    if was_input_pressed(&[KeyCode::Semicolon]) {
-        input.console = true;
-    }
-    if was_input_pressed(&[KeyCode::Escape]) {
-        input.esc = true;
-    }
+
     input
 }
 
