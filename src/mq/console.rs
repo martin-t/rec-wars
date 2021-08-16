@@ -74,27 +74,38 @@ impl Console {
         // LATER A less hacky input system would be great.
         self.prompt = self.prompt.replace(';', "");
 
-        // Save the prompt so that users can go back in history,
-        // then come back to present and get it back.
-        if self.history_index == self.history.len() {
-            self.prompt_saved = self.prompt.clone();
-        }
-
-        // TODO - Only cycle through what the user typed.
-        //  Use slices and iter().rposition() to avoid out of bounds bugs.
         let pressed_up = !self.input_prev.up && self.input.up;
-        if pressed_up && self.history_index >= 1 {
-            // The check must be before subtraction so we don't underflow.
-            self.history_index -= 1;
-            self.prompt = self.history[self.history_index].text.clone();
+        if pressed_up {
+            // Save the prompt so that users can go back in history,
+            // then come back to present and get what they typed back.
+            if self.history_index == self.history.len() {
+                self.prompt_saved = self.prompt.clone();
+            }
+
+            let search_slice = &self.history[0..self.history_index];
+            if let Some(new_index) = search_slice
+                .iter()
+                .rposition(|hist_line| hist_line.is_input)
+            {
+                self.history_index = new_index;
+                self.prompt = self.history[self.history_index].text.clone();
+            }
         }
 
         let pressed_down = !self.input_prev.down && self.input.down;
         if pressed_down && self.history_index < self.history.len() {
-            self.history_index += 1;
-            if self.history_index < self.history.len() {
+            // Since we're starting at history_index+1, the above consition must remain here
+            // otherwise it crashes because the range could start after the end of the Vec.
+            let search_slice = &self.history[self.history_index + 1..];
+            if let Some(new_index) = search_slice.iter().position(|hist_line| hist_line.is_input) {
+                // `position` starts counting from the iterator's start,
+                // not from history's start so we add the found index to what we skipped
+                // instead of using it directly.
+                self.history_index += new_index + 1;
                 self.prompt = self.history[self.history_index].text.clone();
             } else {
+                // We're at the end of history, restore the saved prompt.
+                self.history_index = self.history.len();
                 self.prompt = self.prompt_saved.clone();
             }
         }
