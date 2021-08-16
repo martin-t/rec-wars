@@ -94,8 +94,8 @@ impl Console {
 
         let pressed_down = !self.input_prev.down && self.input.down;
         if pressed_down && self.history_index < self.history.len() {
-            // Since we're starting at history_index+1, the above consition must remain here
-            // otherwise it crashes because the range could start after the end of the Vec.
+            // Since we're starting at history_index+1, the history.len() condition must remain here
+            // otherwise the range could start at history.len()+1 and panic.
             let search_slice = &self.history[self.history_index + 1..];
             if let Some(new_index) = search_slice.iter().position(|hist_line| hist_line.is_input) {
                 // `position` starts counting from the iterator's start,
