@@ -17,7 +17,10 @@ pub struct Console {
     prompt: String,
     prompt_saved: String,
     history: Vec<HistoryLine>,
+    /// Where we are in history when using up and down keys.
     history_index: usize,
+    /// Where we are in the history view when scrolling using page up and down keys.
+    history_view_index: usize,
     input: ConsoleInput,
     input_prev: ConsoleInput,
 }
@@ -30,6 +33,7 @@ impl Console {
             prompt_saved: String::new(),
             history: Vec::new(),
             history_index: 0,
+            history_view_index: 0,
             input: ConsoleInput::new(),
             input_prev: ConsoleInput::new(),
         }
@@ -74,7 +78,14 @@ impl Console {
         // LATER A less hacky input system would be great.
         self.prompt = self.prompt.replace(';', "");
 
+        // Detect key pressed based on previous and current state.
+        // MQ's UI doesn't seem to hae a built-in way to detecting keyboard events.
         let pressed_up = !self.input_prev.up && self.input.up;
+        let pressed_down = !self.input_prev.down && self.input.down;
+        let pressed_page_up = !self.input_prev.page_up && self.input.page_up;
+        let pressed_page_down = !self.input_prev.page_down && self.input.page_down;
+
+        // Go back in history
         if pressed_up {
             // Save the prompt so that users can go back in history,
             // then come back to present and get what they typed back.
@@ -92,7 +103,7 @@ impl Console {
             }
         }
 
-        let pressed_down = !self.input_prev.down && self.input.down;
+        // Go forward in history
         if pressed_down && self.history_index < self.history.len() {
             // Since we're starting at history_index+1, the history.len() condition must remain here
             // otherwise the range could start at history.len()+1 and panic.
@@ -110,9 +121,19 @@ impl Console {
             }
         }
 
-        // TODO history scrolling
-        //let pressed_page_up = !self.input_prev.page_up && self.input.page_up;
-        //let pressed_page_down = !self.input_prev.page_down && self.input.page_down;
+        // Scroll history up
+        let jump = 10; // LATER configurable
+        if pressed_page_up {
+            self.history_view_index = self.history_view_index.saturating_sub(jump);
+            if self.history_view_index == 0 && !self.history.is_empty() {
+                // Keep at least one line in history when possible
+                // because scrolling up to an empty view looks weird.
+                self.history_view_index = 1;
+            }
+        }
+        if pressed_page_down {
+            self.history_view_index = (self.history_view_index + jump).min(self.history.len());
+        }
     }
 
     /// Draw the console and the UI elements it needs.
@@ -139,8 +160,8 @@ impl Console {
         // Draw history
         // This doesn't allow copying but in MQ's UI there's no way to print text
         // which allows copying while preventing editing.
-        if !self.history.is_empty() {
-            let mut i = self.history.len() - 1;
+        if self.history_view_index >= 1 {
+            let mut i = self.history_view_index - 1;
             let mut y = console_height - cvars.con_history_y_offset;
             loop {
                 let text = if self.history[i].is_input {
@@ -198,6 +219,8 @@ impl Console {
 
     /// The user pressed enter - process the line of text
     fn process_input_text(&mut self, cvars: &mut Cvars) {
+        let hist_len_old = self.history.len();
+
         let hist_line = HistoryLine::new(self.prompt.clone(), true);
         self.history.push(hist_line);
 
@@ -212,6 +235,12 @@ impl Console {
 
         // Entering a new command resets the user's position in history to the end.
         self.history_index = self.history.len();
+
+        // If the view was at the end, keep scrolling down as new lines are added.
+        // Otherwise the view's position shouldn't change.
+        if self.history_view_index == hist_len_old {
+            self.history_view_index = self.history.len();
+        }
     }
 
     /// Parse what the user typed and get or set a cvar
