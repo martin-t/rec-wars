@@ -116,9 +116,19 @@ Cvars
 
 Cvars are *console variables* - configuration settings which control everything in the game like physics, weapon behavior, AI, HUD layout, etc.
 
-There are two ways to change them:
-- Edit the `cvars` object using the browser console - e.g. `cvars.g_armor = 100`.
-- Set them using URL parameters - e.g. [https://martin-t.gitlab.io/gitlab-pages/rec-wars/web/?g_armor=100](https://martin-t.gitlab.io/gitlab-pages/rec-wars/web/?g_armor=100)
+They use the [cvars](https://crates.io/crates/cvars) crate - an alternative to inline_tweak & friends.
+
+### Changing cvars
+
+- **Macroquad native and browser versions:**
+    - Press `;` or `\`` to open console
+    - Type cvar name and new value - e.g. `g_armor 150`
+- **Macroquad native version:**
+    - Set them on the command line (see `--help`)
+- **Raw canvas browser verion:**
+    - There are two ways to change them:
+        - Edit the `cvars` object using the browser console - e.g. `cvars.g_armor = 150`.
+        - Set them using URL parameters - e.g. [https://martin-t.gitlab.io/gitlab-pages/rec-wars/web/?g_armor=150](https://martin-t.gitlab.io/gitlab-pages/rec-wars/web/?g_armor=100)
 
 The entire list of cvars is in [src/cvars.rs](src/cvars.rs).
 
