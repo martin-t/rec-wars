@@ -146,7 +146,7 @@ impl Console {
             0.0,
             screen_width(),
             console_height,
-            Color::new(0.0, 0.0, 0.0, 0.8),
+            Color::new(0.0, 0.0, 0.0, cvars.con_background_alpha),
         );
         draw_line(
             0.0,

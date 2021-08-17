@@ -46,6 +46,7 @@ pub struct Cvars {
     pub cl_spawn_indicator_square_side_end: f32,
     pub cl_spawn_indicator_thickness: f32,
 
+    pub con_background_alpha: f32,
     pub con_prompt_group_x: f32,
     pub con_prompt_group_y_offset: f32,
     pub con_height_fraction: f32,
@@ -841,6 +842,7 @@ impl Default for Cvars {
             cl_spawn_indicator_square_side_end: 40.0,
             cl_spawn_indicator_thickness: 2.0,
 
+            con_background_alpha: 0.8,
             con_prompt_group_x: 16.0,
             con_prompt_group_y_offset: 26.0,
             con_height_fraction: 0.45,
