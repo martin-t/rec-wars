@@ -1,7 +1,5 @@
 //! Map data (everything static during a match) and coordinate system
 
-#![allow(clippy::wrong_self_convention)] // https://github.com/rust-lang/rust-clippy/issues/6727
-
 use std::f64::consts::PI;
 use std::ops::Index;
 
