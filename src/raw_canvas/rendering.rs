@@ -731,7 +731,7 @@ pub(crate) fn draw(
 
         client
             .context
-            .fill_text("PAUSED", cvars.hud_pause_x, cvars.hud_pause_y)?;
+            .fill_text("PAUSED", cvars.hud_pause_rc_x, cvars.hud_pause_rc_y)?;
 
         client.context.set_font("10px sans-serif");
         client.context.set_shadow_offset_x(0.0);

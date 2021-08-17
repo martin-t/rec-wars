@@ -363,8 +363,8 @@ pub struct Cvars {
     pub hud_pause_shadow_y: f32,
     pub hud_pause_shadow_rc_x: f64,
     pub hud_pause_shadow_rc_y: f64,
-    pub hud_pause_x: f64,
-    pub hud_pause_y: f64,
+    pub hud_pause_rc_x: f64,
+    pub hud_pause_rc_y: f64,
 
     pub hud_ranking_font_size: f64,
     pub hud_ranking_shadow_x: f32,
@@ -1136,8 +1136,8 @@ impl Default for Cvars {
             hud_pause_shadow_y: 2.0,
             hud_pause_shadow_rc_x: 0.0,
             hud_pause_shadow_rc_y: 0.0,
-            hud_pause_x: 600.0,
-            hud_pause_y: 400.0,
+            hud_pause_rc_x: 600.0,
+            hud_pause_rc_y: 400.0,
 
             hud_ranking_font_size: 16.0,
             hud_ranking_shadow_x: 1.0,
