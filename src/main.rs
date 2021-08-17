@@ -67,6 +67,7 @@ async fn main() {
     if cvars.d_seed == 0 {
         cvars.d_seed = time_seed.to_bits();
     }
+    rec_wars::dbg_logf!("Seed: {}", cvars.d_seed);
 
     // LATER Load texture list and map in parallel with other assets
     let tex_list_bytes = load_file("assets/texture_list.txt").await.unwrap();
@@ -139,6 +140,8 @@ async fn main() {
     if !map_path.starts_with("maps/") {
         map_path.insert_str(0, "maps/");
     }
+    rec_wars::dbg_logf!("Map: {}", map_path);
+
     let map_bytes = load_file(&map_path).await.unwrap();
     draw_text("Loading...", 400.0, 400.0, 32.0, PURPLE);
     let map_text = str::from_utf8(&map_bytes).unwrap();
