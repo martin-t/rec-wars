@@ -746,12 +746,11 @@ fn render_viewport(
     // Pause
     if server.paused {
         let paused_size = measure_text("PAUSED", None, cvars.hud_pause_font_size as u16, 1.0);
-        // LATER remove cvars.hud_pause_x/y if raw_canvas removed
         render_text_with_shadow(
             cvars,
             "PAUSED",
-            (view_size.x as f32 - paused_size.width) / 2.0,
-            (view_size.y as f32 - paused_size.height) / 2.0,
+            (view_size.x as f32 - paused_size.width) / 2.0 + view_pos.x as f32,
+            (view_size.y as f32 - paused_size.height) / 2.0 + view_pos.y as f32,
             cvars.hud_pause_font_size,
             RED,
             cvars.hud_pause_shadow_x,
@@ -789,8 +788,6 @@ fn render_viewport(
 }
 
 fn render_shared(client: &MacroquadClient, server: &Server, cvars: &Cvars) {
-    // Draw screen space debug info:
-
     let screen_size = Vec2f::new(screen_width() as f64, screen_height() as f64);
 
     // Draw FPS
