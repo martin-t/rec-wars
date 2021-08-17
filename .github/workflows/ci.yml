@@ -36,6 +36,9 @@ jobs:
         run: wasm-pack build --target web --dev -- --no-default-features --features raw_canvas
       - name: Run tests
         run: cargo test --verbose --all-features
+      - name: Reject fixmes
+        # Grep return success when found and failure when not found, using `!` inverts that
+        run: ! grep -r FIXME .
 
   format:
     runs-on: ubuntu-latest
