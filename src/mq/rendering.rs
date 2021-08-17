@@ -375,7 +375,6 @@ fn render_viewport(
 
             let name = &server.gs.players[vehicle.owner].name;
             let size = measure_text(name, None, cvars.hud_names_font_size as u16, 1.0);
-            // LATER remove cvars.hud_names_shadow_x/y when raw_canvas is removed
             render_text_with_shadow(
                 cvars,
                 name,
@@ -388,8 +387,8 @@ fn render_viewport(
                     cvars.hud_names_brightness as f32,
                     cvars.hud_names_alpha as f32,
                 ),
-                cvars.hud_names_shadow_mq_x,
-                cvars.hud_names_shadow_mq_y,
+                cvars.hud_names_shadow_x,
+                cvars.hud_names_shadow_y,
                 cvars.hud_names_shadow_alpha,
             );
         }
@@ -543,8 +542,8 @@ fn render_viewport(
         score_pos.y,
         cvars.hud_score_font_size,
         WHITE,
-        cvars.hud_score_shadow_mq_x,
-        cvars.hud_score_shadow_mq_y,
+        cvars.hud_score_shadow_x,
+        cvars.hud_score_shadow_y,
         1.0,
     );
 
@@ -595,8 +594,8 @@ fn render_viewport(
         ranking_pos.y,
         cvars.hud_ranking_font_size,
         WHITE,
-        cvars.hud_ranking_shadow_mq_x,
-        cvars.hud_ranking_shadow_mq_y,
+        cvars.hud_ranking_shadow_x,
+        cvars.hud_ranking_shadow_y,
         1.0,
     );
 
@@ -686,8 +685,8 @@ fn render_viewport(
     ) - Vec2::new(weap_img.width(), weap_img.height()) / 2.0;
     draw_texture(
         weap_img,
-        weap_icon_pos.x + cvars.hud_weapon_icon_shadow_mq_x,
-        weap_icon_pos.y + cvars.hud_weapon_icon_shadow_mq_y,
+        weap_icon_pos.x + cvars.hud_weapon_icon_shadow_x,
+        weap_icon_pos.y + cvars.hud_weapon_icon_shadow_y,
         Color::new(0.0, 0.0, 0.0, cvars.hud_weapon_icon_shadow_alpha as f32),
     );
     draw_texture(weap_img, weap_icon_pos.x, weap_icon_pos.y, WHITE);
@@ -705,8 +704,8 @@ fn render_viewport(
         y = y.floor();
 
         let fs = cvars.hud_scoreboard_font_size;
-        let sx = cvars.hud_scoreboard_shadow_mq_x;
-        let sy = cvars.hud_scoreboard_shadow_mq_y;
+        let sx = cvars.hud_scoreboard_shadow_x;
+        let sy = cvars.hud_scoreboard_shadow_y;
 
         // LATER bold header
         render_text_with_shadow(cvars, "Name", x, y, fs, WHITE, sx, sy, 1.0);
@@ -755,8 +754,8 @@ fn render_viewport(
             (view_size.y as f32 - paused_size.height) / 2.0,
             cvars.hud_pause_font_size,
             RED,
-            cvars.hud_pause_shadow_mq_x,
-            cvars.hud_pause_shadow_mq_y,
+            cvars.hud_pause_shadow_x,
+            cvars.hud_pause_shadow_y,
             1.0,
         );
     }

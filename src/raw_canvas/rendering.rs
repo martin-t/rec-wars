@@ -361,8 +361,12 @@ pub(crate) fn draw(
         );
         let shadow_rgba = format!("rgba(0, 0, 0, {})", cvars.hud_names_shadow_alpha);
         client.context.set_shadow_color(&shadow_rgba);
-        client.context.set_shadow_offset_x(cvars.hud_names_shadow_x);
-        client.context.set_shadow_offset_y(cvars.hud_names_shadow_y);
+        client
+            .context
+            .set_shadow_offset_x(cvars.hud_names_shadow_rc_x);
+        client
+            .context
+            .set_shadow_offset_y(cvars.hud_names_shadow_rc_y);
         client.context.set_fill_style(&names_rgba.into());
         for (_, vehicle) in server.gs.vehicles.iter() {
             let scr_pos = vehicle.pos + camera_offset;
@@ -478,8 +482,12 @@ pub(crate) fn draw(
 
     // Score
     // Original RW shows current score as a big bold number with a 2px shadow.
-    client.context.set_shadow_offset_x(cvars.hud_score_shadow_x);
-    client.context.set_shadow_offset_y(cvars.hud_score_shadow_y);
+    client
+        .context
+        .set_shadow_offset_x(cvars.hud_score_shadow_rc_x);
+    client
+        .context
+        .set_shadow_offset_y(cvars.hud_score_shadow_rc_y);
     let score_font = format!("{}px sans-serif", cvars.hud_score_font_size);
     client.context.set_font(&score_font);
     let score_pos = hud_pos(view_pos, view_size, cvars.hud_score_x, cvars.hud_score_y);
@@ -495,10 +503,10 @@ pub(crate) fn draw(
     // There's no special treatement for players with the same number of points.
     client
         .context
-        .set_shadow_offset_x(cvars.hud_ranking_shadow_x);
+        .set_shadow_offset_x(cvars.hud_ranking_shadow_rc_x);
     client
         .context
-        .set_shadow_offset_y(cvars.hud_ranking_shadow_y);
+        .set_shadow_offset_y(cvars.hud_ranking_shadow_rc_y);
     let ranking_font = format!("{}px sans-serif", cvars.hud_ranking_font_size);
     client.context.set_font(&ranking_font);
     let ranking_pos = hud_pos(
@@ -614,10 +622,10 @@ pub(crate) fn draw(
     client.context.set_shadow_color(&shadow_rgba);
     client
         .context
-        .set_shadow_offset_x(cvars.hud_weapon_icon_shadow_x);
+        .set_shadow_offset_x(cvars.hud_weapon_icon_shadow_rc_x);
     client
         .context
-        .set_shadow_offset_y(cvars.hud_weapon_icon_shadow_y);
+        .set_shadow_offset_y(cvars.hud_weapon_icon_shadow_rc_y);
     draw_img_center(
         client,
         &client.imgs_weapon_icons[player.cur_weapon as usize],
@@ -636,10 +644,10 @@ pub(crate) fn draw(
     if player_vehicle.destroyed() {
         client
             .context
-            .set_shadow_offset_x(cvars.hud_scoreboard_shadow_x);
+            .set_shadow_offset_x(cvars.hud_scoreboard_shadow_rc_x);
         client
             .context
-            .set_shadow_offset_y(cvars.hud_scoreboard_shadow_y);
+            .set_shadow_offset_y(cvars.hud_scoreboard_shadow_rc_y);
         client.context.set_fill_style(&"white".into());
 
         let height = (server.gs.players.len() + 1) as f64 * cvars.hud_scoreboard_line_height;
@@ -711,8 +719,12 @@ pub(crate) fn draw(
 
     // Pause
     if server.paused {
-        client.context.set_shadow_offset_x(cvars.hud_pause_shadow_x);
-        client.context.set_shadow_offset_y(cvars.hud_pause_shadow_y);
+        client
+            .context
+            .set_shadow_offset_x(cvars.hud_pause_shadow_rc_x);
+        client
+            .context
+            .set_shadow_offset_y(cvars.hud_pause_shadow_rc_y);
         client.context.set_fill_style(&"red".into());
         let pause_font = format!("{}px sans-serif", cvars.hud_pause_font_size);
         client.context.set_font(&pause_font);

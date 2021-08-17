@@ -1,5 +1,8 @@
 //! The browser version using WASM and the canvas 2D API (without macroquad).
 
+// LATER If/when removing raw_canvas:
+//  - Remove cvars.*_shadow_rc_x/y
+
 mod rendering;
 
 use std::fmt::Debug;
