@@ -121,7 +121,7 @@ They use the [cvars](https://crates.io/crates/cvars) crate - an alternative to i
 ### Changing cvars
 
 - **Macroquad native and browser versions:**
-    - Press `;` or `\`` to open console
+    - Press ";" or "\`" to open console
     - Type cvar name and new value - e.g. `g_armor 150`
 - **Macroquad native version:**
     - Set them on the command line (see `--help`)
