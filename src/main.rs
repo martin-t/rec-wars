@@ -65,9 +65,7 @@ async fn main() {
 
     let time_seed = macroquad::miniquad::date::now();
     if cvars.d_seed == 0 {
-        // Casting with `as` throws away some bits but it doesn't really matter,
-        // better than using unsafe for transmute.
-        cvars.d_seed = time_seed as u64;
+        cvars.d_seed = time_seed.to_bits();
     }
 
     // LATER Load texture list and map in parallel with other assets

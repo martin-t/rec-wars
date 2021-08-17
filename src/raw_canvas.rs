@@ -47,11 +47,9 @@ impl RawCanvasGame {
         console_error_panic_hook::set_once();
 
         if cvars.d_seed == 0 {
-            // Casting with `as` throws away some bits but it doesn't really matter,
-            // better than using unsafe for transmute.
-            // Another option would be SmallRng::from_entropy() but that requires enabling
+            // Another option here would be SmallRng::from_entropy() but that requires enabling
             // some of rand's features *only* for raw_canvas because macroquad's WASM doesn't work with them.
-            cvars.d_seed = js_sys::Date::now() as u64;
+            cvars.d_seed = js_sys::Date::now().to_bits();
         }
 
         let imgs_tiles = array_tiles
