@@ -39,7 +39,7 @@ jobs:
       - name: Reject fixmes
         # Grep return success when found and failure when not found, using `!` inverts that.
         # The `[F]` is the usualy trick to avoid matching itself.
-        run: "! grep -r --exclude-dir=./target [F]IXME ."
+        run: "! grep -r --exclude-dir=target [F]IXME ."
 
   format:
     runs-on: ubuntu-latest
