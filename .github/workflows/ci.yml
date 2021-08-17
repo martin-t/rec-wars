@@ -36,10 +36,6 @@ jobs:
         run: wasm-pack build --target web --dev -- --no-default-features --features raw_canvas
       - name: Run tests
         run: cargo test --verbose --all-features
-      - name: Reject fixmes
-        # Grep return success when found and failure when not found, using `!` inverts that.
-        # The `[F]` is the usualy trick to avoid matching itself.
-        run: "! grep -r --exclude-dir=target [F]IXME ."
 
   format:
     runs-on: ubuntu-latest
@@ -57,6 +53,10 @@ jobs:
         # Technically --all-features doesn't check all code when something is *disabled* by a feature
         # but that is discouraged and no such feature existed at the time this was added.
       - run: cargo clippy --all-features --all-targets -- --deny warnings
+        # This is my personal clippy (it can't be in the test job because windows doesn't handle `!`).
+        # Grep return success when found and failure when not found, using `!` inverts that.
+        # The `[F]` is the usualy trick to avoid matching itself.
+      - run: "! grep -r --exclude-dir=target [F]IXME ."
 
   audit:
     runs-on: ubuntu-latest
