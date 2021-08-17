@@ -189,11 +189,13 @@ impl Console {
         let style = root_ui()
             .style_builder()
             .background(bg_image)
+            .color(BLANK) // This hides the faint rectangle around a Group
             .text_color(WHITE)
             .build();
         let skin = Skin {
             label_style: style.clone(),
-            editbox_style: style,
+            editbox_style: style.clone(),
+            group_style: style,
             ..root_ui().default_skin()
         };
         root_ui().push_skin(&skin);
