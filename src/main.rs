@@ -1,6 +1,14 @@
 //! Entry point for the macroquad clients (both native and WASM).
 //! The raw canvas + WASM client lives in lib.rs.
 
+// Additional warnings that are allow by default (`rustc -W help`)
+#![warn(missing_debug_implementations)]
+#![warn(trivial_casts)]
+#![warn(trivial_numeric_casts)]
+#![warn(unreachable_pub)]
+#![warn(unused)]
+#![warn(clippy::all)]
+
 mod mq;
 
 use std::str;
