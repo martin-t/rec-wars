@@ -101,21 +101,37 @@ pub(crate) fn spawn_vehicle(
 pub(crate) fn self_destruct(cvars: &Cvars, gs: &mut GameState) {
     for vehicle_handle in gs.vehicles.iter_handles() {
         let vehicle = &gs.vehicles[vehicle_handle];
-        let input = &gs.players[vehicle.owner].input;
+        let pos = vehicle.pos;
+        let owner = vehicle.owner;
+        let input = &gs.players[owner].input;
         if !input.self_destruct || vehicle.destroyed() {
             continue;
         }
 
-        // First the big explosion...
+        // 1) the big explosion
         gs.explosions.push(Explosion::new(
-            vehicle.pos,
+            pos,
             cvars.g_self_destruct_explosion_scale,
             gs.game_time,
             false,
         ));
-        // ...then destroy the vehicle to create the small explosion on top.
-        let attacker_handle = vehicle.owner;
-        damage(cvars, gs, attacker_handle, vehicle_handle, f64::MAX)
+
+        // 2) all vehicles in range
+        explosion_damage(
+            cvars,
+            gs,
+            owner,
+            pos,
+            cvars.g_self_destruct_damage_center,
+            cvars.g_self_destruct_damage_edge,
+            cvars.g_self_destruct_radius,
+            Some(vehicle_handle),
+        );
+
+        // 3) the player vehicle to create the small explosion on top.
+        damage(cvars, gs, owner, vehicle_handle, f64::MAX);
+
+        // LATER What was the order of explosions in the original RecWar? Make it configurable?
     }
 }
 
@@ -602,22 +618,17 @@ fn projectile_impact(cvars: &Cvars, gs: &mut GameState, projectile_handle: Index
 
     let expl_damage = expl_scale * cvars.g_weapon_explosion_damage(weapon);
     let expl_radius = expl_scale * cvars.g_weapon_explosion_radius(weapon);
-    if cvars.d_explosion_radius {
-        dbg_line!(hit_pos, hit_pos + Vec2f::new(expl_radius, 0.0), 5.0);
-    }
-
     if expl_damage > 0.0 || expl_radius > 0.0 {
-        for vehicle_handle in gs.vehicles.iter_handles() {
-            let vehicle = &gs.vehicles[vehicle_handle];
-            if vehicle.destroyed() {
-                continue;
-            }
-
-            let fake_radius = expl_radius + cvars.g_hitcircle_radius;
-            if (vehicle.pos - hit_pos).magnitude_squared() < fake_radius * fake_radius {
-                damage(cvars, gs, owner, vehicle_handle, expl_damage);
-            }
-        }
+        explosion_damage(
+            cvars,
+            gs,
+            owner,
+            hit_pos,
+            expl_damage,
+            expl_damage,
+            expl_radius,
+            None,
+        );
     }
 
     if weapon == Weapon::Gm {
@@ -627,4 +638,52 @@ fn projectile_impact(cvars: &Cvars, gs: &mut GameState, projectile_handle: Index
         }
     }
     gs.projectiles.remove(projectile_handle).unwrap();
+}
+
+fn explosion_damage(
+    cvars: &Cvars,
+    gs: &mut GameState,
+    owner: Index,
+    expl_pos: Vec2f,
+    damage_center: f64,
+    damage_edge: f64,
+    radius: f64,
+    ignore: Option<Index>,
+) {
+    if cvars.d_explosion_radius {
+        dbg_line!(expl_pos, expl_pos + Vec2f::new(radius, 0.0), 5.0);
+    }
+
+    for vehicle_handle in gs.vehicles.iter_handles() {
+        if let Some(ignore) = ignore {
+            if vehicle_handle == ignore {
+                continue;
+            }
+        }
+
+        let vehicle = &gs.vehicles[vehicle_handle];
+        if vehicle.destroyed() {
+            continue;
+        }
+
+        let center_dist = (vehicle.pos - expl_pos).magnitude();
+        let dist = (center_dist - cvars.g_hitcircle_radius).max(0.0);
+        if dist < radius {
+            let expl_damage = map_ranges(dist, 0.0, radius, damage_center, damage_edge);
+            damage(cvars, gs, owner, vehicle_handle, expl_damage);
+        }
+    }
+}
+
+/// Maps values between the src and dest range: `src_min` to `dest_min`, `src_max` to `dest_max`, values between them
+/// to the corresponding values between and extrapolates for values outside the range.
+///
+/// `src_min` and `src_max` must not be the same or division by zero occurs.
+///
+/// `dest_max` can be smaller than `dest_min` if you want the resulting range to be inverted, all values can be negative.
+fn map_ranges(value: f64, src_min: f64, src_max: f64, dest_min: f64, dest_max: f64) -> f64 {
+    let src_diff = src_max - src_min;
+    let dest_diff = dest_max - dest_min;
+    let ratio = (value - src_min) / src_diff;
+    dest_min + dest_diff * ratio
 }

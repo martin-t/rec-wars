@@ -12,6 +12,7 @@
 #![warn(unused)]
 #![warn(clippy::all)]
 #![allow(clippy::needless_range_loop)] // False positives
+#![allow(clippy::too_many_arguments)]
 
 #[macro_use]
 pub mod debugging; // keep first so the macros are available everywhere
