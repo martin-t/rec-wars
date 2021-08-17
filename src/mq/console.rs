@@ -200,14 +200,14 @@ impl Console {
 
         // Draw prompt - this uses MQ's UI so i don't have to reimplement basic text editing ops.
         let id_prompt = 0;
-        let label_y = console_height - cvars.con_label_y_offset;
+        let label_y = console_height - cvars.con_prompt_label_y_offset;
         Label::new(">")
-            .position(vec2(cvars.con_label_x, label_y))
+            .position(vec2(cvars.con_prompt_label_x, label_y))
             .ui(&mut root_ui());
         // Can't set position on an InputText so we wrap it in a Group.
-        let group_y = screen_height() * cvars.con_height_fraction - cvars.con_group_y_offset;
+        let group_y = screen_height() * cvars.con_height_fraction - cvars.con_prompt_group_y_offset;
         Group::new(hash!(), vec2(screen_width() - 8.0, 20.0))
-            .position(vec2(cvars.con_group_x, group_y))
+            .position(vec2(cvars.con_prompt_group_x, group_y))
             .layout(Layout::Horizontal)
             .ui(&mut root_ui(), |ui| {
                 ui.input_text(id_prompt, "", &mut self.prompt);
