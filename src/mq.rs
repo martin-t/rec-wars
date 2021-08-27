@@ -7,7 +7,7 @@ use futures::future;
 use macroquad::prelude::*;
 use thunderdome::Index;
 
-use rec_wars::{
+use crate::{
     cvars::Cvars,
     game_state::Input,
     map::Vec2f,
@@ -146,9 +146,9 @@ impl MacroquadClient {
         img_explosion_cyan.set_filter(FilterMode::Nearest);
 
         let loading_done = get_time();
-        rec_wars::dbg_logf!("Loaded assets in {:.2} s", loading_done - loading_started);
+        dbg_logf!("Loaded assets in {:.2} s", loading_done - loading_started);
 
-        rec_wars::dbg_logf!(
+        dbg_logf!(
             "Detected screen size: {}x{}",
             screen_width(),
             screen_height()

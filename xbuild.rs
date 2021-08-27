@@ -1,7 +1,7 @@
 use std::process::Command;
 
 fn main() {
-    let describe = Command::new("git")
+    /*let describe = Command::new("git")
         .args(&["describe", "--long", "--always", "--dirty"])
         .output()
         .unwrap()
@@ -22,6 +22,6 @@ fn main() {
         .stdout;
     let log = String::from_utf8(log).unwrap();
 
-    let git_version = format!("{} {}", describe, log);
-    println!("cargo:rustc-env=GIT_VERSION={}", git_version);
+    let git_version = format!("{} {}", describe, log);*/
+    //println!("cargo:rustc-env=GIT_VERSION={}", git_version);
 }

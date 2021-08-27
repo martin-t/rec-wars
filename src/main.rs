@@ -9,6 +9,44 @@
 #![warn(unused)]
 #![warn(clippy::all)]
 
+#[macro_use]
+pub mod debugging; // keep first so the macros are available everywhere
+
+pub mod cvars;
+pub mod entities;
+pub mod game_state;
+pub mod map;
+pub mod server;
+pub mod timing;
+
+mod systems;
+
+#[cfg(feature = "raw_canvas")]
+mod raw_canvas;
+
+const BOT_NAMES: [&str; 20] = [
+    "Dr. Dead",
+    "Sir Hurt",
+    "Mr. Pain",
+    "PhD. Torture",
+    "Mrs. Chestwound",
+    "Ms. Dismember",
+    "Don Lobotomy",
+    "Lt. Dead",
+    "Sgt. Dead",
+    "Private Dead",
+    "Colonel Dead",
+    "Captain Dead",
+    "Major Dead",
+    "Commander Dead",
+    "Díotóir",
+    "Fireman",
+    "Goldfinger",
+    "Silverfinger",
+    "Bronzefinger",
+    "President Dead",
+];
+
 mod mq;
 
 use std::str;
@@ -16,7 +54,7 @@ use std::str;
 use macroquad::prelude::*;
 use structopt::StructOpt;
 
-use rec_wars::{cvars::Cvars, map, server::Server, timing::MacroquadTime};
+use crate::{cvars::Cvars, server::Server, timing::MacroquadTime};
 
 use crate::mq::MacroquadClient;
 
@@ -68,14 +106,14 @@ async fn main() {
     while let Some(cvar_name) = cvars_iter.next() {
         let str_value = cvars_iter.next().unwrap();
         cvars.set_str(cvar_name, str_value).unwrap();
-        rec_wars::dbg_logf!("{} = {}", cvar_name, cvars.get_string(cvar_name).unwrap());
+        dbg_logf!("{} = {}", cvar_name, cvars.get_string(cvar_name).unwrap());
     }
 
     let time_seed = macroquad::miniquad::date::now();
     if cvars.d_seed == 0 {
         cvars.d_seed = time_seed.to_bits();
     }
-    rec_wars::dbg_logf!("Seed: {}", cvars.d_seed);
+    dbg_logf!("Seed: {}", cvars.d_seed);
 
     // LATER Load texture list and map in parallel with other assets
     let tex_list_bytes = load_file("assets/texture_list.txt").await.unwrap();
@@ -148,7 +186,7 @@ async fn main() {
     if !map_path.starts_with("maps/") {
         map_path.insert_str(0, "maps/");
     }
-    rec_wars::dbg_logf!("Map: {}", map_path);
+    dbg_logf!("Map: {}", map_path);
 
     let map_bytes = load_file(&map_path).await.unwrap();
     draw_text("Loading...", 400.0, 400.0, 32.0, PURPLE);

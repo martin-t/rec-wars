@@ -15,12 +15,12 @@ categories = ["games"]
 name = "rec-wars-macroquad"
 path = "src/main.rs"
 
-[lib]
+#[lib]
 # Cdylib is for the WASM+canvas client.
 # Rlib is to run doctests (they don't get run with just cdylib) and for the macroquad native client.
 # Keep in mind doctests only work for public items for now:
 # https://users.rust-lang.org/t/rustdoc-doctests-and-private-documentation/20955
-crate-type = ["cdylib", "rlib"]
+#crate-type = ["cdylib", "rlib"]
 
 [profile.dev.package."*"]
 # Optimize deps but not the rec-wars crate itself (tip from macroquad).

@@ -201,7 +201,7 @@ impl Server {
 
         debugging::cleanup();
 
-        dbg_textf!("{}", env!("GIT_VERSION"));
+        //dbg_textf!("{}", env!("GIT_VERSION"));
         dbg_textd!(self.gs.game_time);
         dbg_textd!(self.gs.game_time_prev);
 

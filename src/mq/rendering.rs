@@ -6,7 +6,7 @@ use macroquad::prelude::*;
 use thunderdome::Index;
 use vek::Clamp;
 
-use rec_wars::{
+use crate::{
     cvars::Cvars,
     debugging::{DEBUG_CROSSES, DEBUG_LINES, DEBUG_TEXTS, DEBUG_TEXTS_WORLD},
     entities::{Ammo, Weapon},

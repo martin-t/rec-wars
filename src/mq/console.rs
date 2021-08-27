@@ -9,7 +9,7 @@ use macroquad::{
     },
 };
 
-use rec_wars::cvars::Cvars;
+use crate::cvars::Cvars;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct Console {
