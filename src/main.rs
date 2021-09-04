@@ -6,6 +6,8 @@
 #![warn(unused)]
 #![warn(clippy::all)]
 #![allow(unreachable_pub)] // TODO
+#![allow(clippy::needless_range_loop)] // False positives
+#![allow(clippy::too_many_arguments)]
 
 #[macro_use]
 mod debugging; // keep first so the macros are available everywhere

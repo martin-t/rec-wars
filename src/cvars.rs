@@ -420,6 +420,7 @@ impl Cvars {
     }
 
     /// Create a new Cvars object with an approximation of the original RecWar settings.
+    #[allow(dead_code)] // LATER allow using balance presets again
     pub fn new_rec_war() -> Self {
         Self {
             // This is 15625 tiles - should be more than enough, biggest original maps have 59.
@@ -432,6 +433,7 @@ impl Cvars {
     /// Reset this Cvars object to the default RecWars settings.
     ///
     /// You can call this from the JavaScript console to change settings on the fly.
+    #[allow(dead_code)]
     pub fn load_rec_wars(&mut self) {
         *self = Self {
             ..Self::new_rec_wars()
@@ -441,6 +443,7 @@ impl Cvars {
     /// Reset this Cvars object to an approximation of the original RecWar settings.
     ///
     /// You can call this from the JavaScript console to change settings on the fly.
+    #[allow(dead_code)]
     pub fn load_rec_war(&mut self) {
         *self = Self {
             ..Self::new_rec_war()
