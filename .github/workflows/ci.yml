@@ -25,15 +25,12 @@ jobs:
         run: sudo apt-get install --no-install-recommends -y pkg-config libx11-dev libxi-dev libgl1-mesa-dev libasound2-dev
       - run: rustup target add wasm32-unknown-unknown
       - uses: actions/checkout@v2
-      - uses: jetli/wasm-pack-action@v0.3.0
       - name: Print versions
-        run: rustc --version && cargo --version && wasm-pack --version
-      - name: Build macroquad native
+        run: rustc --version && cargo --version
+      - name: Build native
         run: cargo build --verbose
-      - name: Build macroquad web
+      - name: Build web
         run: cargo build --verbose --target wasm32-unknown-unknown
-      - name: Build raw canvas
-        run: wasm-pack build --target web --dev -- --no-default-features --features raw_canvas
       - name: Run tests
         run: cargo test --verbose --all-features
 

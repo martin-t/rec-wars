@@ -6,16 +6,15 @@ use macroquad::prelude::*;
 use thunderdome::Index;
 use vek::Clamp;
 
-use rec_wars::{
+use crate::{
     cvars::Cvars,
     debugging::{DEBUG_CROSSES, DEBUG_LINES, DEBUG_TEXTS, DEBUG_TEXTS_WORLD},
     entities::{Ammo, Weapon},
     game_state::Explosion,
     map::{F64Ext, Kind, Vec2f, VecExt, TILE_SIZE},
+    mq::{ClientMode, MacroquadClient},
     server::Server,
 };
-
-use crate::mq::{ClientMode, MacroquadClient};
 
 // LATER when raw_canvas is removed, clean up all the casts here
 

@@ -1,6 +1,3 @@
-//! Entry point for the macroquad clients (both native and WASM).
-//! The raw canvas + WASM client lives in lib.rs.
-
 // Additional warnings that are allow by default (`rustc -W help`)
 #![warn(missing_debug_implementations)]
 #![warn(trivial_casts)]
@@ -8,17 +5,26 @@
 #![warn(unreachable_pub)]
 #![warn(unused)]
 #![warn(clippy::all)]
+#![allow(unreachable_pub)] // TODO
 
+#[macro_use]
+mod debugging; // keep first so the macros are available everywhere
+
+mod cvars;
+mod entities;
+mod game_state;
+mod map;
 mod mq;
+mod server;
+mod systems;
+mod timing;
 
 use std::str;
 
 use macroquad::prelude::*;
 use structopt::StructOpt;
 
-use rec_wars::{cvars::Cvars, map, server::Server, timing::MacroquadTime};
-
-use crate::mq::MacroquadClient;
+use crate::{cvars::Cvars, mq::MacroquadClient, server::Server};
 
 #[derive(StructOpt, Debug)]
 struct Opts {
@@ -68,14 +74,14 @@ async fn main() {
     while let Some(cvar_name) = cvars_iter.next() {
         let str_value = cvars_iter.next().unwrap();
         cvars.set_str(cvar_name, str_value).unwrap();
-        rec_wars::dbg_logf!("{} = {}", cvar_name, cvars.get_string(cvar_name).unwrap());
+        dbg_logf!("{} = {}", cvar_name, cvars.get_string(cvar_name).unwrap());
     }
 
     let time_seed = macroquad::miniquad::date::now();
     if cvars.d_seed == 0 {
         cvars.d_seed = time_seed.to_bits();
     }
-    rec_wars::dbg_logf!("Seed: {}", cvars.d_seed);
+    dbg_logf!("Seed: {}", cvars.d_seed);
 
     // LATER Load texture list and map in parallel with other assets
     let tex_list_bytes = load_file("assets/texture_list.txt").await.unwrap();
@@ -148,15 +154,14 @@ async fn main() {
     if !map_path.starts_with("maps/") {
         map_path.insert_str(0, "maps/");
     }
-    rec_wars::dbg_logf!("Map: {}", map_path);
+    dbg_logf!("Map: {}", map_path);
 
     let map_bytes = load_file(&map_path).await.unwrap();
     draw_text("Loading...", 400.0, 400.0, 32.0, PURPLE);
     let map_text = str::from_utf8(&map_bytes).unwrap();
     let map = map::load_map(map_text, surfaces);
 
-    let time = Box::new(MacroquadTime);
-    let mut server = Server::new(&cvars, time, map);
+    let mut server = Server::new(&cvars, map);
 
     let player1_handle = server.connect(&cvars, "Player 1");
     let player2_handle = if opts.splitscreen {

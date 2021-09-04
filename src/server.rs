@@ -10,13 +10,34 @@ use crate::{
     game_state::{ArenaExt, GameState, Input},
     map::Map,
     systems,
-    timing::{Durations, Fps, Time},
-    BOT_NAMES,
+    timing::{Durations, Fps},
 };
+
+const BOT_NAMES: [&str; 20] = [
+    "Dr. Dead",
+    "Sir Hurt",
+    "Mr. Pain",
+    "PhD. Torture",
+    "Mrs. Chestwound",
+    "Ms. Dismember",
+    "Don Lobotomy",
+    "Lt. Dead",
+    "Sgt. Dead",
+    "Private Dead",
+    "Colonel Dead",
+    "Captain Dead",
+    "Major Dead",
+    "Commander Dead",
+    "Díotóir",
+    "Fireman",
+    "Goldfinger",
+    "Silverfinger",
+    "Bronzefinger",
+    "President Dead",
+];
 
 #[derive(Debug)]
 pub struct Server {
-    pub(crate) time: Box<dyn Time>,
     pub map: Map,
     pub gs: GameState,
     /// Game time left over from previous update.
@@ -36,7 +57,7 @@ pub struct Server {
 }
 
 impl Server {
-    pub fn new(cvars: &Cvars, time: Box<dyn Time>, map: Map) -> Self {
+    pub fn new(cvars: &Cvars, map: Map) -> Self {
         let rng = SmallRng::seed_from_u64(cvars.d_seed);
         let mut gs = GameState::new(rng);
 
@@ -65,7 +86,6 @@ impl Server {
         }
 
         Self {
-            time,
             map,
             gs: gs.clone(),
             dt_carry: 0.0,
@@ -108,7 +128,7 @@ impl Server {
         // https://medium.com/@tglaiel/how-to-make-your-game-run-at-60fps-24c61210fe75
 
         self.update_fps.tick(cvars.d_fps_period, self.real_time);
-        let start = self.time.now();
+        let start = macroquad::time::get_time();
 
         // Update time tracking variables
         self.real_time_prev = self.real_time;
@@ -127,7 +147,7 @@ impl Server {
             self.gamelogic(cvars, dt_update);
         }
 
-        let end = self.time.now();
+        let end = macroquad::time::get_time();
         self.update_durations
             .add(cvars.d_timing_samples, end - start);
     }
@@ -185,7 +205,7 @@ impl Server {
     }
 
     fn gamelogic_tick(&mut self, cvars: &Cvars, game_time: f64) {
-        let start = self.time.now();
+        let start = macroquad::time::get_time();
         self.gamelogic_fps.tick(cvars.d_fps_period, self.real_time);
 
         // Update time tracking variables (in seconds)
@@ -233,7 +253,7 @@ impl Server {
         dbg_textf!("projectile count: {}", self.gs.projectiles.len());
         dbg_textf!("explosion count: {}", self.gs.explosions.len());
 
-        let end = self.time.now();
+        let end = macroquad::time::get_time();
         self.gamelogic_durations
             .add(cvars.d_timing_samples, end - start);
     }

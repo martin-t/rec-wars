@@ -2,11 +2,8 @@
 
 use std::default::Default;
 
-use strum_macros::{Display, EnumString};
-#[cfg(feature = "raw_canvas")]
-use wasm_bindgen::prelude::*;
-
 use cvars::SetGet;
+use strum_macros::{Display, EnumString};
 
 use crate::{entities::Hitbox, entities::VehicleType, entities::Weapon, map::Vec2f};
 
@@ -19,14 +16,6 @@ use crate::{entities::Hitbox, entities::VehicleType, entities::Weapon, map::Vec2
 /// hud_ is the heads-up display
 /// r_ is rendering
 /// sv_ is server administration + performance
-///
-/// This struct is shared with the JS side so it has some limitations:
-/// - fields have to be Copy
-/// - only C-like enums
-/// - avoid fields that are structs
-///     - they compile but can't be changed from JS (the change is thrown away)
-///     - e.g. `cvars.g_tank.speed` wouldn't work
-#[cfg_attr(feature = "raw_canvas", wasm_bindgen)]
 #[derive(Debug, Clone, SetGet)]
 #[allow(missing_copy_implementations)]
 pub struct Cvars {
@@ -424,7 +413,6 @@ pub struct Cvars {
     pub sv_gamelogic_fixed_fps: f64,
 }
 
-#[cfg_attr(feature = "raw_canvas", wasm_bindgen)]
 impl Cvars {
     /// Create a new Cvars object with the default RecWars settings.
     pub fn new_rec_wars() -> Self {
@@ -458,14 +446,7 @@ impl Cvars {
             ..Self::new_rec_war()
         }
     }
-}
 
-// Separate impl block without the wasm_bindgen attribute.
-// Some fns need to be pub because of the macroquad client,
-// however wasm-bindgen would then try to generate bindings for them
-// and report errors because they use unsupported types.
-// There's no other way to exclude fns from it - e.g. `#[wasm_bindgen(skip)] does nothing.
-impl Cvars {
     /// Returns whether the weapon is on the chassis or turret and where relative to that part's center.
     pub(crate) fn g_hardpoint(&self, veh_type: VehicleType, weapon: Weapon) -> (Hardpoint, Vec2f) {
         match veh_type {
@@ -1198,7 +1179,6 @@ impl Default for Cvars {
     }
 }
 
-#[cfg_attr(feature = "raw_canvas", wasm_bindgen)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, EnumString, Display)]
 pub enum Hardpoint {
     Chassis,
@@ -1206,7 +1186,6 @@ pub enum Hardpoint {
 }
 
 /// Various options how to handle different physics/gamelogic and rendering framerates.
-#[cfg_attr(feature = "raw_canvas", wasm_bindgen)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, EnumString, Display)]
 pub enum TickrateMode {
     /// Same FPS as rendering - runs one tick with variable timestep before rendering.

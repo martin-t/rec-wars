@@ -11,69 +11,29 @@ readme = "README.md"
 keywords = ["game", "wasm"]
 categories = ["games"]
 
-[[bin]]
-name = "rec-wars-macroquad"
-path = "src/main.rs"
-
-[lib]
-# Cdylib is for the WASM+canvas client.
-# Rlib is to run doctests (they don't get run with just cdylib) and for the macroquad native client.
-# Keep in mind doctests only work for public items for now:
-# https://users.rust-lang.org/t/rustdoc-doctests-and-private-documentation/20955
-crate-type = ["cdylib", "rlib"]
-
 [profile.dev.package."*"]
 # Optimize deps but not the rec-wars crate itself (tip from macroquad).
 # This seems to slightly improve performance (judging by update avg/max times)
 # and shouldn't meaningfully increase incremental compile times because deps only change rarely.
 opt-level = 3
 
-[package.metadata.wasm-pack.profile.profiling]
-# Rustc optimizations (which make a huge difference) are still enabled but no additional wasm-opt
-# Debug symbols are enabled
-wasm-opt = false  # see wasm-opt note
-
-[package.metadata.wasm-pack.profile.release]
-# All possible optimizations
-# No debug symbols (panic messages have line number but stack staces are without function names)
-wasm-opt = ["-O3", "--enable-mutable-globals"]  # see wasm-opt note
-
-# wasm-opt note:
-# Commit bcf475e5fb (cargo update) causes wasm-opt to fail
-# (though the compile itself succeeds and the result seems usable, just without these optimizaions).
-# --enable-mutable-globals is a workaround but it seems wasm-opt doesn't help perf that much
-# while somewhat slowing down compiling.
-# https://github.com/rustwasm/wasm-pack/issues/886
-
-[features]
-# The macroquad dependency must *not* be present when compiling to WASM+canvas,
-# otherwise it will crash with a TypeError at runtime for some reason,
-# explicitly use `--no-default-features` to disable it when compiling WASM+canvas.
-default = ["mq"]
-mq = ["macroquad", "image"]
-raw_canvas = ["console_error_panic_hook", "js-sys", "wasm-bindgen", "web-sys"]
-
 [dependencies]
-console_error_panic_hook = { version = "0.1.6", optional = true }
 cvars = "0.1.0"
 enumn = "0.1.3"
 fnv = "1.0.7"
 futures = "0.3.16"
-js-sys = { version = "0.3.42", optional = true }
-macroquad = { version = "0.3.7", optional = true }
+macroquad = "0.3.7"
 structopt = "0.3.22"
 strum = "0.21.0"
 strum_macros = "0.21.1"
 thunderdome = "0.4.0"
 vek = "0.15.1"
-wasm-bindgen = { version = "0.2.65", optional = true }
 
 [dependencies.image]
 # Dependency of macroquad with added "bmp" feature so we can load RecWar's original assets
 version = "0.23.12"
 default-features = false
 features = ["png", "tga", "bmp"]
-optional = true
 
 [dependencies.rand]
 version = "0.8.3"
@@ -83,19 +43,6 @@ features = ["small_rng"]
 [dependencies.rand_distr]
 version = "0.4.0"
 default-features = false
-
-[dependencies.web-sys]
-version = "0.3.4"
-features = [
-  "CanvasRenderingContext2d",
-  "console",
-  "DomMatrix",
-  "HtmlCanvasElement",
-  "HtmlImageElement",
-  "Performance",
-  "Window",
-]
-optional = true
 
 [dev-dependencies]
 walkdir = "2.3.1"

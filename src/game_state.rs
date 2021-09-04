@@ -4,8 +4,6 @@ use fnv::FnvHashMap;
 use rand::prelude::*;
 use rand_distr::Uniform;
 use thunderdome::{Arena, Index};
-#[cfg(feature = "raw_canvas")]
-use wasm_bindgen::prelude::*;
 
 use crate::{
     entities::{Ai, Player, Projectile, Vehicle},
@@ -139,7 +137,6 @@ impl InputsPrev {
     }
 }
 
-#[cfg_attr(feature = "raw_canvas", wasm_bindgen)]
 #[derive(Clone, Copy, Default)]
 pub struct Input {
     pub left: bool,
@@ -159,9 +156,7 @@ pub struct Input {
     // ^ when adding fields, also add them to Debug
 }
 
-#[cfg_attr(feature = "raw_canvas", wasm_bindgen)]
 impl Input {
-    #[cfg_attr(feature = "raw_canvas", wasm_bindgen(constructor))]
     pub fn new() -> Self {
         Self::default()
     }

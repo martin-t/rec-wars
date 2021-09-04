@@ -1,41 +1,6 @@
-//! Rudimentary time tracking, FPS counter and performance tracker.
+//! Rudimentary FPS counter and performance tracker.
 
 use std::{collections::VecDeque, fmt::Debug};
-
-// Using a trait so both raw_canvas and mq features can be enabled at the same time.
-// The alternative is to use `struct Time` directly in both features
-// and pick one implementation based on which of the two is enabled.
-// That would, however, mean they can't be enabled at the same time
-// so I couldn't use `"rust-analyzer.cargo.allFeatures": true`.
-pub trait Time: Debug {
-    /// Seconds since start.
-    fn now(&self) -> f64;
-}
-
-/// I want to track update and render time in Rust so i can draw the FPS counter and keep stats.
-/// Unfortunately, Instant::now() panics in WASM so i have to use performance.now().
-/// And just like in JS, it has limited precision in some browsers like firefox.
-#[cfg(feature = "raw_canvas")]
-#[derive(Debug, Clone)]
-pub(crate) struct RawCanvasTime(pub(crate) web_sys::Performance);
-
-#[cfg(feature = "raw_canvas")]
-impl Time for RawCanvasTime {
-    fn now(&self) -> f64 {
-        self.0.now() / 1000.0
-    }
-}
-
-#[cfg(feature = "mq")]
-#[derive(Debug, Clone)]
-pub struct MacroquadTime;
-
-#[cfg(feature = "mq")]
-impl Time for MacroquadTime {
-    fn now(&self) -> f64 {
-        macroquad::time::get_time()
-    }
-}
 
 /// Saves frame times over some period of time to measure FPS.
 #[derive(Debug, Clone, Default)]
