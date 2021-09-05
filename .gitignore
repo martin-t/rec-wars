@@ -1,6 +1,6 @@
 /.cargo/config.toml
 /rust-toolchain.toml
 
-rec-wars-macroquad.wasm
+/rec-wars.wasm
 
 /target
