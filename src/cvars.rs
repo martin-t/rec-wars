@@ -400,7 +400,6 @@ pub struct Cvars {
     pub r_draw_cluster_bombs: bool,
     pub r_explosion_duration: f64,
     pub r_explosions_reverse_order: bool,
-    // LATER this is unused, figure out why no warn
     pub r_smoothing: bool,
     pub r_splitscreen_gap: f64,
 
