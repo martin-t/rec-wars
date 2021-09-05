@@ -178,7 +178,6 @@
     - [ ] mode
     - [ ] map
     - [ ] cvars
-- [ ] focus canvas on (re)load (e.g. after touching browser console and reloading)
 - [ ] FAQ - stuttering/tearing due to compositor - Alt+Shift+f12
     - update: somehow this doesn't help anymore
 
@@ -193,8 +192,6 @@
     - renderdoc for graphics debugging
     - cargo flamegraph (internally uses perf on linux)
     - firestorm
-- [ ] if raw_canvas kept: solve perf issues - firefox (78.0.2) *really* hates shadows (maybe only on text)
-    - try prerendering text into offscreen canvas
 - [ ] logo (RecWars spelled out by in-game entities?)
 - [ ] GM - presing fire again switches back to tank
 - [ ] replays (also easier debugging)
@@ -248,7 +245,6 @@
             - some are sanity checks when removing from thunderdome - soft_unwrap instead?
             - review all of them and eliminate or replace with `except` (to mark as reviewed)
     - [ ] find a way to increase rustfmt line length - the arbitrary line breaks are dumb
-            - stuff like setting canvas shadow offset should be one line
-            - stuff like long chains of iterator ops should be split
+            - stuff like long chains of iterator ops should still be split though
 - [ ] all the LATERs
     - They mean something can be done better but marking it as a todo would be just noise when grepping. They're things I'd do if I had infinite time and wanted to make RecWars perfect.
