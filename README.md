@@ -66,7 +66,7 @@ Might have [performance issues](https://bugzilla.mozilla.org/show_bug.cgi?id=101
 
 How to run locally:
 
-- Build with `cargo build --target wasm32-unknown-unknown && mv target/wasm32-unknown-unknown/debug/rec-wars-macroquad.wasm rec-wars-macroquad.wasm`
+- Build with `cargo build --target wasm32-unknown-unknown && mv target/wasm32-unknown-unknown/debug/rec-wars.wasm rec-wars.wasm`
     - You can use `--release` to get better perf and a much smaller WASM file.
 - Host with `python3 -m http.server` (or any other web server, simply opening `macroquad.html` will *not* work though).
 - Open http://localhost:8000/macroquad.html.
