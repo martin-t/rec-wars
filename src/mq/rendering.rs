@@ -16,7 +16,7 @@ use crate::{
     server::Server,
 };
 
-// LATER when raw_canvas is removed, clean up all the casts here
+// LATER clean up at least some of the casts here
 
 pub(crate) fn render(client: &MacroquadClient, server: &Server, cvars: &Cvars) {
     match client.client_mode {
