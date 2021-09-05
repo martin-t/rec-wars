@@ -1204,7 +1204,7 @@ pub enum TickrateMode {
     /// This is described by Jonathan Blow here: https://youtu.be/fdAOPHgW7qM?t=7149
     FixedOrSmaller,
     // There is another option - FixedWithInterpolation:
-    // Instead of running with shorter dt to create the intermediate frame whic his thrown away,
+    // Instead of running with shorter dt to create the intermediate frame which is thrown away,
     // we'd wait till the next full simulation frame and interpolate to get the intermediate render frame.
     // This would however introduce latency.
     // Also note I believe this would require special handling of events like respawning
