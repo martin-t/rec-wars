@@ -140,8 +140,9 @@ impl MacroquadClient {
         let img_explosion = textures.next().unwrap();
         let img_explosion_cyan = textures.next().unwrap();
 
+        // LATER use r_smoothing (currently unused)
         // LATER smoothing optional and configurable per image
-        // LATER either use or remove r_smoothing (if raw_canvas is removed)
+        // LATER allow changing smoothing at runtime
         img_explosion.set_filter(FilterMode::Nearest);
         img_explosion_cyan.set_filter(FilterMode::Nearest);
 
