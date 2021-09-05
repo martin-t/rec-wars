@@ -102,7 +102,7 @@ async fn main() {
         //"Corners (4)",
         "Delta",
         "Desert Eagle",
-        //"Joust (2)",
+        //"Joust (2)", // Small map (narrow)
         //"Large front (2)",
         //"Oases (4)",
         "Park",
@@ -128,7 +128,7 @@ async fn main() {
         //"extra/Large",
         //"extra/Neutral",
         "extra/Nile",
-        //"extra/OK Corral (2)", // Not symmetric (upper spawn is closer)
+        //"extra/OK Corral (2)", // Small map, not symmetric (upper spawn is closer)
         //"extra/Peninsulae (3)",
         //"extra/River Crossings",
         //"extra/Road To Hell (2)", // Only 4 spawns in a tiny area
