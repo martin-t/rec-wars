@@ -82,6 +82,8 @@ I want to make RecWars highly configurable with many different gamemodes and bal
 
 *Optionally* enable extra checks before every commit with `git config core.hooksPath git-hooks`. It gets checked on CI anyway, this just catches issues faster.
 
+*Optionally* enable fast builds - see [.cargo/config.toml.example] for details.
+
 Architecture Overview
 ---------------------
 
