@@ -742,6 +742,53 @@ fn render_viewport(
         }
     }
 
+    // Clear background around the map if it's smaller than the screen.
+    // This covers up any game entities which were drawn outside view.
+    // It would also clear debug text from last frame if macroquad didn't do it automatically
+    // (it calls clear_background at the begining of each frame anyway).
+    if empty_space_size.x > 0.0 {
+        // Draw 4 black stripes (rectangles) around view:
+        // +----+------------+----+
+        // |    |     3      |    |
+        // |    +------------+    |
+        // |    |            |    |
+        // | 1  |    view    | 2  |
+        // |    |            |    |
+        // |    +------------+    |
+        // |    |     4      |    |
+        // +----+------------+----+
+        // view_pos.x is width of vertical stripe
+        // view_pos.y is height of horizontal stripe
+        draw_rectangle(
+            0.0,
+            0.0,
+            view_pos.x as f32,
+            client.viewport_size.y as f32,
+            BLACK,
+        );
+        draw_rectangle(
+            (view_pos.x + view_size.x) as f32,
+            0.0,
+            view_pos.x as f32,
+            client.viewport_size.y as f32,
+            BLACK,
+        );
+        draw_rectangle(
+            view_pos.x as f32,
+            0.0,
+            view_size.x as f32,
+            view_pos.y as f32,
+            BLACK,
+        );
+        draw_rectangle(
+            view_pos.x as f32,
+            (view_pos.y + view_size.y) as f32,
+            view_size.x as f32,
+            view_pos.y as f32,
+            BLACK,
+        );
+    }
+
     // Pause
     if server.paused {
         let paused_size = measure_text("PAUSED", None, cvars.hud_pause_font_size as u16, 1.0);
