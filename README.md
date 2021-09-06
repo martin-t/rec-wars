@@ -86,7 +86,7 @@ Enable extra checks before every commit with `git config core.hooksPath git-hook
 
 Enable fast builds - see [.cargo/config.toml.example](.cargo/config.toml.example) for details.
 
-For even faster builds, prevent rust-analyzer from locking the `target` directory. Add this to your VSCode config (or something similar for your editor):
+For slightly faster builds, prevent rust-analyzer from locking the `target` directory. Add this to your VSCode config (or something similar for your editor):
 ```json
 "rust-analyzer.server.extraEnv": {
     "CARGO_TARGET_DIR": "target-ra"
