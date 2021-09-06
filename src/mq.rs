@@ -50,11 +50,7 @@ pub enum ClientMode {
 }
 
 impl MacroquadClient {
-    pub async fn new(
-        cvars: &Cvars,
-        player1_handle: Index,
-        player2_handle: Option<Index>,
-    ) -> Self {
+    pub async fn new(cvars: &Cvars, player1_handle: Index, player2_handle: Option<Index>) -> Self {
         let loading_started = get_time();
 
         let paths_tiles = [
