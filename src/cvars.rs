@@ -337,9 +337,6 @@ pub struct Cvars {
     pub hud_names_shadow_alpha: f64,
     pub hud_names_shadow_x: f32,
     pub hud_names_shadow_y: f32,
-    /// NB: these shadows absolutely murder performance in firefox (chromum is ok)
-    pub hud_names_shadow_rc_x: f64,
-    pub hud_names_shadow_rc_y: f64,
     pub hud_names_x: f64,
     pub hud_names_y: f64,
 
@@ -349,28 +346,20 @@ pub struct Cvars {
     pub hud_pause_font_size: f64,
     pub hud_pause_shadow_x: f32,
     pub hud_pause_shadow_y: f32,
-    pub hud_pause_shadow_rc_x: f64,
-    pub hud_pause_shadow_rc_y: f64,
-    pub hud_pause_rc_x: f64,
-    pub hud_pause_rc_y: f64,
 
     pub hud_ranking_font_size: f64,
+    /// Original RW uses 1
     pub hud_ranking_shadow_x: f32,
+    /// Original RW uses 1
     pub hud_ranking_shadow_y: f32,
-    /// Original RW uses 1
-    pub hud_ranking_shadow_rc_x: f64,
-    /// Original RW uses 1
-    pub hud_ranking_shadow_rc_y: f64,
     pub hud_ranking_x: f64,
     pub hud_ranking_y: f64,
 
     pub hud_score_font_size: f64,
+    /// Original RW uses 2
     pub hud_score_shadow_x: f32,
+    /// Original RW uses 2
     pub hud_score_shadow_y: f32,
-    /// Original RW uses 2
-    pub hud_score_shadow_rc_x: f64,
-    /// Original RW uses 2
-    pub hud_score_shadow_rc_y: f64,
     pub hud_score_x: f64,
     pub hud_score_y: f64,
 
@@ -379,8 +368,6 @@ pub struct Cvars {
     /// NB: these shadows absolutely murder performance in firefox (chromum is ok)
     pub hud_scoreboard_shadow_x: f32,
     pub hud_scoreboard_shadow_y: f32,
-    pub hud_scoreboard_shadow_rc_x: f64,
-    pub hud_scoreboard_shadow_rc_y: f64,
     pub hud_scoreboard_width_deaths: f32,
     pub hud_scoreboard_width_kills: f32,
     pub hud_scoreboard_width_name: f32,
@@ -389,8 +376,6 @@ pub struct Cvars {
     pub hud_weapon_icon_shadow_alpha: f64,
     pub hud_weapon_icon_shadow_x: f32,
     pub hud_weapon_icon_shadow_y: f32,
-    pub hud_weapon_icon_shadow_rc_x: f64,
-    pub hud_weapon_icon_shadow_rc_y: f64,
     pub hud_weapon_icon_x: f64,
     pub hud_weapon_icon_y: f64,
 
@@ -1105,9 +1090,6 @@ impl Default for Cvars {
             hud_names_shadow_alpha: 1.0,
             hud_names_shadow_x: 1.0,
             hud_names_shadow_y: 1.0,
-            // keep off because of firefox
-            hud_names_shadow_rc_x: 0.0,
-            hud_names_shadow_rc_y: 0.0,
             hud_names_x: -20.0,
             hud_names_y: 30.0,
 
@@ -1117,26 +1099,16 @@ impl Default for Cvars {
             hud_pause_font_size: 64.0,
             hud_pause_shadow_x: 2.0,
             hud_pause_shadow_y: 2.0,
-            hud_pause_shadow_rc_x: 0.0,
-            hud_pause_shadow_rc_y: 0.0,
-            hud_pause_rc_x: 600.0,
-            hud_pause_rc_y: 400.0,
 
             hud_ranking_font_size: 16.0,
             hud_ranking_shadow_x: 1.0,
             hud_ranking_shadow_y: 1.0,
-            // keep off because of firefox
-            hud_ranking_shadow_rc_x: 0.0,
-            hud_ranking_shadow_rc_y: 0.0,
             hud_ranking_x: 80.0,
             hud_ranking_y: -70.0,
 
             hud_score_font_size: 32.0,
             hud_score_shadow_x: 2.0,
             hud_score_shadow_y: 2.0,
-            // keep off because of firefox (even just this one number costs about 5 ms each frame)
-            hud_score_shadow_rc_x: 0.0,
-            hud_score_shadow_rc_y: 0.0,
             hud_score_x: 30.0,
             hud_score_y: -70.0,
 
@@ -1144,9 +1116,6 @@ impl Default for Cvars {
             hud_scoreboard_line_height: 18.0,
             hud_scoreboard_shadow_x: 1.0,
             hud_scoreboard_shadow_y: 1.0,
-            // keep off because of firefox
-            hud_scoreboard_shadow_rc_x: 0.0,
-            hud_scoreboard_shadow_rc_y: 0.0,
             hud_scoreboard_width_deaths: 50.0,
             hud_scoreboard_width_kills: 50.0,
             hud_scoreboard_width_name: 150.0,
@@ -1155,8 +1124,6 @@ impl Default for Cvars {
             hud_weapon_icon_shadow_alpha: 0.5,
             hud_weapon_icon_shadow_x: 2.0,
             hud_weapon_icon_shadow_y: 2.0,
-            hud_weapon_icon_shadow_rc_x: 2.0,
-            hud_weapon_icon_shadow_rc_y: 2.0,
             hud_weapon_icon_x: 170.0,
             hud_weapon_icon_y: -28.0,
 
