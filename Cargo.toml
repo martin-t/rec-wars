@@ -11,11 +11,19 @@ readme = "README.md"
 keywords = ["game", "wasm"]
 categories = ["games"]
 
+[profile.dev]
+# Abort on panic might be a better default:
+# https://vorner.github.io/2018/07/22/dont_panic.html
+panic = "abort"
+
 [profile.dev.package."*"]
 # Optimize deps but not the rec-wars crate itself (tip from macroquad).
 # This seems to slightly improve performance (judging by update avg/max times)
 # and shouldn't meaningfully increase incremental compile times because deps only change rarely.
 opt-level = 3
+
+[profile.release]
+panic = "abort"
 
 [dependencies]
 cvars = "0.1.0"
