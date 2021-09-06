@@ -388,9 +388,9 @@ pub struct Cvars {
     pub r_smoothing: bool,
     pub r_splitscreen_gap: f64,
 
-    /// Does not work in MQ: https://github.com/not-fl3/macroquad/issues/264
+    /// LATER fix - Does not work in MQ: https://github.com/not-fl3/macroquad/issues/264
     pub sv_auto_pause_on_minimize: bool,
-    /// Does not work in MQ: https://github.com/not-fl3/macroquad/issues/264
+    /// LATER fix - Does not work in MQ: https://github.com/not-fl3/macroquad/issues/264
     pub sv_auto_unpause_on_restore: bool,
 
     pub sv_gamelogic_mode: TickrateMode,
