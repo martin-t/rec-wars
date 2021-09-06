@@ -61,9 +61,22 @@ fn window_conf() -> Conf {
     }
 }
 
+#[cfg(feature = "web_splitscreen")]
+fn get_opts() -> Opts {
+    // This is so I can compile a splitscreen version for the web.
+    let mut opts = Opts::from_args();
+    opts.splitscreen = true;
+    opts
+}
+
+#[cfg(not(feature = "web_splitscreen"))]
+fn get_opts() -> Opts {
+    Opts::from_args()
+}
+
 #[macroquad::main(window_conf)]
 async fn main() {
-    let opts = Opts::from_args();
+    let opts = get_opts();
 
     // This is a hack.
     // It seems that in the browser, MQ redraws the screen several times between here and the main loop

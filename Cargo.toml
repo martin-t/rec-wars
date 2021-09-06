@@ -25,6 +25,9 @@ opt-level = 3
 [profile.release]
 panic = "abort"
 
+[features]
+web_splitscreen = []
+
 [dependencies]
 cvars = "0.1.0"
 enumn = "0.1.3"
