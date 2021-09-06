@@ -19,7 +19,7 @@ pub mod map;
 pub mod mq;
 pub mod rendering;
 pub mod server;
-pub mod system_ai;
+pub mod sys_ai;
 pub mod systems;
 pub mod timing;
 
