@@ -223,14 +223,12 @@ impl Console {
     fn process_input_text(&mut self, cvars: &mut Cvars) {
         let hist_len_old = self.history.len();
 
-        let hist_line = HistoryLine::new(self.prompt.clone(), true);
-        self.history.push(hist_line);
+        self.push_history_line(self.prompt.clone(), true);
 
         // The actual command parsing logic
         let res = self.process_line(cvars);
         if let Err(msg) = res {
-            let hist_line = HistoryLine::new(msg, false);
-            self.history.push(hist_line);
+            self.push_history_line(msg, false);
         }
 
         self.prompt = String::new();
@@ -248,15 +246,24 @@ impl Console {
     /// Parse what the user typed and get or set a cvar
     fn process_line(&mut self, cvars: &mut Cvars) -> Result<(), String> {
         let mut parts = self.prompt.split_whitespace();
-        let cvar_name = parts
-            .next()
-            .ok_or_else(|| "expected cvar name".to_owned())?;
+
+        let cvar_name = match parts.next() {
+            Some(name) => name,
+            None => return Ok(()),
+        };
+        if cvar_name == "help" || cvar_name == "?" {
+            self.print("Available actions:".to_owned());
+            self.print("    help                 Print this message".to_owned());
+            self.print("    <cvar name>          Print the cvar's value".to_owned());
+            self.print("    <cvar name> <value>  Set the cvar's value".to_owned());
+            return Ok(());
+        }
+
         let cvar_value = match parts.next() {
             Some(val) => val,
             None => {
                 let val = cvars.get_string(cvar_name)?;
-                let hist_line = HistoryLine::new(val, false);
-                self.history.push(hist_line);
+                self.print(val);
                 return Ok(());
             }
         };
@@ -264,6 +271,15 @@ impl Console {
             return Err(format!("expected only cvar name and value, found {}", rest));
         }
         cvars.set_str(cvar_name, cvar_value)
+    }
+
+    fn print(&mut self, text: String) {
+        self.push_history_line(text, false);
+    }
+
+    fn push_history_line(&mut self, text: String, is_input: bool) {
+        let hist_line = HistoryLine::new(text, is_input);
+        self.history.push(hist_line);
     }
 
     /// Whether the console is open right now.
