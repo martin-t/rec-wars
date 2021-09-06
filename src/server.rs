@@ -9,7 +9,7 @@ use crate::{
     entities::{Ai, Player},
     game_state::{ArenaExt, GameState, Input},
     map::Map,
-    systems,
+    system_ai, systems,
     timing::{Durations, Fps},
 };
 
@@ -227,7 +227,7 @@ impl Server {
 
         systems::cleanup(cvars, &mut self.gs);
 
-        systems::ai::ai(cvars, &mut self.gs);
+        system_ai::ai(cvars, &mut self.gs);
 
         systems::respawning(cvars, &mut self.gs, &self.map);
 

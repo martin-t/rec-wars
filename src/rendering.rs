@@ -18,7 +18,10 @@ use crate::{
 
 // LATER clean up at least some of the casts here
 
-pub fn render(client: &MacroquadClient, server: &Server, cvars: &Cvars) {
+pub fn render(client: &mut MacroquadClient, server: &Server, cvars: &Cvars) {
+    client.render_fps.tick(cvars.d_fps_period, server.real_time);
+    let start = get_time();
+
     match client.client_mode {
         ClientMode::Singleplayer { player_handle } => {
             render_viewport(client, server, cvars, player_handle)
@@ -54,6 +57,11 @@ pub fn render(client: &MacroquadClient, server: &Server, cvars: &Cvars) {
     }
 
     render_shared(client, server, cvars);
+
+    let end = get_time();
+    client
+        .render_cmds_durations
+        .add(cvars.d_timing_samples, end - start);
 }
 
 fn render_viewport(

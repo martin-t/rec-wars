@@ -1,8 +1,5 @@
 //! Native and WASM versions using the macroquad engine.
 
-mod console;
-mod rendering;
-
 use futures::future;
 use macroquad::prelude::*;
 use thunderdome::Index;
@@ -15,7 +12,7 @@ use crate::{
     timing::{Durations, Fps},
 };
 
-use crate::mq::console::Console;
+use crate::console::Console;
 
 #[derive(Debug)]
 pub struct MacroquadClient {
@@ -217,17 +214,6 @@ impl MacroquadClient {
                 server.input(player2_handle, input2);
             }
         }
-    }
-
-    pub fn render(&mut self, server: &Server, cvars: &Cvars) {
-        self.render_fps.tick(cvars.d_fps_period, server.real_time);
-        let start = get_time();
-
-        rendering::render(self, server, cvars);
-
-        let end = get_time();
-        self.render_cmds_durations
-            .add(cvars.d_timing_samples, end - start);
     }
 }
 

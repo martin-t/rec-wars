@@ -11,12 +11,15 @@
 #[macro_use]
 pub mod debugging; // keep first so the macros are available everywhere
 
+pub mod console;
 pub mod cvars;
 pub mod entities;
 pub mod game_state;
 pub mod map;
 pub mod mq;
+pub mod rendering;
 pub mod server;
+pub mod system_ai;
 pub mod systems;
 pub mod timing;
 
@@ -184,7 +187,7 @@ async fn main() {
 
         server.update(&cvars, real_time);
 
-        client.render(&server, &cvars);
+        rendering::render(&mut client, &server, &cvars);
         client.console.update(&mut cvars);
 
         let before = get_time();

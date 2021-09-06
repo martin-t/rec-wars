@@ -4,8 +4,6 @@
 //! just without the ECS data structure (we use generational arenas instead).
 //! Most game behavior (code that changes state) goes here.
 
-pub mod ai;
-
 use std::f64::consts::PI;
 
 use rand::Rng;
