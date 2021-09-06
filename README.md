@@ -84,7 +84,7 @@ I want to make RecWars highly configurable with many different gamemodes and bal
 
 Enable extra checks before every commit with `git config core.hooksPath git-hooks`. It gets checked on CI anyway, this just catches issues faster.
 
-Enable fast builds - see [.cargo/config.toml.example](.cargo/config.toml.example) for details.
+Enable fast builds - see [.cargo/config-example.toml](.cargo/config-example.toml) for details.
 
 For slightly faster builds, prevent rust-analyzer from locking the `target` directory. Add this to your VSCode config (or something similar for your editor):
 ```json
