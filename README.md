@@ -80,9 +80,19 @@ You can always find me on the [RecWars Discord server](https://discord.gg/9BQVVg
 
 I want to make RecWars highly configurable with many different gamemodes and balance settings votable by players and anybody will be able to host their own server (if technically possible, then even from the browser). If you have a gameplay idea and don't suffer from the NIH syndrome, I'd be very happy to help you test it in RecWars.
 
-*Optionally* enable extra checks before every commit with `git config core.hooksPath git-hooks`. It gets checked on CI anyway, this just catches issues faster.
+### Tips (Optional)
 
-*Optionally* enable fast builds - see [.cargo/config.toml.example](.cargo/config.toml.example) for details.
+Enable extra checks before every commit with `git config core.hooksPath git-hooks`. It gets checked on CI anyway, this just catches issues faster.
+
+Enable fast builds - see [.cargo/config.toml.example](.cargo/config.toml.example) for details.
+
+For even faster builds, prevent rust-analyzer from locking the `target` directory. Add this to your VSCode config (or something similar for your editor):
+```json
+"rust-analyzer.server.extraEnv": {
+    "CARGO_TARGET_DIR": "target-ra"
+}
+```
+Normally, rust-analyzer runs `cargo check` on save which locks `target` so if you switch to a terminal and do `cargo run`, it blocks the build for over a second which is currently a third of the build time. This will make rust-analyzer make use a separate target directory so that it'll never block a build. You could also disable saving when losing focus, disable running check on save or use the terminal inside VSCode.
 
 Architecture Overview
 ---------------------
