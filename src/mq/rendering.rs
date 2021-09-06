@@ -18,7 +18,7 @@ use crate::{
 
 // LATER clean up at least some of the casts here
 
-pub(crate) fn render(client: &MacroquadClient, server: &Server, cvars: &Cvars) {
+pub fn render(client: &MacroquadClient, server: &Server, cvars: &Cvars) {
     match client.client_mode {
         ClientMode::Singleplayer { player_handle } => {
             render_viewport(client, server, cvars, player_handle)

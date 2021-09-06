@@ -132,7 +132,7 @@ impl Map {
         TilePos { index, offset }
     }
 
-    pub(crate) fn tile_center(&self, tile_index: Vec2u) -> Vec2f {
+    pub fn tile_center(&self, tile_index: Vec2u) -> Vec2f {
         tile_index.as_() * TILE_SIZE + TILE_SIZE / 2.0
     }
 
@@ -140,18 +140,18 @@ impl Map {
         &self.surfaces[tile.surface_index]
     }
 
-    pub(crate) fn surface_at_pos(&self, pos: Vec2f) -> &Surface {
+    pub fn surface_at_pos(&self, pos: Vec2f) -> &Surface {
         let tile_pos = self.tile_pos(pos);
         self.surface_at_index(tile_pos.index)
     }
 
-    pub(crate) fn surface_at_index(&self, index: Vec2u) -> &Surface {
+    pub fn surface_at_index(&self, index: Vec2u) -> &Surface {
         let surface_index = self[index].surface_index;
         &self.surfaces[surface_index]
     }
 
     /// Is `pos` outside the map or inside a wall?
-    pub(crate) fn is_wall(&self, pos: Vec2f) -> bool {
+    pub fn is_wall(&self, pos: Vec2f) -> bool {
         if pos.x <= 0.0 {
             return true;
         }
@@ -177,7 +177,7 @@ impl Map {
     /// Find first wall collision when traveling from `begin` to `end`.
     /// The returned point is nudged slightly inside the wall.
     /// Area outside the map is considered wall.
-    pub(crate) fn is_wall_trace(&self, begin: Vec2f, end: Vec2f) -> Option<Vec2f> {
+    pub fn is_wall_trace(&self, begin: Vec2f, end: Vec2f) -> Option<Vec2f> {
         if self.is_wall(begin) {
             return Some(begin);
         }
@@ -244,19 +244,19 @@ impl Map {
         }
     }
 
-    pub(crate) fn spawns(&self) -> &Vec<Vec2u> {
+    pub fn spawns(&self) -> &Vec<Vec2u> {
         &self.spawns
     }
 
     // LATER remove all #[allow(dead_code)] here (or the fns if they turn out useless)
 
     #[allow(dead_code)]
-    pub(crate) fn bases(&self) -> &Vec<Vec2u> {
+    pub fn bases(&self) -> &Vec<Vec2u> {
         &self.bases
     }
 
     /// Returns (pos, angle).
-    pub(crate) fn random_spawn(&self, rng: &mut SmallRng) -> (Vec2f, f64) {
+    pub fn random_spawn(&self, rng: &mut SmallRng) -> (Vec2f, f64) {
         // TODO maps with no spawns (or even all walls)
         let i = rng.gen_range(0..self.spawns().len());
         let index = self.spawns()[i];
@@ -266,7 +266,7 @@ impl Map {
     }
 
     /// Returns (pos, angle).
-    pub(crate) fn random_nonwall(&self, rng: &mut SmallRng) -> (Vec2f, f64) {
+    pub fn random_nonwall(&self, rng: &mut SmallRng) -> (Vec2f, f64) {
         loop {
             let c = rng.gen_range(0..self.width());
             let r = rng.gen_range(0..self.height());
@@ -305,12 +305,12 @@ pub struct Tile {
 
 #[derive(Debug, Clone)]
 pub struct Surface {
-    pub(crate) name: String,
+    pub name: String,
     pub kind: Kind,
     /// Seems to affect both turning and acceleration
-    pub(crate) friction: f32,
+    pub friction: f32,
     /// Maybe a multiplier for speed
-    pub(crate) speed: f32,
+    pub speed: f32,
 }
 
 impl Surface {

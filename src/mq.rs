@@ -18,28 +18,28 @@ use crate::{
 use crate::mq::console::Console;
 
 #[derive(Debug)]
-pub(crate) struct MacroquadClient {
-    pub(crate) imgs_tiles: Vec<Texture2D>,
-    pub(crate) imgs_vehicles: Vec<Texture2D>,
-    pub(crate) imgs_wrecks: Vec<Texture2D>,
-    pub(crate) imgs_weapon_icons: Vec<Texture2D>,
-    pub(crate) img_rocket: Texture2D,
-    pub(crate) img_hm: Texture2D,
-    pub(crate) img_gm: Texture2D,
-    pub(crate) img_explosion: Texture2D,
-    pub(crate) img_explosion_cyan: Texture2D,
-    pub(crate) render_fps: Fps,
-    pub(crate) render_cmds_durations: Durations,
-    pub(crate) rest_durations: Durations,
-    pub(crate) viewport_size: Vec2f,
-    pub(crate) client_mode: ClientMode,
-    pub(crate) input1: Input,
-    pub(crate) input1_prev: Input,
-    pub(crate) console: Console,
+pub struct MacroquadClient {
+    pub imgs_tiles: Vec<Texture2D>,
+    pub imgs_vehicles: Vec<Texture2D>,
+    pub imgs_wrecks: Vec<Texture2D>,
+    pub imgs_weapon_icons: Vec<Texture2D>,
+    pub img_rocket: Texture2D,
+    pub img_hm: Texture2D,
+    pub img_gm: Texture2D,
+    pub img_explosion: Texture2D,
+    pub img_explosion_cyan: Texture2D,
+    pub render_fps: Fps,
+    pub render_cmds_durations: Durations,
+    pub rest_durations: Durations,
+    pub viewport_size: Vec2f,
+    pub client_mode: ClientMode,
+    pub input1: Input,
+    pub input1_prev: Input,
+    pub console: Console,
 }
 
 #[derive(Debug)]
-pub(crate) enum ClientMode {
+pub enum ClientMode {
     Singleplayer {
         player_handle: Index,
     },
@@ -50,7 +50,7 @@ pub(crate) enum ClientMode {
 }
 
 impl MacroquadClient {
-    pub(crate) async fn new(
+    pub async fn new(
         cvars: &Cvars,
         player1_handle: Index,
         player2_handle: Option<Index>,
@@ -197,7 +197,7 @@ impl MacroquadClient {
         }
     }
 
-    pub(crate) fn process_input(&mut self, server: &mut Server) {
+    pub fn process_input(&mut self, server: &mut Server) {
         if self.console.is_open() {
             return;
         }
@@ -223,7 +223,7 @@ impl MacroquadClient {
         }
     }
 
-    pub(crate) fn render(&mut self, server: &Server, cvars: &Cvars) {
+    pub fn render(&mut self, server: &Server, cvars: &Cvars) {
         self.render_fps.tick(cvars.d_fps_period, server.real_time);
         let start = get_time();
 

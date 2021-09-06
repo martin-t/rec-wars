@@ -7,7 +7,7 @@ use crate::{
     game_state::{GameState, Input},
 };
 
-pub(crate) fn ai(cvars: &Cvars, gs: &mut GameState) {
+pub fn ai(cvars: &Cvars, gs: &mut GameState) {
     if !cvars.ai {
         return;
     }

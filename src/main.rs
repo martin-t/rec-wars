@@ -5,21 +5,20 @@
 #![warn(unreachable_pub)]
 #![warn(unused)]
 #![warn(clippy::all)]
-#![allow(unreachable_pub)] // TODO
 #![allow(clippy::needless_range_loop)] // False positives
 #![allow(clippy::too_many_arguments)]
 
 #[macro_use]
-mod debugging; // keep first so the macros are available everywhere
+pub mod debugging; // keep first so the macros are available everywhere
 
-mod cvars;
-mod entities;
-mod game_state;
-mod map;
-mod mq;
-mod server;
-mod systems;
-mod timing;
+pub mod cvars;
+pub mod entities;
+pub mod game_state;
+pub mod map;
+pub mod mq;
+pub mod server;
+pub mod systems;
+pub mod timing;
 
 use std::str;
 

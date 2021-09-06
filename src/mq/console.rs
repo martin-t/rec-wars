@@ -12,7 +12,7 @@ use macroquad::{
 use crate::cvars::Cvars;
 
 #[derive(Debug, Clone, Default)]
-pub(crate) struct Console {
+pub struct Console {
     is_open: bool,
     prompt: String,
     prompt_saved: String,
@@ -26,7 +26,7 @@ pub(crate) struct Console {
 }
 
 impl Console {
-    pub(crate) fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             is_open: false,
             prompt: String::new(),
@@ -39,7 +39,7 @@ impl Console {
         }
     }
 
-    pub(crate) fn update(&mut self, cvars: &mut Cvars) {
+    pub fn update(&mut self, cvars: &mut Cvars) {
         self.input_prev = self.input;
         self.input = get_input();
 
@@ -270,7 +270,7 @@ impl Console {
     ///
     /// Useful for example to ignore game-related input
     /// while the player is typing into console.
-    pub(crate) fn is_open(&self) -> bool {
+    pub fn is_open(&self) -> bool {
         self.is_open
     }
 }

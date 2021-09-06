@@ -435,7 +435,7 @@ impl Cvars {
     }
 
     /// Returns whether the weapon is on the chassis or turret and where relative to that part's center.
-    pub(crate) fn g_hardpoint(&self, veh_type: VehicleType, weapon: Weapon) -> (Hardpoint, Vec2f) {
+    pub fn g_hardpoint(&self, veh_type: VehicleType, weapon: Weapon) -> (Hardpoint, Vec2f) {
         match veh_type {
             VehicleType::Tank => match weapon {
                 Weapon::Mg => (
@@ -587,7 +587,7 @@ impl Cvars {
         }
     }
 
-    pub(crate) fn g_vehicle_hitbox(&self, veh_type: VehicleType) -> Hitbox {
+    pub fn g_vehicle_hitbox(&self, veh_type: VehicleType) -> Hitbox {
         match veh_type {
             VehicleType::Tank => Hitbox {
                 mins: Vec2f::new(self.g_tank_mins_x, self.g_tank_mins_y),
@@ -613,7 +613,7 @@ impl Cvars {
         self.g_armor * scale
     }
 
-    pub(crate) fn g_vehicle_movement_stats(&self, veh_type: VehicleType) -> MovementStats {
+    pub fn g_vehicle_movement_stats(&self, veh_type: VehicleType) -> MovementStats {
         match veh_type {
             VehicleType::Tank => MovementStats {
                 accel_backward: self.g_tank_accel_backward,
@@ -695,7 +695,7 @@ impl Cvars {
         }
     }
 
-    pub(crate) fn g_weapon_damage_direct(&self, weapon: Weapon) -> f64 {
+    pub fn g_weapon_damage_direct(&self, weapon: Weapon) -> f64 {
         match weapon {
             Weapon::Mg => self.g_machine_gun_damage,
             Weapon::Rail => self.g_railgun_damage,
@@ -707,7 +707,7 @@ impl Cvars {
         }
     }
 
-    pub(crate) fn g_weapon_explosion_damage(&self, weapon: Weapon) -> f64 {
+    pub fn g_weapon_explosion_damage(&self, weapon: Weapon) -> f64 {
         match weapon {
             Weapon::Mg => 0.0,
             Weapon::Rail => 0.0,
@@ -719,7 +719,7 @@ impl Cvars {
         }
     }
 
-    pub(crate) fn g_weapon_explosion_radius(&self, weapon: Weapon) -> f64 {
+    pub fn g_weapon_explosion_radius(&self, weapon: Weapon) -> f64 {
         match weapon {
             Weapon::Mg => 0.0,
             Weapon::Rail => 0.0,
@@ -731,7 +731,7 @@ impl Cvars {
         }
     }
 
-    pub(crate) fn g_weapon_explosion_scale(&self, weapon: Weapon) -> f64 {
+    pub fn g_weapon_explosion_scale(&self, weapon: Weapon) -> f64 {
         match weapon {
             Weapon::Mg => 0.0,
             Weapon::Rail => 0.0,
@@ -743,7 +743,7 @@ impl Cvars {
         }
     }
 
-    pub(crate) fn g_weapon_movement_stats(&self) -> MovementStats {
+    pub fn g_weapon_movement_stats(&self) -> MovementStats {
         MovementStats {
             accel_backward: 0.0,
             accel_forward: self.g_guided_missile_accel_forward,
@@ -759,7 +759,7 @@ impl Cvars {
         }
     }
 
-    pub(crate) fn g_weapon_refire(&self, weapon: Weapon) -> f64 {
+    pub fn g_weapon_refire(&self, weapon: Weapon) -> f64 {
         match weapon {
             Weapon::Mg => self.g_machine_gun_refire,
             Weapon::Rail => 0.0,
@@ -783,7 +783,7 @@ impl Cvars {
         }
     }
 
-    pub(crate) fn g_weapon_reload_time(&self, weapon: Weapon) -> f64 {
+    pub fn g_weapon_reload_time(&self, weapon: Weapon) -> f64 {
         match weapon {
             Weapon::Mg => self.g_machine_gun_reload_time,
             Weapon::Rail => self.g_railgun_reload_time,
@@ -1179,16 +1179,16 @@ pub enum TickrateMode {
 }
 
 #[derive(Debug, Clone)]
-pub(crate) struct MovementStats {
-    pub(crate) accel_backward: f64,
-    pub(crate) accel_forward: f64,
-    pub(crate) friction_const: f64,
-    pub(crate) friction_linear: f64,
-    pub(crate) speed_max: f64,
-    pub(crate) steering_car: f64,
-    pub(crate) turn_effectiveness: f64,
-    pub(crate) turn_rate_friction_const: f64,
-    pub(crate) turn_rate_friction_linear: f64,
-    pub(crate) turn_rate_increase: f64,
-    pub(crate) turn_rate_max: f64,
+pub struct MovementStats {
+    pub accel_backward: f64,
+    pub accel_forward: f64,
+    pub friction_const: f64,
+    pub friction_linear: f64,
+    pub speed_max: f64,
+    pub steering_car: f64,
+    pub turn_effectiveness: f64,
+    pub turn_rate_friction_const: f64,
+    pub turn_rate_friction_linear: f64,
+    pub turn_rate_increase: f64,
+    pub turn_rate_max: f64,
 }

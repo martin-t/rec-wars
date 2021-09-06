@@ -4,7 +4,7 @@
 //! just without the ECS data structure (we use generational arenas instead).
 //! Most game behavior (code that changes state) goes here.
 
-pub(crate) mod ai;
+pub mod ai;
 
 use std::f64::consts::PI;
 
@@ -22,7 +22,7 @@ use crate::{
 };
 
 /// Delete data from previous frames that's no longer needed.
-pub(crate) fn cleanup(cvars: &Cvars, gs: &mut GameState) {
+pub fn cleanup(cvars: &Cvars, gs: &mut GameState) {
     let game_time = gs.game_time; // borrowck
     gs.rail_beams
         .retain(|beam| beam.start_time + cvars.g_railgun_beam_duration > game_time);
@@ -33,7 +33,7 @@ pub(crate) fn cleanup(cvars: &Cvars, gs: &mut GameState) {
     });
 }
 
-pub(crate) fn respawning(cvars: &Cvars, gs: &mut GameState, map: &Map) {
+pub fn respawning(cvars: &Cvars, gs: &mut GameState, map: &Map) {
     for player_handle in gs.players.iter_handles() {
         let player = &mut gs.players[player_handle];
         let vehicle_handle = player.vehicle.unwrap();
@@ -67,7 +67,7 @@ pub(crate) fn respawning(cvars: &Cvars, gs: &mut GameState, map: &Map) {
     }
 }
 
-pub(crate) fn spawn_vehicle(
+pub fn spawn_vehicle(
     cvars: &Cvars,
     gs: &mut GameState,
     map: &Map,
@@ -98,7 +98,7 @@ pub(crate) fn spawn_vehicle(
     player.vehicle = Some(vehicle_handle);
 }
 
-pub(crate) fn self_destruct(cvars: &Cvars, gs: &mut GameState) {
+pub fn self_destruct(cvars: &Cvars, gs: &mut GameState) {
     for vehicle_handle in gs.vehicles.iter_handles() {
         let vehicle = &gs.vehicles[vehicle_handle];
         let pos = vehicle.pos;
@@ -135,7 +135,7 @@ pub(crate) fn self_destruct(cvars: &Cvars, gs: &mut GameState) {
     }
 }
 
-pub(crate) fn vehicle_movement(cvars: &Cvars, gs: &mut GameState, map: &Map) {
+pub fn vehicle_movement(cvars: &Cvars, gs: &mut GameState, map: &Map) {
     for (_, vehicle) in gs.vehicles.iter_mut() {
         let stats = cvars.g_vehicle_movement_stats(vehicle.veh_type);
 
@@ -247,7 +247,7 @@ fn accel_decel(stats: &MovementStats, vel: &mut Vec2f, angle: &mut f64, input: I
     }
 }
 
-pub(crate) fn player_logic(gs: &mut GameState) {
+pub fn player_logic(gs: &mut GameState) {
     for (player_handle, player) in gs.players.iter_mut() {
         let input_prev = gs.inputs_prev.get(player_handle);
 
@@ -263,7 +263,7 @@ pub(crate) fn player_logic(gs: &mut GameState) {
     }
 }
 
-pub(crate) fn vehicle_logic(cvars: &Cvars, gs: &mut GameState) {
+pub fn vehicle_logic(cvars: &Cvars, gs: &mut GameState) {
     for (_, vehicle) in gs.vehicles.iter_mut() {
         // This should run even while dead, otherwise the ammo indicator will be buggy.
         // Original RW also reloaded while dead.
@@ -298,7 +298,7 @@ pub(crate) fn vehicle_logic(cvars: &Cvars, gs: &mut GameState) {
     }
 }
 
-pub(crate) fn shooting(cvars: &Cvars, gs: &mut GameState) {
+pub fn shooting(cvars: &Cvars, gs: &mut GameState) {
     for (_, vehicle) in gs.vehicles.iter_mut() {
         let player = &mut gs.players[vehicle.owner];
         // Note: vehicles can shoot while controlling a missile
@@ -424,7 +424,7 @@ pub(crate) fn shooting(cvars: &Cvars, gs: &mut GameState) {
 }
 
 /// The *guided* part of guided missile
-pub(crate) fn gm_turning(cvars: &Cvars, gs: &mut GameState) {
+pub fn gm_turning(cvars: &Cvars, gs: &mut GameState) {
     for (gm_handle, gm) in gs
         .projectiles
         .iter_mut()
@@ -455,7 +455,7 @@ pub(crate) fn gm_turning(cvars: &Cvars, gs: &mut GameState) {
 
 /// Projectile movement and collisions / hit detection.
 /// Traces the projectile's path between positions to avoid passing through thin objects.
-pub(crate) fn projectiles(cvars: &Cvars, gs: &mut GameState, map: &Map) {
+pub fn projectiles(cvars: &Cvars, gs: &mut GameState, map: &Map) {
     for proj_handle in gs.projectiles.iter_handles() {
         let projectile = &mut gs.projectiles[proj_handle];
         let max_new_pos = projectile.pos + projectile.vel * gs.dt;
@@ -548,7 +548,7 @@ pub(crate) fn projectiles(cvars: &Cvars, gs: &mut GameState, map: &Map) {
     }
 }
 
-pub(crate) fn damage(
+pub fn damage(
     cvars: &Cvars,
     gs: &mut GameState,
     attacker_handle: Index,
@@ -588,7 +588,7 @@ pub(crate) fn damage(
 
 /// Right now, CBs are the only timed projectiles, long term, might wanna add timeouts to more
 /// to avoid too many entities on huge maps.
-pub(crate) fn projectiles_timeout(cvars: &Cvars, gs: &mut GameState) {
+pub fn projectiles_timeout(cvars: &Cvars, gs: &mut GameState) {
     for handle in gs.projectiles.iter_handles() {
         let projectile = &gs.projectiles[handle];
         if gs.game_time > projectile.explode_time {

@@ -41,14 +41,14 @@ pub struct Server {
     pub map: Map,
     pub gs: GameState,
     /// Game time left over from previous update.
-    pub(crate) dt_carry: f64,
-    pub(crate) gs_fixed: GameState,
+    pub dt_carry: f64,
+    pub gs_fixed: GameState,
     /// Time since game started in seconds. Increases at wall clock speed even when paused.
     ///
     /// This is not meant to be used for anything that affects gameplay - use `gs.game_time` instead.
     pub real_time: f64,
-    pub(crate) real_time_prev: f64,
-    pub(crate) real_time_delta: f64,
+    pub real_time_prev: f64,
+    pub real_time_delta: f64,
     pub paused: bool,
     pub update_fps: Fps,
     pub update_durations: Durations,

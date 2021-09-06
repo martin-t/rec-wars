@@ -19,17 +19,17 @@ use crate::{
 #[derive(Debug, Clone)]
 pub struct GameState {
     /// The RNG for all gamelogic
-    pub(crate) rng: SmallRng,
+    pub rng: SmallRng,
 
     /// Inclusive range [-1.0, 1.0].
     /// Creating it once and saving it here might be faster than using gen_range according to docs.
-    pub(crate) range_uniform11: Uniform<f64>,
+    pub range_uniform11: Uniform<f64>,
 
     /// This gamelogic frame's time in seconds. Affected by d_speed and pause.
     pub game_time: f64,
 
     /// The previous gamelogic frame's time in seconds. Affected by d_speed and pause.
-    pub(crate) game_time_prev: f64,
+    pub game_time_prev: f64,
 
     /// Delta time since last gamelogic frame in seconds
     pub dt: f64,
@@ -44,22 +44,21 @@ pub struct GameState {
     ///     1) Make sure (add test) one beam can kill the player and hit him again if he's unlucky enough to respawn in its path.
     ///     2) Remove the entry after the projectile exist the hitbox - e.g. guided missiles that can pass through several times.
     ///     3) Make sure the HashMap doesn't grow indefinitely in case we forgot to remove in some cases.
-    pub(crate) rail_hits: FnvHashMap<Index, Index>,
+    pub rail_hits: FnvHashMap<Index, Index>,
 
     pub rail_beams: Vec<RailBeam>,
     pub bfg_beams: Vec<(Vec2f, Vec2f)>,
     pub explosions: Vec<Explosion>,
-    pub(crate) ais: Arena<Ai>,
+    pub ais: Arena<Ai>,
     pub players: Arena<Player>,
     pub vehicles: Arena<Vehicle>,
     pub projectiles: Arena<Projectile>,
 
     /// Inputs of players last frame.
-    pub(crate) inputs_prev: InputsPrev,
+    pub inputs_prev: InputsPrev,
 }
 
 impl GameState {
-    // LATER pub(crate)?
     pub fn new(rng: SmallRng) -> Self {
         Self {
             rng,
@@ -88,7 +87,7 @@ pub struct RailBeam {
 }
 
 impl RailBeam {
-    pub(crate) fn new(begin: Vec2f, end: Vec2f, start_time: f64) -> Self {
+    pub fn new(begin: Vec2f, end: Vec2f, start_time: f64) -> Self {
         Self {
             begin,
             end,
@@ -106,7 +105,7 @@ pub struct Explosion {
 }
 
 impl Explosion {
-    pub(crate) fn new(pos: Vec2f, scale: f64, start_time: f64, bfg: bool) -> Self {
+    pub fn new(pos: Vec2f, scale: f64, start_time: f64, bfg: bool) -> Self {
         Self {
             pos,
             scale,
@@ -117,11 +116,11 @@ impl Explosion {
 }
 
 #[derive(Debug, Clone)]
-pub(crate) struct InputsPrev(FnvHashMap<Index, Input>);
+pub struct InputsPrev(FnvHashMap<Index, Input>);
 
 impl InputsPrev {
     /// The player's input last frame or empty input if the player wasn't connected last frame.
-    pub(crate) fn get(&self, player_handle: Index) -> Input {
+    pub fn get(&self, player_handle: Index) -> Input {
         if let Some(input) = self.0.get(&player_handle) {
             *input
         } else {
@@ -129,7 +128,7 @@ impl InputsPrev {
         }
     }
 
-    pub(crate) fn snapshot(&mut self, players: &Arena<Player>) {
+    pub fn snapshot(&mut self, players: &Arena<Player>) {
         self.0.clear();
         for (handle, player) in players.iter() {
             self.0.insert(handle, player.input);
@@ -161,7 +160,7 @@ impl Input {
         Self::default()
     }
 
-    pub(crate) fn new_up() -> Self {
+    pub fn new_up() -> Self {
         Self {
             up: true,
             ..Self::default()
@@ -187,20 +186,20 @@ impl Input {
         }
     }
 
-    pub(crate) fn right_left(&self) -> f64 {
+    pub fn right_left(&self) -> f64 {
         self.right as i32 as f64 - self.left as i32 as f64
     }
 
-    pub(crate) fn up(&self) -> f64 {
+    pub fn up(&self) -> f64 {
         self.up as i32 as f64
     }
 
-    pub(crate) fn down(&self) -> f64 {
+    pub fn down(&self) -> f64 {
         self.down as i32 as f64
     }
 
     /// Subset of inputs to control the missile
-    pub(crate) fn missile_while_guiding(&self) -> Self {
+    pub fn missile_while_guiding(&self) -> Self {
         Self {
             up: true,
             down: false,
@@ -209,7 +208,7 @@ impl Input {
     }
 
     /// Subset of inputs to control the vehicle while guiding a missile
-    pub(crate) fn vehicle_while_guiding(&self) -> Self {
+    pub fn vehicle_while_guiding(&self) -> Self {
         // Original RW allowed everything except movement.
         Self {
             left: false,
@@ -271,7 +270,7 @@ impl Debug for Input {
     }
 }
 
-pub(crate) trait ArenaExt {
+pub trait ArenaExt {
     /// Collect the handles (`thunderdome::Index`) into a `Vec`.
     ///
     /// This is borrowck dance to allow iterating through the collection without keeping the arena borrowed.

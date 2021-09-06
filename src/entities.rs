@@ -32,7 +32,7 @@ pub struct Player {
 }
 
 impl Player {
-    pub(crate) fn new(name: String) -> Self {
+    pub fn new(name: String) -> Self {
         Self {
             name,
             input: Input::new(),
@@ -75,7 +75,7 @@ pub struct Ai {
 }
 
 impl Ai {
-    pub(crate) fn new(player: Index) -> Self {
+    pub fn new(player: Index) -> Self {
         Self {
             player,
             movement: 0,
@@ -107,7 +107,7 @@ pub struct Vehicle {
 
 impl Vehicle {
     #[must_use]
-    pub(crate) fn new(
+    pub fn new(
         cvars: &Cvars,
         pos: Vec2f,
         angle: f64,
@@ -173,7 +173,7 @@ pub struct Projectile {
     pub owner: Index,
 }
 
-pub(crate) const WEAPS_CNT: u8 = 7;
+pub const WEAPS_CNT: u8 = 7;
 
 #[repr(u8)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, N)]
