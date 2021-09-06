@@ -92,7 +92,7 @@ For slightly faster builds, prevent rust-analyzer from locking the `target` dire
     "CARGO_TARGET_DIR": "target-ra"
 }
 ```
-Normally, rust-analyzer runs `cargo check` on save which locks `target` so if you switch to a terminal and do `cargo run`, it blocks the build for over a second which is currently a third of the build time. This will make rust-analyzer make use a separate target directory so that it'll never block a build. You could also disable saving when losing focus, disable running check on save or use the terminal inside VSCode.
+Normally, rust-analyzer runs `cargo check` on save which locks `target` so if you switch to a terminal and do `cargo run`, it blocks the build for over a second which is currently a third of the build time. This will make rust-analyzer make use a separate target directory so that it'll never block a build. Alternatively, you could disable saving when losing focus, disable running check on save or use the terminal inside VSCode.
 
 Architecture Overview
 ---------------------
