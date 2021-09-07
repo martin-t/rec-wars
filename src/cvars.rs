@@ -1035,7 +1035,8 @@ impl Default for Cvars {
             g_railgun_speed: 2500.0,
             g_railgun_vehicle_velocity_factor: 0.0,
 
-            g_respawn_delay: 2.0,
+            // LATER this used to be 2 s, did RW use 2 s?
+            g_respawn_delay: 0.5,
 
             g_rockets_damage_direct: 25.0, // pretty sure from orig RW testing
             g_rockets_explosion_damage: 0.0,
