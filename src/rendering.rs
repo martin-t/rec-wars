@@ -359,21 +359,21 @@ fn render_viewport(
                 continue;
             }
 
-            let corner = scr_pos - cvars.g_cluster_bomb_size / 2.0;
+            let corner = scr_pos - cvars.cl_cluster_bomb_size / 2.0;
             // Tecnically, we should draw all shadows first, then all the projectiles,
             // but actually it barely matters and I think RecWar does it this way too.
             draw_rectangle(
                 (corner.x + cvars.g_cluster_bomb_shadow_x) as f32,
                 (corner.y + cvars.g_cluster_bomb_shadow_y) as f32,
-                cvars.g_cluster_bomb_size as f32,
-                cvars.g_cluster_bomb_size as f32,
+                cvars.cl_cluster_bomb_size as f32,
+                cvars.cl_cluster_bomb_size as f32,
                 Color::new(0.0, 0.0, 0.0, cvars.g_cluster_bomb_shadow_alpha as f32),
             );
             draw_rectangle(
                 corner.x as f32,
                 corner.y as f32,
-                cvars.g_cluster_bomb_size as f32,
-                cvars.g_cluster_bomb_size as f32,
+                cvars.cl_cluster_bomb_size as f32,
+                cvars.cl_cluster_bomb_size as f32,
                 Color::new(0.0, 1.0, 1.0, 1.0),
             );
         }

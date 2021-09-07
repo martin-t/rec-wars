@@ -28,6 +28,8 @@ pub struct Cvars {
 
     pub bots_max: usize,
 
+    pub cl_cluster_bomb_size: f64,
+
     pub cl_machine_gun_trail_length: f64,
     pub cl_machine_gun_trail_thickness: f64,
 
@@ -117,7 +119,6 @@ pub struct Cvars {
     pub g_cluster_bomb_shadow_alpha: f64,
     pub g_cluster_bomb_shadow_x: f64,
     pub g_cluster_bomb_shadow_y: f64,
-    pub g_cluster_bomb_size: f64,
     pub g_cluster_bomb_speed: f64,
     pub g_cluster_bomb_speed_spread_forward: f64,
     pub g_cluster_bomb_speed_spread_gaussian: bool,
@@ -809,6 +810,8 @@ impl Default for Cvars {
 
             bots_max: 20,
 
+            cl_cluster_bomb_size: 1.5,
+
             cl_machine_gun_trail_length: 10.0,
             cl_machine_gun_trail_thickness: 1.5,
 
@@ -878,7 +881,6 @@ impl Default for Cvars {
             g_cluster_bomb_reload_time: 1.5,
             g_cluster_bomb_shadow_alpha: 1.0,
             g_cluster_bomb_shadow_x: 2.0,
-            g_cluster_bomb_size: 1.2,
             g_cluster_bomb_shadow_y: 2.0,
             g_cluster_bomb_speed: 400.0,
             g_cluster_bomb_speed_spread_forward: 50.0,
