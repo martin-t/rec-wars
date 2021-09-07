@@ -32,6 +32,7 @@ pub struct MacroquadClient {
     pub client_mode: ClientMode,
     pub input1: Input,
     pub input1_prev: Input,
+    pub last_key: Option<KeyCode>,
     pub console: Console,
 }
 
@@ -186,6 +187,7 @@ impl MacroquadClient {
             client_mode,
             input1: Input::new(),
             input1_prev: Input::new(),
+            last_key: None,
             console: Console::new(),
         }
     }
@@ -213,6 +215,10 @@ impl MacroquadClient {
                 server.input(player1_handle, input1);
                 server.input(player2_handle, input2);
             }
+        }
+
+        if let Some(key_code) = get_last_key_pressed() {
+            self.last_key = Some(key_code);
         }
     }
 }

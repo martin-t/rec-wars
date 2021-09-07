@@ -944,6 +944,23 @@ fn render_shared(client: &MacroquadClient, server: &Server, cvars: &Cvars) {
         }
     }
 
+    // Draw last key
+    if cvars.d_last_key {
+        if let Some(key_code) = client.last_key {
+            render_text_with_shadow(
+                cvars,
+                &format!("{:?}", key_code),
+                300.0,
+                300.0,
+                32.0,
+                RED,
+                1.0,
+                1.0,
+                0.5,
+            );
+        }
+    }
+
     // Draw debug text
     let mut y = 25.0;
     DEBUG_TEXTS.with(|texts| {
