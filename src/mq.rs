@@ -269,9 +269,9 @@ fn get_input1() -> Input {
         input.horn = true;
     }
 
-    // The rest is player 1 only
+    // The rest are shared actions defined on is player 1 only
 
-    if was_input_pressed(&[KeyCode::T]) {
+    if was_input_pressed(&[KeyCode::Enter, KeyCode::T]) {
         input.chat = true;
     }
     if was_input_pressed(&[KeyCode::Pause, KeyCode::P]) {
@@ -307,6 +307,7 @@ fn get_input2() -> Input {
     if was_input_pressed(&[
         KeyCode::Slash, // US layout
         KeyCode::Minus, // Same key, CZ layout
+        KeyCode::Kp0,
     ]) {
         input.next_weapon = true;
     }
@@ -322,8 +323,10 @@ fn get_input2() -> Input {
     if was_input_pressed(&[KeyCode::K]) {
         input.horn = true;
     }
+
     // No binds for shared actions like chat, pause, console and esc.
-    // They're shared and defined on player 1.
+    // They're defined on player 1.
+
     input
 }
 
