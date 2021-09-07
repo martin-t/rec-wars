@@ -162,15 +162,25 @@ fn render_viewport(
             continue;
         }
         // we're drawing from the bullet's position backwards
-        let scr_end = scr_pos - mg.vel.normalized() * cvars.g_machine_gun_trail_length;
-        render_line(scr_pos, scr_end, 1.0, YELLOW);
+        let scr_end = scr_pos - mg.vel.normalized() * cvars.cl_machine_gun_trail_length;
+        render_line(
+            scr_pos,
+            scr_end,
+            cvars.cl_machine_gun_trail_thickness,
+            YELLOW,
+        );
     }
 
     // Draw railguns
     for beam in &server.gs.rail_beams {
         let scr_begin = beam.begin + camera_offset;
         let scr_end = beam.end + camera_offset;
-        render_line(scr_begin, scr_end, 1.0, Color::new(0.0, 0.0, 1.0, 1.0));
+        render_line(
+            scr_begin,
+            scr_end,
+            cvars.cl_railgun_trail_thickness,
+            Color::new(0.0, 0.0, 1.0, 1.0),
+        );
     }
 
     // Draw rockets, homing and guided missiles

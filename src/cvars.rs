@@ -28,6 +28,12 @@ pub struct Cvars {
 
     pub bots_max: usize,
 
+    pub cl_machine_gun_trail_length: f64,
+    pub cl_machine_gun_trail_thickness: f64,
+
+    pub cl_railgun_trail_thickness: f64,
+    pub cl_railgun_trail_duration: f64,
+
     pub cl_spawn_indicator_animation_time: f64,
     pub cl_spawn_indicator_blinking_period: f64,
     pub cl_spawn_indicator_duration: f64,
@@ -138,7 +144,6 @@ pub struct Cvars {
     pub g_machine_gun_reload_ammo: u32,
     pub g_machine_gun_reload_time: f64,
     pub g_machine_gun_speed: f64,
-    pub g_machine_gun_trail_length: f64,
     pub g_machine_gun_vehicle_velocity_factor: f64,
 
     pub g_guided_missile_accel_forward: f64,
@@ -269,7 +274,6 @@ pub struct Cvars {
     pub g_hummer_turret_offset_turret_x: f64,
     pub g_hummer_turret_offset_turret_y: f64,
 
-    pub g_railgun_beam_duration: f64,
     pub g_railgun_damage: f64,
     pub g_railgun_push: f64,
     pub g_railgun_reload_ammo: u32,
@@ -805,6 +809,12 @@ impl Default for Cvars {
 
             bots_max: 20,
 
+            cl_machine_gun_trail_length: 10.0,
+            cl_machine_gun_trail_thickness: 1.5,
+
+            cl_railgun_trail_thickness: 1.5,
+            cl_railgun_trail_duration: 0.05,
+
             cl_spawn_indicator_animation_time: 0.3,
             cl_spawn_indicator_blinking_period: 0.3,
             cl_spawn_indicator_duration: 1.5,
@@ -896,7 +906,6 @@ impl Default for Cvars {
             g_machine_gun_reload_ammo: 50,
             g_machine_gun_reload_time: 1.0,
             g_machine_gun_speed: 1000.0,
-            g_machine_gun_trail_length: 10.0,
             g_machine_gun_vehicle_velocity_factor: 1.0,
 
             g_guided_missile_accel_forward: 2000.0,
@@ -1027,7 +1036,6 @@ impl Default for Cvars {
             g_hummer_turret_offset_turret_x: 0.0,
             g_hummer_turret_offset_turret_y: 0.0,
 
-            g_railgun_beam_duration: 0.05,
             g_railgun_damage: 47.0, // exact from orig RW
             g_railgun_push: 300.0,
             g_railgun_reload_ammo: 1,

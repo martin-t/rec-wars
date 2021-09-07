@@ -23,7 +23,7 @@ use crate::{
 pub fn cleanup(cvars: &Cvars, gs: &mut GameState) {
     let game_time = gs.game_time; // borrowck
     gs.rail_beams
-        .retain(|beam| beam.start_time + cvars.g_railgun_beam_duration > game_time);
+        .retain(|beam| beam.start_time + cvars.cl_railgun_trail_duration > game_time);
     gs.bfg_beams.clear();
     gs.explosions.retain(|explosion| {
         let progress = (game_time - explosion.start_time) / cvars.r_explosion_duration;
