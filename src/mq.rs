@@ -30,8 +30,6 @@ pub struct MacroquadClient {
     pub rest_durations: Durations,
     pub viewport_size: Vec2f,
     pub client_mode: ClientMode,
-    pub input1: Input,
-    pub input1_prev: Input,
     pub last_key: Option<KeyCode>,
     pub console: Console,
 }
@@ -185,8 +183,6 @@ impl MacroquadClient {
             rest_durations: Durations::new(),
             viewport_size,
             client_mode,
-            input1: Input::new(),
-            input1_prev: Input::new(),
             last_key: None,
             console: Console::new(),
         }
@@ -199,9 +195,6 @@ impl MacroquadClient {
 
         let input1 = get_input1();
         let input2 = get_input2();
-
-        self.input1_prev = self.input1;
-        self.input1 = input1;
 
         match self.client_mode {
             ClientMode::Singleplayer { player_handle } => {
