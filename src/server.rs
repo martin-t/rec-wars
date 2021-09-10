@@ -221,7 +221,7 @@ impl Server {
 
         debugging::cleanup();
 
-        dbg_textf!("{}", env!("GIT_VERSION"));
+        dbg_textf!(include_str!(concat!(env!("OUT_DIR"), "/git_version")));
         dbg_textd!(self.gs.game_time);
         dbg_textd!(self.gs.game_time_prev);
 

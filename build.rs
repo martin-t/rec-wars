@@ -1,4 +1,4 @@
-use std::process::Command;
+use std::{env, fs, path::Path, process::Command};
 
 fn main() {
     let describe = Command::new("git")
@@ -23,5 +23,7 @@ fn main() {
     let log = String::from_utf8(log).unwrap();
 
     let git_version = format!("{} {}", describe, log);
-    println!("cargo:rustc-env=GIT_VERSION={}", git_version);
+
+    let path = Path::new(&env::var("OUT_DIR").expect("failed to get OUT_DIR")).join("git_version");
+    fs::write(path, git_version).expect("Failed to write git_version");
 }
