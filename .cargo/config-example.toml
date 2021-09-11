@@ -30,5 +30,5 @@ rustflags = ["-Zshare-generics=n"]
 # Optional: bevy suggests reducing debug to 1 (line number tables), matklad / rust-analyzer suggests 0.
 # In most cases the gains are negligible, but if you are on macos and have slow compile times you should see significant gains.
 # Seems to have no effect for me on linux.
-#[profile.dev]
-#debug = 0
+[profile.dev]
+debug = 0
