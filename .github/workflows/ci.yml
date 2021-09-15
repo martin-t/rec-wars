@@ -58,15 +58,3 @@ jobs:
         # Grep return success when found and failure when not found, using `!` inverts that.
         # The `[F]` is the usualy trick to avoid matching itself.
       - run: "! grep -r --exclude-dir=target [F]IXME ."
-
-  audit:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions-rs/install@v0.1
-        with:
-          crate: cargo-audit
-          version: latest
-      - run: cargo audit --version
-      # https://github.com/rust-random/getrandom/issues/175
-      - run: cargo audit --deny warnings --ignore RUSTSEC-2020-0056
