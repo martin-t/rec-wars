@@ -6,9 +6,7 @@
 #   cd .cargo
 #   ln -s config-example.toml config.toml
 
-# Add the contents of this file to `config.toml` to enable "fast build" configuration. Please read the notes below.
-
-# NOTE: For maximum performance, build using a nightly compiler
+# NOTE: For maximum performance, you need a nightly compiler
 # If you are using rust stable, remove the "-Zshare-generics=y" below.
 
 [target.x86_64-unknown-linux-gnu]
