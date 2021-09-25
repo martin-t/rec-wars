@@ -1,7 +1,7 @@
 # This is from https://github.com/bevyengine/bevy/blob/main/.cargo/config_fast_builds
 # Explanation: https://bevyengine.org/learn/book/getting-started/setup/ - CTRL+F Enable Fast Compiles (Optional)
 # To get faster compile times, rename this to config.toml and rust-toolchain-example.toml to rust-toolchain.toml
-# You can use symlinks (run these in project root):
+# You can use symlinks to get potential future updates - run these in project root:
 #   ln -s rust-toolchain-example.toml rust-toolchain.toml
 #   cd .cargo
 #   ln -s config-example.toml config.toml
