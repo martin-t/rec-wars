@@ -9,14 +9,14 @@
 [![CI](https://github.com/martin-t/rec-wars/workflows/CI/badge.svg)](https://github.com/martin-t/rec-wars/actions)
 [![Audit](https://github.com/martin-t/rec-wars/workflows/audit/badge.svg)](https://rustsec.org/)
 [![Dependency status](https://deps.rs/repo/github/martin-t/rec-wars/status.svg)](https://deps.rs/repo/github/martin-t/rec-wars)
-[![Discord](https://img.shields.io/discord/770013530593689620?label=discord)](https://discord.gg/9BQVVgV)
+[![Discord](https://img.shields.io/discord/770013530593689620?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2)](https://discord.gg/9BQVVgV)
 [![Total lines](https://tokei.rs/b1/github/martin-t/rec-wars)](https://github.com/martin-t/rec-wars)
 [![Lines of comments](https://tokei.rs/b1/github/martin-t/rec-wars?category=comments)](https://github.com/martin-t/rec-wars#architecture-overview)
 
 <!-- Note to my future OCD: The ideal image width for github is 838 pixels -->
 [![Gameplay](media/screenshot.jpg)](https://martin-t.gitlab.io/gitlab-pages/rec-wars/macroquad.html)
 
-_**[Play in the Browser](https://martin-t.gitlab.io/gitlab-pages/rec-wars/macroquad.html)** | **[Join Discord](https://discord.gg/9BQVVgV)**_
+_**[Play in the Browser](https://martin-t.gitlab.io/gitlab-pages/rec-wars/macroquad.html)** | **[Join our Discord](https://discord.gg/9BQVVgV)**_
 
 RecWars is a free and open source clone of [RecWar](#the-original-game) - you control a vehicle and fight other vehicles in a variety of game modes using an arsenal of several distinct weapons. You can play against bots, in splitscreen and over the network.
 
