@@ -60,8 +60,8 @@ jobs:
         # Technically --all-features doesn't check all code when something is *disabled* by a feature
         # but that is discouraged and no such feature existed at the time this was added.
       - run: cargo clippy --all-targets --all-features -- --deny warnings
-        # No FIXMEs allowed - they're to be fixed before committing or at least before merging to master.
+        # No fixmes allowed - they're to be fixed before committing or at least before merging to master.
         # This is my personal clippy (it can't be in the test job because windows doesn't handle `!`).
-        # Grep returns success when found and failure when not found, using `!` inverts that.
+        # Grep returns success when found and failure when not found, `!` inverts success/failure.
         # The `[F]` is the usualy trick to avoid matching this line itself.
-      - run: "! grep -r --exclude-dir=target [F]IXME ."
+      - run: "! { grep -r --exclude-dir=target [F]IXME . && echo 'The lines above this message must be fixed (or marked as todo/later in uppercase, not fixme)' }"
