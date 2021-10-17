@@ -1,6 +1,3 @@
 {
     "rust-analyzer.cargo.allFeatures": true,
-    "rust-analyzer.diagnostics.disabled": [
-        "missing-unsafe"
-    ]
 }
