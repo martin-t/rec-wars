@@ -189,9 +189,8 @@ impl Map {
         let nudge = delta.normalized() * 0.01;
 
         // Find closest vertical and horizontal intersections with the grid.
-        let mut t_x;
-        if delta.x == 0.0 {
-            t_x = f64::INFINITY;
+        let mut t_x = if delta.x == 0.0 {
+            f64::INFINITY
         } else {
             // Next intersection along the X axis (with a vertical line).
             let next_x = if delta.x > 0.0 {
@@ -202,24 +201,22 @@ impl Map {
 
             // How far along the line are we?
             let travelled_x = next_x - begin.x;
-            t_x = travelled_x / delta.x;
-        }
-        let mut t_y;
-        if delta.y == 0.0 {
-            t_y = f64::INFINITY;
+            travelled_x / delta.x
+        };
+        let mut t_y = if delta.y == 0.0 {
+            f64::INFINITY
         } else {
             // Next intersection along the X axis (with a vertical line).
-            let next_y;
-            if delta.y > 0.0 {
-                next_y = (begin.y / TILE_SIZE).ceil() * TILE_SIZE
+            let next_y = if delta.y > 0.0 {
+                (begin.y / TILE_SIZE).ceil() * TILE_SIZE
             } else {
-                next_y = (begin.y / TILE_SIZE).floor() * TILE_SIZE
+                (begin.y / TILE_SIZE).floor() * TILE_SIZE
             };
 
             // How far along the line are we?
             let travelled_y = next_y - begin.y;
-            t_y = travelled_y / delta.y;
-        }
+            travelled_y / delta.y
+        };
 
         // After finding the first intersection, the subsequent steps all have the same size.
         let t_step_x = TILE_SIZE / delta.x.abs();

@@ -233,12 +233,11 @@ fn render_viewport(
         if cull(scr_pos) {
             continue;
         }
-        let img;
-        if vehicle.destroyed() {
-            img = client.imgs_wrecks[vehicle.veh_type as usize];
+        let img = if vehicle.destroyed() {
+            client.imgs_wrecks[vehicle.veh_type as usize]
         } else {
-            img = client.imgs_vehicles[vehicle.veh_type as usize * 2];
-        }
+            client.imgs_vehicles[vehicle.veh_type as usize * 2]
+        };
         render_img_center(img, scr_pos, vehicle.angle);
         // LATER draw hitboxes
         // if cvars.d_draw && cvars.d_draw_hitboxes {
