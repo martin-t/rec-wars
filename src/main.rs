@@ -46,6 +46,19 @@ struct Opts {
     cvars: Vec<String>,
 }
 
+#[cfg(feature = "web_splitscreen")]
+fn get_opts() -> Opts {
+    // This is so I can compile a splitscreen version for the web.
+    let mut opts = Opts::from_args();
+    opts.splitscreen = true;
+    opts
+}
+
+#[cfg(not(feature = "web_splitscreen"))]
+fn get_opts() -> Opts {
+    Opts::from_args()
+}
+
 fn window_conf() -> Conf {
     Conf {
         window_title: "RecWars".to_owned(),
@@ -59,19 +72,6 @@ fn window_conf() -> Conf {
         // Can't use window_resizable: false because Kubuntu's panel would cover the bottom part of the window.
         ..Default::default()
     }
-}
-
-#[cfg(feature = "web_splitscreen")]
-fn get_opts() -> Opts {
-    // This is so I can compile a splitscreen version for the web.
-    let mut opts = Opts::from_args();
-    opts.splitscreen = true;
-    opts
-}
-
-#[cfg(not(feature = "web_splitscreen"))]
-fn get_opts() -> Opts {
-    Opts::from_args()
 }
 
 #[macroquad::main(window_conf)]
