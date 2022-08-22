@@ -42,7 +42,7 @@ pub struct GameState {
     /// and there's no guarantee the last vehicle is the one where the beam ends.
     /// LATER This is a can of worms:
     ///     1) Make sure (add test) one beam can kill the player and hit him again if he's unlucky enough to respawn in its path.
-    ///     2) Remove the entry after the projectile exist the hitbox - e.g. guided missiles that can pass through several times.
+    ///     2) Remove the entry after the projectile exits the hitbox - e.g. guided missiles that can pass through several times.
     ///     3) Make sure the HashMap doesn't grow indefinitely in case we forgot to remove in some cases.
     pub rail_hits: FnvHashMap<Index, Index>,
 
