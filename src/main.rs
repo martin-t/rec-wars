@@ -62,14 +62,14 @@ fn get_opts() -> Opts {
 fn window_conf() -> Conf {
     Conf {
         window_title: "RecWars".to_owned(),
-        // Setting width and height to the size of the screen or larger
-        // creates a maximized window. Tested on Kubuntu 20.10.
-        // Not using larger values (or i32::MAX) in case other platforms behave differently.
-        window_width: 1920,
-        window_height: 1080,
-        // LATER Prevent resizing or handle it properly when using render targets.
-        // Can't use fullscreen: true because of https://github.com/not-fl3/macroquad/issues/237.
-        // Can't use window_resizable: false because Kubuntu's panel would cover the bottom part of the window.
+        // In older macroquad, setting width and height to the size of the screen or larger
+        // created a maximized window. This no longer works and the bottom OS panel covers
+        // the window so this is an ugly compromise that should be good enough for most people.
+        window_width: 1280,
+        window_height: 1024,
+        // LATER Allow resizing - AFAICT there was an issue with infinite memory growth when resizing the render target.
+        // Can't use `fullscreen: true` because of https://github.com/not-fl3/macroquad/issues/237.
+        window_resizable: false,
         ..Default::default()
     }
 }
