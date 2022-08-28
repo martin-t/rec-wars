@@ -70,6 +70,11 @@ fn render_viewport(
     cvars: &Cvars,
     local_player_handle: Index,
 ) {
+    // This is one long function. A lot of people will tell you that's bad™
+    // because they've heard it from other people who think long functions are bad™.
+    // Most of those people haven't written a game bigger than snake. Carmack says it's ok so it's ok:
+    // http://number-none.com/blow/blog/programming/2014/09/26/carmack-on-inlined-code.html
+
     let player = &server.gs.players[local_player_handle];
     let player_vehicle = &server.gs.vehicles[player.vehicle.unwrap()];
     let player_entity_pos = if let Some(gm_handle) = player.guided_missile {
