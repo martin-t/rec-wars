@@ -18,7 +18,7 @@ pub struct Console {
     prompt_saved: String,
     history: Vec<HistoryLine>,
     /// Where we are in history when using up and down keys.
-    history_index: usize,
+    history_prompt_index: usize,
     /// Where we are in the history view when scrolling using page up and down keys.
     history_view_index: usize,
     input: ConsoleInput,
@@ -32,7 +32,7 @@ impl Console {
             prompt: String::new(),
             prompt_saved: String::new(),
             history: Vec::new(),
-            history_index: 0,
+            history_prompt_index: 0,
             history_view_index: 0,
             input: ConsoleInput::new(),
             input_prev: ConsoleInput::new(),
@@ -89,34 +89,34 @@ impl Console {
         if pressed_up {
             // Save the prompt so that users can go back in history,
             // then come back to present and get what they typed back.
-            if self.history_index == self.history.len() {
+            if self.history_prompt_index == self.history.len() {
                 self.prompt_saved = self.prompt.clone();
             }
 
-            let search_slice = &self.history[0..self.history_index];
+            let search_slice = &self.history[0..self.history_prompt_index];
             if let Some(new_index) = search_slice
                 .iter()
                 .rposition(|hist_line| hist_line.is_input)
             {
-                self.history_index = new_index;
-                self.prompt = self.history[self.history_index].text.clone();
+                self.history_prompt_index = new_index;
+                self.prompt = self.history[self.history_prompt_index].text.clone();
             }
         }
 
         // Go forward in history
-        if pressed_down && self.history_index < self.history.len() {
+        if pressed_down && self.history_prompt_index < self.history.len() {
             // Since we're starting at history_index+1, the history.len() condition must remain here
             // otherwise the range could start at history.len()+1 and panic.
-            let search_slice = &self.history[self.history_index + 1..];
+            let search_slice = &self.history[self.history_prompt_index + 1..];
             if let Some(new_index) = search_slice.iter().position(|hist_line| hist_line.is_input) {
                 // `position` starts counting from the iterator's start,
                 // not from history's start so we add the found index to what we skipped
                 // instead of using it directly.
-                self.history_index += new_index + 1;
-                self.prompt = self.history[self.history_index].text.clone();
+                self.history_prompt_index += new_index + 1;
+                self.prompt = self.history[self.history_prompt_index].text.clone();
             } else {
                 // We're at the end of history, restore the saved prompt.
-                self.history_index = self.history.len();
+                self.history_prompt_index = self.history.len();
                 self.prompt = self.prompt_saved.clone();
             }
         }
@@ -234,7 +234,7 @@ impl Console {
         self.prompt = String::new();
 
         // Entering a new command resets the user's position in history to the end.
-        self.history_index = self.history.len();
+        self.history_prompt_index = self.history.len();
 
         // If the view was at the end, keep scrolling down as new lines are added.
         // Otherwise the view's position shouldn't change.
