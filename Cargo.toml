@@ -32,8 +32,10 @@ web_splitscreen = []
 
 [dependencies]
 cvars = "0.1.0"
-cvars-console = { path = "../cvars/cvars-console" }
-cvars-console-macroquad = { path = "../cvars/cvars-console-macroquad" }
+cvars-console = { git = "https://github.com/martin-t/cvars", rev = "76a079e07de3f98d11cbd504ceb3842353ebeb98" }
+cvars-console-macroquad = { git = "https://github.com/martin-t/cvars", rev = "76a079e07de3f98d11cbd504ceb3842353ebeb98" }
+#cvars-console = { path = "../cvars/cvars-console" }
+#cvars-console-macroquad = { path = "../cvars/cvars-console-macroquad" }
 enumn = "0.1.3"
 fnv = "1.0.7"
 futures = "0.3.16"
