@@ -29,11 +29,11 @@ The ultimate goal is to create a moddable multiplayer game playable in the brows
 (Planned) Features
 ------------------
 
-- [ ] Bots
+- [x] Singleplayer
 - [ ] Multiplayer
     - [x] Splitscreen
     - [ ] Network
-    - [ ] Combination of both (plus bots)
+- [ ] Bot AI
 - [x] [Browser client](https://martin-t.gitlab.io/gitlab-pages/rec-wars/macroquad.html)
 - [x] Native client (Linux, Windows, macOS)
 - [ ] Game modes
@@ -109,11 +109,11 @@ Cvars
 
 Cvars are *console variables* - configuration settings which control everything in the game like physics, weapon behavior, AI, HUD layout, etc.
 
-They use the [cvars](https://crates.io/crates/cvars) crate - an alternative to inline_tweak & friends.
+They use the [cvars](https://crates.io/crates/cvars) crate - an alternative to `inline_tweak` & friends. There's a built-in console from the `cvars-console-macroquad` crate.
 
 ### Changing cvars
 
-- Press ";" or "\`" to open console
+- Press ";" or "\`" to open the console
 - Type the cvar's name and new value - e.g. `g_armor 150`
 
 The desktop version also accepts them on the command line - see `--help`.
