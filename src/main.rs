@@ -11,7 +11,6 @@
 #[macro_use]
 pub mod debugging; // keep first so the macros are available everywhere
 
-pub mod console;
 pub mod cvars;
 pub mod entities;
 pub mod game_state;

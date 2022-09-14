@@ -32,10 +32,12 @@ web_splitscreen = []
 
 [dependencies]
 cvars = "0.1.0"
+cvars-console = { path = "../cvars/cvars-console" }
+cvars-console-macroquad = { path = "../cvars/cvars-console-macroquad" }
 enumn = "0.1.3"
 fnv = "1.0.7"
 futures = "0.3.16"
-macroquad = "0.3.7"
+macroquad = "=0.3.24" # Exact version because of the image crate
 structopt = "0.3.22"
 strum = "0.24.0"
 strum_macros = "0.24.0"
@@ -45,7 +47,7 @@ vek = "0.15.1"
 [dependencies.image]
 # Dependency of macroquad with added "bmp" feature so we can load RecWar's original assets.
 # Must be the same version as macroquad, even if that means it's outdated.
-version = "0.23.12"
+version = "0.24.3"
 default-features = false
 features = ["png", "tga", "bmp"]
 

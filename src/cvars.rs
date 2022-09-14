@@ -3,6 +3,7 @@
 use std::default::Default;
 
 use cvars::SetGet;
+use cvars_console::CvarAccess;
 use strum_macros::{Display, EnumString};
 
 use crate::{entities::Hitbox, entities::VehicleType, entities::Weapon, map::Vec2f};
@@ -1205,4 +1206,14 @@ pub struct MovementStats {
     pub turn_rate_friction_linear: f64,
     pub turn_rate_increase: f64,
     pub turn_rate_max: f64,
+}
+
+impl CvarAccess for Cvars {
+    fn get_string(&self, cvar_name: &str) -> Result<String, String> {
+        Cvars::get_string(self, cvar_name)
+    }
+
+    fn set_str(&mut self, cvar_name: &str, str_value: &str) -> Result<(), String> {
+        Cvars::set_str(self, cvar_name, str_value)
+    }
 }

@@ -1,5 +1,6 @@
 //! Native and WASM versions using the macroquad engine.
 
+use cvars_console_macroquad::MacroquadConsole;
 use futures::future;
 use macroquad::prelude::*;
 use thunderdome::Index;
@@ -11,8 +12,6 @@ use crate::{
     server::Server,
     timing::{Durations, Fps},
 };
-
-use crate::console::Console;
 
 #[derive(Debug)]
 pub struct MacroquadClient {
@@ -31,7 +30,7 @@ pub struct MacroquadClient {
     pub viewport_size: Vec2f,
     pub client_mode: ClientMode,
     pub last_key: Option<KeyCode>,
-    pub console: Console,
+    pub console: MacroquadConsole,
 }
 
 #[derive(Debug)]
@@ -184,7 +183,7 @@ impl MacroquadClient {
             viewport_size,
             client_mode,
             last_key: None,
-            console: Console::new(),
+            console: MacroquadConsole::new(),
         }
     }
 
