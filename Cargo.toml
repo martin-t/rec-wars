@@ -39,7 +39,7 @@ cvars-console-macroquad = { git = "https://github.com/martin-t/cvars", rev = "76
 enumn = "0.1.3"
 fnv = "1.0.7"
 futures = "0.3.16"
-macroquad = "=0.3.24" # Exact version because of the image crate
+macroquad = "=0.3.24" # Exact version because of the image crate https://github.com/not-fl3/macroquad/issues/494
 structopt = "0.3.22"
 strum = "0.24.0"
 strum_macros = "0.24.0"
