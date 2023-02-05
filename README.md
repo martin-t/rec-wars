@@ -10,10 +10,12 @@
 [![Audit](https://github.com/martin-t/rec-wars/workflows/audit/badge.svg)](https://rustsec.org/)
 [![Dependency status](https://deps.rs/repo/github/martin-t/rec-wars/status.svg)](https://deps.rs/repo/github/martin-t/rec-wars)
 [![Discord](https://img.shields.io/discord/770013530593689620?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2)](https://discord.gg/9BQVVgV)
+<!-- These keep getting broken and then they show 0 which looks bad
 [![Total lines](https://tokei.rs/b1/github/martin-t/rec-wars)](https://github.com/martin-t/rec-wars)
-[![Lines of comments](https://tokei.rs/b1/github/martin-t/rec-wars?category=comments)](https://github.com/martin-t/rec-wars#architecture-overview)
+[![Lines of comments](https://tokei.rs/b1/github/martin-t/rec-wars?category=comments)](https://github.com/martin-t/rec-wars#architecture-overview) -->
 
-<!-- Note to my future OCD: The ideal image width for github is ~838~ 830 pixels. Inspect in firefox and look at Box Model on the Layout tab (value confirmed in gimp). -->
+<!-- Note to my future OCD: The ideal image width for a github readme is ~838~ 830 pixels. Inspect in firefox and look at Box Model on the Layout tab (value confirmed in gimp). The recommended size for the social preview is higher, likely best to use a different image. -->
+<!-- Check https://github.com/topics/multiplayer-browser-game to make sure it doesnẗ look blurry. -->
 [![Gameplay](media/screenshot.jpg)](https://martin-t.gitlab.io/gitlab-pages/rec-wars/macroquad.html)
 
 _**[Play in the Browser](https://martin-t.gitlab.io/gitlab-pages/rec-wars/macroquad.html)** | **[Join our Discord](https://discord.gg/9BQVVgV)**_
