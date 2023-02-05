@@ -13,7 +13,7 @@
 [![Total lines](https://tokei.rs/b1/github/martin-t/rec-wars)](https://github.com/martin-t/rec-wars)
 [![Lines of comments](https://tokei.rs/b1/github/martin-t/rec-wars?category=comments)](https://github.com/martin-t/rec-wars#architecture-overview)
 
-<!-- Note to my future OCD: The ideal image width for github is 838 pixels -->
+<!-- Note to my future OCD: The ideal image width for github is ~838~ 830 pixels. Inspect in firefox and look at Box Model on the Layout tab (value confirmed in gimp). -->
 [![Gameplay](media/screenshot.jpg)](https://martin-t.gitlab.io/gitlab-pages/rec-wars/macroquad.html)
 
 _**[Play in the Browser](https://martin-t.gitlab.io/gitlab-pages/rec-wars/macroquad.html)** | **[Join our Discord](https://discord.gg/9BQVVgV)**_
