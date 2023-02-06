@@ -24,38 +24,37 @@ pub mod timing;
 
 use std::str;
 
+use clap::Parser;
 use macroquad::prelude::*;
-use structopt::StructOpt;
 
 use crate::{cvars::Cvars, mq::MacroquadClient, server::Server};
 
-#[derive(StructOpt, Debug)]
+#[derive(Debug, Parser)]
 struct Opts {
     /// 2 player local multiplayer
-    #[structopt(long)]
+    #[arg(long)]
     splitscreen: bool,
 
     /// Set the map to play on (instead of random)
-    #[structopt(long)]
+    #[arg(long)]
     map: Option<String>,
 
     /// Set cvar values - use key value pairs (separated by space).
     /// Example: g_armor 150 hud_names false
-    #[structopt()]
     cvars: Vec<String>,
 }
 
 #[cfg(feature = "web_splitscreen")]
 fn get_opts() -> Opts {
     // This is so I can compile a splitscreen version for the web.
-    let mut opts = Opts::from_args();
+    let mut opts = Opts::parse();
     opts.splitscreen = true;
     opts
 }
 
 #[cfg(not(feature = "web_splitscreen"))]
 fn get_opts() -> Opts {
-    Opts::from_args()
+    Opts::parse()
 }
 
 fn window_conf() -> Conf {
