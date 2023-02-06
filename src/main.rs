@@ -44,17 +44,18 @@ struct Opts {
     cvars: Vec<String>,
 }
 
-#[cfg(feature = "web_splitscreen")]
 fn get_opts() -> Opts {
-    // This is so I can compile a splitscreen version for the web.
+    #[allow(unused_mut)]
     let mut opts = Opts::parse();
-    opts.splitscreen = true;
-    opts
-}
 
-#[cfg(not(feature = "web_splitscreen"))]
-fn get_opts() -> Opts {
-    Opts::parse()
+    // This is so I can easily toggle between compiling
+    // singleplayer and splitscreen for the web.
+    #[cfg(feature = "web_splitscreen")]
+    {
+        opts.splitscreen = true;
+    }
+
+    opts
 }
 
 fn window_conf() -> Conf {
