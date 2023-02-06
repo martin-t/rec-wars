@@ -41,7 +41,7 @@ macroquad = "=0.3.25" # Exact version because of the image crate https://github.
 strum = "0.24.0"
 strum_macros = "0.24.0"
 thunderdome = "0.6.0"
-vek = "0.15.1"
+vek = "0.15.10"
 
 [dependencies.image]
 # Dependency of macroquad with added "bmp" feature so we can load RecWar's original assets.
