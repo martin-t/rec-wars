@@ -134,12 +134,11 @@ dependencies = [
 
 [[package]]
 name = "cvars"
-version = "0.1.0"
+version = "0.3.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1f38e0641d1103148828aef276ca249d50a905812a7e70f54cc62ccf877a6a53"
+checksum = "1c735e31b06ce368b59b122bcc121fdbceafe5cb3aaf528e1e8ca145f31a6ab3"
 dependencies = [
- "quote",
- "syn",
+ "cvars-macros",
 ]
 
 [[package]]
@@ -154,6 +153,17 @@ source = "git+https://github.com/martin-t/cvars?rev=76a079e07de3f98d11cbd504ceb3
 dependencies = [
  "cvars-console",
  "macroquad",
+]
+
+[[package]]
+name = "cvars-macros"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "53639af00bba7b8d72f45de3f4ace482f56d4768d0f56673bfc09bf7c35538a3"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
 ]
 
 [[package]]
@@ -571,9 +581,9 @@ dependencies = [
 
 [[package]]
 name = "proc-macro2"
-version = "1.0.43"
+version = "1.0.51"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0a2ca2c61bc9f3d74d2886294ab7b9853abd9c1ad903a3ac7815c58989bb7bab"
+checksum = "5d727cae5b39d21da60fa540906919ad737832fe0b1c165da3a34d6548c849d6"
 dependencies = [
  "unicode-ident",
 ]

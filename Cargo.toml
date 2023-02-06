@@ -31,7 +31,7 @@ panic = "abort"
 web_splitscreen = []
 
 [dependencies]
-cvars = "0.1.0"
+cvars = "0.3.1"
 cvars-console = { git = "https://github.com/martin-t/cvars", rev = "76a079e07de3f98d11cbd504ceb3842353ebeb98" }
 cvars-console-macroquad = { git = "https://github.com/martin-t/cvars", rev = "76a079e07de3f98d11cbd504ceb3842353ebeb98" }
 #cvars-console = { path = "../cvars/cvars-console" }
