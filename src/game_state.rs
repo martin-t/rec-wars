@@ -14,7 +14,8 @@ use crate::{
 /// and might need to be taken back during frame interpolation / reconciliation.
 ///
 /// TODO How to do frame interpolation / server reconcilliation?
-/// Ralith (hecs author) says to make all components a Vec but that requires all code to be aware of interpolation.
+/// Ralith (hecs author) says to make all components a Vec if past positions
+/// but that requires all code to be aware of interpolation.
 /// What does veloren do?
 #[derive(Debug, Clone)]
 pub struct GameState {
