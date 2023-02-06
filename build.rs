@@ -4,7 +4,7 @@ fn main() {
     // Ideally we'd save --dirty status but that often means
     // recompiling when non-code files in the repo changed.
     let describe = Command::new("git")
-        .args(&["describe", "--long", "--always"])
+        .args(["describe", "--long", "--always"])
         .output()
         .unwrap()
         .stdout;
@@ -13,7 +13,7 @@ fn main() {
     // e.g. v0.1.0-109-g6a10529
 
     let log = Command::new("git")
-        .args(&[
+        .args([
             "log",
             "-n",
             "1",
