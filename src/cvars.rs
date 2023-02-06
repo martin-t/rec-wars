@@ -424,7 +424,7 @@ impl Cvars {
 
     /// Reset this Cvars object to the default RecWars settings.
     ///
-    /// You can call this from the JavaScript console to change settings on the fly.
+    /// LATER Allow calling this from the console to change settings on the fly.
     #[allow(dead_code)]
     pub fn load_rec_wars(&mut self) {
         *self = Self {
@@ -434,7 +434,7 @@ impl Cvars {
 
     /// Reset this Cvars object to an approximation of the original RecWar settings.
     ///
-    /// You can call this from the JavaScript console to change settings on the fly.
+    /// LATER Allow calling this from the console to change settings on the fly.
     #[allow(dead_code)]
     pub fn load_rec_war(&mut self) {
         *self = Self {
