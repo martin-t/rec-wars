@@ -11,3 +11,5 @@
   - `python3 -m http.server`
   - Open http://localhost:8000/macroquad.html
 - Publish on GitLab: `cd ~/dev/gitlab-pages && ./copy-rec-wars.sh`
+- Wait for CI to finish
+- Test again
