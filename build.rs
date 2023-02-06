@@ -1,6 +1,11 @@
 use std::process::Command;
 
 fn main() {
+    // LATER Multiple issues with using build.rs:
+    //  - It can report incorrect commit - it doesn't rerun after commit
+    //  - Measure how much it slows down incremental rebuilds
+    //  - Any way to only use build.rs in release builds?
+
     // Ideally we'd also save --dirty status but that often means
     // recompiling when non-code files in the repo changed.
     let describe = Command::new("git")
