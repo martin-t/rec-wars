@@ -142,9 +142,9 @@ dependencies = [
 
 [[package]]
 name = "cvars"
-version = "0.3.1"
+version = "0.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1c735e31b06ce368b59b122bcc121fdbceafe5cb3aaf528e1e8ca145f31a6ab3"
+checksum = "c7434ae844e4eea62869ed0da48d8236ee89139bbd5b27af223c997ecf47dd9b"
 dependencies = [
  "cvars-macros",
 ]

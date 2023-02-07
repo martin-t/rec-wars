@@ -32,7 +32,7 @@ web_splitscreen = []
 
 [dependencies]
 clap = { version = "4.1.4", features = ["derive"] }
-cvars = "0.3.1"
+cvars = "0.3.2"
 cvars-console-macroquad = "0.1.0"
 enumn = "0.1.6"
 fnv = "1.0.7"
