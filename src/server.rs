@@ -171,6 +171,9 @@ impl Server {
                         self.dt_carry = remaining;
                         break;
                     }
+                    if cvars.d_gamelogic_remaining {
+                        dbg_logf!("Remaining time: {}", remaining);
+                    }
                     self.gamelogic_tick(cvars, self.gs.game_time + dt);
                 }
             }
@@ -193,8 +196,8 @@ impl Server {
                     }
                     self.gamelogic_tick(cvars, self.gs.game_time + dt);
                 }
-                if cvars.d_dbg {
-                    dbg_logd!(remaining);
+                if cvars.d_gamelogic_remaining {
+                    dbg_logf!("Remaining time: {}", remaining);
                 }
                 self.gamelogic_tick(cvars, self.gs.game_time + remaining);
                 // TODO skip too small steps?

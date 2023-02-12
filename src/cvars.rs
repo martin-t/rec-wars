@@ -75,6 +75,7 @@ pub struct Cvars {
     pub d_fps_period: f64,
     pub d_fps_x: f64,
     pub d_fps_y: f64,
+    pub d_gamelogic_remaining: bool,
     /// Display the last pressed key. Useful for debugging MQ's issues with keyboard layouts.
     pub d_last_key: bool,
     pub d_timing_samples: usize,
@@ -852,6 +853,7 @@ impl Default for Cvars {
             d_fps_period: 1.0,
             d_fps_x: -300.0,
             d_fps_y: -15.0,
+            d_gamelogic_remaining: false,
             d_last_key: false,
             d_timing_samples: 60,
             d_tracing: false,
