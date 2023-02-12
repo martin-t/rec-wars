@@ -156,7 +156,7 @@ impl Server {
         // TODO prevent death spirals
         // LATER impl the other modes
         // TODO allow switching at runtime
-        match cvars.sv_gamelogic_mode {
+        match cvars.sv_tickrate_mode {
             TickrateMode::Synchronized => {
                 let game_time_target = self.gs.game_time + dt_update;
                 self.gamelogic_tick(cvars, game_time_target);
@@ -166,12 +166,12 @@ impl Server {
                 loop {
                     // gs.game_time is still the previous frame here
                     let remaining = game_time_target - self.gs.game_time;
-                    let dt = 1.0 / cvars.sv_gamelogic_fixed_fps;
+                    let dt = 1.0 / cvars.sv_tickrate_fixed_fps;
                     if remaining < dt {
                         self.dt_carry = remaining;
                         break;
                     }
-                    if cvars.d_gamelogic_remaining {
+                    if cvars.d_tickrate_remaining {
                         dbg_logf!("Remaining time: {}", remaining);
                     }
                     self.gamelogic_tick(cvars, self.gs.game_time + dt);
@@ -189,14 +189,14 @@ impl Server {
                 loop {
                     // gs.game_time is still the previous frame here
                     remaining = game_time_target - self.gs.game_time;
-                    let dt = 1.0 / cvars.sv_gamelogic_fixed_fps;
+                    let dt = 1.0 / cvars.sv_tickrate_fixed_fps;
                     if remaining < dt {
                         self.gs_fixed = self.gs.clone();
                         break;
                     }
                     self.gamelogic_tick(cvars, self.gs.game_time + dt);
                 }
-                if cvars.d_gamelogic_remaining {
+                if cvars.d_tickrate_remaining {
                     dbg_logf!("Remaining time: {}", remaining);
                 }
                 self.gamelogic_tick(cvars, self.gs.game_time + remaining);

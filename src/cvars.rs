@@ -75,9 +75,9 @@ pub struct Cvars {
     pub d_fps_period: f64,
     pub d_fps_x: f64,
     pub d_fps_y: f64,
-    pub d_gamelogic_remaining: bool,
     /// Display the last pressed key. Useful for debugging MQ's issues with keyboard layouts.
     pub d_last_key: bool,
+    pub d_tickrate_remaining: bool,
     pub d_timing_samples: usize,
     pub d_tracing: bool,
     /// The seed to initialize the RNG.
@@ -401,8 +401,8 @@ pub struct Cvars {
     /// LATER fix - Does not work in MQ: https://github.com/not-fl3/macroquad/issues/264
     pub sv_auto_unpause_on_restore: bool,
 
-    pub sv_gamelogic_mode: TickrateMode,
-    pub sv_gamelogic_fixed_fps: f64,
+    pub sv_tickrate_mode: TickrateMode,
+    pub sv_tickrate_fixed_fps: f64,
 }
 
 impl Cvars {
@@ -853,8 +853,8 @@ impl Default for Cvars {
             d_fps_period: 1.0,
             d_fps_x: -300.0,
             d_fps_y: -15.0,
-            d_gamelogic_remaining: false,
             d_last_key: false,
+            d_tickrate_remaining: false,
             d_timing_samples: 60,
             d_tracing: false,
             d_seed: 0,
@@ -1158,8 +1158,8 @@ impl Default for Cvars {
             sv_auto_pause_on_minimize: true,
             sv_auto_unpause_on_restore: false,
 
-            sv_gamelogic_mode: TickrateMode::Synchronized,
-            sv_gamelogic_fixed_fps: 150.0,
+            sv_tickrate_mode: TickrateMode::Synchronized,
+            sv_tickrate_fixed_fps: 150.0,
         }
     }
 }
