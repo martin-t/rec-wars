@@ -12,4 +12,5 @@
   - Open http://localhost:8000/macroquad.html
 - Publish on GitLab: `cd ~/dev/gitlab-pages && ./copy-rec-wars.sh`
 - Wait for CI to finish
-- Test again
+- Test [on GitLab](https://martin-t.gitlab.io/gitlab-pages/rec-wars/macroquad.html)
+  - Check version number
