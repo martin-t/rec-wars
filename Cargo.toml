@@ -36,7 +36,6 @@ cvars = "0.3.2"
 cvars-console-macroquad = "0.1.0"
 enumn = "0.1.6"
 fnv = "1.0.7"
-futures = "0.3.16"
 macroquad = "=0.3.25" # Exact version because of the image crate https://github.com/not-fl3/macroquad/issues/494
 strum = "0.24.0"
 strum_macros = "0.24.0"

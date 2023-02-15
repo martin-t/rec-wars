@@ -1,7 +1,6 @@
 //! Native and WASM versions using the macroquad engine.
 
 use cvars_console_macroquad::MacroquadConsole;
-use futures::future;
 use macroquad::prelude::*;
 use thunderdome::Index;
 
@@ -110,15 +109,28 @@ impl MacroquadClient {
         ]
         .concat();
 
-        let mut textures = future::try_join_all(paths.into_iter().map(|path| {
+        // TODO We can't use futures / join because it' crash when compiled to WASM with the newest futures crate.
+        //  Find a way to load stuff in parallel using coroutines or pack everything into an archive.
+
+        // let mut textures = future::try_join_all(paths.into_iter().map(|path| {
+        //     draw_text("Loading...", 400.0, 400.0, 32.0, YELLOW);
+        //     let tex = load_texture(path);
+        //     draw_text("Loading...", 400.0, 400.0, 32.0, GREEN);
+        //     tex
+        // }))
+        // .await
+        // .unwrap()
+        // .into_iter();
+
+        let mut textures = Vec::new();
+        for path in paths {
             draw_text("Loading...", 400.0, 400.0, 32.0, YELLOW);
-            let tex = load_texture(path);
+            let tex = load_texture(path).await.unwrap();
             draw_text("Loading...", 400.0, 400.0, 32.0, GREEN);
-            tex
-        }))
-        .await
-        .unwrap()
-        .into_iter();
+            textures.push(tex);
+        }
+        let mut textures = textures.into_iter();
+
         draw_text("Loading...", 400.0, 400.0, 32.0, WHITE);
 
         let imgs_tiles = textures.by_ref().take(paths_tiles.len()).collect();
