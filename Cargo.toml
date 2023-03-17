@@ -60,4 +60,4 @@ version = "0.4.0"
 default-features = false
 
 [dev-dependencies]
-walkdir = "2.3.1"
+walkdir = "2.3.3"
