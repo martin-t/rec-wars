@@ -60,3 +60,7 @@ default-features = false
 
 [dev-dependencies]
 walkdir = "2.3.1"
+
+# Note: sometimes it's necessary to run cargo update after patching a dependency.
+[patch.crates-io]
+#cvars = { path = "../cvars/cvars" }
