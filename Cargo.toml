@@ -31,10 +31,10 @@ panic = "abort"
 web_splitscreen = []
 
 [dependencies]
-clap = { version = "4.1.4", features = ["derive"] }
+clap = { version = "4.1.11", features = ["derive"] }
 cvars = "0.3.2"
 cvars-console-macroquad = "0.1.0"
-enumn = "0.1.6"
+enumn = "0.1.8"
 fnv = "1.0.7"
 macroquad = "=0.3.25" # Exact version because of the image crate https://github.com/not-fl3/macroquad/issues/494
 strum = "0.24.0"
@@ -45,7 +45,7 @@ vek = "0.15.10"
 [dependencies.image]
 # Dependency of macroquad with added "bmp" feature so we can load RecWar's original assets.
 # Must be the same version as macroquad, even if that means it's outdated.
-version = "0.24.3"
+version = "0.24.6"
 default-features = false
 features = ["png", "tga", "bmp"]
 
@@ -59,7 +59,7 @@ version = "0.4.0"
 default-features = false
 
 [dev-dependencies]
-walkdir = "2.3.1"
+walkdir = "2.3.3"
 
 # Note: sometimes it's necessary to run cargo update after patching a dependency.
 [patch.crates-io]
