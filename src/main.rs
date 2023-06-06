@@ -73,18 +73,31 @@ fn window_conf() -> Conf {
     }
 }
 
-#[macroquad::main(window_conf)]
+use macroquad::prelude::*;
+
+#[macroquad::main("test")]
 async fn main() {
+    loop {
+        info!("AAAAAAAAAAAAAAAAA");
+        draw_text("MAIN", 400.0, 400.0, 32.0, RED);
+        next_frame().await;
+    }
+}
+
+//#[macroquad::main(window_conf)]
+async fn main2() {
     let opts = get_opts();
 
     // This is a hack.
     // It seems that in the browser, MQ redraws the screen several times between here and the main loop
     // (even though there are no next_frame().await calls) so this doesn't stay up for long.
     // Let's just redraw it a few times during the loading process so the player sees something is happening.
+    dbg_logf!("Loading...");
     draw_text("Loading...", 400.0, 400.0, 32.0, RED);
 
     show_mouse(false);
 
+    dbg_logf!("Loading cvars");
     let mut cvars = Cvars::new_rec_wars();
     let mut cvars_iter = opts.cvars.iter();
     while let Some(cvar_name) = cvars_iter.next() {

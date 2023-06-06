@@ -36,7 +36,8 @@ cvars = "0.3.2"
 cvars-console-macroquad = "0.1.0"
 enumn = "0.1.8"
 fnv = "1.0.7"
-macroquad = "=0.3.25" # Exact version because of the image crate https://github.com/not-fl3/macroquad/issues/494
+#macroquad = { version = "=0.3.25", features = ["log-rs"] } # Exact version because of the image crate https://github.com/not-fl3/macroquad/issues/494
+macroquad = "0.3.25"
 strum = "0.24.0"
 strum_macros = "0.24.0"
 thunderdome = "0.6.0"
