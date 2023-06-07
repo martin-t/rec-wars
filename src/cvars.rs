@@ -16,7 +16,7 @@ use crate::{entities::Hitbox, entities::VehicleType, entities::Weapon, map::Vec2
 /// hud_ is the heads-up display
 /// r_ is rendering
 /// sv_ is server administration + performance
-#[derive(Debug, Clone, SetGet)]
+#[derive(SetGet)]
 #[allow(missing_copy_implementations)]
 pub struct Cvars {
     // Long-term this needs some kind of better system to reduce duplication / manual work.
