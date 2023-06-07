@@ -45,150 +45,92 @@ pub enum ClientMode {
 
 impl MacroquadClient {
     pub async fn new(cvars: &Cvars, player1_handle: Index, player2_handle: Option<Index>) -> Self {
+        draw_text("Loading...", 400.0, 400.0, 32.0, GREEN);
+
         let loading_started = get_time();
 
-        let imgs_tiles;
-        let imgs_vehicles;
-        let imgs_wrecks;
-        let imgs_weapon_icons;
-        let img_rocket;
-        let img_hm;
-        let img_gm;
-        let img_explosion;
-        let img_explosion_cyan;
-
-        #[cfg(not(target_family = "wasm32"))]
-        {
-            draw_text("Loading...", 400.0, 400.0, 32.0, GREEN);
-
-            // Load assets from disk so we can change them without recompiling.
-
-            imgs_tiles = vec![
-                load_texture("assets/tiles/g1.bmp").await.unwrap(),
-                load_texture("assets/tiles/g2.bmp").await.unwrap(),
-                load_texture("assets/tiles/g3.bmp").await.unwrap(),
-                load_texture("assets/tiles/g_stripes.bmp").await.unwrap(),
-                load_texture("assets/tiles/bunker1.bmp").await.unwrap(),
-                load_texture("assets/tiles/ice1.bmp").await.unwrap(),
-                load_texture("assets/tiles/ice.bmp").await.unwrap(),
-                load_texture("assets/tiles/ice_side.bmp").await.unwrap(),
-                load_texture("assets/tiles/ice_corner.bmp").await.unwrap(),
-                load_texture("assets/tiles/g_spawn.bmp").await.unwrap(),
-                load_texture("assets/tiles/road.bmp").await.unwrap(),
-                load_texture("assets/tiles/water.bmp").await.unwrap(),
-                load_texture("assets/tiles/snow.bmp").await.unwrap(),
-                load_texture("assets/tiles/snow2.bmp").await.unwrap(),
-                load_texture("assets/tiles/bunker2.bmp").await.unwrap(),
-                load_texture("assets/tiles/base.bmp").await.unwrap(),
-                load_texture("assets/tiles/water_side.bmp").await.unwrap(),
-                load_texture("assets/tiles/water_corner.bmp").await.unwrap(),
-                load_texture("assets/tiles/desert.bmp").await.unwrap(),
-                load_texture("assets/tiles/d_rock.bmp").await.unwrap(),
-                load_texture("assets/tiles/g2d.bmp").await.unwrap(),
-                load_texture("assets/tiles/water_middle.bmp").await.unwrap(),
-            ];
-            imgs_vehicles = vec![
-                load_texture("assets/vehicles/tank_chassis_flames.png").await.unwrap(),
-                load_texture("assets/vehicles/tank_turret_flames.png").await.unwrap(),
-                load_texture("assets/vehicles/hovercraft_chassis_flames.png").await.unwrap(),
-                load_texture("assets/vehicles/hovercraft_turret_flames.png").await.unwrap(),
-                load_texture("assets/vehicles/hummer_chassis_flames.png").await.unwrap(),
-                load_texture("assets/vehicles/hummer_turret_flames.png").await.unwrap(),
-            ];
-            imgs_wrecks = vec![
-                load_texture("assets/wrecks/tank.png").await.unwrap(),
-                load_texture("assets/wrecks/hovercraft.png").await.unwrap(),
-                load_texture("assets/wrecks/hummer.png").await.unwrap(),
-            ];
-            imgs_weapon_icons = vec![
-                load_texture("assets/weapon_icons/mg.png").await.unwrap(),
-                load_texture("assets/weapon_icons/rail.png").await.unwrap(),
-                load_texture("assets/weapon_icons/cb.png").await.unwrap(),
-                load_texture("assets/weapon_icons/rockets.png").await.unwrap(),
-                load_texture("assets/weapon_icons/hm.png").await.unwrap(),
-                load_texture("assets/weapon_icons/gm.png").await.unwrap(),
-                load_texture("assets/weapon_icons/bfg.png").await.unwrap(),
-            ];
-            img_rocket = load_texture("assets/weapons/rocket.png").await.unwrap();
-            img_hm = load_texture("assets/weapons/hm.png").await.unwrap();
-            img_gm = load_texture("assets/weapons/gm.png").await.unwrap();
-            img_explosion = load_texture("assets/explosion.png").await.unwrap();
-            img_explosion_cyan = load_texture("assets/explosion_cyan.png").await.unwrap();
+        // WASM:
+        // Loading one by one is too slow in the browser because each is a separate request.
+        // We can't use future::try_join_all because it crashes when compiled to WASM with the newest futures crate.
+        // Might be because macroquad has its own special way of doing web-related things.
+        // So just bundle the assets into the binary.
+        #[cfg(target_arch = "wasm32")]
+        macro_rules! img {
+            ($path:expr $(,)?) => {{
+                let bytes = include_bytes!(concat!("../", $path));
+                Texture2D::from_file_with_format(bytes, None)
+            }};
         }
 
-        #[cfg(target_family = "wasm")]
-        {
-            // Loading one by one is too slow because each is a separate request.
-            // We can't use future::try_join_all because it crashes when compiled to WASM with the newest futures crate.
-            // So just bundle the assets into the binary.
-
-            macro_rules! img {
-                ($file:expr $(,)?) => {
-                    Texture2D::from_file_with_format(include_bytes!($file), None)
-                };
-            }
-
-            let imgs_tiles = vec![
-                img!("../assets/tiles/g1.bmp"),
-                img!("../assets/tiles/g2.bmp"),
-                img!("../assets/tiles/g3.bmp"),
-                img!("../assets/tiles/g_stripes.bmp"),
-                img!("../assets/tiles/bunker1.bmp"),
-                img!("../assets/tiles/ice1.bmp"),
-                img!("../assets/tiles/ice.bmp"),
-                img!("../assets/tiles/ice_side.bmp"),
-                img!("../assets/tiles/ice_corner.bmp"),
-                img!("../assets/tiles/g_spawn.bmp"),
-                img!("../assets/tiles/road.bmp"),
-                img!("../assets/tiles/water.bmp"),
-                img!("../assets/tiles/snow.bmp"),
-                img!("../assets/tiles/snow2.bmp"),
-                img!("../assets/tiles/bunker2.bmp"),
-                img!("../assets/tiles/base.bmp"),
-                img!("../assets/tiles/water_side.bmp"),
-                img!("../assets/tiles/water_corner.bmp"),
-                img!("../assets/tiles/desert.bmp"),
-                img!("../assets/tiles/d_rock.bmp"),
-                img!("../assets/tiles/g2d.bmp"),
-                img!("../assets/tiles/water_middle.bmp"),
-            ];
-            let imgs_vehicles = vec![
-                img!("../assets/vehicles/tank_chassis_flames.png"),
-                img!("../assets/vehicles/tank_turret_flames.png"),
-                img!("../assets/vehicles/hovercraft_chassis_flames.png"),
-                img!("../assets/vehicles/hovercraft_turret_flames.png"),
-                img!("../assets/vehicles/hummer_chassis_flames.png"),
-                img!("../assets/vehicles/hummer_turret_flames.png"),
-            ];
-            let imgs_wrecks = vec![
-                img!("../assets/wrecks/tank.png"),
-                img!("../assets/wrecks/hovercraft.png"),
-                img!("../assets/wrecks/hummer.png"),
-            ];
-            let imgs_weapon_icons = vec![
-                img!("../assets/weapon_icons/mg.png"),
-                img!("../assets/weapon_icons/rail.png"),
-                img!("../assets/weapon_icons/cb.png"),
-                img!("../assets/weapon_icons/rockets.png"),
-                img!("../assets/weapon_icons/hm.png"),
-                img!("../assets/weapon_icons/gm.png"),
-                img!("../assets/weapon_icons/bfg.png"),
-            ];
-            let img_rocket = img!("../assets/weapons/rocket.png");
-            let img_hm = img!("../assets/weapons/hm.png");
-            let img_gm = img!("../assets/weapons/gm.png");
-            let img_explosion = img!("../assets/explosion.png");
-            let img_explosion_cyan = img!("../assets/explosion_cyan.png");
+        // Desktop:
+        // Load assets from disk so we can change them without recompiling.
+        #[cfg(not(target_arch = "wasm32"))]
+        macro_rules! img {
+            ($path:expr $(,)?) => {{
+                load_texture($path).await.unwrap()
+            }};
         }
+
+        let imgs_tiles = vec![
+            img!("assets/tiles/g1.bmp"),
+            img!("assets/tiles/g2.bmp"),
+            img!("assets/tiles/g3.bmp"),
+            img!("assets/tiles/g_stripes.bmp"),
+            img!("assets/tiles/bunker1.bmp"),
+            img!("assets/tiles/ice1.bmp"),
+            img!("assets/tiles/ice.bmp"),
+            img!("assets/tiles/ice_side.bmp"),
+            img!("assets/tiles/ice_corner.bmp"),
+            img!("assets/tiles/g_spawn.bmp"),
+            img!("assets/tiles/road.bmp"),
+            img!("assets/tiles/water.bmp"),
+            img!("assets/tiles/snow.bmp"),
+            img!("assets/tiles/snow2.bmp"),
+            img!("assets/tiles/bunker2.bmp"),
+            img!("assets/tiles/base.bmp"),
+            img!("assets/tiles/water_side.bmp"),
+            img!("assets/tiles/water_corner.bmp"),
+            img!("assets/tiles/desert.bmp"),
+            img!("assets/tiles/d_rock.bmp"),
+            img!("assets/tiles/g2d.bmp"),
+            img!("assets/tiles/water_middle.bmp"),
+        ];
+        let imgs_vehicles = vec![
+            img!("assets/vehicles/tank_chassis_flames.png"),
+            img!("assets/vehicles/tank_turret_flames.png"),
+            img!("assets/vehicles/hovercraft_chassis_flames.png"),
+            img!("assets/vehicles/hovercraft_turret_flames.png"),
+            img!("assets/vehicles/hummer_chassis_flames.png"),
+            img!("assets/vehicles/hummer_turret_flames.png"),
+        ];
+        let imgs_wrecks = vec![
+            img!("assets/wrecks/tank.png"),
+            img!("assets/wrecks/hovercraft.png"),
+            img!("assets/wrecks/hummer.png"),
+        ];
+        let imgs_weapon_icons = vec![
+            img!("assets/weapon_icons/mg.png"),
+            img!("assets/weapon_icons/rail.png"),
+            img!("assets/weapon_icons/cb.png"),
+            img!("assets/weapon_icons/rockets.png"),
+            img!("assets/weapon_icons/hm.png"),
+            img!("assets/weapon_icons/gm.png"),
+            img!("assets/weapon_icons/bfg.png"),
+        ];
+        let img_rocket = img!("assets/weapons/rocket.png");
+        let img_hm = img!("assets/weapons/hm.png");
+        let img_gm = img!("assets/weapons/gm.png");
+        let img_explosion = img!("assets/explosion.png");
+        let img_explosion_cyan = img!("assets/explosion_cyan.png");
+
+        let loading_done = get_time();
+        dbg_logf!("Loaded assets in {:.2} s", loading_done - loading_started);
 
         // LATER use r_smoothing (currently unused)
         // LATER smoothing optional and configurable per image
         // LATER allow changing smoothing at runtime
         img_explosion.set_filter(FilterMode::Nearest);
         img_explosion_cyan.set_filter(FilterMode::Nearest);
-
-        let loading_done = get_time();
-        dbg_logf!("Loaded assets in {:.2} s", loading_done - loading_started);
 
         dbg_logf!(
             "Detected screen size: {}x{}",
