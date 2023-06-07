@@ -203,8 +203,6 @@ dependencies = [
 [[package]]
 name = "cvars"
 version = "0.3.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c7434ae844e4eea62869ed0da48d8236ee89139bbd5b27af223c997ecf47dd9b"
 dependencies = [
  "cvars-macros",
 ]
@@ -232,12 +230,10 @@ dependencies = [
 [[package]]
 name = "cvars-macros"
 version = "0.2.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "53639af00bba7b8d72f45de3f4ace482f56d4768d0f56673bfc09bf7c35538a3"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 1.0.109",
+ "syn 2.0.18",
 ]
 
 [[package]]
