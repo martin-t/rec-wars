@@ -2,84 +2,85 @@
 
 use std::default::Default;
 
-use cvars::SetGet;
+use cvars::cvars;
 use strum_macros::{Display, EnumString};
 
 use crate::{entities::Hitbox, entities::VehicleType, entities::Weapon, map::Vec2f};
 
-/// Console variables - configuration options for anything and everything.
-///
-/// Prefix meanings:
-/// cl_ is client
-/// d_ is debug
-/// g_ is gameplay
-/// hud_ is the heads-up display
-/// r_ is rendering
-/// sv_ is server administration + performance
-#[derive(SetGet)]
-#[allow(missing_copy_implementations)]
-pub struct Cvars {
+// LATER Make this a doc comment again when supported.
+// Console variables - configuration options for anything and everything.
+//
+// Prefix meanings:
+// cl_ is client
+// d_ is debug
+// g_ is gameplay
+// hud_ is the heads-up display
+// r_ is rendering
+// sv_ is server administration + performance
+cvars! {
+    #![derive(Debug)]
+
     // Long-term this needs some kind of better system to reduce duplication / manual work.
     // Would be nice to keep alphabetically.
     //  |
     //  v
     /// Master switch for AI - disable if you want stationary targets
-    pub ai: bool,
+    ai: bool = true,
 
-    pub bots_max: usize,
+    bots_max: usize = 20,
 
-    pub cl_cluster_bomb_size: f64,
+    cl_cluster_bomb_size: f64 = 1.5,
 
-    pub cl_machine_gun_trail_length: f64,
-    pub cl_machine_gun_trail_thickness: f64,
+    cl_machine_gun_trail_length: f64 = 10.0,
+    cl_machine_gun_trail_thickness: f64 = 1.5,
 
-    pub cl_railgun_trail_thickness: f64,
-    pub cl_railgun_trail_duration: f64,
+    cl_railgun_trail_thickness: f64 = 1.5,
+    cl_railgun_trail_duration: f64 = 0.05,
 
-    pub cl_spawn_indicator_animation_time: f64,
-    pub cl_spawn_indicator_blinking_period: f64,
-    pub cl_spawn_indicator_duration: f64,
-    pub cl_spawn_indicator_square_side_begin: f32,
-    pub cl_spawn_indicator_square_side_end: f32,
-    pub cl_spawn_indicator_thickness: f32,
+    cl_spawn_indicator_animation_time: f64 = 0.3,
+    cl_spawn_indicator_blinking_period: f64 = 0.3,
+    cl_spawn_indicator_duration: f64 = 1.5,
+    cl_spawn_indicator_square_side_begin: f32 = 800.0,
+    cl_spawn_indicator_square_side_end: f32 = 40.0,
+    cl_spawn_indicator_thickness: f32 = 2.0,
 
-    pub con_background_alpha: f32,
-    pub con_prompt_group_x: f32,
-    pub con_prompt_group_y_offset: f32,
-    pub con_height_fraction: f32,
-    pub con_history_line_font_size: f32,
-    pub con_history_line_height: f32,
-    pub con_history_x: f32,
-    pub con_history_y_offset: f32,
-    pub con_prompt_label_x: f32,
-    pub con_prompt_label_y_offset: f32,
+    con_background_alpha: f32 = 0.8,
+    con_prompt_group_x: f32 = 16.0,
+    con_prompt_group_y_offset: f32 = 26.0,
+    con_height_fraction: f32 = 0.45,
+    con_history_line_font_size: f32 = 16.0,
+    con_history_line_height: f32 = 14.0,
+    con_history_x: f32 = 8.0,
+    con_history_y_offset: f32 = 25.0,
+    con_prompt_label_x: f32 = 8.0,
+    con_prompt_label_y_offset: f32 = 22.0,
 
     /// "Temporary" cvar for quick testing. Normally unused but kept here
     /// so I don't have to add a cvar each time I want a quick toggle.
-    pub d_dbg: bool,
+    d_dbg: bool = false,
 
     /// Master switch for debug output - the d_draw_* group.
-    pub d_draw: bool,
-    pub d_draw_crosses: bool,
-    pub d_draw_hitboxes: bool,
-    pub d_draw_lines: bool,
-    pub d_draw_lines_ends_length: f64,
-    pub d_draw_perf: bool,
-    pub d_draw_text: bool,
-    pub d_draw_text_line_height: f64,
-    pub d_draw_world_text: bool,
-    pub d_explosion_radius: bool,
+    d_draw: bool = true,
+    d_draw_crosses: bool = true,
+    d_draw_hitboxes: bool = false,
+    d_draw_lines: bool = true,
+    d_draw_lines_ends_length: f64 = 3.0,
+    d_draw_perf: bool = true,
+    d_draw_text: bool = true,
+    d_draw_text_line_height: f64 = 14.0,
+    d_draw_world_text: bool = true,
+    d_explosion_radius: bool = false,
     /// Draw FPS counter. Intentionally not in the d_draw_* group
     /// so I can easily check perf with and without the other debug output.
-    pub d_fps: bool,
-    pub d_fps_period: f64,
-    pub d_fps_x: f64,
-    pub d_fps_y: f64,
+    d_fps: bool = true,
+    d_fps_period: f64 = 1.0,
+    d_fps_x: f64 = -300.0,
+    d_fps_y: f64 = -15.0,
     /// Display the last pressed key. Useful for debugging MQ's issues with keyboard layouts.
-    pub d_last_key: bool,
-    pub d_tickrate_remaining: bool,
-    pub d_timing_samples: usize,
-    pub d_tracing: bool,
+    d_last_key: bool = false,
+    d_tickrate_remaining: bool = false,
+    d_timing_samples: usize = 60,
+    d_tracing: bool = false,
     /// The seed to initialize the RNG.
     ///
     /// This is not very helpful by itself because by the time you can change cvars in the console,
@@ -88,321 +89,325 @@ pub struct Cvars {
     ///
     /// If the seed is 0 at match start, the cvar is changed to the current time and that is used as seed.
     /// This means you can look at the cvar's value later and know what seed you need to replay the same game.
-    pub d_seed: u64,
+    d_seed: u64 = 0,
     /// Change speed of everything in the game
-    pub d_speed: f64,
+    d_speed: f64 = 1.0,
 
     /// Hit points. Recommended values are between 1 and 500, original RecWar used 100 as default.
     ///
     /// Note that the actual number of hitpoints depends on vehicle type, this is just the base value.
     /// By default, the tank uses this value, other vehicles scale it by some multiplier.
-    pub g_armor: f64,
+    g_armor: f64 = 50.0,
 
-    pub g_bfg_beam_damage_per_sec: f64,
-    pub g_bfg_beam_range: f64,
-    pub g_bfg_damage_direct: f64,
-    pub g_bfg_explosion_damage: f64,
-    pub g_bfg_explosion_radius: f64,
-    pub g_bfg_explosion_scale: f64,
-    pub g_bfg_radius: f64,
-    pub g_bfg_reload_ammo: u32,
-    pub g_bfg_reload_time: f64,
-    pub g_bfg_speed: f64,
-    pub g_bfg_vehicle_velocity_factor: f64,
+    g_bfg_beam_damage_per_sec: f64 = 25.0,
+    g_bfg_beam_range: f64 = 125.0,
+    g_bfg_damage_direct: f64 = 0.0,
+    g_bfg_explosion_damage: f64 = 100.0, // pretty sure from orig RW testing
+    g_bfg_explosion_radius: f64 = 40.0,
+    g_bfg_explosion_scale: f64 = 1.0,
+    g_bfg_radius: f64 = 4.0,
+    g_bfg_reload_ammo: u32 = 1,
+    g_bfg_reload_time: f64 = 2.5,
+    g_bfg_speed: f64 = 150.0,
+    g_bfg_vehicle_velocity_factor: f64 = 1.0,
 
-    pub g_cluster_bomb_count: i32,
-    pub g_cluster_bomb_damage_direct: f64,
-    pub g_cluster_bomb_explosion_damage: f64,
-    pub g_cluster_bomb_explosion_radius: f64,
-    pub g_cluster_bomb_explosion_scale: f64,
-    pub g_cluster_bomb_reload_ammo: u32,
-    pub g_cluster_bomb_reload_time: f64,
-    pub g_cluster_bomb_shadow_alpha: f64,
-    pub g_cluster_bomb_shadow_x: f64,
-    pub g_cluster_bomb_shadow_y: f64,
-    pub g_cluster_bomb_speed: f64,
-    pub g_cluster_bomb_speed_spread_forward: f64,
-    pub g_cluster_bomb_speed_spread_gaussian: bool,
-    pub g_cluster_bomb_speed_spread_sideways: f64,
-    pub g_cluster_bomb_time: f64,
-    pub g_cluster_bomb_time_spread: f64,
-    pub g_cluster_bomb_vehicle_velocity_factor: f64,
+    g_cluster_bomb_count: i32 = 40,
+    g_cluster_bomb_damage_direct: f64 = 0.0, // best guess - same as rockets
+    g_cluster_bomb_explosion_damage: f64 = 25.0,
+    g_cluster_bomb_explosion_radius: f64 = 20.0,
+    g_cluster_bomb_explosion_scale: f64 = 0.5,
+    g_cluster_bomb_reload_ammo: u32 = 1,
+    g_cluster_bomb_reload_time: f64 = 1.5,
+    g_cluster_bomb_shadow_alpha: f64 = 1.0,
+    g_cluster_bomb_shadow_x: f64 = 2.0,
+    g_cluster_bomb_shadow_y: f64 = 2.0,
+    g_cluster_bomb_speed: f64 = 400.0,
+    g_cluster_bomb_speed_spread_forward: f64 = 50.0,
+    g_cluster_bomb_speed_spread_gaussian: bool = true,
+    g_cluster_bomb_speed_spread_sideways: f64 = 50.0,
+    g_cluster_bomb_time: f64 = 0.8,
+    g_cluster_bomb_time_spread: f64 = 0.2,
+    g_cluster_bomb_vehicle_velocity_factor: f64 = 1.0,
 
-    pub g_ffa_score_kill: i32,
-    pub g_ffa_score_death: i32,
+    g_ffa_score_kill: i32 = 1,
+    g_ffa_score_death: i32 = -1,
 
-    pub g_homing_missile_damage_direct: f64,
-    pub g_homing_missile_explosion_damage: f64,
-    pub g_homing_missile_explosion_radius: f64,
-    pub g_homing_missile_explosion_scale: f64,
-    pub g_homing_missile_reload_ammo: u32,
-    pub g_homing_missile_reload_time: f64,
-    pub g_homing_missile_speed_initial: f64,
-    pub g_homing_missile_vehicle_velocity_factor: f64,
+    g_homing_missile_damage_direct: f64 = 0.0,
+    g_homing_missile_explosion_damage: f64 = 56.0, // assumed same as GM
+    g_homing_missile_explosion_radius: f64 = 40.0,
+    g_homing_missile_explosion_scale: f64 = 1.0,
+    g_homing_missile_reload_ammo: u32 = 1,
+    g_homing_missile_reload_time: f64 = 1.5,
+    g_homing_missile_speed_initial: f64 = 360.0,
+    g_homing_missile_vehicle_velocity_factor: f64 = 1.0,
 
-    pub g_machine_gun_angle_spread: f64,
-    pub g_machine_gun_damage: f64,
-    pub g_machine_gun_refire: f64,
-    pub g_machine_gun_reload_ammo: u32,
-    pub g_machine_gun_reload_time: f64,
-    pub g_machine_gun_speed: f64,
-    pub g_machine_gun_vehicle_velocity_factor: f64,
+    g_machine_gun_angle_spread: f64 = 0.015,
+    g_machine_gun_damage: f64 = 2.5, // exact from orig RW
+    g_machine_gun_refire: f64 = 0.050,
+    g_machine_gun_reload_ammo: u32 = 50,
+    g_machine_gun_reload_time: f64 = 1.0,
+    g_machine_gun_speed: f64 = 1000.0,
+    g_machine_gun_vehicle_velocity_factor: f64 = 1.0,
 
-    pub g_guided_missile_accel_forward: f64,
-    pub g_guided_missile_damage_direct: f64,
-    pub g_guided_missile_explosion_damage: f64,
-    pub g_guided_missile_explosion_radius: f64,
-    pub g_guided_missile_explosion_scale: f64,
-    pub g_guided_missile_friction_const: f64,
-    pub g_guided_missile_friction_linear: f64,
-    pub g_guided_missile_reload_ammo: u32,
-    pub g_guided_missile_reload_time: f64,
-    pub g_guided_missile_speed_initial: f64,
-    pub g_guided_missile_speed_max: f64,
-    pub g_guided_missile_turn_effectiveness: f64,
-    pub g_guided_missile_turn_rate_increase: f64,
-    pub g_guided_missile_turn_rate_friction_const: f64,
-    pub g_guided_missile_turn_rate_friction_linear: f64,
-    pub g_guided_missile_turn_rate_max: f64,
-    pub g_guided_missile_vehicle_velocity_factor: f64,
+    g_guided_missile_accel_forward: f64 = 2000.0,
+    g_guided_missile_damage_direct: f64 = 0.0,
+    g_guided_missile_explosion_damage: f64 = 56.0, // exact from orig RW
+    g_guided_missile_explosion_radius: f64 = 40.0,
+    g_guided_missile_explosion_scale: f64 = 1.0,
+    g_guided_missile_friction_const: f64 = 0.0,
+    g_guided_missile_friction_linear: f64 = 0.99,
+    g_guided_missile_reload_ammo: u32 = 1,
+    g_guided_missile_reload_time: f64 = 1.5,
+    g_guided_missile_speed_initial: f64 = 100.0,
+    g_guided_missile_speed_max: f64 = f64::INFINITY,
+    g_guided_missile_turn_effectiveness: f64 = 1.0,
+    g_guided_missile_turn_rate_increase: f64 = 0.10,
+    g_guided_missile_turn_rate_friction_const: f64 = 0.995,
+    g_guided_missile_turn_rate_friction_linear: f64 = 30.0,
+    g_guided_missile_turn_rate_max: f64 = f64::INFINITY,
+    g_guided_missile_vehicle_velocity_factor: f64 = 1.0,
 
-    pub g_hardpoint_hovercraft_machine_gun: Hardpoint,
-    pub g_hardpoint_hovercraft_machine_gun_x: f64,
-    pub g_hardpoint_hovercraft_machine_gun_y: f64,
-    pub g_hardpoint_hovercraft_railgun: Hardpoint,
-    pub g_hardpoint_hovercraft_railgun_x: f64,
-    pub g_hardpoint_hovercraft_railgun_y: f64,
-    pub g_hardpoint_hovercraft_cluster_bomb: Hardpoint,
-    pub g_hardpoint_hovercraft_cluster_bomb_x: f64,
-    pub g_hardpoint_hovercraft_cluster_bomb_y: f64,
-    pub g_hardpoint_hovercraft_rockets: Hardpoint,
-    pub g_hardpoint_hovercraft_rockets_x: f64,
-    pub g_hardpoint_hovercraft_rockets_y: f64,
-    pub g_hardpoint_hovercraft_homing_missile: Hardpoint,
-    pub g_hardpoint_hovercraft_homing_missile_x: f64,
-    pub g_hardpoint_hovercraft_homing_missile_y: f64,
-    pub g_hardpoint_hovercraft_guided_missile: Hardpoint,
-    pub g_hardpoint_hovercraft_guided_missile_x: f64,
-    pub g_hardpoint_hovercraft_guided_missile_y: f64,
-    pub g_hardpoint_hovercraft_bfg: Hardpoint,
-    pub g_hardpoint_hovercraft_bfg_x: f64,
-    pub g_hardpoint_hovercraft_bfg_y: f64,
+    g_hardpoint_hovercraft_machine_gun: Hardpoint = Hardpoint::Turret,
+    g_hardpoint_hovercraft_machine_gun_x: f64 = 19.0,
+    g_hardpoint_hovercraft_machine_gun_y: f64 = 0.0,
+    g_hardpoint_hovercraft_railgun: Hardpoint = Hardpoint::Turret,
+    g_hardpoint_hovercraft_railgun_x: f64 = 19.0,
+    g_hardpoint_hovercraft_railgun_y: f64 = 0.0,
+    g_hardpoint_hovercraft_cluster_bomb: Hardpoint = Hardpoint::Turret,
+    g_hardpoint_hovercraft_cluster_bomb_x: f64 = 19.0,
+    g_hardpoint_hovercraft_cluster_bomb_y: f64 = 0.0,
+    g_hardpoint_hovercraft_rockets: Hardpoint = Hardpoint::Turret,
+    g_hardpoint_hovercraft_rockets_x: f64 = 19.0,
+    g_hardpoint_hovercraft_rockets_y: f64 = 0.0,
+    g_hardpoint_hovercraft_homing_missile: Hardpoint = Hardpoint::Chassis,
+    g_hardpoint_hovercraft_homing_missile_x: f64 = 0.0,
+    g_hardpoint_hovercraft_homing_missile_y: f64 = -16.0,
+    g_hardpoint_hovercraft_guided_missile: Hardpoint = Hardpoint::Chassis,
+    g_hardpoint_hovercraft_guided_missile_x: f64 = 0.0,
+    g_hardpoint_hovercraft_guided_missile_y: f64 = -16.0,
+    g_hardpoint_hovercraft_bfg: Hardpoint = Hardpoint::Turret,
+    g_hardpoint_hovercraft_bfg_x: f64 = 19.0,
+    g_hardpoint_hovercraft_bfg_y: f64 = 0.0,
 
-    pub g_hardpoint_hummer_machine_gun: Hardpoint,
-    pub g_hardpoint_hummer_machine_gun_x: f64,
-    pub g_hardpoint_hummer_machine_gun_y: f64,
-    pub g_hardpoint_hummer_railgun: Hardpoint,
-    pub g_hardpoint_hummer_railgun_x: f64,
-    pub g_hardpoint_hummer_railgun_y: f64,
-    pub g_hardpoint_hummer_cluster_bomb: Hardpoint,
-    pub g_hardpoint_hummer_cluster_bomb_x: f64,
-    pub g_hardpoint_hummer_cluster_bomb_y: f64,
-    pub g_hardpoint_hummer_rockets: Hardpoint,
-    pub g_hardpoint_hummer_rockets_x: f64,
-    pub g_hardpoint_hummer_rockets_y: f64,
-    pub g_hardpoint_hummer_homing_missile: Hardpoint,
-    pub g_hardpoint_hummer_homing_missile_x: f64,
-    pub g_hardpoint_hummer_homing_missile_y: f64,
-    pub g_hardpoint_hummer_guided_missile: Hardpoint,
-    pub g_hardpoint_hummer_guided_missile_x: f64,
-    pub g_hardpoint_hummer_guided_missile_y: f64,
-    pub g_hardpoint_hummer_bfg: Hardpoint,
-    pub g_hardpoint_hummer_bfg_x: f64,
-    pub g_hardpoint_hummer_bfg_y: f64,
+    g_hardpoint_hummer_machine_gun: Hardpoint = Hardpoint::Chassis,
+    g_hardpoint_hummer_machine_gun_x: f64 = 10.0,
+    g_hardpoint_hummer_machine_gun_y: f64 = 9.0,
+    g_hardpoint_hummer_railgun: Hardpoint = Hardpoint::Chassis,
+    g_hardpoint_hummer_railgun_x: f64 = 10.0,
+    g_hardpoint_hummer_railgun_y: f64 = 9.0,
+    g_hardpoint_hummer_cluster_bomb: Hardpoint = Hardpoint::Turret,
+    g_hardpoint_hummer_cluster_bomb_x: f64 = 0.0,
+    g_hardpoint_hummer_cluster_bomb_y: f64 = 0.0,
+    g_hardpoint_hummer_rockets: Hardpoint = Hardpoint::Turret,
+    g_hardpoint_hummer_rockets_x: f64 = 0.0,
+    g_hardpoint_hummer_rockets_y: f64 = 0.0,
+    g_hardpoint_hummer_homing_missile: Hardpoint = Hardpoint::Chassis,
+    g_hardpoint_hummer_homing_missile_x: f64 = 0.0,
+    g_hardpoint_hummer_homing_missile_y: f64 = -10.0,
+    g_hardpoint_hummer_guided_missile: Hardpoint = Hardpoint::Chassis,
+    g_hardpoint_hummer_guided_missile_x: f64 = 0.0,
+    g_hardpoint_hummer_guided_missile_y: f64 = -10.0,
+    g_hardpoint_hummer_bfg: Hardpoint = Hardpoint::Chassis,
+    g_hardpoint_hummer_bfg_x: f64 = 10.0,
+    g_hardpoint_hummer_bfg_y: f64 = 9.0,
 
-    pub g_hardpoint_tank_machine_gun: Hardpoint,
-    pub g_hardpoint_tank_machine_gun_x: f64,
-    pub g_hardpoint_tank_machine_gun_y: f64,
-    pub g_hardpoint_tank_railgun: Hardpoint,
-    pub g_hardpoint_tank_railgun_x: f64,
-    pub g_hardpoint_tank_railgun_y: f64,
-    pub g_hardpoint_tank_cluster_bomb: Hardpoint,
-    pub g_hardpoint_tank_cluster_bomb_x: f64,
-    pub g_hardpoint_tank_cluster_bomb_y: f64,
-    pub g_hardpoint_tank_rockets: Hardpoint,
-    pub g_hardpoint_tank_rockets_x: f64,
-    pub g_hardpoint_tank_rockets_y: f64,
-    pub g_hardpoint_tank_homing_missile: Hardpoint,
-    pub g_hardpoint_tank_homing_missile_x: f64,
-    pub g_hardpoint_tank_homing_missile_y: f64,
-    pub g_hardpoint_tank_guided_missile: Hardpoint,
-    pub g_hardpoint_tank_guided_missile_x: f64,
-    pub g_hardpoint_tank_guided_missile_y: f64,
-    pub g_hardpoint_tank_bfg: Hardpoint,
-    pub g_hardpoint_tank_bfg_x: f64,
-    pub g_hardpoint_tank_bfg_y: f64,
+    g_hardpoint_tank_machine_gun: Hardpoint = Hardpoint::Turret,
+    g_hardpoint_tank_machine_gun_x: f64 = 12.0,
+    g_hardpoint_tank_machine_gun_y: f64 = -5.0,
+    g_hardpoint_tank_railgun: Hardpoint = Hardpoint::Turret,
+    g_hardpoint_tank_railgun_x: f64 = 35.0,
+    g_hardpoint_tank_railgun_y: f64 = 0.0,
+    g_hardpoint_tank_cluster_bomb: Hardpoint = Hardpoint::Turret,
+    g_hardpoint_tank_cluster_bomb_x: f64 = 35.0,
+    g_hardpoint_tank_cluster_bomb_y: f64 = 0.0,
+    g_hardpoint_tank_rockets: Hardpoint = Hardpoint::Turret,
+    g_hardpoint_tank_rockets_x: f64 = 35.0,
+    g_hardpoint_tank_rockets_y: f64 = 0.0,
+    g_hardpoint_tank_homing_missile: Hardpoint = Hardpoint::Chassis,
+    g_hardpoint_tank_homing_missile_x: f64 = 0.0,
+    g_hardpoint_tank_homing_missile_y: f64 = -14.0,
+    g_hardpoint_tank_guided_missile: Hardpoint = Hardpoint::Chassis,
+    g_hardpoint_tank_guided_missile_x: f64 = 0.0,
+    g_hardpoint_tank_guided_missile_y: f64 = -14.0,
+    g_hardpoint_tank_bfg: Hardpoint = Hardpoint::Turret,
+    g_hardpoint_tank_bfg_x: f64 = 35.0,
+    g_hardpoint_tank_bfg_y: f64 = 0.0,
 
-    pub g_hitcircle_radius: f64, // TODO proper hitbox
+    g_hitcircle_radius: f64 = 24.0, // TODO proper hitbox
 
-    pub g_hovercraft_armor_scale: f64,
-    pub g_hovercraft_accel_backward: f64,
-    pub g_hovercraft_accel_forward: f64,
-    pub g_hovercraft_friction_const: f64,
-    pub g_hovercraft_friction_linear: f64,
-    pub g_hovercraft_maxs_x: f64,
-    pub g_hovercraft_maxs_y: f64,
-    pub g_hovercraft_mins_x: f64,
-    pub g_hovercraft_mins_y: f64,
-    pub g_hovercraft_speed_max: f64,
-    pub g_hovercraft_steering_car: f64,
-    pub g_hovercraft_turn_effectiveness: f64,
-    pub g_hovercraft_turn_rate_friction_const: f64,
-    pub g_hovercraft_turn_rate_friction_linear: f64,
-    pub g_hovercraft_turn_rate_increase: f64,
-    pub g_hovercraft_turn_rate_max: f64,
-    pub g_hovercraft_turret_offset_chassis_x: f64,
-    pub g_hovercraft_turret_offset_chassis_y: f64,
-    pub g_hovercraft_turret_offset_turret_x: f64,
-    pub g_hovercraft_turret_offset_turret_y: f64,
+    g_hovercraft_armor_scale: f64 = 0.65,
+    g_hovercraft_accel_backward: f64 = 400.0,
+    g_hovercraft_accel_forward: f64 = 400.0,
+    g_hovercraft_friction_const: f64 = 0.0,
+    g_hovercraft_friction_linear: f64 = 0.6,
+    g_hovercraft_maxs_x: f64 = 22.0,
+    g_hovercraft_maxs_y: f64 = 14.0,
+    g_hovercraft_mins_x: f64 = -22.0,
+    g_hovercraft_mins_y: f64 = -14.0,
+    g_hovercraft_speed_max: f64 = f64::INFINITY,
+    g_hovercraft_steering_car: f64 = 0.0,
+    g_hovercraft_turn_effectiveness: f64 = 0.0,
+    g_hovercraft_turn_rate_friction_const: f64 = 0.03,
+    g_hovercraft_turn_rate_friction_linear: f64 = 0.92,
+    g_hovercraft_turn_rate_increase: f64 = 10.0,
+    g_hovercraft_turn_rate_max: f64 = f64::INFINITY,
+    g_hovercraft_turret_offset_chassis_x: f64 = -9.0,
+    g_hovercraft_turret_offset_chassis_y: f64 = 5.0,
+    g_hovercraft_turret_offset_turret_x: f64 = -8.0,
+    g_hovercraft_turret_offset_turret_y: f64 = 0.0,
 
-    pub g_hummer_armor_scale: f64,
-    pub g_hummer_accel_backward: f64,
-    pub g_hummer_accel_forward: f64,
-    pub g_hummer_friction_const: f64,
-    pub g_hummer_friction_linear: f64,
-    pub g_hummer_maxs_x: f64,
-    pub g_hummer_maxs_y: f64,
-    pub g_hummer_mins_x: f64,
-    pub g_hummer_mins_y: f64,
-    pub g_hummer_speed_max: f64,
-    pub g_hummer_steering_car: f64,
-    pub g_hummer_turn_effectiveness: f64,
-    pub g_hummer_turn_rate_friction_const: f64,
-    pub g_hummer_turn_rate_friction_linear: f64,
-    pub g_hummer_turn_rate_increase: f64,
-    pub g_hummer_turn_rate_max: f64,
-    pub g_hummer_turret_offset_chassis_x: f64,
-    pub g_hummer_turret_offset_chassis_y: f64,
-    pub g_hummer_turret_offset_turret_x: f64,
-    pub g_hummer_turret_offset_turret_y: f64,
+    g_hummer_armor_scale: f64 = 0.625,
+    g_hummer_accel_backward: f64 = 600.0,
+    g_hummer_accel_forward: f64 = 600.0,
+    g_hummer_friction_const: f64 = 11.0,
+    g_hummer_friction_linear: f64 = 0.8,
+    g_hummer_maxs_x: f64 = 20.0,
+    g_hummer_maxs_y: f64 = 9.0,
+    g_hummer_mins_x: f64 = -20.0,
+    g_hummer_mins_y: f64 = -9.0,
+    g_hummer_speed_max: f64 = f64::INFINITY,
+    g_hummer_steering_car: f64 = 200.0,
+    g_hummer_turn_effectiveness: f64 = 1.0,
+    g_hummer_turn_rate_friction_const: f64 = 0.04,
+    g_hummer_turn_rate_friction_linear: f64 = 0.97,
+    g_hummer_turn_rate_increase: f64 = 18.0,
+    g_hummer_turn_rate_max: f64 = f64::INFINITY,
+    g_hummer_turret_offset_chassis_x: f64 = -12.0,
+    g_hummer_turret_offset_chassis_y: f64 = 0.0,
+    g_hummer_turret_offset_turret_x: f64 = 0.0,
+    g_hummer_turret_offset_turret_y: f64 = 0.0,
 
-    pub g_railgun_damage: f64,
-    pub g_railgun_push: f64,
-    pub g_railgun_reload_ammo: u32,
-    pub g_railgun_reload_time: f64,
-    pub g_railgun_speed: f64,
-    pub g_railgun_vehicle_velocity_factor: f64,
+    g_railgun_damage: f64 = 47.0, // exact from orig RW
+    g_railgun_push: f64 = 300.0,
+    g_railgun_reload_ammo: u32 = 1,
+    g_railgun_reload_time: f64 = 1.0,
+    g_railgun_speed: f64 = 2500.0,
+    g_railgun_vehicle_velocity_factor: f64 = 0.0,
 
-    pub g_respawn_delay: f64,
+    g_respawn_delay: f64 = 0.5, // LATER this used to be 2 s, did RW use 2 s?
 
-    pub g_rockets_damage_direct: f64,
-    pub g_rockets_explosion_damage: f64,
-    pub g_rockets_explosion_radius: f64,
-    pub g_rockets_explosion_scale: f64,
-    pub g_rockets_refire: f64,
-    pub g_rockets_reload_ammo: u32,
-    pub g_rockets_reload_time: f64,
-    pub g_rockets_speed: f64,
-    pub g_rockets_vehicle_velocity_factor: f64,
+    g_rockets_damage_direct: f64 = 25.0,
+    g_rockets_explosion_damage: f64 = 0.0, // pretty sure from orig RW testing
+    g_rockets_explosion_radius: f64 = 20.0,
+    g_rockets_explosion_scale: f64 = 0.5,
+    g_rockets_refire: f64 = 0.200,
+    g_rockets_reload_ammo: u32 = 6,
+    g_rockets_reload_time: f64 = 1.5,
+    g_rockets_speed: f64 = 600.0,
+    g_rockets_vehicle_velocity_factor: f64 = 1.0,
 
-    pub g_self_destruct_damage_center: f64,
-    pub g_self_destruct_damage_edge: f64,
-    pub g_self_destruct_explosion_scale: f64, // TODO radius
-    pub g_self_destruct_radius: f64,
+    g_self_destruct_damage_center: f64 = 150.0,
+    g_self_destruct_damage_edge: f64 = 0.0,
+    g_self_destruct_explosion_scale: f64 = 2.0, // TODO radius
+    g_self_destruct_radius: f64 = 175.0,
 
-    pub g_tank_armor_scale: f64,
-    pub g_tank_accel_backward: f64,
-    pub g_tank_accel_forward: f64,
-    pub g_tank_friction_const: f64,
-    pub g_tank_friction_linear: f64,
-    pub g_tank_maxs_x: f64,
-    pub g_tank_maxs_y: f64,
-    pub g_tank_mins_x: f64,
-    pub g_tank_mins_y: f64,
-    pub g_tank_speed_max: f64,
-    pub g_tank_steering_car: f64,
-    pub g_tank_turn_effectiveness: f64,
-    pub g_tank_turn_rate_friction_const: f64,
-    pub g_tank_turn_rate_friction_linear: f64,
-    pub g_tank_turn_rate_increase: f64,
-    pub g_tank_turn_rate_max: f64,
-    pub g_tank_turret_offset_chassis_x: f64,
-    pub g_tank_turret_offset_chassis_y: f64,
-    pub g_tank_turret_offset_turret_x: f64,
-    pub g_tank_turret_offset_turret_y: f64,
+    g_tank_armor_scale: f64 = 1.0,
+    g_tank_accel_backward: f64 = 550.0,
+    g_tank_accel_forward: f64 = 550.0,
+    g_tank_friction_const: f64 = 50.0,
+    g_tank_friction_linear: f64 = 0.9,
+    g_tank_maxs_x: f64 = 19.0,
+    g_tank_maxs_y: f64 = 12.0,
+    g_tank_mins_x: f64 = -19.0,
+    g_tank_mins_y: f64 = -12.0,
+    g_tank_speed_max: f64 = f64::INFINITY,
+    g_tank_steering_car: f64 = 0.0,
+    g_tank_turn_effectiveness: f64 = 1.0,
+    g_tank_turn_rate_friction_const: f64 = 0.05,
+    g_tank_turn_rate_friction_linear: f64 = 0.96,
+    g_tank_turn_rate_increase: f64 = 8.0,
+    g_tank_turn_rate_max: f64 = f64::INFINITY,
+    g_tank_turret_offset_chassis_x: f64 = -5.0,
+    g_tank_turret_offset_chassis_y: f64 = 0.0,
+    g_tank_turret_offset_turret_x: f64 = -14.0,
+    g_tank_turret_offset_turret_y: f64 = 0.0,
 
-    pub g_turret_turn_speed_deg: f64,
-    pub g_turret_turn_step_angle_deg: f64,
+    g_turret_turn_speed_deg: f64 = 120.0,
+    g_turret_turn_step_angle_deg: f64 = 45.0,
 
-    pub hud_ammo_x: f64,
-    pub hud_ammo_y: f64,
+    hud_ammo_x: f64 = 30.0,
+    hud_ammo_y: f64 = -30.0,
     /// Original RecWar had 99.
-    pub hud_ammo_width: f64,
+    hud_ammo_width: f64 = 100.0,
     /// Original RecWar had 4.
-    pub hud_ammo_height: f64,
+    hud_ammo_height: f64 = 4.0,
 
-    pub hud_hp_x: f64,
-    pub hud_hp_y: f64,
+    hud_hp_x: f64 = 30.0,
+    hud_hp_y: f64 = -50.0,
     /// Original RecWar had 99.
-    pub hud_hp_width: f64,
+    hud_hp_width: f64 = 100.0,
     /// Original RecWar had 9.
-    pub hud_hp_height: f64,
+    hud_hp_height: f64 = 9.0,
 
-    pub hud_names: bool,
-    pub hud_names_alpha: f64,
-    pub hud_names_brightness: f64,
-    pub hud_names_font_size: f64,
-    pub hud_names_shadow_alpha: f64,
-    pub hud_names_shadow_x: f32,
-    pub hud_names_shadow_y: f32,
-    pub hud_names_x: f64,
-    pub hud_names_y: f64,
+    hud_names: bool = true,
+    hud_names_alpha: f64 = 1.0,
+    hud_names_brightness: f64 = 255.0,
+    hud_names_font_size: f64 = 16.0,
+    hud_names_shadow_alpha: f64 = 1.0,
+    hud_names_shadow_x: f32 = 1.0,
+    hud_names_shadow_y: f32 = 1.0,
+    hud_names_x: f64 = -20.0,
+    hud_names_y: f64 = 30.0,
 
-    pub hud_missile_indicator_dash_length: f64,
-    pub hud_missile_indicator_radius: f64,
+    hud_missile_indicator_dash_length: f64 = 3.3,
+    hud_missile_indicator_radius: f64 = 18.0,
 
-    pub hud_pause_font_size: f64,
-    pub hud_pause_shadow_x: f32,
-    pub hud_pause_shadow_y: f32,
+    hud_pause_font_size: f64 = 64.0,
+    hud_pause_shadow_x: f32 = 2.0,
+    hud_pause_shadow_y: f32 = 2.0,
 
-    pub hud_ranking_font_size: f64,
+    hud_ranking_font_size: f64 = 16.0,
     /// Original RW uses 1
-    pub hud_ranking_shadow_x: f32,
+    hud_ranking_shadow_x: f32 = 1.0,
     /// Original RW uses 1
-    pub hud_ranking_shadow_y: f32,
-    pub hud_ranking_x: f64,
-    pub hud_ranking_y: f64,
+    hud_ranking_shadow_y: f32 = 1.0,
+    hud_ranking_x: f64 = 80.0,
+    hud_ranking_y: f64 = -70.0,
 
-    pub hud_score_font_size: f64,
+    hud_score_font_size: f64 = 32.0,
     /// Original RW uses 2
-    pub hud_score_shadow_x: f32,
+    hud_score_shadow_x: f32 = 2.0,
     /// Original RW uses 2
-    pub hud_score_shadow_y: f32,
-    pub hud_score_x: f64,
-    pub hud_score_y: f64,
+    hud_score_shadow_y: f32 = 2.0,
+    hud_score_x: f64 = 30.0,
+    hud_score_y: f64 = -70.0,
 
-    pub hud_scoreboard_font_size: f64,
-    pub hud_scoreboard_line_height: f64,
+    hud_scoreboard_font_size: f64 = 16.0,
+    hud_scoreboard_line_height: f64 = 18.0,
     /// NB: these shadows absolutely murder performance in firefox (chromum is ok)
-    pub hud_scoreboard_shadow_x: f32,
-    pub hud_scoreboard_shadow_y: f32,
-    pub hud_scoreboard_width_deaths: f32,
-    pub hud_scoreboard_width_kills: f32,
-    pub hud_scoreboard_width_name: f32,
-    pub hud_scoreboard_width_points: f32,
+    hud_scoreboard_shadow_x: f32 = 1.0,
+    hud_scoreboard_shadow_y: f32 = 1.0,
+    hud_scoreboard_width_deaths: f32 = 50.0,
+    hud_scoreboard_width_kills: f32 = 50.0,
+    hud_scoreboard_width_name: f32 = 150.0,
+    hud_scoreboard_width_points: f32 = 50.0,
 
-    pub hud_weapon_icon_shadow_alpha: f64,
-    pub hud_weapon_icon_shadow_x: f32,
-    pub hud_weapon_icon_shadow_y: f32,
-    pub hud_weapon_icon_x: f64,
-    pub hud_weapon_icon_y: f64,
+    hud_weapon_icon_shadow_alpha: f64 = 0.5,
+    hud_weapon_icon_shadow_x: f32 = 2.0,
+    hud_weapon_icon_shadow_y: f32 = 2.0,
+    hud_weapon_icon_x: f64 = 170.0,
+    hud_weapon_icon_y: f64 = -28.0,
 
     /// This is in a way the opposite of smoothing
-    pub r_align_to_pixels_background: bool,
-    pub r_align_to_pixels_text: bool,
-    pub r_draw_cluster_bombs: bool,
-    pub r_explosion_duration: f64,
-    pub r_explosions_reverse_order: bool,
-    pub r_smoothing: bool,
-    pub r_splitscreen_gap: f64,
+    r_align_to_pixels_background: bool = true,
+    r_align_to_pixels_text: bool = true,
+    r_draw_cluster_bombs: bool = true,
+    r_explosion_duration: f64 = 0.5,
+    // After trying true for a while, I think false looks better:
+    // - CB looks smoother. With true it sometimes looked like it had 2 stages
+    //   because the later explosions were suddenly revealed after the first ones disappeared.
+    // - Rockets look better if hitting the same spot.
+    r_explosions_reverse_order: bool = false,
+    r_smoothing: bool = false,
+    r_splitscreen_gap: f64 = 8.0,
 
     /// LATER fix - Does not work in MQ: https://github.com/not-fl3/macroquad/issues/264
-    pub sv_auto_pause_on_minimize: bool,
+    sv_auto_pause_on_minimize: bool = true,
     /// LATER fix - Does not work in MQ: https://github.com/not-fl3/macroquad/issues/264
-    pub sv_auto_unpause_on_restore: bool,
+    sv_auto_unpause_on_restore: bool = false,
 
-    pub sv_tickrate_mode: TickrateMode,
-    pub sv_tickrate_fixed_fps: f64,
+    sv_tickrate_mode: TickrateMode = TickrateMode::Synchronized,
+    sv_tickrate_fixed_fps: f64 = 150.0,
 }
 
 impl Cvars {
@@ -804,7 +809,7 @@ impl Cvars {
     }
 }
 
-impl Default for Cvars {
+/*impl Default for Cvars {
     fn default() -> Self {
         Self {
             ai: true,
@@ -865,7 +870,7 @@ impl Default for Cvars {
             g_bfg_beam_damage_per_sec: 25.0,
             g_bfg_beam_range: 125.0,
             g_bfg_damage_direct: 0.0,
-            g_bfg_explosion_damage: 100.0, // pretty sure from orig RW testing
+            g_bfg_explosion_damage: 100.0,
             g_bfg_explosion_radius: 40.0,
             g_bfg_explosion_scale: 1.0,
             g_bfg_radius: 4.0,
@@ -875,7 +880,7 @@ impl Default for Cvars {
             g_bfg_vehicle_velocity_factor: 1.0,
 
             g_cluster_bomb_count: 40,
-            g_cluster_bomb_damage_direct: 0.0, // best guess - same as rockets
+            g_cluster_bomb_damage_direct: 0.0,
             g_cluster_bomb_explosion_damage: 25.0,
             g_cluster_bomb_explosion_radius: 20.0,
             g_cluster_bomb_explosion_scale: 0.5,
@@ -896,7 +901,7 @@ impl Default for Cvars {
             g_ffa_score_death: -1,
 
             g_homing_missile_damage_direct: 0.0,
-            g_homing_missile_explosion_damage: 56.0, // assumed same as GM
+            g_homing_missile_explosion_damage: 56.0,
             g_homing_missile_explosion_radius: 40.0,
             g_homing_missile_explosion_scale: 1.0,
             g_homing_missile_reload_ammo: 1,
@@ -905,7 +910,7 @@ impl Default for Cvars {
             g_homing_missile_vehicle_velocity_factor: 1.0,
 
             g_machine_gun_angle_spread: 0.015,
-            g_machine_gun_damage: 2.5, // exact from orig RW
+            g_machine_gun_damage: 2.5,
             g_machine_gun_refire: 0.050,
             g_machine_gun_reload_ammo: 50,
             g_machine_gun_reload_time: 1.0,
@@ -914,7 +919,7 @@ impl Default for Cvars {
 
             g_guided_missile_accel_forward: 2000.0,
             g_guided_missile_damage_direct: 0.0,
-            g_guided_missile_explosion_damage: 56.0, // exact from orig RW
+            g_guided_missile_explosion_damage: 56.0,
             g_guided_missile_explosion_radius: 40.0,
             g_guided_missile_explosion_scale: 1.0,
             g_guided_missile_friction_const: 0.0,
@@ -1040,17 +1045,16 @@ impl Default for Cvars {
             g_hummer_turret_offset_turret_x: 0.0,
             g_hummer_turret_offset_turret_y: 0.0,
 
-            g_railgun_damage: 47.0, // exact from orig RW
+            g_railgun_damage: 47.0,
             g_railgun_push: 300.0,
             g_railgun_reload_ammo: 1,
             g_railgun_reload_time: 1.0,
             g_railgun_speed: 2500.0,
             g_railgun_vehicle_velocity_factor: 0.0,
 
-            // LATER this used to be 2 s, did RW use 2 s?
             g_respawn_delay: 0.5,
 
-            g_rockets_damage_direct: 25.0, // pretty sure from orig RW testing
+            g_rockets_damage_direct: 25.0,
             g_rockets_explosion_damage: 0.0,
             g_rockets_explosion_radius: 20.0,
             g_rockets_explosion_scale: 0.5,
@@ -1147,10 +1151,7 @@ impl Default for Cvars {
             r_align_to_pixels_text: true,
             r_draw_cluster_bombs: true,
             r_explosion_duration: 0.5,
-            // After trying true for a while, I think false looks better:
-            // - CB looks smoother. With true it sometimes looked like it had 2 stages
-            //   because the later explosions were suddenly revealed after the first ones disappeared.
-            // - Rockets look better if hitting the same spot.
+
             r_explosions_reverse_order: false,
             r_smoothing: false,
             r_splitscreen_gap: 8.0,
@@ -1162,7 +1163,7 @@ impl Default for Cvars {
             sv_tickrate_fixed_fps: 150.0,
         }
     }
-}
+}*/
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, EnumString, Display)]
 pub enum Hardpoint {
