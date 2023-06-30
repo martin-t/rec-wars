@@ -7,17 +7,17 @@ use strum_macros::{Display, EnumString};
 
 use crate::{entities::Hitbox, entities::VehicleType, entities::Weapon, map::Vec2f};
 
-// LATER Make this a doc comment again when supported.
-// Console variables - configuration options for anything and everything.
-//
-// Prefix meanings:
-// cl_ is client
-// d_ is debug
-// g_ is gameplay
-// hud_ is the heads-up display
-// r_ is rendering
-// sv_ is server administration + performance
 cvars! {
+    //! Console variables - configuration options for anything and everything.
+    //!
+    //! Prefix meanings:
+    //! cl_ is client
+    //! d_ is debug
+    //! g_ is gameplay
+    //! hud_ is the heads-up display
+    //! r_ is rendering
+    //! sv_ is server administration + performance
+
     #![derive(Debug)]
 
     // Long-term this needs some kind of better system to reduce duplication / manual work.

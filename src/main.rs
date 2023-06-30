@@ -92,6 +92,7 @@ async fn main() {
         cvars.set_str(cvar_name, str_value).unwrap();
         dbg_logf!("{} = {}", cvar_name, cvars.get_string(cvar_name).unwrap());
     }
+    dbg!(&cvars);
 
     let time_seed = macroquad::miniquad::date::now();
     if cvars.d_seed == 0 {
