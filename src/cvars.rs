@@ -161,9 +161,10 @@ cvars! {
     g_guided_missile_speed_initial: f64 = 100.0,
     g_guided_missile_speed_max: f64 = f64::INFINITY,
     g_guided_missile_turn_effectiveness: f64 = 1.0,
-    g_guided_missile_turn_rate_increase: f64 = 0.10,
-    g_guided_missile_turn_rate_friction_const: f64 = 0.995,
-    g_guided_missile_turn_rate_friction_linear: f64 = 30.0,
+    g_guided_missile_turn_rate_friction_const: f64 = 0.10,
+    // LATER Interesting bug: setting this to 30.0 and shooting kills everyone on Atrium and gets stuck on other maps.
+    g_guided_missile_turn_rate_friction_linear: f64 = 0.995,
+    g_guided_missile_turn_rate_increase: f64 = 30.0,
     g_guided_missile_turn_rate_max: f64 = f64::INFINITY,
     g_guided_missile_vehicle_velocity_factor: f64 = 1.0,
 
