@@ -38,7 +38,7 @@ enumn = "0.1.8"
 fnv = "1.0.7"
 macroquad = "=0.3.26" # Exact version because of the image crate https://github.com/not-fl3/macroquad/issues/494
 strum = "0.25.0"
-strum_macros = "0.25.0"
+strum_macros = "0.25.1"
 thunderdome = "0.6.1"
 vek = "0.15.10"
 
