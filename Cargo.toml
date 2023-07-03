@@ -34,7 +34,7 @@ web_splitscreen = []
 clap = { version = "4.3.10", features = ["derive"] }
 cvars = "0.4.0"
 cvars-console-macroquad = "0.2.0"
-enumn = "0.1.8"
+enumn = "0.1.9"
 fnv = "1.0.7"
 macroquad = "=0.3.26" # Exact version because of the image crate https://github.com/not-fl3/macroquad/issues/494
 strum = "0.25.0"
