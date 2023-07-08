@@ -49,6 +49,7 @@ impl MacroquadClient {
 
         let loading_started = get_time();
         let mut cnt_bundled = 0;
+        #[allow(unused_mut)] // WASM
         let mut cnt_loaded = 0;
 
         macro_rules! img {
