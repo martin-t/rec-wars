@@ -48,26 +48,43 @@ impl MacroquadClient {
         draw_text("Loading...", 400.0, 400.0, 32.0, GREEN);
 
         let loading_started = get_time();
+        let mut cnt_bundled = 0;
+        let mut cnt_loaded = 0;
 
-        // WASM:
-        // Loading one by one is too slow in the browser because each is a separate request.
-        // We can't use future::try_join_all because it crashes when compiled to WASM with the newest futures crate.
-        // Might be because macroquad has its own special way of doing web-related things.
-        // So just bundle the assets into the binary.
-        #[cfg(target_arch = "wasm32")]
         macro_rules! img {
             ($path:expr $(,)?) => {{
                 let bytes = include_bytes!(concat!("../", $path));
-                Texture2D::from_file_with_format(bytes, None)
-            }};
-        }
+                let bundled = Texture2D::from_file_with_format(bytes, None);
 
-        // Desktop:
-        // Load assets from disk so we can change them without recompiling.
-        #[cfg(not(target_arch = "wasm32"))]
-        macro_rules! img {
-            ($path:expr $(,)?) => {{
-                load_texture($path).await.unwrap()
+                // WASM:
+                // Loading assets one by one is too slow in the browser because each is a separate request.
+                // We can't use future::try_join_all because it crashes when compiled to WASM with the newest futures crate.
+                // Might be because macroquad has its own special way of doing web-related things.
+                // So just bundle the assets into the binary.
+                #[cfg(target_arch = "wasm32")]
+                {
+                    cnt_bundled += 1;
+                    bundled
+                }
+
+                // Desktop:
+                // Load assets from disk so we can change them without recompiling.
+                // Fall back to bundled assets if it fails.
+                // This makes it possible to install the game from crates.io because it doesn't allow installing assets.
+                #[cfg(not(target_arch = "wasm32"))]
+                {
+                    let loaded = load_texture($path).await;
+                    match loaded {
+                        Ok(loaded) => {
+                            cnt_loaded += 1;
+                            loaded
+                        }
+                        Err(_) => {
+                            cnt_bundled += 1;
+                            bundled
+                        }
+                    }
+                }
             }};
         }
 
@@ -124,7 +141,9 @@ impl MacroquadClient {
         let img_explosion_cyan = img!("assets/explosion_cyan.png");
 
         let loading_done = get_time();
-        dbg_logf!("Loaded assets in {:.2} s", loading_done - loading_started);
+        let loading_duration = loading_done - loading_started;
+        dbg_logf!("Loaded {} assets in {:.2} s", cnt_loaded, loading_duration);
+        dbg_logf!("Using {} bundled assets as fallback", cnt_bundled);
 
         // LATER use r_smoothing (currently unused)
         // LATER smoothing optional and configurable per image
