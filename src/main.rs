@@ -84,8 +84,8 @@ async fn main() {
         dbg_logf!("{} = {}", cvar_name, cvars.get_string(cvar_name).unwrap());
     }
 
-    let time_seed = macroquad::miniquad::date::now();
     if cvars.d_seed == 0 {
+        let time_seed = macroquad::miniquad::date::now();
         cvars.d_seed = time_seed.to_bits();
     }
     dbg_logf!("Seed: {}", cvars.d_seed);
@@ -152,9 +152,7 @@ async fn main() {
     let mut map_path = if cvars.g_map != "" {
         cvars.g_map.clone()
     } else {
-        // Intentionally not using cvars.d_seed here
-        // so that setting the seed doesn't force a specific map.
-        let index = time_seed as usize % maps.len();
+        let index = cvars.d_seed as usize % maps.len();
         maps[index].to_owned()
     };
     if !map_path.ends_with(".map") {
