@@ -24,38 +24,23 @@ pub mod timing;
 
 use std::str;
 
-use clap::Parser;
 use macroquad::prelude::*;
 
 use crate::{cvars::Cvars, mq::MacroquadClient, server::Server};
 
-#[derive(Debug, Parser)]
+// LATER server/client/local mode
+#[derive(Debug)]
 struct Opts {
-    /// 2 player local multiplayer
-    #[arg(long)]
-    splitscreen: bool,
-
-    /// Set the map to play on (instead of random)
-    #[arg(long)]
-    map: Option<String>,
-
     /// Set cvar values - use key value pairs (separated by space).
     /// Example: g_armor 150 hud_names false
     cvars: Vec<String>,
 }
 
 fn get_opts() -> Opts {
-    #[allow(unused_mut)]
-    let mut opts = Opts::parse();
-
-    // This is so I can easily toggle between compiling
-    // singleplayer and splitscreen for the web.
-    #[cfg(feature = "web_splitscreen")]
-    {
-        opts.splitscreen = true;
+    // Currently not using clap to save 150 ms on incremental rebuilds.
+    Opts {
+        cvars: std::env::args().skip(1).collect(),
     }
-
-    opts
 }
 
 fn window_conf() -> Conf {
@@ -86,6 +71,12 @@ async fn main() {
     show_mouse(false);
 
     let mut cvars = Cvars::new_rec_wars();
+
+    #[cfg(feature = "web_splitscreen")]
+    {
+        cvars.cl_splitscreen = true;
+    }
+
     let mut cvars_iter = opts.cvars.iter();
     while let Some(cvar_name) = cvars_iter.next() {
         let str_value = cvars_iter.next().unwrap();
@@ -158,12 +149,14 @@ async fn main() {
         //"extra2/Winter (4)",
         //"extra2/World War (2)",
     ];
-    let mut map_path = opts.map.unwrap_or_else(|| {
+    let mut map_path = if cvars.g_map != "" {
+        cvars.g_map.clone()
+    } else {
         // Intentionally not using cvars.d_seed here
         // so that setting the seed doesn't force a specific map.
         let index = time_seed as usize % maps.len();
         maps[index].to_owned()
-    });
+    };
     if !map_path.ends_with(".map") {
         map_path.push_str(".map");
     }
@@ -180,7 +173,7 @@ async fn main() {
     let mut server = Server::new(&cvars, map);
 
     let player1_handle = server.connect(&cvars, "Player 1");
-    let player2_handle = if opts.splitscreen {
+    let player2_handle = if cvars.cl_splitscreen {
         Some(server.connect(&cvars, "Player 2"))
     } else {
         None

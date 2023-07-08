@@ -59,7 +59,8 @@ Compiling and running
 How to run:
 - `cargo run`
 
-See `cargo run -- --help` for more options (splitscreen, map, ...)
+You can set [cvars](#cvars) on the command line - e.g.:
+- `cargo run -- g_map Atrium g_armor 150`
 
 ### Browser version
 
@@ -116,9 +117,9 @@ They use the [cvars](https://crates.io/crates/cvars) crate - an alternative to `
 ### Changing cvars
 
 - Press ";" or "\`" to open the console
-- Type the cvar's name and new value - e.g. `g_armor 150`
+- Type the cvar's name and new value - e.g. `g_bfg_beam_range 250`
 
-The desktop version also accepts them on the command line - see `--help`.
+The desktop version also accepts them on the command line. Some cvars like `g_map` or `d_seed` currently only take effect this way because they need to be set before match start.
 
 The entire list of cvars is in [src/cvars.rs](src/cvars.rs).
 

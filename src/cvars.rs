@@ -40,6 +40,9 @@ cvars! {
     cl_spawn_indicator_square_side_end: f32 = 40.0,
     cl_spawn_indicator_thickness: f32 = 2.0,
 
+    /// Two player local multiplayer
+    cl_splitscreen: bool = false,
+
     con_background_alpha: f32 = 0.8,
     con_prompt_group_x: f32 = 16.0,
     con_prompt_group_y_offset: f32 = 26.0,
@@ -144,6 +147,9 @@ cvars! {
     g_machine_gun_reload_time: f64 = 1.0,
     g_machine_gun_speed: f64 = 1000.0,
     g_machine_gun_vehicle_velocity_factor: f64 = 1.0,
+
+    /// The map to play on. Set to empty string for random.
+    g_map: String = "".to_owned(),
 
     g_guided_missile_accel_forward: f64 = 2000.0,
     g_guided_missile_damage_direct: f64 = 0.0,
