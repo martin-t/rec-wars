@@ -36,10 +36,12 @@ jobs:
         run: rustc --version && cargo --version
       - name: Build native
         run: cargo build --verbose
-      - name: Build web
-        run: cargo build --verbose --target wasm32-unknown-unknown
       - name: Run tests
         run: cargo test --verbose --all-features
+      # Test WASM only on ubuntu - the result should be the same on any OS and ubuntu is the fastest.
+      - name: Build web
+        if: ${{ matrix.os == 'ubuntu-latest' }}
+        run: cargo build --verbose --target wasm32-unknown-unknown
 
   format:
     runs-on: ubuntu-latest
