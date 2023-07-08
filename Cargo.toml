@@ -31,7 +31,6 @@ panic = "abort"
 web_splitscreen = []
 
 [dependencies]
-#clap = { version = "4.3.10", features = ["derive"] }
 cvars = "0.4.0"
 cvars-console-macroquad = "0.2.0"
 enumn = "0.1.8"
