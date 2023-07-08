@@ -149,11 +149,11 @@ async fn main() {
         //"extra2/Winter (4)",
         //"extra2/World War (2)",
     ];
-    let mut map_path = if cvars.g_map != "" {
-        cvars.g_map.clone()
-    } else {
+    let mut map_path = if cvars.g_map.is_empty() {
         let index = cvars.d_seed as usize % maps.len();
         maps[index].to_owned()
+    } else {
+        cvars.g_map.clone()
     };
     if !map_path.ends_with(".map") {
         map_path.push_str(".map");
