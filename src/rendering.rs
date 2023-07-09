@@ -266,15 +266,15 @@ fn render_viewport(
             continue;
         }
 
-        let scr_pos = vehicle.pos + camera_offset;
-        if cull(scr_pos) {
+        let vehicle_scr_pos = vehicle.pos + camera_offset;
+        if cull(vehicle_scr_pos) {
             continue;
         }
 
         let img = client.imgs_vehicles[vehicle.veh_type as usize * 2 + 1];
         let offset_chassis =
             vehicle.angle.to_mat2f() * cvars.g_vehicle_turret_offset_chassis(vehicle.veh_type);
-        let turret_scr_pos = scr_pos + offset_chassis;
+        let turret_scr_pos = vehicle_scr_pos + offset_chassis;
         let offset_turret = cvars.g_vehicle_turret_offset_turret(vehicle.veh_type);
         render_img_offset(
             img,

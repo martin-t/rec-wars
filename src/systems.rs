@@ -583,6 +583,9 @@ pub fn projectiles(cvars: &Cvars, gs: &mut GameState, map: &Map) {
         let step_dir = (new_pos - projectile.pos).normalized();
 
         projectile.pos = new_pos;
+        if cvars.d_projectiles {
+            dbg_cross!(projectile.pos);
+        }
 
         let is_rail = projectile.weapon == Weapon::Rail;
         if is_rail {

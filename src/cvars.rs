@@ -77,6 +77,7 @@ cvars! {
     d_fps_y: f64 = -15.0,
     /// Display the last pressed key. Useful for debugging MQ's issues with keyboard layouts.
     d_last_key: bool = false,
+    d_projectiles: bool = false,
     d_tickrate_remaining: bool = false,
     d_timing_samples: usize = 60,
     d_tracing: bool = false,
