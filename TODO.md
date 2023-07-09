@@ -1,13 +1,10 @@
 # Master TODO list
 
-## MVP
+## 0.2 - MVP
 
 - [x] pick a math lib, don't overthink it
 - [x] load maps
 - [x] cvars
-    - https://crates.io/crates/cvar
-        - no tab completion in js console
-        - https://crates.io/crates/amethyst-console - uses cvar and imgui
 - [x] some way to have references between entities
 - [x] explosions
     - [x] sizes
@@ -24,6 +21,30 @@
 - [x] splitscreen
 - [x] decent default binds (2x for splitscreen)
 - [x] pick an engine
+
+## 0.3
+
+- [ ] network multiplayer
+    - WASM doesn't allow UDP sockets
+        - https://gafferongames.com/post/why_cant_i_send_udp_packets_from_a_browser/
+        - https://www.html5rocks.com/en/tutorials/webrtc/datachannels/
+        - TCP
+            - reduce extra latency: https://lobste.rs/s/5qlb7z/40_milliseconds_latency_just_would_not_go (article + link to HN)
+            - crazy idea: multiple TCP streams, rotate among them - not all will be stalled by PL
+            - https://old.reddit.com/r/linux/comments/k2opr7/veloren_08_an_opensource_multiplayer_rpg_is_being/gdz8avd/
+                - "never use TCP. ISPs will rudely inject RSTs into long-running streams, and you can't realistically ask people to install a firewall rule to drop them.
+                - "Likewise, always encrypt everything. QUIC made life easier but there are numerous alternates. Multiple streams are probably overrated."
+        - webRTC
+    - https://arewegameyet.rs/ecosystem/networking/ or custom?
+        - https://crates.io/crates/quinn - what is QUIC?
+        - https://crates.io/crates/laminar - mentions only UDP, not WASM
+        - https://crates.io/crates/naia-server
+    - [ ] prediction / reconciliation
+        - https://github.com/pond3r/ggpo/tree/master/doc
+    - [ ] server framerate when minimized - https://developer.mozilla.org/en-US/docs/Web/API/Window/setImmediate#Notes
+        - postMessage / MessageChannel / https://github.com/YuzuJS/setImmediate polyfill
+    - [ ] what happens to Entity handles after a player disconnects
+- [ ] chat
 
 ## 1.0
 
@@ -88,7 +109,7 @@
         - [x] about 1 s between first and last rocket -> refire 200 ms
         - [ ] hummer more + refire + entire width
         - [ ] orig RW: only direct hit does dmg, not explosion
-    - [ ] homing missile
+    - [x] homing missile
     - [x] guided missile
     - [ ] BFG
         - [ ] shot delay + random dir when dead
@@ -100,7 +121,8 @@
     - [ ] missiles+BFG in orig RW: explosion range counted towards origin, not nearest, touches chassis if rotated towards explosion (origin is in turret swivel point)
     - [x] proper shot origins
     - [x] proper reload times
-    - [ ] rockets?, missiles and bfg seem to have terminal velocity - force+friction?
+    - [ ] weapon movement - measure and replicate as closely as possible
+        - [ ] rockets?, missiles and bfg seem to have terminal velocity - force+friction?
     - [x] avoid hitting self (orig RW had hummer chassis hardpoint more forward)
         - [ ] allow hitting self if missile comes back after clearing the hitbox
     - [x] entity culling? faster to render?
@@ -153,27 +175,6 @@
         - https://github.com/Ralith/masterserve
     - if dedicated servers, need at least 2 - EU and US
         - hardcoded list of servers as backup for master
-- [ ] network multiplayer
-    - WASM doesn't allow UDP sockets
-        - https://gafferongames.com/post/why_cant_i_send_udp_packets_from_a_browser/
-        - https://www.html5rocks.com/en/tutorials/webrtc/datachannels/
-        - TCP
-            - reduce extra latency: https://lobste.rs/s/5qlb7z/40_milliseconds_latency_just_would_not_go (article + link to HN)
-            - crazy idea: multiple TCP streams, rotate among them - not all will be stalled by PL
-            - https://old.reddit.com/r/linux/comments/k2opr7/veloren_08_an_opensource_multiplayer_rpg_is_being/gdz8avd/
-                - "never use TCP. ISPs will rudely inject RSTs into long-running streams, and you can't realistically ask people to install a firewall rule to drop them.
-                - "Likewise, always encrypt everything. QUIC made life easier but there are numerous alternates. Multiple streams are probably overrated."
-        - webRTC
-    - https://arewegameyet.rs/ecosystem/networking/ or custom?
-        - https://crates.io/crates/quinn - what is QUIC?
-        - https://crates.io/crates/laminar - mentions only UDP, not WASM
-        - https://crates.io/crates/naia-server
-    - [ ] prediction / reconciliation
-        - https://github.com/pond3r/ggpo/tree/master/doc
-    - [ ] server framerate when minimized - https://developer.mozilla.org/en-US/docs/Web/API/Window/setImmediate#Notes
-        - postMessage / MessageChannel / https://github.com/YuzuJS/setImmediate polyfill
-    - [ ] what happens to Entity handles after a player disconnects
-- [ ] chat
 - [ ] voting
     - [ ] mode
     - [ ] map
@@ -181,7 +182,7 @@
 - [ ] FAQ - stuttering/tearing due to compositor - Alt+Shift+f12
     - update: somehow this doesn't help anymore
 
-## nice to have
+## Nice to have
 
 - [ ] fullscreen
 - profiling
