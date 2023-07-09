@@ -194,10 +194,7 @@ fn render_viewport(
         if cull(scr_pos) {
             continue;
         }
-        let offset = Vec2f::new(
-            cvars.r_rockets_offset_x,
-            cvars.r_rockets_offset_y,
-        );
+        let offset = Vec2f::new(cvars.r_rockets_offset_x, cvars.r_rockets_offset_y);
         render_img_offset(client.img_rocket, scr_pos, proj.vel.to_angle(), offset);
     }
     for (_, proj) in weapon_projectiles(Weapon::Hm) {
