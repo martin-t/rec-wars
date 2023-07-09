@@ -190,7 +190,7 @@ async fn main() {
 
         server.update(&cvars, real_time);
 
-        rendering::render(&mut client, &server, &cvars);
+        rendering::render(&cvars, &mut client, &server);
         client.console.update(&mut cvars);
 
         let before = get_time();

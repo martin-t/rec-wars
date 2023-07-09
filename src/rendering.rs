@@ -18,13 +18,13 @@ use crate::{
 
 // LATER clean up at least some of the casts here
 
-pub fn render(client: &mut MacroquadClient, server: &Server, cvars: &Cvars) {
+pub fn render(cvars: &Cvars, client: &mut MacroquadClient, server: &Server) {
     client.render_fps.tick(cvars.d_fps_period, server.real_time);
     let start = get_time();
 
     match client.client_mode {
         ClientMode::Singleplayer { player_handle } => {
-            render_viewport(client, server, cvars, player_handle)
+            render_viewport(cvars, client, server, player_handle)
         }
         ClientMode::Splitscreen {
             render_targets,
@@ -42,12 +42,12 @@ pub fn render(client: &mut MacroquadClient, server: &Server, cvars: &Cvars) {
             camera.render_target = Some(render_targets.0);
             set_camera(&camera);
             clear_background(BLANK);
-            render_viewport(client, server, cvars, player_handles.0);
+            render_viewport(cvars, client, server, player_handles.0);
 
             camera.render_target = Some(render_targets.1);
             set_camera(&camera);
             clear_background(BLANK);
-            render_viewport(client, server, cvars, player_handles.1);
+            render_viewport(cvars, client, server, player_handles.1);
 
             set_default_camera();
             draw_texture(render_targets.0.texture, 0.0, 0.0, WHITE);
@@ -65,9 +65,9 @@ pub fn render(client: &mut MacroquadClient, server: &Server, cvars: &Cvars) {
 }
 
 fn render_viewport(
+    cvars: &Cvars,
     client: &MacroquadClient,
     server: &Server,
-    cvars: &Cvars,
     local_player_handle: Index,
 ) {
     // This is one long function. A lot of people will tell you that's bad™
