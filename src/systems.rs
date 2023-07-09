@@ -739,7 +739,11 @@ fn projectile_impact(cvars: &Cvars, gs: &mut GameState, projectile_handle: Index
             // Borrowck dance:
             // No need to hm_forget here because the projectile is desotryed anyway.
             // We actually can't call it anyway because we can't keep projectile borrowed.
-            let index = target.hms.iter().position(|&h| h == projectile_handle).unwrap();
+            let index = target
+                .hms
+                .iter()
+                .position(|&h| h == projectile_handle)
+                .unwrap();
             target.hms.swap_remove(index);
         }
     }
