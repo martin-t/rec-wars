@@ -438,7 +438,7 @@ pub fn hm_turning(cvars: &Cvars, gs: &mut GameState) {
             let mut best_target_dot = f64::NEG_INFINITY;
 
             for (vehicle_handle, vehicle) in gs.vehicles.iter() {
-                if vehicle.owner == hm.owner {
+                if vehicle.owner == hm.owner || vehicle.destroyed() {
                     // LATER Allow hitting self if the missile loops around other vehicles
                     continue;
                 }
