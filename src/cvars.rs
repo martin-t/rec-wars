@@ -133,8 +133,8 @@ cvars! {
     g_ffa_score_death: i32 = -1,
 
     g_homing_missile_accel_forward: f64 = 2000.0,
-    g_homing_missile_angle_detect: f64 = 20.0f64.to_radians(), // TODO (also other places) use Deg
-    g_homing_missile_angle_forget: f64 = 30.0f64.to_radians(),
+    g_homing_missile_angle_detect: f64 = 40.0f64.to_radians(), // TODO (also other places) use Deg
+    g_homing_missile_angle_forget: f64 = 50.0f64.to_radians(),
     g_homing_missile_damage_direct: f64 = 0.0,
     g_homing_missile_explosion_damage: f64 = 56.0, // assumed same as GM
     g_homing_missile_explosion_radius: f64 = 40.0,
