@@ -325,7 +325,6 @@ impl Surface {
 /// Special behavior of some tiles.
 ///
 /// Reverse engineered by modifying RecWar's TextureList.txt and seeing what happens.
-#[repr(u8)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, FromRepr)]
 pub enum Kind {
     /// No special behavior beyond the normal surface properties
