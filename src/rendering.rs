@@ -356,7 +356,7 @@ fn render_viewport(
 
     // Draw cluster bombs
     // TODO what about shadows (in general)?
-    if cvars.r_draw_cluster_bombs {
+    if cvars.r_cluster_bombs {
         for (_, cb) in weapon_projectiles(Weapon::Cb) {
             let scr_pos = cb.pos + camera_offset;
             if cull(scr_pos) {

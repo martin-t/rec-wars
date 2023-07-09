@@ -407,7 +407,7 @@ cvars! {
     /// This is in a way the opposite of smoothing
     r_align_to_pixels_background: bool = true,
     r_align_to_pixels_text: bool = true,
-    r_draw_cluster_bombs: bool = true,
+    r_cluster_bombs: bool = true,
     r_explosion_duration: f64 = 0.5,
     // After trying true for a while, I think false looks better:
     // - CB looks smoother. With true it sometimes looked like it had 2 stages
