@@ -429,33 +429,51 @@ pub fn hm_turning(cvars: &Cvars, gs: &mut GameState) {
         .iter_mut()
         .filter(|(_, proj)| proj.weapon == Weapon::Hm)
     {
+        // Forget target under some conditions
+        if let Some(target_handle) = hm.target {
+            let target = &gs.vehicles[target_handle];
+            let target_dir = (target.pos - hm.pos).normalized();
+            let target_angle = target_dir.to_angle();
+
+            let mut angle_diff = (target_angle - hm.angle).rem_euclid(2.0 * PI);
+            if angle_diff > PI {
+                angle_diff -= 2.0 * PI;
+            }
+            if angle_diff.abs() > cvars.g_homing_missile_angle_forget {
+                hm.target = None;
+            }
+        }
+
+        // Pick new target
         if hm.target.is_none() {
             // Where the missile is aiming.
             // Not using velocity because it can move sieways sometimes (especially right after firing).
             let forward_dir = hm.angle.to_vec2f();
 
             let mut best_target = None;
-            let mut best_target_dot = f64::NEG_INFINITY;
+            let mut best_target_angle_diff = f64::INFINITY;
 
             for (vehicle_handle, vehicle) in gs.vehicles.iter() {
                 if vehicle.owner == hm.owner || vehicle.destroyed() {
-                    // LATER Allow hitting self if the missile loops around other vehicles
+                    // LATER Allow targetting self if the missile loops around other vehicles
                     continue;
                 }
 
                 let target_dir = (vehicle.pos - hm.pos).normalized();
                 let dot = forward_dir.dot(target_dir);
-                if dot > best_target_dot {
+                let angle_diff = dot.acos();
+                if angle_diff < cvars.g_homing_missile_angle_detect
+                    && angle_diff < best_target_angle_diff
+                {
                     best_target = Some(vehicle_handle);
-                    best_target_dot = dot;
+                    best_target_angle_diff = angle_diff;
                 }
             }
 
             hm.target = best_target;
         }
 
-        let stats = cvars.g_homing_missile_movement_stats();
-
+        // Determine direction
         let mut input = Input::new_up();
         if let Some(target_handle) = hm.target {
             let target = &gs.vehicles[target_handle];
@@ -472,6 +490,8 @@ pub fn hm_turning(cvars: &Cvars, gs: &mut GameState) {
             // LATER Use https://crates.io/crates/pid ?
         }
 
+        // Movement
+        let stats = cvars.g_homing_missile_movement_stats();
         hm.angle = turning(
             &stats,
             &mut hm.vel,
@@ -480,7 +500,6 @@ pub fn hm_turning(cvars: &Cvars, gs: &mut GameState) {
             input,
             gs.dt,
         );
-
         accel_decel(&stats, &mut hm.vel, &mut hm.angle, input, gs.dt);
     }
 }
