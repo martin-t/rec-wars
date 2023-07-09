@@ -49,8 +49,8 @@ fn window_conf() -> Conf {
         // In older macroquad, setting width and height to the size of the screen or larger
         // created a maximized window. This no longer works and the bottom OS panel covers
         // the window so this is an ugly compromise that should be good enough for most people.
-        window_width: 1280,
-        window_height: 1024,
+        window_width: 1600,
+        window_height: 900,
         // LATER Allow resizing - AFAICT there was an issue with infinite memory growth when resizing the render target.
         // Can't use `fullscreen: true` because of https://github.com/not-fl3/macroquad/issues/237.
         window_resizable: false,

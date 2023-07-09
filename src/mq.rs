@@ -153,7 +153,7 @@ impl MacroquadClient {
         img_explosion_cyan.set_filter(FilterMode::Nearest);
 
         dbg_logf!(
-            "Detected screen size: {}x{}",
+            "Window inner size: {}x{}",
             screen_width(),
             screen_height()
         );
