@@ -162,6 +162,13 @@ pub enum Ammo {
     Reloading(f64, f64),
 }
 
+/// A projectile fired by a vehicle.
+///
+/// All weapons share the same projectile struct
+/// so long-term it's possible to add/modify/remove weapon behavior dynamically.
+///
+/// Every weapon shoots a projectile, there is no hitscan.
+/// If you want hitscan behavior, use a high (but finite) projectile speed.
 #[derive(Debug, Clone)]
 pub struct Projectile {
     pub weapon: Weapon,
@@ -171,10 +178,12 @@ pub struct Projectile {
     pub turn_rate: f64,
     pub explode_time: f64,
     pub owner: Index,
+    pub target: Option<Index>,
 }
 
 pub const WEAPS_CNT: u8 = 7;
 
+/// Weapon type - currently hardcoded.
 #[repr(u8)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, N)]
 pub enum Weapon {

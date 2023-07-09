@@ -16,7 +16,7 @@ use crate::{
     entities::{Ammo, Projectile, Respawn, Vehicle, VehicleType, Weapon, WEAPS_CNT},
     game_state::ArenaExt,
     game_state::{Explosion, GameState, Input, RailBeam},
-    map::{F64Ext, Map, Vec2f},
+    map::{F64Ext, Map, Vec2f, VecExt},
 };
 
 /// Delete data from previous frames that's no longer needed.
@@ -342,6 +342,7 @@ pub fn shooting(cvars: &Cvars, gs: &mut GameState) {
                 turn_rate: 0.0,
                 explode_time: f64::MAX,
                 owner: vehicle.owner,
+                target: None,
             };
 
             match player.cur_weapon {
@@ -421,6 +422,69 @@ pub fn shooting(cvars: &Cvars, gs: &mut GameState) {
     }
 }
 
+/// The *homing* part of homing missile
+pub fn hm_turning(cvars: &Cvars, gs: &mut GameState) {
+    for (_hm_handle, hm) in gs
+        .projectiles
+        .iter_mut()
+        .filter(|(_, proj)| proj.weapon == Weapon::Hm)
+    {
+        if hm.target.is_none() {
+            // Where the missile is aiming.
+            // Not using velocity because it can move sieways sometimes (especially right after firing).
+            let forward_dir = hm.angle.to_vec2f();
+
+            let mut best_target = None;
+            let mut best_target_dot = f64::NEG_INFINITY;
+
+            for (vehicle_handle, vehicle) in gs.vehicles.iter() {
+                if vehicle.owner == hm.owner {
+                    // LATER Allow hitting self if the missile loops around other vehicles
+                    continue;
+                }
+
+                let target_dir = (vehicle.pos - hm.pos).normalized();
+                let dot = forward_dir.dot(target_dir);
+                if dot > best_target_dot {
+                    best_target = Some(vehicle_handle);
+                    best_target_dot = dot;
+                }
+            }
+
+            hm.target = best_target;
+        }
+
+        let stats = cvars.g_homing_missile_movement_stats();
+
+        let mut input = Input::new_up();
+        if let Some(target_handle) = hm.target {
+            let target = &gs.vehicles[target_handle];
+            let target_dir = (target.pos - hm.pos).normalized();
+            let target_angle = target_dir.to_angle();
+
+            let angle_diff = (target_angle - hm.angle).rem_euclid(2.0 * PI);
+            if angle_diff < PI {
+                input.right = true;
+            } else {
+                input.left = true;
+            }
+
+            // LATER Use https://crates.io/crates/pid ?
+        }
+
+        hm.angle = turning(
+            &stats,
+            &mut hm.vel,
+            &hm.angle,
+            &mut hm.turn_rate,
+            input,
+            gs.dt,
+        );
+
+        accel_decel(&stats, &mut hm.vel, &mut hm.angle, input, gs.dt);
+    }
+}
+
 /// The *guided* part of guided missile
 pub fn gm_turning(cvars: &Cvars, gs: &mut GameState) {
     for (gm_handle, gm) in gs
@@ -428,7 +492,7 @@ pub fn gm_turning(cvars: &Cvars, gs: &mut GameState) {
         .iter_mut()
         .filter(|(_, proj)| proj.weapon == Weapon::Gm)
     {
-        let stats = cvars.g_weapon_movement_stats();
+        let stats = cvars.g_guided_missile_movement_stats();
         let player = &gs.players[gm.owner];
 
         // Only allow guiding the most recently launched missile

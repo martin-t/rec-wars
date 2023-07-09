@@ -32,7 +32,8 @@ pub trait VecExt {
 
 impl VecExt for Vec2f {
     fn to_angle(self) -> f64 {
-        self.y.atan2(self.x)
+        // Normalize to 0..=360 deg
+        self.y.atan2(self.x).rem_euclid(2.0 * PI)
     }
 }
 

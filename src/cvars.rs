@@ -131,13 +131,22 @@ cvars! {
     g_ffa_score_kill: i32 = 1,
     g_ffa_score_death: i32 = -1,
 
+    g_homing_missile_accel_forward: f64 = 2000.0,
     g_homing_missile_damage_direct: f64 = 0.0,
     g_homing_missile_explosion_damage: f64 = 56.0, // assumed same as GM
     g_homing_missile_explosion_radius: f64 = 40.0,
     g_homing_missile_explosion_scale: f64 = 1.0,
+    g_homing_missile_friction_const: f64 = 0.0,
+    g_homing_missile_friction_linear: f64 = 0.99,
     g_homing_missile_reload_ammo: u32 = 1,
     g_homing_missile_reload_time: f64 = 1.5,
     g_homing_missile_speed_initial: f64 = 360.0,
+    g_homing_missile_speed_max: f64 = f64::INFINITY,
+    g_homing_missile_turn_effectiveness: f64 = 1.0,
+    g_homing_missile_turn_rate_friction_const: f64 = 0.10,
+    g_homing_missile_turn_rate_friction_linear: f64 = 0.995,
+    g_homing_missile_turn_rate_increase: f64 = 30.0,
+    g_homing_missile_turn_rate_max: f64 = f64::INFINITY,
     g_homing_missile_vehicle_velocity_factor: f64 = 1.0,
 
     g_machine_gun_angle_spread: f64 = 0.015,
@@ -165,6 +174,7 @@ cvars! {
     g_guided_missile_turn_effectiveness: f64 = 1.0,
     g_guided_missile_turn_rate_friction_const: f64 = 0.10,
     // LATER Interesting bug: setting this to 30.0 and shooting kills everyone on Atrium and gets stuck on other maps.
+    //  Same for HM.
     g_guided_missile_turn_rate_friction_linear: f64 = 0.995,
     g_guided_missile_turn_rate_increase: f64 = 30.0,
     g_guided_missile_turn_rate_max: f64 = f64::INFINITY,
@@ -759,7 +769,23 @@ impl Cvars {
         }
     }
 
-    pub fn g_weapon_movement_stats(&self) -> MovementStats {
+    pub fn g_homing_missile_movement_stats(&self) -> MovementStats {
+        MovementStats {
+            accel_backward: 0.0,
+            accel_forward: self.g_homing_missile_accel_forward,
+            friction_const: self.g_homing_missile_friction_const,
+            friction_linear: self.g_homing_missile_friction_linear,
+            speed_max: self.g_homing_missile_speed_max,
+            steering_car: 0.0,
+            turn_effectiveness: self.g_homing_missile_turn_effectiveness,
+            turn_rate_friction_const: self.g_homing_missile_turn_rate_friction_const,
+            turn_rate_friction_linear: self.g_homing_missile_turn_rate_friction_linear,
+            turn_rate_increase: self.g_homing_missile_turn_rate_increase,
+            turn_rate_max: self.g_homing_missile_turn_rate_max,
+        }
+    }
+
+    pub fn g_guided_missile_movement_stats(&self) -> MovementStats {
         MovementStats {
             accel_backward: 0.0,
             accel_forward: self.g_guided_missile_accel_forward,
