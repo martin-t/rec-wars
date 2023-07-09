@@ -194,21 +194,33 @@ fn render_viewport(
         if cull(scr_pos) {
             continue;
         }
-        render_img_center(client.img_rocket, scr_pos, proj.vel.to_angle());
+        let offset = Vec2f::new(
+            cvars.r_rockets_offset_x,
+            cvars.r_rockets_offset_y,
+        );
+        render_img_offset(client.img_rocket, scr_pos, proj.vel.to_angle(), offset);
     }
     for (_, proj) in weapon_projectiles(Weapon::Hm) {
         let scr_pos = proj.pos + camera_offset;
         if cull(scr_pos) {
             continue;
         }
-        render_img_center(client.img_hm, scr_pos, proj.vel.to_angle());
+        let offset = Vec2f::new(
+            cvars.r_homing_missile_offset_x,
+            cvars.r_homing_missile_offset_y,
+        );
+        render_img_offset(client.img_hm, scr_pos, proj.vel.to_angle(), offset);
     }
     for (_, proj) in weapon_projectiles(Weapon::Gm) {
         let scr_pos = proj.pos + camera_offset;
         if cull(scr_pos) {
             continue;
         }
-        render_img_center(client.img_gm, scr_pos, proj.vel.to_angle());
+        let offset = Vec2f::new(
+            cvars.r_guided_missile_offset_x,
+            cvars.r_guided_missile_offset_y,
+        );
+        render_img_offset(client.img_gm, scr_pos, proj.vel.to_angle(), offset);
     }
 
     // Draw BFGs

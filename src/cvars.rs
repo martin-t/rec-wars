@@ -414,6 +414,12 @@ cvars! {
     //   because the later explosions were suddenly revealed after the first ones disappeared.
     // - Rockets look better if hitting the same spot.
     r_explosions_reverse_order: bool = false,
+    r_rockets_offset_x: f64 = 5.0,
+    r_rockets_offset_y: f64 = 0.0,
+    r_guided_missile_offset_x: f64 = 5.0,
+    r_guided_missile_offset_y: f64 = 0.0,
+    r_homing_missile_offset_x: f64 = 5.0,
+    r_homing_missile_offset_y: f64 = 0.0,
     r_smoothing: bool = false,
     r_splitscreen_gap: f64 = 8.0,
 
