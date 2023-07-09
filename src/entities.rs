@@ -8,7 +8,7 @@
 //! This is not a violation of the ECS pattern,
 //! because they don't modify game state - they're not behavior.
 
-use enumn::N;
+use strum_macros::{EnumCount, FromRepr};
 use thunderdome::Index;
 
 use crate::{cvars::Cvars, game_state::Input, map::Vec2f};
@@ -150,7 +150,7 @@ impl Vehicle {
     }
 }
 
-#[derive(Debug, Clone, Copy, N)]
+#[derive(Debug, Clone, Copy, FromRepr)]
 pub enum VehicleType {
     Tank,
     Hovercraft,
@@ -184,11 +184,8 @@ pub struct Projectile {
     pub target: Option<Index>,
 }
 
-pub const WEAPS_CNT: u8 = 7;
-
 /// Weapon type - currently hardcoded.
-#[repr(u8)]
-#[derive(Debug, Clone, Copy, PartialEq, Eq, N)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumCount, FromRepr)]
 pub enum Weapon {
     Mg,
     Rail,

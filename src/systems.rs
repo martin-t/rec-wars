@@ -8,12 +8,13 @@ use std::f64::consts::PI;
 
 use rand::Rng;
 use rand_distr::StandardNormal;
+use strum::EnumCount;
 use thunderdome::Index;
 use vek::{Clamp, LineSegment2, Wrap};
 
 use crate::{
     cvars::{Cvars, Hardpoint, MovementStats},
-    entities::{Ammo, Projectile, Respawn, Vehicle, VehicleType, Weapon, WEAPS_CNT},
+    entities::{Ammo, Projectile, Respawn, Vehicle, VehicleType, Weapon},
     game_state::ArenaExt,
     game_state::{Explosion, GameState, Input, RailBeam},
     map::{F64Ext, Map, Vec2f, VecExt},
@@ -72,7 +73,7 @@ pub fn spawn_vehicle(
     player_handle: Index,
     use_spawns: bool,
 ) {
-    let veh_type = VehicleType::n(gs.rng.gen_range(0..3)).unwrap();
+    let veh_type = VehicleType::from_repr(gs.rng.gen_range(0..3)).unwrap();
     let (spawn_pos, spawn_angle) = if use_spawns {
         map.random_spawn(&mut gs.rng)
     } else {
@@ -251,12 +252,12 @@ pub fn player_logic(gs: &mut GameState) {
 
         // Change weapon
         if !input_prev.prev_weapon && player.input.prev_weapon {
-            let prev = (player.cur_weapon as u8 + WEAPS_CNT - 1) % WEAPS_CNT;
-            player.cur_weapon = Weapon::n(prev).unwrap();
+            let prev = (player.cur_weapon as usize + Weapon::COUNT - 1) % Weapon::COUNT;
+            player.cur_weapon = Weapon::from_repr(prev).unwrap();
         }
         if !input_prev.next_weapon && player.input.next_weapon {
-            let next = (player.cur_weapon as u8 + 1) % WEAPS_CNT;
-            player.cur_weapon = Weapon::n(next).unwrap();
+            let next = (player.cur_weapon as usize + 1) % Weapon::COUNT;
+            player.cur_weapon = Weapon::from_repr(next).unwrap();
         }
     }
 }

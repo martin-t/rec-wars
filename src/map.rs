@@ -3,8 +3,8 @@
 use std::f64::consts::PI;
 use std::ops::Index;
 
-use enumn::N;
 use rand::{prelude::SmallRng, Rng};
+use strum_macros::FromRepr;
 use vek::{approx::AbsDiffEq, Clamp, Mat2, Vec2};
 
 /// Position in world or screen space.
@@ -326,7 +326,7 @@ impl Surface {
 ///
 /// Reverse engineered by modifying RecWar's TextureList.txt and seeing what happens.
 #[repr(u8)]
-#[derive(Debug, Clone, Copy, PartialEq, Eq, N)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, FromRepr)]
 pub enum Kind {
     /// No special behavior beyond the normal surface properties
     Normal = 0,
@@ -381,7 +381,7 @@ pub fn load_tex_list(text: &str) -> Vec<Surface> {
             let friction = parts.next().unwrap().parse().unwrap();
             let speed = parts.next().unwrap().parse().unwrap();
 
-            let kind = Kind::n(kind_num).unwrap();
+            let kind = Kind::from_repr(kind_num).unwrap();
             Surface::new(name.to_owned(), kind, friction, speed)
         })
         .collect()
