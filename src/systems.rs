@@ -422,16 +422,33 @@ pub fn shooting(cvars: &Cvars, gs: &mut GameState) {
     }
 }
 
+fn hm_forget(hm_handle: Index, hm: &mut Projectile, target: &mut Vehicle) {
+    hm.target = None;
+    let index = target.hms.iter().position(|&h| h == hm_handle).unwrap();
+    target.hms.swap_remove(index);
+}
+
 /// The *homing* part of homing missile
 pub fn hm_turning(cvars: &Cvars, gs: &mut GameState) {
-    for (_hm_handle, hm) in gs
+    for (hm_handle, hm) in gs
         .projectiles
         .iter_mut()
         .filter(|(_, proj)| proj.weapon == Weapon::Hm)
     {
         // Forget target under some conditions
         if let Some(target_handle) = hm.target {
-            let target = &gs.vehicles[target_handle];
+            if !gs.vehicles.contains(target_handle) {
+                // Vehicle is gone (player disconnected)
+                hm.target = None;
+                continue;
+            }
+
+            let target = &mut gs.vehicles[target_handle];
+            if target.destroyed() {
+                hm_forget(hm_handle, hm, target);
+                continue;
+            }
+
             let target_dir = (target.pos - hm.pos).normalized();
             let target_angle = target_dir.to_angle();
 
@@ -440,7 +457,7 @@ pub fn hm_turning(cvars: &Cvars, gs: &mut GameState) {
                 angle_diff -= 2.0 * PI;
             }
             if angle_diff.abs() > cvars.g_homing_missile_angle_forget {
-                hm.target = None;
+                hm_forget(hm_handle, hm, target);
             }
         }
 
@@ -470,7 +487,10 @@ pub fn hm_turning(cvars: &Cvars, gs: &mut GameState) {
                 }
             }
 
-            hm.target = best_target;
+            if let Some(best_target) = best_target {
+                hm.target = Some(best_target);
+                gs.vehicles[best_target].hms.push(hm_handle);
+            }
         }
 
         // Determine direction
@@ -685,6 +705,7 @@ fn projectile_impact(cvars: &Cvars, gs: &mut GameState, projectile_handle: Index
     // borrowck dance
     let weapon = projectile.weapon;
     let owner = projectile.owner;
+    let target = projectile.target;
 
     // Vehicle explosion first so it's below projectile explosion because it looks better.
     let expl_scale = cvars.g_weapon_explosion_scale(weapon);
@@ -710,6 +731,17 @@ fn projectile_impact(cvars: &Cvars, gs: &mut GameState, projectile_handle: Index
             expl_radius,
             None,
         );
+    }
+
+    if weapon == Weapon::Hm {
+        if let Some(target) = target {
+            let target = &mut gs.vehicles[target];
+            // Borrowck dance:
+            // No need to hm_forget here because the projectile is desotryed anyway.
+            // We actually can't call it anyway because we can't keep projectile borrowed.
+            let index = target.hms.iter().position(|&h| h == projectile_handle).unwrap();
+            target.hms.swap_remove(index);
+        }
     }
 
     if weapon == Weapon::Gm {

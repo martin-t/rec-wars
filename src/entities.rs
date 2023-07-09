@@ -103,6 +103,8 @@ pub struct Vehicle {
     pub ammos: Vec<Ammo>,
     pub spawn_time: f64,
     pub owner: Index,
+    /// Indices of homing missiles targeting this vehicle.
+    pub hms: Vec<Index>,
 }
 
 impl Vehicle {
@@ -139,6 +141,7 @@ impl Vehicle {
             ammos,
             spawn_time,
             owner,
+            hms: Vec::new(),
         }
     }
 
