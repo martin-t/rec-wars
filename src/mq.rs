@@ -152,11 +152,7 @@ impl MacroquadClient {
         img_explosion.set_filter(FilterMode::Nearest);
         img_explosion_cyan.set_filter(FilterMode::Nearest);
 
-        dbg_logf!(
-            "Window inner size: {}x{}",
-            screen_width(),
-            screen_height()
-        );
+        dbg_logf!("Window inner size: {}x{}", screen_width(), screen_height());
         let (viewport_size, client_mode) = if let Some(player2_handle) = player2_handle {
             let viewport_width = (screen_width() as f64 - cvars.r_splitscreen_gap) / 2.0;
             let viewport_size = Vec2f::new(viewport_width, screen_height() as f64);
