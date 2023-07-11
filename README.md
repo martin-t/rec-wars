@@ -7,7 +7,7 @@
 <br />
 
 [![GitHub](https://img.shields.io/badge/github-martin--t/rec--wars-8da0cb?logo=github)](https://github.com/martin-t/rec-wars)
-[![License (AGPLv3)](https://img.shields.io/github/license/martin-t/rec-wars)](https://github.com/martin-t/cvarec-warsrs/blob/master/LICENSE)
+[![License (AGPLv3)](https://img.shields.io/badge/license-AGPL--3.0-f88a4c)](https://github.com/martin-t/cvarec-warsrs/blob/master/LICENSE)
 [![CI](https://github.com/martin-t/rec-wars/workflows/CI/badge.svg)](https://github.com/martin-t/rec-wars/actions)
 [![Audit](https://github.com/martin-t/rec-wars/workflows/audit/badge.svg)](https://rustsec.org/)
 [![Dependency status](https://deps.rs/repo/github/martin-t/rec-wars/status.svg)](https://deps.rs/repo/github/martin-t/rec-wars)
