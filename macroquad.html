@@ -25,16 +25,6 @@
             font: 32px sans-serif;
             color: white;
         }
-
-        #ff {
-            display: none;
-            position: fixed;
-            width: 100%;
-            margin-top: 40%;
-            text-align: center;
-            font: 16px sans-serif;
-            color: red;
-        }
     </style>
 </head>
 
@@ -50,11 +40,6 @@
     <p id="loading">
         Loading...
     </p>
-    <p id="ff" disabled>
-        If the framerate is below 60, consider using Chromium. <br>
-        The canvas element is too slow in Firefox on Linux due to
-        <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1010527#c0">a bug in Firefox</a>.
-    </p>
     <script>
         // This is a hack.
         // It takes a few seconds to load the WASM (using GitLab as host: ~1.5 s in release mode, up to 10 s in debug mode).
@@ -62,22 +47,6 @@
         // so I just use this text and hardcode it to disappear so at least people know something is (hopefully) happening.
         let loading = document.getElementById("loading");
         setTimeout(function () { loading.style.display = "none"; }, 1000);
-
-        // Also let users know the bad perf is something i can't fix.
-        let ff = document.getElementById("ff");
-        let isFirefox = window.navigator.userAgent.indexOf("Firefox") != -1;
-        let isLinux = window.navigator.userAgent.indexOf("Linux") != -1;
-        if (isFirefox && isLinux) {
-            ff.style.display = "inline";
-            setTimeout(function () { ff.style.display = "none"; }, 30000);
-        }
-
-        // I am tired of looking for clean solutions in webdev because it's all a hacky mess and there are none.
-        // When the user clicks the link to the firefox bug, the canvas loses focus.
-        // For some reason refocusing it in its onblur event doesn't work
-        // so let's do this and be done with it.
-        let glcanvas = document.getElementById("glcanvas");
-        setInterval(function () { glcanvas.focus(); }, 500);
     </script>
 
     <!-- Minified and statically hosted version of https://github.com/not-fl3/macroquad/blob/master/js/mq_js_bundle.js -->
@@ -92,20 +61,6 @@
         gtag('js', new Date());
 
         gtag('config', 'UA-175307504-1');
-    </script>
-
-    <script>
-        // Ping master server
-        let request = new XMLHttpRequest();
-        request.open("GET", "https://rec-wars-master.herokuapp.com/");
-        request.onloadend = () => {
-            if (request.status !== 200) {
-                console.log("Failed to ping master server");
-            } else {
-                console.log(request.responseText);
-            }
-        }
-        request.send();
     </script>
 </body>
 
