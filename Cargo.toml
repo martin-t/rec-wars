@@ -41,7 +41,7 @@ panic = "abort"
 web_splitscreen = []
 
 [dependencies]
-cvars = "0.4.0"
+cvars = "0.4.2"
 cvars-console-macroquad = "0.2.0"
 fnv = "1.0.7"
 macroquad = "=0.3.26" # Exact version because of the image crate https://github.com/not-fl3/macroquad/issues/494
