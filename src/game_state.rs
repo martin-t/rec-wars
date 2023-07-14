@@ -1,14 +1,8 @@
 use std::fmt::{self, Debug, Formatter};
 
-use fnv::FnvHashMap;
-use rand::prelude::*;
 use rand_distr::Uniform;
-use thunderdome::{Arena, Index};
 
-use crate::{
-    entities::{Ai, Player, Projectile, Vehicle},
-    map::Vec2f,
-};
+use crate::prelude::*;
 
 /// Things that change during the game
 /// and might need to be taken back during frame interpolation / reconciliation.

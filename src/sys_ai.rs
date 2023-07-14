@@ -1,11 +1,6 @@
 //! Stub. So far bots move and shoot randomly.
 
-use rand::Rng;
-
-use crate::{
-    cvars::Cvars,
-    game_state::{GameState, Input},
-};
+use crate::prelude::*;
 
 pub fn ai(cvars: &Cvars, gs: &mut GameState) {
     if !cvars.ai {

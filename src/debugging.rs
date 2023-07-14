@@ -13,7 +13,7 @@
 
 use std::cell::RefCell;
 
-use crate::map::Vec2f;
+use crate::prelude::*;
 
 #[macro_export]
 macro_rules! soft_assert {

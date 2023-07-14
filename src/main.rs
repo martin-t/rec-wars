@@ -16,17 +16,16 @@ pub mod entities;
 pub mod game_state;
 pub mod map;
 pub mod mq;
+pub mod prelude;
 pub mod rendering;
 pub mod server;
 pub mod sys_ai;
 pub mod systems;
 pub mod timing;
 
-use std::str;
-
 use macroquad::prelude::*;
 
-use crate::{cvars::Cvars, mq::MacroquadClient, server::Server};
+use crate::{mq::MacroquadClient, prelude::*, server::Server};
 
 // LATER server/client/local mode
 #[derive(Debug)]
@@ -62,12 +61,7 @@ fn window_conf() -> Conf {
 async fn main() {
     let opts = get_opts();
 
-    // This is a hack.
-    // It seems that in the browser, MQ redraws the screen several times between here and the main loop
-    // (even though there are no next_frame().await calls) so this doesn't stay up for long.
-    // Let's just redraw it a few times during the loading process so the player sees something is happening.
     draw_text("Loading...", 400.0, 400.0, 32.0, RED);
-
     show_mouse(false);
 
     let mut cvars = Cvars::new_rec_wars();
@@ -90,83 +84,28 @@ async fn main() {
     }
     dbg_logf!("Seed: {}", cvars.d_seed);
 
-    // LATER Load texture list and map in parallel with other assets
-    let tex_list_bytes = load_file("assets/texture_list.txt").await.unwrap();
-    draw_text("Loading...", 400.0, 400.0, 32.0, PURPLE);
-    let tex_list_text = str::from_utf8(&tex_list_bytes).unwrap();
-    let surfaces = map::load_tex_list(tex_list_text);
+    let assets = Assets::load_all().await;
 
-    // This is a subset of maps that are not blatantly broken with the current bots.
-    let maps = [
-        //"Arena",
-        //"A simple plan (2)",
-        "Atrium",
-        "Bunkers (2)",
-        "Castle Islands (2)",
-        "Castle Islands (4)",
-        //"Corners (4)",
-        "Delta",
-        "Desert Eagle",
-        //"Joust (2)", // Small map (narrow)
-        //"Large front (2)",
-        //"Oases (4)",
-        "Park",
-        "Roads",
-        "Snow",
-        "Spots (8)",
-        //"Vast Arena",
-        //"extra/6 terrains (2)",
-        //"extra/A Cow Too Far",
-        //"extra/All Water",
-        //"extra/Battlegrounds (2)",
-        //"extra/Crossing", // No spawns
-        "extra/Damned Rockets (2)", // Asymmetric CTF, left half like Castly Islands (2), right half has 2 bases
-        //"extra/doom",
-        //"extra/elements",
-        //"extra/Exile (4)", // Tiny, many spawns
-        //"extra/football",
-        "extra/Ice ring",
-        //"extra/ice skating ring (2)",
-        "extra/IceWorld",
-        "extra/I see you (2)", // Like Large Front (2) but without any cover
-        //"extra/Knifflig (2)",
-        //"extra/Large",
-        //"extra/Neutral",
-        "extra/Nile",
-        //"extra/OK Corral (2)", // Small map, not symmetric (upper spawn is closer)
-        //"extra/Peninsulae (3)",
-        //"extra/River Crossings",
-        //"extra/Road To Hell (2)", // Only 4 spawns in a tiny area
-        //"extra/THE Crossing",
-        //"extra/Thomap1 (4)",
-        //"extra/Town on Fire",
-        "extra/twisted (2)",
-        //"extra/winterhardcore",
-        "extra/Yellow and Green",
-        "extra2/Mini Islands (4)",
-        //"extra2/Symmetric",
-        //"extra2/Training room",
-        //"extra2/Winter (4)",
-        //"extra2/World War (2)",
-    ];
-    let mut map_path = if cvars.g_map.is_empty() {
-        let index = cvars.d_seed as usize % maps.len();
-        maps[index].to_owned()
+    let map_path = if cvars.g_map.is_empty() {
+        let index = cvars.d_seed as usize % assets.map_list.len();
+        let path = assets.map_list[index].clone();
+        cvars.g_map = path.clone();
+        path
     } else {
-        cvars.g_map.clone()
+        let mut path = cvars.g_map.clone();
+        if !path.starts_with("maps/") {
+            path.insert_str(0, "maps/");
+        }
+        if !path.ends_with(".map") {
+            path.push_str(".map");
+        }
+        path
     };
-    if !map_path.ends_with(".map") {
-        map_path.push_str(".map");
-    }
-    if !map_path.starts_with("maps/") {
-        map_path.insert_str(0, "maps/");
-    }
     dbg_logf!("Map: {}", map_path);
 
-    let map_bytes = load_file(&map_path).await.unwrap();
-    draw_text("Loading...", 400.0, 400.0, 32.0, PURPLE);
-    let map_text = str::from_utf8(&map_bytes).unwrap();
-    let map = map::load_map(map_text, surfaces);
+    let map_text = assets.maps.get(&map_path).unwrap();
+    let surfaces = map::parse_texture_list(&assets.texture_list);
+    let map = map::parse_map(map_text, surfaces);
 
     let mut server = Server::new(&cvars, map);
 
@@ -176,10 +115,7 @@ async fn main() {
     } else {
         None
     };
-    // LATER It can take some time for assets to load but the game is already running on the server.
-    //       Load assets first, then connect.
-    let mut client = MacroquadClient::new(&cvars, player1_handle, player2_handle).await;
-    draw_text("Loading...", 400.0, 400.0, 32.0, PURPLE);
+    let mut client = MacroquadClient::new(&cvars, assets, player1_handle, player2_handle);
 
     loop {
         let real_time = get_time();

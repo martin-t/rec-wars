@@ -3,9 +3,10 @@
 use std::f64::consts::PI;
 use std::ops::Index;
 
-use rand::{prelude::SmallRng, Rng};
 use strum_macros::FromRepr;
-use vek::{approx::AbsDiffEq, Clamp, Mat2, Vec2};
+use vek::{approx::AbsDiffEq, Mat2, Vec2};
+
+use crate::prelude::*;
 
 /// Position in world or screen space.
 ///
@@ -341,7 +342,7 @@ pub enum Kind {
     Base = 5,
 }
 
-pub fn load_map(text: &str, surfaces: Vec<Surface>) -> Map {
+pub fn parse_map(text: &str, surfaces: Vec<Surface>) -> Map {
     // TODO handle both CRLF and LF properly
     // TODO move to Map::new()?
     let tiles = text
@@ -369,7 +370,7 @@ pub fn load_map(text: &str, surfaces: Vec<Surface>) -> Map {
     Map::new(tiles, surfaces)
 }
 
-pub fn load_tex_list(text: &str) -> Vec<Surface> {
+pub fn parse_texture_list(text: &str) -> Vec<Surface> {
     // TODO handle both CRLF and LF properly OR use cvars instead
     // if using cvars, update load_map docs
     text.split_terminator("\r\n")
@@ -397,7 +398,7 @@ mod tests {
     #[test]
     fn test_loading_tex_list() {
         let text = fs::read_to_string("assets/texture_list.txt").unwrap();
-        let surfaces = load_tex_list(&text);
+        let surfaces = parse_texture_list(&text);
         assert_ne!(surfaces.len(), 0);
     }
 
@@ -406,7 +407,7 @@ mod tests {
         let mut cnt = 0;
 
         let tex_list_text = fs::read_to_string("assets/texture_list.txt").unwrap();
-        let surfaces = load_tex_list(&tex_list_text);
+        let surfaces = parse_texture_list(&tex_list_text);
         for entry in WalkDir::new("maps") {
             let entry = entry.unwrap();
             let is_map = entry.file_name().to_str().unwrap().ends_with(".map");
@@ -416,7 +417,7 @@ mod tests {
 
             dbg!(entry.file_name());
             let map_text = fs::read_to_string(entry.path()).unwrap();
-            let map = load_map(&map_text, surfaces.clone());
+            let map = parse_map(&map_text, surfaces.clone());
             assert_ne!(map.width(), 0);
             assert_ne!(map.height(), 0);
             cnt += 1;
@@ -427,9 +428,9 @@ mod tests {
     #[test]
     fn test_map_a_simple_plan() {
         let tex_list_text = fs::read_to_string("assets/texture_list.txt").unwrap();
-        let surfaces = load_tex_list(&tex_list_text);
+        let surfaces = parse_texture_list(&tex_list_text);
         let map_text = fs::read_to_string("maps/A simple plan (2).map").unwrap();
-        let map = load_map(&map_text, surfaces);
+        let map = parse_map(&map_text, surfaces);
         assert_eq!(map.width(), 55);
         assert_eq!(map.height(), 23);
         assert_eq!(map.size(), Vec2u::new(55, 23));
@@ -449,9 +450,9 @@ mod tests {
     #[test]
     fn test_collisions_between() {
         let tex_list_text = fs::read_to_string("assets/texture_list.txt").unwrap();
-        let surfaces = load_tex_list(&tex_list_text);
+        let surfaces = parse_texture_list(&tex_list_text);
         let map_text = fs::read_to_string("maps/Corners (4).map").unwrap();
-        let map = load_map(&map_text, surfaces);
+        let map = parse_map(&map_text, surfaces);
 
         let outside = Vec2f::new(-50.0, -50.0);
 

@@ -3,16 +3,12 @@
 use std::{cmp::Reverse, str};
 
 use macroquad::prelude::*;
-use thunderdome::Index;
-use vek::Clamp;
 
 use crate::{
-    cvars::Cvars,
     debugging::{DEBUG_CROSSES, DEBUG_LINES, DEBUG_TEXTS, DEBUG_TEXTS_WORLD},
-    entities::{Ammo, Weapon},
-    game_state::Explosion,
-    map::{F64Ext, Kind, Vec2f, VecExt, TILE_SIZE},
+    map::{Kind, TILE_SIZE},
     mq::{ClientMode, MacroquadClient},
+    prelude::*,
     server::Server,
 };
 
@@ -118,6 +114,8 @@ fn render_viewport(
         top_left_tp.offset
     };
 
+    let assets = &client.assets;
+
     // Draw non-walls
     let mut r = top_left_index.y;
     let mut y = -bg_offset.y;
@@ -128,7 +126,7 @@ fn render_viewport(
             let tile = server.map.col_row(c, r);
 
             if server.map.surface_of(tile).kind != Kind::Wall {
-                let img = client.imgs_tiles[tile.surface_index];
+                let img = assets.texs_tiles[tile.surface_index];
                 render_tile(img, view_pos.x + x, view_pos.y + y, tile.angle);
             }
 
@@ -195,7 +193,7 @@ fn render_viewport(
             continue;
         }
         let offset = Vec2f::new(cvars.r_rockets_offset_x, cvars.r_rockets_offset_y);
-        render_img_offset(client.img_rocket, scr_pos, proj.vel.to_angle(), offset);
+        render_img_offset(assets.tex_rocket, scr_pos, proj.vel.to_angle(), offset);
     }
     for (_, proj) in weapon_projectiles(Weapon::Hm) {
         let scr_pos = proj.pos + camera_offset;
@@ -206,7 +204,7 @@ fn render_viewport(
             cvars.r_homing_missile_offset_x,
             cvars.r_homing_missile_offset_y,
         );
-        render_img_offset(client.img_hm, scr_pos, proj.vel.to_angle(), offset);
+        render_img_offset(assets.tex_hm, scr_pos, proj.vel.to_angle(), offset);
     }
     for (_, proj) in weapon_projectiles(Weapon::Gm) {
         let scr_pos = proj.pos + camera_offset;
@@ -217,7 +215,7 @@ fn render_viewport(
             cvars.r_guided_missile_offset_x,
             cvars.r_guided_missile_offset_y,
         );
-        render_img_offset(client.img_gm, scr_pos, proj.vel.to_angle(), offset);
+        render_img_offset(assets.tex_gm, scr_pos, proj.vel.to_angle(), offset);
     }
 
     // Draw BFGs
@@ -248,9 +246,9 @@ fn render_viewport(
             continue;
         }
         let img = if vehicle.destroyed() {
-            client.imgs_wrecks[vehicle.veh_type as usize]
+            assets.texs_wrecks[vehicle.veh_type as usize]
         } else {
-            client.imgs_vehicles[vehicle.veh_type as usize * 2]
+            assets.texs_vehicles[vehicle.veh_type as usize * 2]
         };
         render_img_center(img, scr_pos, vehicle.angle);
         // LATER draw hitboxes
@@ -280,7 +278,7 @@ fn render_viewport(
             continue;
         }
 
-        let img = client.imgs_vehicles[vehicle.veh_type as usize * 2 + 1];
+        let img = assets.texs_vehicles[vehicle.veh_type as usize * 2 + 1];
         let offset_chassis =
             vehicle.angle.to_mat2f() * cvars.g_vehicle_turret_offset_chassis(vehicle.veh_type);
         let turret_scr_pos = vehicle_scr_pos + offset_chassis;
@@ -320,10 +318,10 @@ fn render_viewport(
         let (offset, img);
         if explosion.bfg {
             offset = (12.0 - frame) * 100.0;
-            img = client.img_explosion_cyan;
+            img = assets.tex_explosion_cyan;
         } else {
             offset = frame * 100.0;
-            img = client.img_explosion;
+            img = assets.tex_explosion;
         };
         draw_texture_ex(
             img,
@@ -352,7 +350,7 @@ fn render_viewport(
             let tile = server.map.col_row(c, r);
 
             if server.map.surface_of(tile).kind == Kind::Wall {
-                let img = client.imgs_tiles[tile.surface_index];
+                let img = assets.texs_tiles[tile.surface_index];
                 render_tile(img, view_pos.x + x, view_pos.y + y, tile.angle);
             }
 
@@ -706,7 +704,7 @@ fn render_viewport(
 
     // Weapon icon
     // The original shadows were part of the image but this is good enough for now.
-    let weap_img = client.imgs_weapon_icons[player.cur_weapon as usize];
+    let weap_img = assets.texs_weapon_icons[player.cur_weapon as usize];
     let weap_icon_pos = hud_pos(
         view_pos,
         view_size,

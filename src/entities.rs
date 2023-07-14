@@ -9,9 +9,8 @@
 //! because they don't modify game state - they're not behavior.
 
 use strum_macros::{EnumCount, FromRepr};
-use thunderdome::Index;
 
-use crate::{cvars::Cvars, game_state::Input, map::Vec2f};
+use crate::prelude::*;
 
 #[derive(Debug, Clone)]
 pub struct Player {

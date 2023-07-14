@@ -9,15 +9,11 @@ use std::f64::consts::PI;
 use rand::Rng;
 use rand_distr::StandardNormal;
 use strum::EnumCount;
-use thunderdome::Index;
-use vek::{Clamp, LineSegment2, Wrap};
+use vek::LineSegment2;
 
 use crate::{
-    cvars::{Cvars, Hardpoint, MovementStats},
-    entities::{Ammo, Projectile, Respawn, Vehicle, VehicleType, Weapon},
-    game_state::ArenaExt,
-    game_state::{Explosion, GameState, Input, RailBeam},
-    map::{F64Ext, Map, Vec2f, VecExt},
+    cvars::{Hardpoint, MovementStats},
+    prelude::*,
 };
 
 /// Delete data from previous frames that's no longer needed.
@@ -370,7 +366,6 @@ pub fn shooting(cvars: &Cvars, gs: &mut GameState) {
                         let spread_forward;
                         let spread_sideways;
                         if cvars.g_cluster_bomb_speed_spread_gaussian {
-                            // Broken type inference (works with rand crate but distributions are deprecated).
                             let r: f64 = gs.rng.sample(StandardNormal);
                             spread_forward = cvars.g_cluster_bomb_speed_spread_forward * r;
                             let r: f64 = gs.rng.sample(StandardNormal);

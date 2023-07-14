@@ -1,11 +1,9 @@
 //! Console variables - configuration options for anything and everything.
 
-use std::default::Default;
-
 use cvars::cvars;
 use strum_macros::{Display, EnumString};
 
-use crate::{entities::Hitbox, entities::VehicleType, entities::Weapon, map::Vec2f};
+use crate::prelude::*;
 
 cvars! {
     //! Console variables - configuration options for anything and everything.
