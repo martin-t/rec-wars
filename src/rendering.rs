@@ -328,7 +328,7 @@ fn render_viewport(
             img = &assets.tex_explosion;
         };
         draw_texture_ex(
-            &img,
+            img,
             (scr_pos.x - 50.0 * explosion.scale) as f32,
             (scr_pos.y - 50.0 * explosion.scale) as f32,
             WHITE,
@@ -716,12 +716,12 @@ fn render_viewport(
         cvars.hud_weapon_icon_y,
     ) - Vec2::new(weap_img.width(), weap_img.height()) / 2.0;
     draw_texture(
-        &weap_img,
+        weap_img,
         weap_icon_pos.x + cvars.hud_weapon_icon_shadow_x,
         weap_icon_pos.y + cvars.hud_weapon_icon_shadow_y,
         Color::new(0.0, 0.0, 0.0, cvars.hud_weapon_icon_shadow_alpha as f32),
     );
-    draw_texture(&weap_img, weap_icon_pos.x, weap_icon_pos.y, WHITE);
+    draw_texture(weap_img, weap_icon_pos.x, weap_icon_pos.y, WHITE);
 
     // Scoreboard
     if player_vehicle.destroyed() {
