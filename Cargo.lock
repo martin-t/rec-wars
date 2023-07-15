@@ -82,6 +82,8 @@ dependencies = [
 [[package]]
 name = "cvars"
 version = "0.4.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "05ab28b58a0d519c24ea023a45939e8ab8a4ed712dee012878246e4e1dfb7efb"
 dependencies = [
  "cvars-macros",
 ]
@@ -89,6 +91,8 @@ dependencies = [
 [[package]]
 name = "cvars-console"
 version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4eb07ffaf92ae325f51087a4b5636c84cd4535c200d7b1611ce2c35cc4958ea9"
 dependencies = [
  "cvars",
 ]
@@ -96,6 +100,8 @@ dependencies = [
 [[package]]
 name = "cvars-console-macroquad"
 version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a1bebeca002e9e2868d7d775a9c57e71e0f8fa07a830fd2ec20f3a08717b61aa"
 dependencies = [
  "cvars",
  "cvars-console",
@@ -105,6 +111,8 @@ dependencies = [
 [[package]]
 name = "cvars-macros"
 version = "0.4.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2b194baa29da3ebc9fc736650c395c8e43a4f7381b0b4b8c421015351c43c82c"
 dependencies = [
  "proc-macro2",
  "quote",
