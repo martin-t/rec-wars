@@ -42,9 +42,9 @@ web_splitscreen = []
 
 [dependencies]
 cvars = "0.4.2"
-cvars-console-macroquad = "0.2.0"
+cvars-console-macroquad = "0.3.0"
 fnv = "1.0.7"
-macroquad = "=0.3.26" # Exact version because of the image crate https://github.com/not-fl3/macroquad/issues/494
+macroquad = "=0.4.0" # Exact version because of the image crate https://github.com/not-fl3/macroquad/issues/494
 strum = "0.25.0"
 strum_macros = "0.25.0"
 thunderdome = "0.6.1"
@@ -71,5 +71,5 @@ walkdir = "2.3.3"
 
 # Note: sometimes it's necessary to run cargo update after patching a dependency.
 [patch.crates-io]
-#cvars = { path = "../cvars/cvars" }
-#cvars-console-macroquad = { path = "../cvars/cvars-console-macroquad" }
+cvars = { path = "../cvars/cvars" }
+cvars-console-macroquad = { path = "../cvars/cvars-console-macroquad" }

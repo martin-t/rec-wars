@@ -18,9 +18,9 @@ pub fn render(cvars: &Cvars, client: &mut MacroquadClient, server: &Server) {
     client.render_fps.tick(cvars.d_fps_period, server.real_time);
     let start = get_time();
 
-    match client.client_mode {
+    match &client.client_mode {
         ClientMode::Singleplayer { player_handle } => {
-            render_viewport(cvars, client, server, player_handle)
+            render_viewport(cvars, client, server, *player_handle)
         }
         ClientMode::Splitscreen {
             render_targets,
@@ -33,22 +33,26 @@ pub fn render(cvars: &Cvars, client: &mut MacroquadClient, server: &Server) {
                 client.viewport_size.y as f32,
             );
             let mut camera = Camera2D::from_display_rect(rect);
-            camera.zoom.y = -camera.zoom.y; // Macroquad bug https://github.com/not-fl3/macroquad/issues/171
 
-            camera.render_target = Some(render_targets.0);
+            // Macroquad bug https://github.com/not-fl3/macroquad/issues/171
+            // This does not appear fixed in macroquad 0.4 despite the changelog claiming so:
+            // https://macroquad.rs/articles/macroquad-0-4/#camera-consistency
+            camera.zoom.y = -camera.zoom.y;
+
+            camera.render_target = Some(render_targets.0.clone());
             set_camera(&camera);
             clear_background(BLANK);
             render_viewport(cvars, client, server, player_handles.0);
 
-            camera.render_target = Some(render_targets.1);
+            camera.render_target = Some(render_targets.1.clone());
             set_camera(&camera);
             clear_background(BLANK);
             render_viewport(cvars, client, server, player_handles.1);
 
             set_default_camera();
-            draw_texture(render_targets.0.texture, 0.0, 0.0, WHITE);
+            draw_texture(&render_targets.0.texture, 0.0, 0.0, WHITE);
             let offset_x = (client.viewport_size.x + cvars.r_splitscreen_gap) as f32;
-            draw_texture(render_targets.1.texture, offset_x, 0.0, WHITE);
+            draw_texture(&render_targets.1.texture, offset_x, 0.0, WHITE);
         }
     }
 
@@ -126,7 +130,7 @@ fn render_viewport(
             let tile = server.map.col_row(c, r);
 
             if server.map.surface_of(tile).kind != Kind::Wall {
-                let img = assets.texs_tiles[tile.surface_index];
+                let img = &assets.texs_tiles[tile.surface_index];
                 render_tile(img, view_pos.x + x, view_pos.y + y, tile.angle);
             }
 
@@ -193,7 +197,7 @@ fn render_viewport(
             continue;
         }
         let offset = Vec2f::new(cvars.r_rockets_offset_x, cvars.r_rockets_offset_y);
-        render_img_offset(assets.tex_rocket, scr_pos, proj.vel.to_angle(), offset);
+        render_img_offset(&assets.tex_rocket, scr_pos, proj.vel.to_angle(), offset);
     }
     for (_, proj) in weapon_projectiles(Weapon::Hm) {
         let scr_pos = proj.pos + camera_offset;
@@ -204,7 +208,7 @@ fn render_viewport(
             cvars.r_homing_missile_offset_x,
             cvars.r_homing_missile_offset_y,
         );
-        render_img_offset(assets.tex_hm, scr_pos, proj.vel.to_angle(), offset);
+        render_img_offset(&assets.tex_hm, scr_pos, proj.vel.to_angle(), offset);
     }
     for (_, proj) in weapon_projectiles(Weapon::Gm) {
         let scr_pos = proj.pos + camera_offset;
@@ -215,7 +219,7 @@ fn render_viewport(
             cvars.r_guided_missile_offset_x,
             cvars.r_guided_missile_offset_y,
         );
-        render_img_offset(assets.tex_gm, scr_pos, proj.vel.to_angle(), offset);
+        render_img_offset(&assets.tex_gm, scr_pos, proj.vel.to_angle(), offset);
     }
 
     // Draw BFGs
@@ -246,9 +250,9 @@ fn render_viewport(
             continue;
         }
         let img = if vehicle.destroyed() {
-            assets.texs_wrecks[vehicle.veh_type as usize]
+            &assets.texs_wrecks[vehicle.veh_type as usize]
         } else {
-            assets.texs_vehicles[vehicle.veh_type as usize * 2]
+            &assets.texs_vehicles[vehicle.veh_type as usize * 2]
         };
         render_img_center(img, scr_pos, vehicle.angle);
         // LATER draw hitboxes
@@ -278,7 +282,7 @@ fn render_viewport(
             continue;
         }
 
-        let img = assets.texs_vehicles[vehicle.veh_type as usize * 2 + 1];
+        let img = &assets.texs_vehicles[vehicle.veh_type as usize * 2 + 1];
         let offset_chassis =
             vehicle.angle.to_mat2f() * cvars.g_vehicle_turret_offset_chassis(vehicle.veh_type);
         let turret_scr_pos = vehicle_scr_pos + offset_chassis;
@@ -318,13 +322,13 @@ fn render_viewport(
         let (offset, img);
         if explosion.bfg {
             offset = (12.0 - frame) * 100.0;
-            img = assets.tex_explosion_cyan;
+            img = &assets.tex_explosion_cyan;
         } else {
             offset = frame * 100.0;
-            img = assets.tex_explosion;
+            img = &assets.tex_explosion;
         };
         draw_texture_ex(
-            img,
+            &img,
             (scr_pos.x - 50.0 * explosion.scale) as f32,
             (scr_pos.y - 50.0 * explosion.scale) as f32,
             WHITE,
@@ -350,7 +354,7 @@ fn render_viewport(
             let tile = server.map.col_row(c, r);
 
             if server.map.surface_of(tile).kind == Kind::Wall {
-                let img = assets.texs_tiles[tile.surface_index];
+                let img = &assets.texs_tiles[tile.surface_index];
                 render_tile(img, view_pos.x + x, view_pos.y + y, tile.angle);
             }
 
@@ -704,7 +708,7 @@ fn render_viewport(
 
     // Weapon icon
     // The original shadows were part of the image but this is good enough for now.
-    let weap_img = assets.texs_weapon_icons[player.cur_weapon as usize];
+    let weap_img = &assets.texs_weapon_icons[player.cur_weapon as usize];
     let weap_icon_pos = hud_pos(
         view_pos,
         view_size,
@@ -712,12 +716,12 @@ fn render_viewport(
         cvars.hud_weapon_icon_y,
     ) - Vec2::new(weap_img.width(), weap_img.height()) / 2.0;
     draw_texture(
-        weap_img,
+        &weap_img,
         weap_icon_pos.x + cvars.hud_weapon_icon_shadow_x,
         weap_icon_pos.y + cvars.hud_weapon_icon_shadow_y,
         Color::new(0.0, 0.0, 0.0, cvars.hud_weapon_icon_shadow_alpha as f32),
     );
-    draw_texture(weap_img, weap_icon_pos.x, weap_icon_pos.y, WHITE);
+    draw_texture(&weap_img, weap_icon_pos.x, weap_icon_pos.y, WHITE);
 
     // Scoreboard
     if player_vehicle.destroyed() {
@@ -999,7 +1003,7 @@ fn render_shared(client: &MacroquadClient, server: &Server, cvars: &Cvars) {
 /// rotate it clockwise by `angle`.
 ///
 /// See Vec2f for more about the coord system and rotations.
-fn render_img_center(img: Texture2D, pos: Vec2f, angle: f64) {
+fn render_img_center(img: &Texture2D, pos: Vec2f, angle: f64) {
     draw_texture_ex(
         img,
         pos.x as f32 - img.width() / 2.0,
@@ -1017,7 +1021,7 @@ fn render_img_center(img: Texture2D, pos: Vec2f, angle: f64) {
 /// The center of rotation is `img`'s center + `offset`.
 ///
 /// See Vec2f for more about the coord system and rotations.
-fn render_img_offset(img: Texture2D, pos: Vec2f, angle: f64, offset: Vec2f) {
+fn render_img_offset(img: &Texture2D, pos: Vec2f, angle: f64, offset: Vec2f) {
     draw_texture_ex(
         img,
         // This is effectively `pos - (offset + half_size)`, just written differently.
@@ -1032,7 +1036,7 @@ fn render_img_offset(img: Texture2D, pos: Vec2f, angle: f64, offset: Vec2f) {
     );
 }
 
-fn render_tile(img: Texture2D, x: f64, y: f64, angle: f64) {
+fn render_tile(img: &Texture2D, x: f64, y: f64, angle: f64) {
     draw_texture_ex(
         img,
         x as f32,
