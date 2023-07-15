@@ -197,7 +197,7 @@ fn render_viewport(
             continue;
         }
         let offset = Vec2f::new(cvars.r_rockets_offset_x, cvars.r_rockets_offset_y);
-        render_img_offset(&assets.tex_rocket, scr_pos, proj.vel.to_angle(), offset);
+        render_tex_offset(&assets.tex_rocket, scr_pos, proj.vel.to_angle(), offset);
     }
     for (_, proj) in weapon_projectiles(Weapon::Hm) {
         let scr_pos = proj.pos + camera_offset;
@@ -208,7 +208,7 @@ fn render_viewport(
             cvars.r_homing_missile_offset_x,
             cvars.r_homing_missile_offset_y,
         );
-        render_img_offset(&assets.tex_hm, scr_pos, proj.vel.to_angle(), offset);
+        render_tex_offset(&assets.tex_hm, scr_pos, proj.vel.to_angle(), offset);
     }
     for (_, proj) in weapon_projectiles(Weapon::Gm) {
         let scr_pos = proj.pos + camera_offset;
@@ -219,7 +219,7 @@ fn render_viewport(
             cvars.r_guided_missile_offset_x,
             cvars.r_guided_missile_offset_y,
         );
-        render_img_offset(&assets.tex_gm, scr_pos, proj.vel.to_angle(), offset);
+        render_tex_offset(&assets.tex_gm, scr_pos, proj.vel.to_angle(), offset);
     }
 
     // Draw BFGs
@@ -254,7 +254,7 @@ fn render_viewport(
         } else {
             &assets.texs_vehicles[vehicle.veh_type as usize * 2]
         };
-        render_img_center(img, scr_pos, vehicle.angle);
+        render_tex_center(img, scr_pos, vehicle.angle);
         // LATER draw hitboxes
         // if cvars.d_draw && cvars.d_draw_hitboxes {
         //     client.context.set_stroke_style(&"yellow".into());
@@ -287,7 +287,7 @@ fn render_viewport(
             vehicle.angle.to_mat2f() * cvars.g_vehicle_turret_offset_chassis(vehicle.veh_type);
         let turret_scr_pos = vehicle_scr_pos + offset_chassis;
         let offset_turret = cvars.g_vehicle_turret_offset_turret(vehicle.veh_type);
-        render_img_offset(
+        render_tex_offset(
             img,
             turret_scr_pos,
             vehicle.angle + vehicle.turret_angle_current,
@@ -1003,7 +1003,7 @@ fn render_shared(client: &MacroquadClient, server: &Server, cvars: &Cvars) {
 /// rotate it clockwise by `angle`.
 ///
 /// See Vec2f for more about the coord system and rotations.
-fn render_img_center(img: &Texture2D, pos: Vec2f, angle: f64) {
+fn render_tex_center(img: &Texture2D, pos: Vec2f, angle: f64) {
     draw_texture_ex(
         img,
         pos.x as f32 - img.width() / 2.0,
@@ -1021,7 +1021,7 @@ fn render_img_center(img: &Texture2D, pos: Vec2f, angle: f64) {
 /// The center of rotation is `img`'s center + `offset`.
 ///
 /// See Vec2f for more about the coord system and rotations.
-fn render_img_offset(img: &Texture2D, pos: Vec2f, angle: f64, offset: Vec2f) {
+fn render_tex_offset(img: &Texture2D, pos: Vec2f, angle: f64, offset: Vec2f) {
     draw_texture_ex(
         img,
         // This is effectively `pos - (offset + half_size)`, just written differently.
