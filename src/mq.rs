@@ -172,7 +172,7 @@ impl Assets {
             }};
         }
 
-        let texture_list = String::from_utf8(asset!("assets/texture_list.txt")).unwrap();
+        let texture_list = String::from_utf8(asset!("data/texture_list.txt")).unwrap();
 
         let mut map_list = Vec::new();
         let mut maps = FnvHashMap::default();
@@ -248,56 +248,56 @@ impl Assets {
             };
         }
         let texs_tiles = vec![
-            tex!("assets/tiles/g1.bmp"),
-            tex!("assets/tiles/g2.bmp"),
-            tex!("assets/tiles/g3.bmp"),
-            tex!("assets/tiles/g_stripes.bmp"),
-            tex!("assets/tiles/bunker1.bmp"),
-            tex!("assets/tiles/ice1.bmp"),
-            tex!("assets/tiles/ice.bmp"),
-            tex!("assets/tiles/ice_side.bmp"),
-            tex!("assets/tiles/ice_corner.bmp"),
-            tex!("assets/tiles/g_spawn.bmp"),
-            tex!("assets/tiles/road.bmp"),
-            tex!("assets/tiles/water.bmp"),
-            tex!("assets/tiles/snow.bmp"),
-            tex!("assets/tiles/snow2.bmp"),
-            tex!("assets/tiles/bunker2.bmp"),
-            tex!("assets/tiles/base.bmp"),
-            tex!("assets/tiles/water_side.bmp"),
-            tex!("assets/tiles/water_corner.bmp"),
-            tex!("assets/tiles/desert.bmp"),
-            tex!("assets/tiles/d_rock.bmp"),
-            tex!("assets/tiles/g2d.bmp"),
-            tex!("assets/tiles/water_middle.bmp"),
+            tex!("data/tiles/g1.bmp"),
+            tex!("data/tiles/g2.bmp"),
+            tex!("data/tiles/g3.bmp"),
+            tex!("data/tiles/g_stripes.bmp"),
+            tex!("data/tiles/bunker1.bmp"),
+            tex!("data/tiles/ice1.bmp"),
+            tex!("data/tiles/ice.bmp"),
+            tex!("data/tiles/ice_side.bmp"),
+            tex!("data/tiles/ice_corner.bmp"),
+            tex!("data/tiles/g_spawn.bmp"),
+            tex!("data/tiles/road.bmp"),
+            tex!("data/tiles/water.bmp"),
+            tex!("data/tiles/snow.bmp"),
+            tex!("data/tiles/snow2.bmp"),
+            tex!("data/tiles/bunker2.bmp"),
+            tex!("data/tiles/base.bmp"),
+            tex!("data/tiles/water_side.bmp"),
+            tex!("data/tiles/water_corner.bmp"),
+            tex!("data/tiles/desert.bmp"),
+            tex!("data/tiles/d_rock.bmp"),
+            tex!("data/tiles/g2d.bmp"),
+            tex!("data/tiles/water_middle.bmp"),
         ];
         let texs_vehicles = vec![
-            tex!("assets/vehicles/tank_chassis_flames.png"),
-            tex!("assets/vehicles/tank_turret_flames.png"),
-            tex!("assets/vehicles/hovercraft_chassis_flames.png"),
-            tex!("assets/vehicles/hovercraft_turret_flames.png"),
-            tex!("assets/vehicles/hummer_chassis_flames.png"),
-            tex!("assets/vehicles/hummer_turret_flames.png"),
+            tex!("data/vehicles/tank_chassis_flames.png"),
+            tex!("data/vehicles/tank_turret_flames.png"),
+            tex!("data/vehicles/hovercraft_chassis_flames.png"),
+            tex!("data/vehicles/hovercraft_turret_flames.png"),
+            tex!("data/vehicles/hummer_chassis_flames.png"),
+            tex!("data/vehicles/hummer_turret_flames.png"),
         ];
         let texs_wrecks = vec![
-            tex!("assets/wrecks/tank.png"),
-            tex!("assets/wrecks/hovercraft.png"),
-            tex!("assets/wrecks/hummer.png"),
+            tex!("data/wrecks/tank.png"),
+            tex!("data/wrecks/hovercraft.png"),
+            tex!("data/wrecks/hummer.png"),
         ];
         let texs_weapon_icons = vec![
-            tex!("assets/weapon_icons/mg.png"),
-            tex!("assets/weapon_icons/rail.png"),
-            tex!("assets/weapon_icons/cb.png"),
-            tex!("assets/weapon_icons/rockets.png"),
-            tex!("assets/weapon_icons/hm.png"),
-            tex!("assets/weapon_icons/gm.png"),
-            tex!("assets/weapon_icons/bfg.png"),
+            tex!("data/weapon_icons/mg.png"),
+            tex!("data/weapon_icons/rail.png"),
+            tex!("data/weapon_icons/cb.png"),
+            tex!("data/weapon_icons/rockets.png"),
+            tex!("data/weapon_icons/hm.png"),
+            tex!("data/weapon_icons/gm.png"),
+            tex!("data/weapon_icons/bfg.png"),
         ];
-        let tex_rocket = tex!("assets/weapons/rocket.png");
-        let tex_hm = tex!("assets/weapons/hm.png");
-        let tex_gm = tex!("assets/weapons/gm.png");
-        let tex_explosion = tex!("assets/explosion.png");
-        let tex_explosion_cyan = tex!("assets/explosion_cyan.png");
+        let tex_rocket = tex!("data/weapons/rocket.png");
+        let tex_hm = tex!("data/weapons/hm.png");
+        let tex_gm = tex!("data/weapons/gm.png");
+        let tex_explosion = tex!("data/explosion.png");
+        let tex_explosion_cyan = tex!("data/explosion_cyan.png");
 
         let loading_done = get_time();
         let loading_duration = loading_done - loading_started;

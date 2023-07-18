@@ -1,15 +1,12 @@
 /.gdb_history*
 
+# Macroquad compiled to WASM (copy here from target)
+/rec-wars.wasm
+
 /git-hooks/pre-commit
 
 # Configs for faster builds - see readme / example configs
 /.cargo/config.toml
 /rust-toolchain.toml
-
-# Macroquad compiled to WASM (copy here from target)
-/rec-wars.wasm
-
-# Separate target for rust-analyzer to speed up builds
-/target-ra
 
 /target

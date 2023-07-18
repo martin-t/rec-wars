@@ -397,7 +397,7 @@ mod tests {
 
     #[test]
     fn test_loading_tex_list() {
-        let text = fs::read_to_string("assets/texture_list.txt").unwrap();
+        let text = fs::read_to_string("data/texture_list.txt").unwrap();
         let surfaces = parse_texture_list(&text);
         assert_ne!(surfaces.len(), 0);
     }
@@ -406,7 +406,7 @@ mod tests {
     fn test_loading_maps() {
         let mut cnt = 0;
 
-        let tex_list_text = fs::read_to_string("assets/texture_list.txt").unwrap();
+        let tex_list_text = fs::read_to_string("data/texture_list.txt").unwrap();
         let surfaces = parse_texture_list(&tex_list_text);
         for entry in WalkDir::new("maps") {
             let entry = entry.unwrap();
@@ -427,7 +427,7 @@ mod tests {
 
     #[test]
     fn test_map_a_simple_plan() {
-        let tex_list_text = fs::read_to_string("assets/texture_list.txt").unwrap();
+        let tex_list_text = fs::read_to_string("data/texture_list.txt").unwrap();
         let surfaces = parse_texture_list(&tex_list_text);
         let map_text = fs::read_to_string("maps/A simple plan (2).map").unwrap();
         let map = parse_map(&map_text, surfaces);
@@ -449,7 +449,7 @@ mod tests {
 
     #[test]
     fn test_collisions_between() {
-        let tex_list_text = fs::read_to_string("assets/texture_list.txt").unwrap();
+        let tex_list_text = fs::read_to_string("data/texture_list.txt").unwrap();
         let surfaces = parse_texture_list(&tex_list_text);
         let map_text = fs::read_to_string("maps/Corners (4).map").unwrap();
         let map = parse_map(&map_text, surfaces);

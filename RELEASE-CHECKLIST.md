@@ -1,6 +1,4 @@
-# Checklists
-
-## Publishing the web version
+# Release checklist
 
 - `git pull`
 - Look for fixmes
