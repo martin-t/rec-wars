@@ -244,7 +244,7 @@ fn render_viewport(
     }
 
     // Draw chassis
-    for (_, vehicle) in server.gs.vehicles.iter() {
+    for (_, vehicle) in &server.gs.vehicles {
         let scr_pos = vehicle.pos + camera_offset;
         if cull(scr_pos) {
             continue;
@@ -272,7 +272,7 @@ fn render_viewport(
     // TODO Draw cow
 
     // Draw turrets
-    for (_, vehicle) in server.gs.vehicles.iter() {
+    for (_, vehicle) in &server.gs.vehicles {
         if vehicle.destroyed() {
             continue;
         }
@@ -398,7 +398,7 @@ fn render_viewport(
 
     // Names
     if cvars.hud_names {
-        for (_, vehicle) in server.gs.vehicles.iter() {
+        for (_, vehicle) in &server.gs.vehicles {
             let scr_pos = vehicle.pos + camera_offset;
             if cull(scr_pos) {
                 // LATER, restrict name length
