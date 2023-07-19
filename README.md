@@ -20,7 +20,7 @@
 <!-- Check https://github.com/topics/multiplayer-browser-game to make sure it doesnẗ look blurry. -->
 [![Gameplay](media/screenshot.jpg)](https://martin-t.gitlab.io/gitlab-pages/rec-wars/macroquad.html)
 
-_**[Play in the Browser](https://martin-t.gitlab.io/gitlab-pages/rec-wars/macroquad.html)** | **[Join our Discord](https://discord.gg/9BQVVgV)**_
+_**[Play in the Browser](https://martin-t.gitlab.io/gitlab-pages/rec-wars/macroquad.html) | [Play splitscreen in the Browser](https://martin-t.gitlab.io/gitlab-pages/rec-wars/macroquad-splitscreen.html) | [Join our Discord](https://discord.gg/9BQVVgV)**_
 
 RecWars is a free and open source clone of [RecWar](#the-original-game) - you control a vehicle and fight other vehicles in a variety of game modes using an arsenal of several distinct weapons. You can play against bots, in splitscreen and over the network.
 
@@ -30,8 +30,8 @@ RecWars aims to have gameplay similar, but not identical, to RecWar. I suspect R
 
 The ultimate goal is to create a moddable multiplayer game playable in the browser and natively on Linux, Windows and macOS. RecWars is built in the spirit of [everlasting games](https://spicylobster.itch.io/jumpy/devlog/337996/everlasting-games).
 
-(Planned) Features
-------------------
+Features
+--------
 
 - [x] Singleplayer
 - [ ] Multiplayer
@@ -48,27 +48,28 @@ The ultimate goal is to create a moddable multiplayer game playable in the brows
 
 See [TODO.md](TODO.md) for details.
 
-Build Dependencies
-------------------
+How to Play
+-----------
+
+The browser version is hosted [here](https://martin-t.gitlab.io/gitlab-pages/rec-wars/macroquad.html).
+
+Splitscreen is hosted [here](https://martin-t.gitlab.io/gitlab-pages/rec-wars/macroquad-splitscreen.html).
+
+Compiling and Running Locally
+-----------------------------
+
+### Build Dependencies
 
 Install [Macroquad's dependencies](https://github.com/not-fl3/macroquad#linux).
 
-Compiling and running
----------------------
-
 ### Native version
 
-How to run:
 - `cargo run`
 
 You can set [cvars](#cvars) on the command line - e.g.:
-- `cargo run -- g_map Atrium g_armor 150`
+- `cargo run -- bots_max 4 cl_splitscreen true g_map Atrium g_armor 150`
 
 ### Browser version
-
-This version is hosted [here](https://martin-t.gitlab.io/gitlab-pages/rec-wars/macroquad.html).
-
-How to run locally:
 
 - Build with `cargo build --target wasm32-unknown-unknown && mv target/wasm32-unknown-unknown/debug/rec-wars.wasm rec-wars.wasm`
     - You can use `--release` to get better perf and a much smaller WASM file.
