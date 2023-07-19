@@ -36,8 +36,6 @@ pub fn ai(cvars: &Cvars, gs: &mut GameState) {
             ai.firing = false;
         }
 
-        dbg_world_textf!(vehicle.pos, "{:.1} {}", age, ai.movement);
-
         player.input = Input {
             up: ai.movement == 1,
             down: ai.movement == -1,
