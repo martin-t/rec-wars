@@ -425,7 +425,7 @@ fn hm_forget(hm_handle: Index, hm: &mut Projectile, target: &mut Vehicle) {
 }
 
 /// The *homing* part of homing missile
-pub fn hm_turning(cvars: &Cvars, gs: &mut GameState) {
+pub fn hm_turning(cvars: &Cvars, gs: &mut GameState, map: &Map) {
     for (hm_handle, hm) in gs
         .projectiles
         .iter_mut()
@@ -460,7 +460,7 @@ pub fn hm_turning(cvars: &Cvars, gs: &mut GameState) {
         // Pick new target
         if hm.target.is_none() {
             // Where the missile is aiming.
-            // Not using velocity because it can move sieways sometimes (especially right after firing).
+            // Not using velocity because it can move sieways sometimes (especially during launch).
             let forward_dir = hm.angle.to_vec2f();
 
             let mut best_target = None;
@@ -477,6 +477,7 @@ pub fn hm_turning(cvars: &Cvars, gs: &mut GameState) {
                 let angle_diff = dot.acos();
                 if angle_diff < cvars.g_homing_missile_angle_detect
                     && angle_diff < best_target_angle_diff
+                    && map.is_wall_trace(hm.pos, vehicle.pos).is_none()
                 {
                     best_target = Some(vehicle_handle);
                     best_target_angle_diff = angle_diff;

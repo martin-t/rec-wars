@@ -238,7 +238,7 @@ impl Server {
 
         systems::vehicle_movement(cvars, &mut self.gs, &self.map);
 
-        systems::hm_turning(cvars, &mut self.gs);
+        systems::hm_turning(cvars, &mut self.gs, &self.map);
         systems::gm_turning(cvars, &mut self.gs);
 
         systems::projectiles(cvars, &mut self.gs, &self.map);
