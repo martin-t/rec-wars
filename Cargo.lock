@@ -370,7 +370,7 @@ dependencies = [
 
 [[package]]
 name = "rec-wars"
-version = "0.1.4"
+version = "0.1.5"
 dependencies = [
  "cvars",
  "cvars-console-macroquad",
