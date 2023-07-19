@@ -426,19 +426,30 @@ fn render_viewport(
         }
     }
 
-    // Homing missile indicator
-    // TODO dashed lines (maybe use image)
-    let player_veh_scr_pos = player_vehicle.pos + camera_offset;
-    draw_circle_lines(
-        player_veh_scr_pos.x as f32,
-        player_veh_scr_pos.y as f32,
-        cvars.hud_missile_indicator_radius as f32,
-        1.0,
-        GREEN,
-    );
-    let dir = 0.0.to_vec2f(); // TODO
-    let end = player_veh_scr_pos + dir * cvars.hud_missile_indicator_radius;
-    render_line(player_veh_scr_pos, end, 1.0, GREEN);
+    // Homing missile indicators
+    // LATER dashed lines (maybe use image or https://docs.rs/macroquad/0.4.1/src/macroquad/shapes.rs.html#180-204)
+    for (_, vehicle) in &server.gs.vehicles {
+        let scr_pos = vehicle.pos + camera_offset;
+        if cull(scr_pos) {
+            continue;
+        }
+
+        if !vehicle.hms.is_empty() {
+            draw_circle_lines(
+                scr_pos.x as f32,
+                scr_pos.y as f32,
+                cvars.hud_missile_indicator_radius as f32,
+                1.0,
+                GREEN,
+            );
+        }
+        for &hm_handle in &vehicle.hms {
+            let hm = &server.gs.projectiles[hm_handle];
+            let dir = (hm.pos - vehicle.pos).normalized();
+            let end = scr_pos + dir * cvars.hud_missile_indicator_radius;
+            render_line(scr_pos, end, 1.0, GREEN);
+        }
+    }
 
     // Spawn location indicator
     let alive_time = server.gs.game_time - player_vehicle.spawn_time;
