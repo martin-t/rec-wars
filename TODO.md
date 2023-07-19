@@ -24,6 +24,9 @@
 
 ## 0.3
 
+- [ ] physics that aren't frustrating
+    - [ ] proper collisions
+    - [ ] more responsive controls
 - [ ] network multiplayer
     - WASM doesn't allow UDP sockets
         - https://gafferongames.com/post/why_cant_i_send_udp_packets_from_a_browser/

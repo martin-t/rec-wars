@@ -2,6 +2,7 @@
 
 # Macroquad compiled to WASM (copy here from target)
 /rec-wars.wasm
+/rec-wars-splitscreen.wasm
 
 /git-hooks/pre-commit
 
