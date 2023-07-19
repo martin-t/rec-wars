@@ -28,7 +28,7 @@ RecWars aims to have gameplay similar, but not identical, to RecWar. I suspect R
 
 **Currently this is very much a work-in-progress**: the driving physics don't feel right, there are no collisions between vehicles, bots move randomly ...
 
-The ultimate goal is to create a moddable multiplayer game playable in the browser and natively on Linux, Windows and macOS. This might be tricky since WASM in the browser doesn't allow UDP. I have some ideas how to solve that.
+The ultimate goal is to create a moddable multiplayer game playable in the browser and natively on Linux, Windows and macOS. RecWars is built in the spirit of [everlasting games](https://spicylobster.itch.io/jumpy/devlog/337996/everlasting-games).
 
 (Planned) Features
 ------------------
