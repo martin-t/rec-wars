@@ -3,8 +3,10 @@ use std::process::Command;
 fn main() {
     // LATER Multiple issues with using build.rs:
     //  - It can report incorrect commit - it doesn't rerun after commit
+    //    EDIT 2023-07-23 it reruns on any change, including .git
     //  - Measure how much it slows down incremental rebuilds
     //  - Any way to only use build.rs in release builds?
+    // LATER consider https://docs.rs/vergen/latest/vergen/
 
     // Ideally we'd also save --dirty status but that often means
     // recompiling when non-code files in the repo changed.
