@@ -203,9 +203,9 @@ checksum = "f7012b1bbb0719e1097c47611d3898568c546d597c2e74d66f6087edd5233ff4"
 
 [[package]]
 name = "macroquad"
-version = "0.4.1"
+version = "0.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fd3e7dde4aeec81c8eadf9783033eebb6a02b4b01311417ded1c0fe46dcbaefa"
+checksum = "44a29dcaa0719da224e075ba07d9aa577b4bd5f6d750820cee4ef1ad2da2ea00"
 dependencies = [
  "bumpalo",
  "fontdue",
@@ -234,9 +234,9 @@ dependencies = [
 
 [[package]]
 name = "miniquad"
-version = "0.4.0-alpha.5"
+version = "0.4.0-alpha.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3fb3ea4fad981a4f020c5992531684a3281d7a3483f9c003cb4a23145cc197a2"
+checksum = "a46033fb403c40c734dffcd4cef27252ff1c75221952b5c29dad15b8e1ef345f"
 dependencies = [
  "libc",
  "ndk-sys",
