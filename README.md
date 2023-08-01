@@ -79,11 +79,11 @@ You can set [cvars](#cvars) on the command line - e.g.:
 Contributing
 ------------
 
-You can always find me on the [RecWars Discord server](https://discord.gg/9BQVVgV) if you have any questions or suggestions.
+You can always find me on the [RecWars Discord server](https://discord.gg/9BQVVgV) if you have any questions or suggestions or if you just wanna see a game slowly develop from a small prototype to being playable and enjoyable by real people.
 
 [Issues](https://github.com/martin-t/rec-wars/issues/new) and [Pull Requests](https://github.com/martin-t/rec-wars/pulls) are welcome, I will try to look at them as soon as possible.
 
-I want to make RecWars highly configurable with many different gamemodes and balance settings votable by players and anybody will be able to host their own server (if technically possible, then even from the browser). If you have a gameplay idea and don't suffer from the NIH syndrome, I'd be very happy to help you test it in RecWars.
+I want to make RecWars highly configurable with many different gamemodes and balance settings votable by players and anybody will be able to host their own server. RecWars aims to blur the line between a game and a genre-specific game engine. Vehicles, weapons, AI, game modes, etc. will be completely configurable. If you have a gameplay idea and don't suffer from the NIH syndrome, I'd be very happy to help you test it in RecWars.
 
 ### Tips (Optional)
 
@@ -91,18 +91,10 @@ Enable extra checks before every commit: copy/symlink `pre-commit-example` to `p
 
 Enable fast builds - see [.cargo/config-example.toml](.cargo/config-example.toml) for details.
 
-For slightly faster builds, prevent rust-analyzer from locking the `target` directory. Add this to your VSCode config (or something similar for your editor):
-```json
-"rust-analyzer.server.extraEnv": {
-    "CARGO_TARGET_DIR": "target-ra"
-}
-```
-Normally, rust-analyzer runs `cargo check` on save which locks `target` so if you switch to a terminal and do `cargo run`, it blocks the build for over a second which is currently a third of the build time. This will make rust-analyzer make use a separate target directory so that it'll never block a build (at the expense of some disk space). Alternatively, you could disable saving when losing focus, disable running check on save or use the terminal inside VSCode.
-
 Architecture Overview
 ---------------------
 
-Most of the code is commented to be understandable to anyone with a vague idea of how a game works. If it's not clear why a particular piece of code exists or why it needs to be written the way it is, I consider that a bug which should be fixed by either rewriting the code more clearly or adding comments explaining it.
+Most of the code is commented to be understandable to anyone with a basic understanding of how a game works (there's a main loop, gamelogic and rendering run is steps called frames). If it's not clear why a particular piece of code exists or why it needs to be written the way it is, I consider that a bug which should be fixed by either rewriting the code more clearly or adding comments explaining it.
 
 Currently, most game state is managed by generational arenas from the [thunderdome](https://github.com/LPGhatguy/thunderdome) crate to make the code type-safe and readable. Previously, RecWars used the [legion](https://github.com/amethyst/legion) ECS. However it was cumbersome to use and WASM didn't get any benefits from parallelism. The only reason I was using ECS was so I could have references between entities and for this I was paying by having all entities dynamicly typed which lead to bugs. It's a Rust tradition to start writing a game and end up writing a game engine or ECS so I am considering creating an ECS crate that would satisfy my standards of clean API and static typing. For now arenas seem to be close enough.
 
@@ -185,7 +177,8 @@ Read this to learn from other people's mistakes and save yourself some time.
 License
 -------
 
-<!-- When updating this, also update LICENSE and Cargo.toml -->
+<!-- If updating this, also update LICENSE and Cargo.toml -->
+
 All code is available under [AGPL-v3](agpl-3.0.txt) or newer.
 
 All assets (maps, textures, sounds, etc.) are taken from the original RecWar by Willem Janssen which is freely available online.
