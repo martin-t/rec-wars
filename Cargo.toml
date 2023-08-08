@@ -46,7 +46,7 @@ cvars-console-macroquad = "0.3.0"
 fnv = "1.0.7"
 macroquad = "=0.4.2" # Exact version because of the image crate https://github.com/not-fl3/macroquad/issues/494
 strum = "0.25.0"
-strum_macros = "0.25.0"
+strum_macros = "0.25.2"
 thunderdome = "0.6.1"
 vek = "0.16.1"
 
