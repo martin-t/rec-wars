@@ -1,6 +1,13 @@
 //! Console variables - configuration options for anything and everything.
 
+use std::{
+    fmt::{self, Display, Formatter},
+    num::ParseFloatError,
+    str::FromStr,
+};
+
 use cvars::cvars;
+use macroquad::prelude::Color;
 use strum_macros::{Display, EnumString};
 
 use crate::prelude::*;
@@ -367,6 +374,20 @@ cvars! {
     hud_names_shadow_y: f32 = 1.0,
     hud_names_x: f64 = -20.0,
     hud_names_y: f64 = 30.0,
+
+    hud_notifications_alpha_old: f64 = 0.5,
+    hud_notifications_color_death: CVec3 = CVec3::RED,
+    hud_notifications_color_kill: CVec3 = CVec3::BLUE2,
+    hud_notifications_duration: f64 = 3.0,
+    hud_notifications_duration_fade_out: f64 = 0.25,
+    hud_notifications_duration_grow: f64 = 0.02,
+    hud_notifications_duration_large: f64 = 0.03,
+    hud_notifications_duration_shrink: f64 = 0.06,
+    hud_notifications_font_size: f64 = 24.0,
+    hud_notifications_font_size_large: f64 = 28.0,
+    hud_notifications_y_from_center: f32 = -250.0,
+    hud_notifications_y_from_top: f32 = 150.0,
+    hud_notifications_y_offset: f32 = -40.0,
 
     hud_pause_font_size: f64 = 64.0,
     hud_pause_shadow_x: f32 = 2.0,
@@ -844,6 +865,78 @@ impl Cvars {
             Weapon::Gm => self.g_guided_missile_reload_time,
             Weapon::Bfg => self.g_bfg_reload_time,
         }
+    }
+}
+
+/// Vec3 with support for cvars. Should be converted to Vec3 before use in gamecode.
+#[derive(Debug, Clone, Copy)]
+pub struct CVec3 {
+    pub x: f32,
+    pub y: f32,
+    pub z: f32,
+}
+
+#[allow(dead_code)]
+impl CVec3 {
+    const RED: Self = Self::new(1.0, 0.0, 0.0);
+    const GREEN: Self = Self::new(0.0, 1.0, 0.0);
+    const BLUE: Self = Self::new(0.0, 0.0, 1.0);
+    const BLUE2: Self = Self::new(0.0, 0.2, 1.0);
+    const WHITE: Self = Self::new(1.0, 1.0, 1.0);
+    const BLACK: Self = Self::new(0.0, 0.0, 0.0);
+    const YELLOW: Self = Self::new(1.0, 1.0, 0.0);
+    const MAGENTA: Self = Self::new(1.0, 0.0, 1.0);
+    const CYAN: Self = Self::new(0.0, 1.0, 1.0);
+
+    const fn new(x: f32, y: f32, z: f32) -> Self {
+        Self { x, y, z }
+    }
+}
+
+impl FromStr for CVec3 {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        parse_cvec3(s).map_err(|e| {
+            if let Some(e) = e {
+                format!("Expected format `'x y z'`, got `{}`: {}", s, e)
+            } else {
+                format!("Expected format `'x y z'`, got `{}`", s)
+            }
+        })
+    }
+}
+
+fn parse_cvec3(mut s: &str) -> Result<CVec3, Option<ParseFloatError>> {
+    if s.starts_with('\'') && s.ends_with('\'') {
+        s = &s[1..s.len() - 1];
+    }
+    let mut parts = s.split(' ');
+    let x = parts.next().ok_or(None)?.parse().map_err(Some)?;
+    let y = parts.next().ok_or(None)?.parse().map_err(Some)?;
+    let z = parts.next().ok_or(None)?.parse().map_err(Some)?;
+    if parts.next().is_some() {
+        return Err(None);
+    }
+    Ok(CVec3::new(x, y, z))
+}
+
+impl Display for CVec3 {
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+        write!(f, "'{:?} {:?} {:?}'", self.x, self.y, self.z)
+    }
+}
+
+impl From<CVec3> for Color {
+    fn from(v: CVec3) -> Self {
+        Color::new(v.x, v.y, v.z, 1.0)
+    }
+}
+
+impl From<Color> for CVec3 {
+    fn from(c: Color) -> Self {
+        //soft_assert_eq!(c.a, 1.0); TODO
+        CVec3::new(c.r, c.g, c.b)
     }
 }
 

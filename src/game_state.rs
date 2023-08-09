@@ -29,6 +29,14 @@ pub struct GameState {
     /// Delta time since last gamelogic frame in seconds
     pub dt: f64,
 
+    /// Inputs of players last frame.
+    pub inputs_prev: InputsPrev,
+
+    pub ais: Arena<Ai>,
+    pub players: Arena<Player>,
+    pub vehicles: Arena<Vehicle>,
+    pub projectiles: Arena<Projectile>,
+
     /// Map of projectile handles to vehicle handles.
     /// Prevents rail hitting the same vehicle twice
     /// when one segment ends inside the hitbox and the next starts inside it the next frame.
@@ -44,13 +52,6 @@ pub struct GameState {
     pub rail_beams: Vec<RailBeam>,
     pub bfg_beams: Vec<(Vec2f, Vec2f)>,
     pub explosions: Vec<Explosion>,
-    pub ais: Arena<Ai>,
-    pub players: Arena<Player>,
-    pub vehicles: Arena<Vehicle>,
-    pub projectiles: Arena<Projectile>,
-
-    /// Inputs of players last frame.
-    pub inputs_prev: InputsPrev,
 }
 
 impl GameState {
@@ -61,15 +62,18 @@ impl GameState {
             game_time: 0.0,
             game_time_prev: 0.0,
             dt: 0.0,
-            rail_beams: Vec::new(),
-            rail_hits: FnvHashMap::default(),
-            bfg_beams: Vec::new(),
-            explosions: Vec::new(),
+            inputs_prev: InputsPrev(FnvHashMap::default()),
+
             ais: Arena::new(),
             players: Arena::new(),
             vehicles: Arena::new(),
             projectiles: Arena::new(),
-            inputs_prev: InputsPrev(FnvHashMap::default()),
+
+            rail_hits: FnvHashMap::default(),
+
+            rail_beams: Vec::new(),
+            bfg_beams: Vec::new(),
+            explosions: Vec::new(),
         }
     }
 }

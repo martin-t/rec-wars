@@ -28,6 +28,7 @@ pub struct Player {
     pub guided_missile: Option<Index>,
     pub cur_weapon: Weapon,
     pub score: Score,
+    pub notifications: Vec<Notification>,
 }
 
 impl Player {
@@ -41,6 +42,7 @@ impl Player {
             guided_missile: None,
             cur_weapon: Weapon::Mg,
             score: Score::default(),
+            notifications: Vec::new(),
         }
     }
 }
@@ -62,6 +64,23 @@ pub struct Score {
 impl Score {
     pub fn points(&self, cvars: &Cvars) -> i32 {
         self.kills * cvars.g_ffa_score_kill + self.deaths * cvars.g_ffa_score_death
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct Notification {
+    pub text: String,
+    pub color: CVec3,
+    pub start_time: f64,
+}
+
+impl Notification {
+    pub fn new(text: String, color: CVec3, start_time: f64) -> Self {
+        Self {
+            text,
+            color,
+            start_time,
+        }
     }
 }
 

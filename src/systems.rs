@@ -26,6 +26,12 @@ pub fn cleanup(cvars: &Cvars, gs: &mut GameState) {
         let progress = (game_time - explosion.start_time) / cvars.r_explosion_duration;
         progress <= 1.0
     });
+
+    for (_, player) in gs.players.iter_mut() {
+        player.notifications.retain(|notification| {
+            game_time - notification.start_time < cvars.hud_notifications_duration
+        });
+    }
 }
 
 pub fn respawning(cvars: &Cvars, gs: &mut GameState, map: &Map) {
@@ -675,14 +681,34 @@ pub fn damage(
         .push(Explosion::new(vehicle.pos, 1.0, gs.game_time, false));
     gs.players[vehicle.owner].guided_missile = None; // No guiding after death
 
+    let attacker_name = &gs.players[attacker_handle].name.clone();
+    let victim_name = &gs.players[vehicle.owner].name.clone();
+
     let attacker = &mut gs.players[attacker_handle];
     if attacker_handle == vehicle.owner {
         attacker.score.suicides += 1;
+        attacker.notifications.push(Notification::new(
+            "You committed suicide".to_owned(),
+            cvars.hud_notifications_color_death,
+            gs.game_time,
+        ));
     } else {
         attacker.score.kills += 1;
+        attacker.notifications.push(Notification::new(
+            format!("You killed {victim_name}"),
+            cvars.hud_notifications_color_kill,
+            gs.game_time,
+        ));
     }
     let victim = &mut gs.players[vehicle.owner];
-    victim.score.deaths += 1;
+    victim.score.deaths += 1; // All deaths, including suicides
+    if attacker_handle != vehicle.owner {
+        victim.notifications.push(Notification::new(
+            format!("You were killed by {attacker_name}"),
+            cvars.hud_notifications_color_death,
+            gs.game_time,
+        ));
+    }
 
     victim.death_time = gs.game_time;
 }

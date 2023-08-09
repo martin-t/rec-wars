@@ -734,6 +734,71 @@ fn render_viewport(
     );
     draw_texture(weap_img, weap_icon_pos.x, weap_icon_pos.y, WHITE);
 
+    // Notifications
+    let mut notification_y = if cvars.hud_notifications_y_from_center != 0.0 {
+        screen_height() / 2.0 + cvars.hud_notifications_y_from_center
+    } else {
+        cvars.hud_notifications_y_from_top
+    };
+    let notification_most_recent = player.notifications.last().map_or(0.0, |n| n.start_time);
+    for notification in player.notifications.iter().rev() {
+        let age_current = server.gs.game_time - notification.start_time;
+        let age_grow = cvars.hud_notifications_duration_grow;
+        let age_large = age_grow + cvars.hud_notifications_duration_large;
+        let age_shrink = age_large + cvars.hud_notifications_duration_shrink;
+
+        let mut alpha = if age_current < age_grow {
+            age_current / cvars.hud_notifications_duration_grow
+        } else {
+            let time_remaining = cvars.hud_notifications_duration - age_current;
+            if time_remaining > cvars.hud_notifications_duration_fade_out {
+                1.0
+            } else {
+                time_remaining / cvars.hud_notifications_duration_fade_out
+            }
+        };
+        // The most recent "event" (sometimes multiple messages) should be fully visible,
+        // the rest should be faded out a little.
+        if notification.start_time != notification_most_recent {
+            alpha *= cvars.hud_notifications_alpha_old;
+        }
+        let color = Color::new(
+            notification.color.x,
+            notification.color.y,
+            notification.color.z,
+            alpha as f32,
+        );
+
+        let font_size = if age_current < age_grow {
+            let factor = age_current / cvars.hud_notifications_duration_grow;
+            Lerp::lerp(0.0, cvars.hud_notifications_font_size_large, factor)
+        } else if age_current < age_large {
+            cvars.hud_notifications_font_size_large
+        } else if age_current < age_shrink {
+            let factor = (age_current - age_large) / cvars.hud_notifications_duration_shrink;
+            Lerp::lerp(
+                cvars.hud_notifications_font_size_large,
+                cvars.hud_notifications_font_size,
+                factor,
+            )
+        } else {
+            cvars.hud_notifications_font_size
+        };
+        let measured_size = measure_text(&notification.text, None, font_size as u16, 1.0);
+        render_text_with_shadow(
+            cvars,
+            &notification.text,
+            (screen_width() - measured_size.width) / 2.0,
+            notification_y + measured_size.height / 2.0,
+            font_size,
+            color,
+            1.0,
+            1.0,
+            alpha,
+        );
+        notification_y += cvars.hud_notifications_y_offset;
+    }
+
     // Scoreboard
     if player_vehicle.destroyed() {
         let width = cvars.hud_scoreboard_width_name

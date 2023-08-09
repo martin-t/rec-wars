@@ -25,7 +25,7 @@ pub use thunderdome::{Arena, Index};
 pub use vek::{Clamp, Lerp, Slerp, Wrap};
 
 pub use crate::{
-    cvars::Cvars,
+    cvars::{CVec3, Cvars},
     entities::*,
     game_state::*,
     map::{F64Ext, Map, Mat2f, Vec2f, Vec2u, VecExt},
