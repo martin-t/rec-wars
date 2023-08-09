@@ -683,6 +683,7 @@ pub fn damage(
 
     let attacker_name = &gs.players[attacker_handle].name.clone();
     let victim_name = &gs.players[vehicle.owner].name.clone();
+    dbg_logf!("{:?} was killed by {:?}", victim_name, attacker_name);
 
     let attacker = &mut gs.players[attacker_handle];
     if attacker_handle == vehicle.owner {
