@@ -6,6 +6,8 @@ use strum_macros::{Display, EnumString};
 use crate::prelude::*;
 
 cvars! {
+    #![cvars(sorted)]
+
     //! Console variables - configuration options for anything and everything.
     //!
     //! Prefix meanings:
@@ -28,8 +30,8 @@ cvars! {
     cl_machine_gun_trail_length: f64 = 10.0,
     cl_machine_gun_trail_thickness: f64 = 1.5,
 
-    cl_railgun_trail_thickness: f64 = 1.5,
     cl_railgun_trail_duration: f64 = 0.05,
+    cl_railgun_trail_thickness: f64 = 1.5,
 
     cl_spawn_indicator_animation_time: f64 = 0.3,
     cl_spawn_indicator_blinking_period: f64 = 0.3,
@@ -42,13 +44,13 @@ cvars! {
     cl_splitscreen: bool = false,
 
     con_background_alpha: f32 = 0.8,
-    con_prompt_group_x: f32 = 16.0,
-    con_prompt_group_y_offset: f32 = 26.0,
     con_height_fraction: f32 = 0.45,
     con_history_line_font_size: f32 = 16.0,
     con_history_line_height: f32 = 14.0,
     con_history_x: f32 = 8.0,
     con_history_y_offset: f32 = 25.0,
+    con_prompt_group_x: f32 = 16.0,
+    con_prompt_group_y_offset: f32 = 26.0,
     con_prompt_label_x: f32 = 8.0,
     con_prompt_label_y_offset: f32 = 22.0,
 
@@ -76,9 +78,6 @@ cvars! {
     /// Display the last pressed key. Useful for debugging MQ's issues with keyboard layouts.
     d_last_key: bool = false,
     d_projectiles: bool = false,
-    d_tickrate_remaining: bool = false,
-    d_timing_samples: usize = 60,
-    d_tracing: bool = false,
     /// The seed to initialize the RNG.
     ///
     /// This is not very helpful by itself because by the time you can change cvars in the console,
@@ -90,6 +89,9 @@ cvars! {
     d_seed: u64 = 0,
     /// Change speed of everything in the game
     d_speed: f64 = 1.0,
+    d_tickrate_remaining: bool = false,
+    d_timing_samples: usize = 60,
+    d_tracing: bool = false,
 
     /// Hit points. Recommended values are between 1 and 500, original RecWar used 100 as default.
     ///
@@ -127,39 +129,8 @@ cvars! {
     g_cluster_bomb_time_spread: f64 = 0.2,
     g_cluster_bomb_vehicle_velocity_factor: f64 = 1.0,
 
-    g_ffa_score_kill: i32 = 1,
     g_ffa_score_death: i32 = -1,
-
-    g_homing_missile_accel_forward: f64 = 2000.0,
-    g_homing_missile_angle_detect: f64 = 40.0f64.to_radians(), // TODO (also other places) use Deg
-    g_homing_missile_angle_forget: f64 = 50.0f64.to_radians(),
-    g_homing_missile_damage_direct: f64 = 0.0,
-    g_homing_missile_explosion_damage: f64 = 56.0, // assumed same as GM
-    g_homing_missile_explosion_radius: f64 = 40.0,
-    g_homing_missile_explosion_scale: f64 = 1.0,
-    g_homing_missile_friction_const: f64 = 0.0,
-    g_homing_missile_friction_linear: f64 = 0.99,
-    g_homing_missile_reload_ammo: u32 = 1,
-    g_homing_missile_reload_time: f64 = 1.5,
-    g_homing_missile_speed_initial: f64 = 100.0,
-    g_homing_missile_speed_max: f64 = f64::INFINITY,
-    g_homing_missile_turn_effectiveness: f64 = 1.0,
-    g_homing_missile_turn_rate_friction_const: f64 = 0.10,
-    g_homing_missile_turn_rate_friction_linear: f64 = 0.995,
-    g_homing_missile_turn_rate_increase: f64 = 10.0,
-    g_homing_missile_turn_rate_max: f64 = f64::INFINITY,
-    g_homing_missile_vehicle_velocity_factor: f64 = 1.0,
-
-    g_machine_gun_angle_spread: f64 = 0.015,
-    g_machine_gun_damage: f64 = 2.5, // exact from orig RW
-    g_machine_gun_refire: f64 = 0.050,
-    g_machine_gun_reload_ammo: u32 = 50,
-    g_machine_gun_reload_time: f64 = 1.0,
-    g_machine_gun_speed: f64 = 1000.0,
-    g_machine_gun_vehicle_velocity_factor: f64 = 1.0,
-
-    /// The map to play on. Set to empty string for random.
-    g_map: String = "".to_owned(),
+    g_ffa_score_kill: i32 = 1,
 
     g_guided_missile_accel_forward: f64 = 2000.0,
     g_guided_missile_damage_direct: f64 = 0.0,
@@ -181,77 +152,97 @@ cvars! {
     g_guided_missile_turn_rate_max: f64 = f64::INFINITY,
     g_guided_missile_vehicle_velocity_factor: f64 = 1.0,
 
+    g_hardpoint_hovercraft_bfg: Hardpoint = Hardpoint::Turret,
+    g_hardpoint_hovercraft_bfg_x: f64 = 19.0,
+    g_hardpoint_hovercraft_bfg_y: f64 = 0.0,
+    g_hardpoint_hovercraft_cluster_bomb: Hardpoint = Hardpoint::Turret,
+    g_hardpoint_hovercraft_cluster_bomb_x: f64 = 19.0,
+    g_hardpoint_hovercraft_cluster_bomb_y: f64 = 0.0,
+    g_hardpoint_hovercraft_guided_missile: Hardpoint = Hardpoint::Chassis,
+    g_hardpoint_hovercraft_guided_missile_x: f64 = 0.0,
+    g_hardpoint_hovercraft_guided_missile_y: f64 = -16.0,
+    g_hardpoint_hovercraft_homing_missile: Hardpoint = Hardpoint::Chassis,
+    g_hardpoint_hovercraft_homing_missile_x: f64 = 0.0,
+    g_hardpoint_hovercraft_homing_missile_y: f64 = -16.0,
     g_hardpoint_hovercraft_machine_gun: Hardpoint = Hardpoint::Turret,
     g_hardpoint_hovercraft_machine_gun_x: f64 = 19.0,
     g_hardpoint_hovercraft_machine_gun_y: f64 = 0.0,
     g_hardpoint_hovercraft_railgun: Hardpoint = Hardpoint::Turret,
     g_hardpoint_hovercraft_railgun_x: f64 = 19.0,
     g_hardpoint_hovercraft_railgun_y: f64 = 0.0,
-    g_hardpoint_hovercraft_cluster_bomb: Hardpoint = Hardpoint::Turret,
-    g_hardpoint_hovercraft_cluster_bomb_x: f64 = 19.0,
-    g_hardpoint_hovercraft_cluster_bomb_y: f64 = 0.0,
     g_hardpoint_hovercraft_rockets: Hardpoint = Hardpoint::Turret,
     g_hardpoint_hovercraft_rockets_x: f64 = 19.0,
     g_hardpoint_hovercraft_rockets_y: f64 = 0.0,
-    g_hardpoint_hovercraft_homing_missile: Hardpoint = Hardpoint::Chassis,
-    g_hardpoint_hovercraft_homing_missile_x: f64 = 0.0,
-    g_hardpoint_hovercraft_homing_missile_y: f64 = -16.0,
-    g_hardpoint_hovercraft_guided_missile: Hardpoint = Hardpoint::Chassis,
-    g_hardpoint_hovercraft_guided_missile_x: f64 = 0.0,
-    g_hardpoint_hovercraft_guided_missile_y: f64 = -16.0,
-    g_hardpoint_hovercraft_bfg: Hardpoint = Hardpoint::Turret,
-    g_hardpoint_hovercraft_bfg_x: f64 = 19.0,
-    g_hardpoint_hovercraft_bfg_y: f64 = 0.0,
 
+    g_hardpoint_hummer_bfg: Hardpoint = Hardpoint::Chassis,
+    g_hardpoint_hummer_bfg_x: f64 = 10.0,
+    g_hardpoint_hummer_bfg_y: f64 = 9.0,
+    g_hardpoint_hummer_cluster_bomb: Hardpoint = Hardpoint::Turret,
+    g_hardpoint_hummer_cluster_bomb_x: f64 = 0.0,
+    g_hardpoint_hummer_cluster_bomb_y: f64 = 0.0,
+    g_hardpoint_hummer_guided_missile: Hardpoint = Hardpoint::Chassis,
+    g_hardpoint_hummer_guided_missile_x: f64 = 0.0,
+    g_hardpoint_hummer_guided_missile_y: f64 = -10.0,
+    g_hardpoint_hummer_homing_missile: Hardpoint = Hardpoint::Chassis,
+    g_hardpoint_hummer_homing_missile_x: f64 = 0.0,
+    g_hardpoint_hummer_homing_missile_y: f64 = -10.0,
     g_hardpoint_hummer_machine_gun: Hardpoint = Hardpoint::Chassis,
     g_hardpoint_hummer_machine_gun_x: f64 = 10.0,
     g_hardpoint_hummer_machine_gun_y: f64 = 9.0,
     g_hardpoint_hummer_railgun: Hardpoint = Hardpoint::Chassis,
     g_hardpoint_hummer_railgun_x: f64 = 10.0,
     g_hardpoint_hummer_railgun_y: f64 = 9.0,
-    g_hardpoint_hummer_cluster_bomb: Hardpoint = Hardpoint::Turret,
-    g_hardpoint_hummer_cluster_bomb_x: f64 = 0.0,
-    g_hardpoint_hummer_cluster_bomb_y: f64 = 0.0,
     g_hardpoint_hummer_rockets: Hardpoint = Hardpoint::Turret,
     g_hardpoint_hummer_rockets_x: f64 = 0.0,
     g_hardpoint_hummer_rockets_y: f64 = 0.0,
-    g_hardpoint_hummer_homing_missile: Hardpoint = Hardpoint::Chassis,
-    g_hardpoint_hummer_homing_missile_x: f64 = 0.0,
-    g_hardpoint_hummer_homing_missile_y: f64 = -10.0,
-    g_hardpoint_hummer_guided_missile: Hardpoint = Hardpoint::Chassis,
-    g_hardpoint_hummer_guided_missile_x: f64 = 0.0,
-    g_hardpoint_hummer_guided_missile_y: f64 = -10.0,
-    g_hardpoint_hummer_bfg: Hardpoint = Hardpoint::Chassis,
-    g_hardpoint_hummer_bfg_x: f64 = 10.0,
-    g_hardpoint_hummer_bfg_y: f64 = 9.0,
 
+    g_hardpoint_tank_bfg: Hardpoint = Hardpoint::Turret,
+    g_hardpoint_tank_bfg_x: f64 = 35.0,
+    g_hardpoint_tank_bfg_y: f64 = 0.0,
+    g_hardpoint_tank_cluster_bomb: Hardpoint = Hardpoint::Turret,
+    g_hardpoint_tank_cluster_bomb_x: f64 = 35.0,
+    g_hardpoint_tank_cluster_bomb_y: f64 = 0.0,
+    g_hardpoint_tank_guided_missile: Hardpoint = Hardpoint::Chassis,
+    g_hardpoint_tank_guided_missile_x: f64 = 0.0,
+    g_hardpoint_tank_guided_missile_y: f64 = -14.0,
+    g_hardpoint_tank_homing_missile: Hardpoint = Hardpoint::Chassis,
+    g_hardpoint_tank_homing_missile_x: f64 = 0.0,
+    g_hardpoint_tank_homing_missile_y: f64 = -14.0,
     g_hardpoint_tank_machine_gun: Hardpoint = Hardpoint::Turret,
     g_hardpoint_tank_machine_gun_x: f64 = 12.0,
     g_hardpoint_tank_machine_gun_y: f64 = -5.0,
     g_hardpoint_tank_railgun: Hardpoint = Hardpoint::Turret,
     g_hardpoint_tank_railgun_x: f64 = 35.0,
     g_hardpoint_tank_railgun_y: f64 = 0.0,
-    g_hardpoint_tank_cluster_bomb: Hardpoint = Hardpoint::Turret,
-    g_hardpoint_tank_cluster_bomb_x: f64 = 35.0,
-    g_hardpoint_tank_cluster_bomb_y: f64 = 0.0,
     g_hardpoint_tank_rockets: Hardpoint = Hardpoint::Turret,
     g_hardpoint_tank_rockets_x: f64 = 35.0,
     g_hardpoint_tank_rockets_y: f64 = 0.0,
-    g_hardpoint_tank_homing_missile: Hardpoint = Hardpoint::Chassis,
-    g_hardpoint_tank_homing_missile_x: f64 = 0.0,
-    g_hardpoint_tank_homing_missile_y: f64 = -14.0,
-    g_hardpoint_tank_guided_missile: Hardpoint = Hardpoint::Chassis,
-    g_hardpoint_tank_guided_missile_x: f64 = 0.0,
-    g_hardpoint_tank_guided_missile_y: f64 = -14.0,
-    g_hardpoint_tank_bfg: Hardpoint = Hardpoint::Turret,
-    g_hardpoint_tank_bfg_x: f64 = 35.0,
-    g_hardpoint_tank_bfg_y: f64 = 0.0,
 
     g_hitcircle_radius: f64 = 24.0, // TODO proper hitbox
 
-    g_hovercraft_armor_scale: f64 = 0.65,
+    g_homing_missile_accel_forward: f64 = 2000.0,
+    g_homing_missile_angle_detect: f64 = 40.0f64.to_radians(), // TODO (also other places) use Deg
+    g_homing_missile_angle_forget: f64 = 50.0f64.to_radians(),
+    g_homing_missile_damage_direct: f64 = 0.0,
+    g_homing_missile_explosion_damage: f64 = 56.0, // assumed same as GM
+    g_homing_missile_explosion_radius: f64 = 40.0,
+    g_homing_missile_explosion_scale: f64 = 1.0,
+    g_homing_missile_friction_const: f64 = 0.0,
+    g_homing_missile_friction_linear: f64 = 0.99,
+    g_homing_missile_reload_ammo: u32 = 1,
+    g_homing_missile_reload_time: f64 = 1.5,
+    g_homing_missile_speed_initial: f64 = 100.0,
+    g_homing_missile_speed_max: f64 = f64::INFINITY,
+    g_homing_missile_turn_effectiveness: f64 = 1.0,
+    g_homing_missile_turn_rate_friction_const: f64 = 0.10,
+    g_homing_missile_turn_rate_friction_linear: f64 = 0.995,
+    g_homing_missile_turn_rate_increase: f64 = 10.0,
+    g_homing_missile_turn_rate_max: f64 = f64::INFINITY,
+    g_homing_missile_vehicle_velocity_factor: f64 = 1.0,
+
     g_hovercraft_accel_backward: f64 = 400.0,
     g_hovercraft_accel_forward: f64 = 400.0,
+    g_hovercraft_armor_scale: f64 = 0.65,
     g_hovercraft_friction_const: f64 = 0.0,
     g_hovercraft_friction_linear: f64 = 0.6,
     g_hovercraft_maxs_x: f64 = 22.0,
@@ -270,9 +261,9 @@ cvars! {
     g_hovercraft_turret_offset_turret_x: f64 = -8.0,
     g_hovercraft_turret_offset_turret_y: f64 = 0.0,
 
-    g_hummer_armor_scale: f64 = 0.625,
     g_hummer_accel_backward: f64 = 600.0,
     g_hummer_accel_forward: f64 = 600.0,
+    g_hummer_armor_scale: f64 = 0.625,
     g_hummer_friction_const: f64 = 11.0,
     g_hummer_friction_linear: f64 = 0.8,
     g_hummer_maxs_x: f64 = 20.0,
@@ -290,6 +281,17 @@ cvars! {
     g_hummer_turret_offset_chassis_y: f64 = 0.0,
     g_hummer_turret_offset_turret_x: f64 = 0.0,
     g_hummer_turret_offset_turret_y: f64 = 0.0,
+
+    g_machine_gun_angle_spread: f64 = 0.015,
+    g_machine_gun_damage: f64 = 2.5, // exact from orig RW
+    g_machine_gun_refire: f64 = 0.050,
+    g_machine_gun_reload_ammo: u32 = 50,
+    g_machine_gun_reload_time: f64 = 1.0,
+    g_machine_gun_speed: f64 = 1000.0,
+    g_machine_gun_vehicle_velocity_factor: f64 = 1.0,
+
+    /// The map to play on. Set to empty string for random.
+    g_map: String = "".to_owned(),
 
     g_railgun_damage: f64 = 47.0, // exact from orig RW
     g_railgun_push: f64 = 300.0,
@@ -315,9 +317,9 @@ cvars! {
     g_self_destruct_explosion_scale: f64 = 2.0, // TODO radius
     g_self_destruct_radius: f64 = 175.0,
 
-    g_tank_armor_scale: f64 = 1.0,
     g_tank_accel_backward: f64 = 550.0,
     g_tank_accel_forward: f64 = 550.0,
+    g_tank_armor_scale: f64 = 1.0,
     g_tank_friction_const: f64 = 50.0,
     g_tank_friction_linear: f64 = 0.9,
     g_tank_maxs_x: f64 = 19.0,
@@ -339,19 +341,22 @@ cvars! {
     g_turret_turn_speed_deg: f64 = 120.0,
     g_turret_turn_step_angle_deg: f64 = 45.0,
 
-    hud_ammo_x: f64 = 30.0,
-    hud_ammo_y: f64 = -30.0,
-    /// Original RecWar had 99.
-    hud_ammo_width: f64 = 100.0,
     /// Original RecWar had 4.
     hud_ammo_height: f64 = 4.0,
-
-    hud_hp_x: f64 = 30.0,
-    hud_hp_y: f64 = -50.0,
     /// Original RecWar had 99.
-    hud_hp_width: f64 = 100.0,
+    hud_ammo_width: f64 = 100.0,
+    hud_ammo_x: f64 = 30.0,
+    hud_ammo_y: f64 = -30.0,
+
     /// Original RecWar had 9.
     hud_hp_height: f64 = 9.0,
+    /// Original RecWar had 99.
+    hud_hp_width: f64 = 100.0,
+    hud_hp_x: f64 = 30.0,
+    hud_hp_y: f64 = -50.0,
+
+    hud_missile_indicator_dash_length: f64 = 3.3,
+    hud_missile_indicator_radius: f64 = 18.0,
 
     hud_names: bool = true,
     hud_names_alpha: f64 = 1.0,
@@ -362,9 +367,6 @@ cvars! {
     hud_names_shadow_y: f32 = 1.0,
     hud_names_x: f64 = -20.0,
     hud_names_y: f64 = 30.0,
-
-    hud_missile_indicator_dash_length: f64 = 3.3,
-    hud_missile_indicator_radius: f64 = 18.0,
 
     hud_pause_font_size: f64 = 64.0,
     hud_pause_shadow_x: f32 = 2.0,
@@ -412,12 +414,12 @@ cvars! {
     //   because the later explosions were suddenly revealed after the first ones disappeared.
     // - Rockets look better if hitting the same spot.
     r_explosions_reverse_order: bool = false,
-    r_rockets_offset_x: f64 = 5.0,
-    r_rockets_offset_y: f64 = 0.0,
     r_guided_missile_offset_x: f64 = 5.0,
     r_guided_missile_offset_y: f64 = 0.0,
     r_homing_missile_offset_x: f64 = 5.0,
     r_homing_missile_offset_y: f64 = 0.0,
+    r_rockets_offset_x: f64 = 5.0,
+    r_rockets_offset_y: f64 = 0.0,
     r_smoothing: bool = false,
     r_splitscreen_gap: f64 = 8.0,
 
@@ -426,8 +428,8 @@ cvars! {
     /// LATER fix - Does not work in MQ: https://github.com/not-fl3/macroquad/issues/264
     sv_auto_unpause_on_restore: bool = false,
 
-    sv_tickrate_mode: TickrateMode = TickrateMode::Synchronized,
     sv_tickrate_fixed_fps: f64 = 150.0,
+    sv_tickrate_mode: TickrateMode = TickrateMode::Synchronized,
 }
 
 impl Cvars {
