@@ -83,7 +83,7 @@ macro_rules! dbg_logd {
 macro_rules! dbg_textf {
     ( $( $t:tt )* ) => {
         let s = format!( $( $t )* );
-        $crate::debugging::DEBUG_TEXTS.with(|texts| {
+        $crate::debug::DEBUG_TEXTS.with(|texts| {
             texts.borrow_mut().push(s)
         });
     };
@@ -96,7 +96,7 @@ macro_rules! dbg_textf {
 macro_rules! dbg_textd {
     ( $( $e:expr ),* ) => {
         let s = $crate::__format_pairs!( $( $e ),* );
-        $crate::debugging::DEBUG_TEXTS.with(|texts| {
+        $crate::debug::DEBUG_TEXTS.with(|texts| {
             texts.borrow_mut().push(s)
         });
     };
@@ -109,11 +109,11 @@ macro_rules! dbg_textd {
 macro_rules! dbg_world_textf {
     ( $pos:expr, $( $t:tt )* ) => {
         let s = format!( $( $t )* );
-        let text = $crate::debugging::WorldText {
+        let text = $crate::debug::WorldText {
             msg: s,
             pos: $pos,
         };
-        $crate::debugging::DEBUG_TEXTS_WORLD.with(|texts| {
+        $crate::debug::DEBUG_TEXTS_WORLD.with(|texts| {
             texts.borrow_mut().push(text)
         });
     };
@@ -126,11 +126,11 @@ macro_rules! dbg_world_textf {
 macro_rules! dbg_world_textd {
     ( $pos:expr, $( $e:expr ),* ) => {
         let s = $crate::__format_pairs!( $( $e ),* );
-        let text = $crate::debugging::WorldText {
+        let text = $crate::debug::WorldText {
             msg: s,
             pos: $pos,
         };
-        $crate::debugging::DEBUG_TEXTS_WORLD.with(|texts| {
+        $crate::debug::DEBUG_TEXTS_WORLD.with(|texts| {
             texts.borrow_mut().push(text)
         });
     };
@@ -159,7 +159,7 @@ macro_rules! __format_pairs {
 #[macro_export]
 macro_rules! dbg_line {
     ($begin:expr, $end:expr, $time:expr, $color:expr) => {
-        $crate::debugging::debug_line($begin, $end, $time, $color);
+        $crate::debug::debug_line($begin, $end, $time, $color);
     };
     ($begin:expr, $end:expr, $time:expr) => {
         $crate::dbg_line!($begin, $end, $time, "red");
@@ -189,7 +189,7 @@ pub fn debug_line(begin: Vec2f, end: Vec2f, time: f64, color: &'static str) {
 #[macro_export]
 macro_rules! dbg_cross {
     ($point:expr, $time:expr, $color:expr) => {
-        $crate::debugging::debug_cross($point, $time, $color);
+        $crate::debug::debug_cross($point, $time, $color);
     };
     ($point:expr, $time:expr) => {
         $crate::dbg_cross!($point, $time, "red");

@@ -9,7 +9,7 @@
 #![allow(clippy::too_many_arguments)]
 
 #[macro_use]
-pub mod debugging; // keep first so the macros are available everywhere
+pub mod debug; // keep first so the macros are available everywhere
 
 pub mod cvars;
 pub mod entities;

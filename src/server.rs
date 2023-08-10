@@ -2,7 +2,7 @@
 
 use crate::{
     cvars::TickrateMode,
-    debugging,
+    debug,
     prelude::*,
     sys_ai, systems,
     timing::{Durations, Fps},
@@ -216,7 +216,7 @@ impl Server {
         self.gs.game_time = game_time;
         self.gs.dt = self.gs.game_time - self.gs.game_time_prev;
 
-        debugging::cleanup();
+        debug::cleanup();
 
         dbg_textf!("{}", env!("GIT_VERSION"));
         dbg_textd!(self.gs.game_time);

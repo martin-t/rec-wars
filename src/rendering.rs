@@ -5,7 +5,7 @@ use std::{cmp::Reverse, str};
 use macroquad::prelude::*;
 
 use crate::{
-    debugging::{DEBUG_CROSSES, DEBUG_LINES, DEBUG_TEXTS, DEBUG_TEXTS_WORLD},
+    debug::{DEBUG_CROSSES, DEBUG_LINES, DEBUG_TEXTS, DEBUG_TEXTS_WORLD},
     map::{Kind, TILE_SIZE},
     mq::{ClientMode, MacroquadClient},
     prelude::*,
