@@ -216,7 +216,7 @@ impl Server {
         self.gs.game_time = game_time;
         self.gs.dt = self.gs.game_time - self.gs.game_time_prev;
 
-        debug::cleanup();
+        debug::clear_expired();
 
         dbg_textf!("{}", env!("GIT_VERSION"));
         dbg_textd!(self.gs.game_time);
@@ -246,6 +246,8 @@ impl Server {
         systems::projectiles_timeout(cvars, &mut self.gs);
 
         systems::self_destruct(cvars, &mut self.gs);
+
+        systems::debug_examples(cvars);
 
         dbg_textf!("vehicle count: {}", self.gs.vehicles.len());
         dbg_textf!("projectile count: {}", self.gs.projectiles.len());

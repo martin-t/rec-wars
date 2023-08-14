@@ -268,18 +268,3 @@ impl Debug for Input {
         Ok(())
     }
 }
-
-pub trait ArenaExt {
-    /// Collect the handles (`thunderdome::Index`) into a `Vec`.
-    ///
-    /// This is borrowck dance to allow iterating through the collection without keeping the arena borrowed.
-    /// You can reborrow each iteration of the loop by indexing the arena using the handle
-    /// and release the borrow if you need to pass the arena (or usually whole `GameState`) into another function.
-    fn iter_handles(&self) -> Vec<Index>;
-}
-
-impl<T> ArenaExt for Arena<T> {
-    fn iter_handles(&self) -> Vec<Index> {
-        self.iter().map(|(handle, _)| handle).collect()
-    }
-}

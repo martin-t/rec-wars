@@ -1,5 +1,4 @@
 // Additional warnings that are allow by default (`rustc -W help`)
-#![warn(missing_debug_implementations)]
 #![warn(trivial_casts)]
 #![warn(trivial_numeric_casts)]
 #![warn(unreachable_pub)]
@@ -59,10 +58,12 @@ fn window_conf() -> Conf {
 
 #[macroquad::main(window_conf)]
 async fn main() {
-    let opts = get_opts();
-
     draw_text("Loading...", 400.0, 400.0, 32.0, RED);
     show_mouse(false);
+
+    let opts = get_opts();
+
+    debug::set_endpoint("lo");
 
     let mut cvars = Cvars::new_rec_wars();
 

@@ -1,60 +1,11 @@
 //! Map data (everything static during a match) and coordinate system
 
-use std::f64::consts::PI;
 use std::ops::Index;
 
 use strum_macros::FromRepr;
-use vek::{approx::AbsDiffEq, Mat2, Vec2};
+use vek::approx::AbsDiffEq;
 
 use crate::prelude::*;
-
-/// Position in world or screen space.
-///
-/// ### Coord system
-/// `x` is right, `y` is down - origin is top-left.
-/// This is to make world and screen coords behave the same
-/// (although I believe it's more common for world coords to start in bottom-left so that `y` is up).
-/// The result of having `y` down is that the unit circle in mirrored around the X axis.
-/// As a result, **angles are clockwise**, in radians and 0 is pointing right.
-pub type Vec2f = Vec2<f64>;
-
-pub type Mat2f = Mat2<f64>;
-
-/// Position of a tile in the map.
-///
-/// To avoid confusion with world positions,
-/// it's sometimes referred to as tile index since it's a pair of indices.
-/// `x` is column, `y` is row to match the order of `Vec2f`.
-pub type Vec2u = Vec2<usize>;
-
-pub trait VecExt {
-    fn to_angle(self) -> f64;
-}
-
-impl VecExt for Vec2f {
-    fn to_angle(self) -> f64 {
-        // Normalize to 0..=360 deg
-        self.y.atan2(self.x).rem_euclid(2.0 * PI)
-    }
-}
-
-pub trait F64Ext {
-    /// Rotated unit vector
-    fn to_vec2f(self) -> Vec2f;
-
-    /// 2D rotation matrix
-    fn to_mat2f(self) -> Mat2f;
-}
-
-impl F64Ext for f64 {
-    fn to_vec2f(self) -> Vec2f {
-        Vec2f::new(self.cos(), self.sin())
-    }
-
-    fn to_mat2f(self) -> Mat2f {
-        Mat2f::rotation_z(self)
-    }
-}
 
 pub const TILE_SIZE: f64 = 64.0;
 
@@ -104,11 +55,11 @@ impl Map {
 
     /// Lowest possible coordinates / top left
     ///
-    /// Currently for simplicity always 0,0.
+    /// Currently for simplicity always [0,0].
     /// Might change in the future e.g. if symmetry is easier with 0,0 in the center.
     pub fn mins(&self) -> Vec2f {
         // NOTE: if changing mins to be negative, check all uses of the modulo operator
-        Vec2::new(0.0, 0.0)
+        Vec2f::new(0.0, 0.0)
     }
 
     /// Highest possible coordinates / bottom right
@@ -118,7 +69,7 @@ impl Map {
 
     /// Returns tile at (c,r). Col is x, row is y
     pub fn col_row(&self, c: usize, r: usize) -> Tile {
-        self[Vec2::new(c, r)]
+        self[Vec2u::new(c, r)]
     }
 
     /// Converts world coords into tile position and offset within it.

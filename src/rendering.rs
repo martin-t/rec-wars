@@ -5,7 +5,7 @@ use std::{cmp::Reverse, str};
 use macroquad::prelude::*;
 
 use crate::{
-    debug::{DEBUG_CROSSES, DEBUG_LINES, DEBUG_TEXTS, DEBUG_TEXTS_WORLD},
+    debug::{details::Lines, DEBUG_SHAPES, DEBUG_TEXTS, DEBUG_TEXTS_WORLD},
     map::{Kind, TILE_SIZE},
     mq::{ClientMode, MacroquadClient},
     prelude::*,
@@ -515,53 +515,25 @@ fn render_viewport(
         }
     }
 
-    // Debug lines and crosses
-    // LATER colors (also in other places below)
-    //  It would be nice to use MQ's Color struct in debugging but then everything depends on MQ.
-    DEBUG_LINES.with(|lines| {
-        let mut lines = lines.borrow_mut();
-        for line in lines.iter_mut() {
-            if cvars.d_draw && cvars.d_draw_lines {
-                let scr_begin = line.begin + camera_offset;
-                let scr_end = line.end + camera_offset;
-                render_line(scr_begin, scr_end, 1.0, RED);
-                if cvars.d_draw_lines_ends_length > 0.0 {
-                    let segment = line.end - line.begin;
-                    let perpendicular = Vec2f::new(-segment.y, segment.x).normalized();
-                    render_line(
-                        scr_begin - perpendicular * cvars.d_draw_lines_ends_length,
-                        scr_begin + perpendicular * cvars.d_draw_lines_ends_length,
-                        1.0,
-                        RED,
-                    );
-                    render_line(
-                        scr_end - perpendicular * cvars.d_draw_lines_ends_length,
-                        scr_end + perpendicular * cvars.d_draw_lines_ends_length,
-                        1.0,
-                        RED,
-                    );
-                }
+    // Deduplicate and draw debug shapes
+    DEBUG_SHAPES.with(|shapes| {
+        // Sometimes debug shapes overlap and only the last one gets drawn.
+        // This is especially common when both client and server wanna draw.
+        // So instead, we convert everything to lines,
+        // merge colors if they overlap and only then draw it.
+        // This way if cl and sv shapes overlap, they end up yellow (red + green).
+        let mut shapes = shapes.borrow_mut();
+        let mut lines = Lines::new();
+        for shape in shapes.iter_mut() {
+            if cvars.d_draw {
+                shape.to_lines(cvars, &mut lines);
             }
-            line.time -= server.gs.dt;
+            shape.time -= server.gs.dt;
         }
-    });
-    DEBUG_CROSSES.with(|crosses| {
-        let mut crosses = crosses.borrow_mut();
-        for cross in crosses.iter_mut() {
-            if cvars.d_draw && cvars.d_draw_crosses {
-                let scr_point = cross.point + camera_offset;
-                if cull(scr_point) {
-                    continue;
-                }
-
-                let top_left = scr_point - Vec2f::new(-3.0, -3.0);
-                let bottom_right = scr_point - Vec2f::new(3.0, 3.0);
-                let top_right = scr_point - Vec2f::new(3.0, -3.0);
-                let bottom_left = scr_point - Vec2f::new(-3.0, 3.0);
-                render_line(top_left, bottom_right, 1.0, RED);
-                render_line(top_right, bottom_left, 1.0, RED);
-            }
-            cross.time -= server.gs.dt;
+        for (_, line) in lines.0 {
+            let scr_begin = line.begin + camera_offset;
+            let scr_end = line.end + camera_offset;
+            render_line(scr_begin, scr_end, cvars.d_draw_line_thickness, line.color);
         }
     });
 
@@ -662,7 +634,7 @@ fn render_viewport(
         cvars.hud_hp_height as f32,
         rgb,
     );
-    if cvars.d_draw_text {
+    if cvars.d_draw_hud {
         let hp_number = player_vehicle.hp_fraction * cvars.g_vehicle_hp(player_vehicle.veh_type);
         let hp_text = format!("{}", hp_number);
         render_text_with_shadow(
@@ -699,7 +671,7 @@ fn render_viewport(
         cvars.hud_ammo_height as f32,
         YELLOW,
     );
-    if cvars.d_draw_text {
+    if cvars.d_draw_texts {
         let ammo_number = match ammo {
             Ammo::Loaded(_ready_time, count) => count,
             Ammo::Reloading(_start, _end) => 0,
@@ -917,7 +889,7 @@ fn render_viewport(
     // Draw world debug text
     DEBUG_TEXTS_WORLD.with(|texts| {
         let texts = texts.borrow();
-        if cvars.d_draw && cvars.d_draw_world_text {
+        if cvars.d_draw && cvars.d_draw_world_texts {
             for text in texts.iter() {
                 let scr_pos = text.pos + camera_offset;
                 if cull(scr_pos) {
@@ -1066,10 +1038,10 @@ fn render_shared(client: &MacroquadClient, server: &Server, cvars: &Cvars) {
     let mut y = 25.0;
     DEBUG_TEXTS.with(|texts| {
         let texts = texts.borrow();
-        if cvars.d_draw && cvars.d_draw_text {
+        if cvars.d_draw && cvars.d_draw_texts {
             for text in texts.iter() {
                 render_text_with_shadow(cvars, text, 20.0, y as f32, 16.0, RED, 1.0, 1.0, 0.5);
-                y += cvars.d_draw_text_line_height;
+                y += cvars.d_draw_texts_line_height;
             }
         }
     });

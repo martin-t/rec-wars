@@ -67,14 +67,24 @@ cvars! {
 
     /// Master switch for debug output - the d_draw_* group.
     d_draw: bool = true,
+    d_draw_arrows: bool = true,
     d_draw_crosses: bool = true,
+    d_draw_crosses_half_len: f64 = 5.0,
+    /// Sometimes useful if you have trouble finding the crosses.
+    d_draw_crosses_line_from_origin: bool = false,
     d_draw_hitboxes: bool = false,
+    d_draw_hud: bool = true,
+    d_draw_line_thickness: f64 = 1.0,
     d_draw_lines: bool = true,
-    d_draw_lines_ends_length: f64 = 3.0,
+    /// This sometimes makes it easier to see the lines if they're very short.
+    d_draw_lines_ends_half_length: f64 = 5.0,
     d_draw_perf: bool = true,
-    d_draw_text: bool = true,
-    d_draw_text_line_height: f64 = 14.0,
-    d_draw_world_text: bool = true,
+    d_draw_rots: bool = true,
+    d_draw_rots_size: f64 = 16.0,
+    d_draw_texts: bool = true,
+    d_draw_texts_line_height: f64 = 14.0,
+    d_draw_world_texts: bool = true,
+    d_examples: bool = true,
     d_explosion_radius: bool = false,
     /// Draw FPS counter. Intentionally not in the d_draw_* group
     /// so I can easily check perf with and without the other debug output.
@@ -935,7 +945,7 @@ impl From<CVec3> for Color {
 
 impl From<Color> for CVec3 {
     fn from(c: Color) -> Self {
-        //soft_assert_eq!(c.a, 1.0); TODO
+        soft_assert_eq!(c.a, 1.0);
         CVec3::new(c.r, c.g, c.b)
     }
 }

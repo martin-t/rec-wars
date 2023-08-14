@@ -4,8 +4,6 @@
 //! just without the ECS data structure (we use generational arenas instead).
 //! Most game behavior (code that changes state) goes here.
 
-use std::f64::consts::PI;
-
 use rand::Rng;
 use rand_distr::StandardNormal;
 use strum::EnumCount;
@@ -813,7 +811,7 @@ fn explosion_damage(
         let center_dist = (vehicle.pos - expl_pos).magnitude();
         let dist = (center_dist - cvars.g_hitcircle_radius).max(0.0);
         if dist < radius {
-            let expl_damage = map_ranges(dist, 0.0, radius, damage_center, damage_edge);
+            let expl_damage = lerp_ranges(0.0, radius, damage_center, damage_edge, dist);
             damage(cvars, gs, owner, vehicle_handle, expl_damage);
         }
     }
@@ -825,9 +823,27 @@ fn explosion_damage(
 /// `src_min` and `src_max` must not be the same or division by zero occurs.
 ///
 /// `dest_max` can be smaller than `dest_min` if you want the resulting range to be inverted, all values can be negative.
-fn map_ranges(value: f64, src_min: f64, src_max: f64, dest_min: f64, dest_max: f64) -> f64 {
+fn lerp_ranges(src_min: f64, src_max: f64, dest_min: f64, dest_max: f64, value: f64) -> f64 {
     let src_diff = src_max - src_min;
     let dest_diff = dest_max - dest_min;
     let ratio = (value - src_min) / src_diff;
     dest_min + dest_diff * ratio
+}
+
+pub fn debug_examples(cvars: &Cvars) {
+    if !cvars.d_examples {
+        return;
+    }
+
+    dbg_world_textd!(v!(25 200), cvars.d_examples);
+
+    dbg_line!(v!(25 225), v!(75 225));
+
+    dbg_arrow!(v!(25 250), v!(50 0));
+    dbg_arrow!(v!(25 275), v!(25, -10));
+
+    dbg_cross!(v!(25 300));
+
+    dbg_rot!(v!(25 325), 0.0);
+    dbg_rot!(v!(25 350), 30.0_f64.to_radians());
 }

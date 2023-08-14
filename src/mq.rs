@@ -216,7 +216,7 @@ impl Assets {
         push_map!("maps/extra/Damned Rockets (2).map"); // Asymmetric CTF, left half like Castle Islands (2), right half has 2 bases
         push_map_hidden!("maps/extra/doom.map");
         push_map_hidden!("maps/extra/elements.map");
-        push_map_hidden!("maps/extra/Exile (4).map"); // Tiny, many spawns
+        push_map_hidden!("maps/extra/Exile (4).map"); // Small, many spawns
         push_map_hidden!("maps/extra/football.map");
         push_map!("maps/extra/Ice ring.map");
         push_map_hidden!("maps/extra/ice skating ring (2).map");
@@ -226,7 +226,7 @@ impl Assets {
         push_map_hidden!("maps/extra/Large.map");
         push_map_hidden!("maps/extra/Neutral.map");
         push_map!("maps/extra/Nile.map");
-        push_map_hidden!("maps/extra/OK Corral (2).map"); // Small map, not symmetric (upper spawn is closer)
+        push_map_hidden!("maps/extra/OK Corral (2).map"); // Tiny, not symmetric (upper spawn is closer)
         push_map_hidden!("maps/extra/Peninsulae (3).map");
         push_map_hidden!("maps/extra/River Crossings.map");
         push_map_hidden!("maps/extra/Road To Hell (2).map"); // Only 4 spawns in a tiny area
