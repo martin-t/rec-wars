@@ -215,6 +215,7 @@ impl Server {
         self.gs.game_time_prev = self.gs.game_time;
         self.gs.game_time = game_time;
         self.gs.dt = self.gs.game_time - self.gs.game_time_prev;
+        debug::set_game_time(self.gs.game_time);
 
         debug::clear_expired();
 
