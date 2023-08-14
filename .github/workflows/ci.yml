@@ -31,7 +31,8 @@ jobs:
           sudo apt-get update
           sudo apt-get install --no-install-recommends -y pkg-config libx11-dev libxi-dev libgl1-mesa-dev libasound2-dev
       - run: rustup target add wasm32-unknown-unknown
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
+      - uses: Swatinem/rust-cache@b8a6852b4f997182bdea832df3f9e153038b5191
       - name: Print versions
         run: rustc --version && cargo --version
       - name: Build native
@@ -46,7 +47,7 @@ jobs:
   format:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - run: cargo fmt --version
       - run: cargo fmt -- --check
 
@@ -56,7 +57,8 @@ jobs:
       - run: |
           sudo apt-get update
           sudo apt-get install --no-install-recommends -y pkg-config libx11-dev libxi-dev libgl1-mesa-dev libasound2-dev
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
+      - uses: Swatinem/rust-cache@b8a6852b4f997182bdea832df3f9e153038b5191
       - run: cargo clippy --version
 
       # Use --all-targets to also check tests.
