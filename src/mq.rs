@@ -1,5 +1,7 @@
 //! Native and WASM versions using the macroquad engine.
 
+use std::path::Path;
+
 use cvars_console_macroquad::MacroquadConsole;
 use macroquad::prelude::*;
 
@@ -113,10 +115,12 @@ pub struct Assets {
     /// This is called texture list because the original ReCwar called it that.
     /// It's actually just a list of map surfaces, not all images/textures.
     pub texture_list: String,
-    /// List of paths to maps.
-    pub map_list: Vec<String>,
+    /// List of paths to maps supported by bots.
+    pub bot_map_paths: Vec<String>,
     /// Map path -> map data as a string.
     pub maps: FnvHashMap<String, String>,
+    /// Map name -> path.
+    pub map_names_to_paths: FnvHashMap<String, String>,
     pub texs_tiles: Vec<Texture2D>,
     pub texs_vehicles: Vec<Texture2D>,
     pub texs_wrecks: Vec<Texture2D>,
@@ -174,73 +178,77 @@ impl Assets {
 
         let texture_list = String::from_utf8(asset!("data/texture_list.txt")).unwrap();
 
-        let mut map_list = Vec::new();
+        let mut bot_map_paths = Vec::new();
         let mut maps = FnvHashMap::default();
-        macro_rules! push_map {
-            ($path:expr $(,)?) => {{
-                map_list.push($path.to_owned());
-                let data = String::from_utf8(asset!($path)).unwrap();
-                maps.insert($path.to_string(), data);
+        let mut map_names_to_paths = FnvHashMap::default();
+        macro_rules! add_map {
+            ($path:expr) => {{
+                add_map_hidden!($path);
+
+                bot_map_paths.push($path.to_owned());
             }};
         }
-        macro_rules! push_map_hidden {
-            ($path:expr $(,)?) => {{
+        macro_rules! add_map_hidden {
+            ($path:expr) => {{
                 let data = String::from_utf8(asset!($path)).unwrap();
-                maps.insert($path.to_string(), data);
+                maps.insert($path.to_owned(), data);
+
+                let name = Path::new($path).file_name().unwrap().to_str().unwrap();
+                map_names_to_paths.insert(name.to_owned(), $path.to_owned());
             }};
         }
         // This is a subset of maps that are not blatantly broken with the current bots.
         // LATER Autodiscover maps without hardcoding.
-        push_map_hidden!("maps/Arena.map");
-        push_map_hidden!("maps/A simple plan (2).map");
-        push_map!("maps/Atrium.map");
-        push_map!("maps/Bunkers (2).map");
-        push_map!("maps/Castle Islands (2).map");
-        push_map!("maps/Castle Islands (4).map");
-        push_map_hidden!("maps/Corners (4).map");
-        push_map!("maps/Delta.map");
-        push_map!("maps/Desert Eagle.map");
-        push_map_hidden!("maps/Joust (2).map"); // Small map (narrow)
-        push_map_hidden!("maps/Large front (2).map");
-        push_map_hidden!("maps/Oases (4).map");
-        push_map!("maps/Park.map");
-        push_map!("maps/Roads.map");
-        push_map!("maps/Snow.map");
-        push_map!("maps/Spots (8).map");
-        push_map_hidden!("maps/Vast Arena.map");
-        push_map_hidden!("maps/extra/6 terrains (2).map");
-        push_map_hidden!("maps/extra/A Cow Too Far.map");
-        push_map_hidden!("maps/extra/All Water.map");
-        push_map_hidden!("maps/extra/Battlegrounds (2).map");
-        push_map_hidden!("maps/extra/Crossing.map"); // No spawns
-        push_map!("maps/extra/Damned Rockets (2).map"); // Asymmetric CTF, left half like Castle Islands (2), right half has 2 bases
-        push_map_hidden!("maps/extra/doom.map");
-        push_map_hidden!("maps/extra/elements.map");
-        push_map_hidden!("maps/extra/Exile (4).map"); // Small, many spawns
-        push_map_hidden!("maps/extra/football.map");
-        push_map!("maps/extra/Ice ring.map");
-        push_map_hidden!("maps/extra/ice skating ring (2).map");
-        push_map!("maps/extra/IceWorld.map");
-        push_map!("maps/extra/I see you (2).map"); // Like Large Front (2) but without any cover
-        push_map_hidden!("maps/extra/Knifflig (2).map");
-        push_map_hidden!("maps/extra/Large.map");
-        push_map_hidden!("maps/extra/Neutral.map");
-        push_map!("maps/extra/Nile.map");
-        push_map_hidden!("maps/extra/OK Corral (2).map"); // Tiny, not symmetric (upper spawn is closer)
-        push_map_hidden!("maps/extra/Peninsulae (3).map");
-        push_map_hidden!("maps/extra/River Crossings.map");
-        push_map_hidden!("maps/extra/Road To Hell (2).map"); // Only 4 spawns in a tiny area
-        push_map_hidden!("maps/extra/THE Crossing.map");
-        push_map_hidden!("maps/extra/Thomap1 (4).map");
-        push_map_hidden!("maps/extra/Town on Fire.map");
-        push_map!("maps/extra/twisted (2).map");
-        push_map_hidden!("maps/extra/winterhardcore.map");
-        push_map!("maps/extra/Yellow and Green.map");
-        push_map!("maps/extra2/Mini Islands (4).map");
-        push_map_hidden!("maps/extra2/Symmetric.map");
-        push_map_hidden!("maps/extra2/Training room.map");
-        push_map_hidden!("maps/extra2/Winter (4).map");
-        push_map_hidden!("maps/extra2/World War (2).map");
+        add_map_hidden!("maps/Arena.map");
+        add_map_hidden!("maps/A simple plan (2).map");
+        add_map!("maps/Atrium.map");
+        add_map!("maps/Bunkers (2).map");
+        add_map!("maps/Castle Islands (2).map");
+        add_map!("maps/Castle Islands (4).map");
+        add_map_hidden!("maps/Corners (4).map");
+        add_map!("maps/Delta.map");
+        add_map!("maps/Desert Eagle.map");
+        add_map_hidden!("maps/Joust (2).map"); // Small map (narrow)
+        add_map_hidden!("maps/Large front (2).map");
+        add_map_hidden!("maps/Oases (4).map");
+        add_map!("maps/Park.map");
+        add_map!("maps/Roads.map");
+        add_map!("maps/Snow.map");
+        add_map!("maps/Spots (8).map");
+        add_map_hidden!("maps/Vast Arena.map");
+        add_map_hidden!("maps/extra/6 terrains (2).map");
+        add_map_hidden!("maps/extra/A Cow Too Far.map");
+        add_map_hidden!("maps/extra/All Water.map");
+        add_map_hidden!("maps/extra/Battlegrounds (2).map");
+        add_map_hidden!("maps/extra/Crossing.map"); // No spawns
+        add_map!("maps/extra/Damned Rockets (2).map"); // Asymmetric CTF, left half like Castle Islands (2), right half has 2 bases
+        add_map_hidden!("maps/extra/doom.map");
+        add_map_hidden!("maps/extra/elements.map");
+        add_map_hidden!("maps/extra/Exile (4).map"); // Small, many spawns
+        add_map_hidden!("maps/extra/football.map");
+        add_map!("maps/extra/Ice ring.map");
+        add_map_hidden!("maps/extra/ice skating ring (2).map");
+        add_map!("maps/extra/IceWorld.map");
+        add_map!("maps/extra/I see you (2).map"); // Like Large Front (2) but without any cover
+        add_map_hidden!("maps/extra/Knifflig (2).map");
+        add_map_hidden!("maps/extra/Large.map");
+        add_map_hidden!("maps/extra/Neutral.map");
+        add_map!("maps/extra/Nile.map");
+        add_map_hidden!("maps/extra/OK Corral (2).map"); // Tiny, not symmetric (upper spawn is closer)
+        add_map_hidden!("maps/extra/Peninsulae (3).map");
+        add_map_hidden!("maps/extra/River Crossings.map");
+        add_map_hidden!("maps/extra/Road To Hell (2).map"); // Only 4 spawns in a tiny area
+        add_map_hidden!("maps/extra/THE Crossing.map");
+        add_map_hidden!("maps/extra/Thomap1 (4).map");
+        add_map_hidden!("maps/extra/Town on Fire.map");
+        add_map!("maps/extra/twisted (2).map");
+        add_map_hidden!("maps/extra/winterhardcore.map");
+        add_map!("maps/extra/Yellow and Green.map");
+        add_map!("maps/extra2/Mini Islands (4).map");
+        add_map_hidden!("maps/extra2/Symmetric.map");
+        add_map_hidden!("maps/extra2/Training room.map");
+        add_map_hidden!("maps/extra2/Winter (4).map");
+        add_map_hidden!("maps/extra2/World War (2).map");
 
         macro_rules! tex {
             ($path:expr $(,)?) => {
@@ -306,8 +314,9 @@ impl Assets {
 
         Self {
             texture_list,
-            map_list,
+            bot_map_paths,
             maps,
+            map_names_to_paths,
             texs_tiles,
             texs_vehicles,
             texs_wrecks,

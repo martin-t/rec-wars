@@ -88,23 +88,37 @@ async fn main() {
     let assets = Assets::load_all().await;
 
     let map_path = if cvars.g_map.is_empty() {
-        let index = cvars.d_seed as usize % assets.map_list.len();
-        let path = assets.map_list[index].clone();
+        // Pick a random map supported by bots.
+        let index = cvars.d_seed as usize % assets.bot_map_paths.len();
+        let path = &assets.bot_map_paths[index];
         cvars.g_map = path.clone();
         path
+    } else if cvars.g_map.starts_with("maps/") {
+        // Load the exact path.
+        &cvars.g_map
     } else {
-        let mut path = cvars.g_map.clone();
-        if !path.starts_with("maps/") {
-            path.insert_str(0, "maps/");
+        // Attempt to find a map whose name starts with the given string.
+        let mut matching = Vec::new();
+        for (name, path) in &assets.map_names_to_paths {
+            if name.starts_with(&cvars.g_map) {
+                matching.push(path);
+            }
         }
-        if !path.ends_with(".map") {
-            path.push_str(".map");
+        if matching.is_empty() {
+            panic!("ERROR: No maps found matching {}", cvars.g_map);
+        } else if matching.len() > 1 {
+            dbg_logf!("WARNING: Multiple maps found matching {}:", cvars.g_map);
+            for path in &matching {
+                dbg_logf!("    {}", path);
+            }
+            matching[0]
+        } else {
+            matching[0]
         }
-        path
     };
     dbg_logf!("Map: {}", map_path);
 
-    let map_text = assets.maps.get(&map_path).unwrap();
+    let map_text = assets.maps.get(map_path).unwrap();
     let surfaces = map::parse_texture_list(&assets.texture_list);
     let map = map::parse_map(map_text, surfaces);
 
