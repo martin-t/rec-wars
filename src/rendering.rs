@@ -5,7 +5,7 @@ use std::{cmp::Reverse, str};
 use macroquad::prelude::*;
 
 use crate::{
-    debug::{details::Lines, DEBUG_SHAPES, DEBUG_TEXTS, DEBUG_TEXTS_WORLD},
+    debug::{details::UniqueLines, DEBUG_SHAPES, DEBUG_TEXTS, DEBUG_TEXTS_WORLD},
     map::{Kind, TILE_SIZE},
     mq::{ClientMode, MacroquadClient},
     prelude::*,
@@ -523,7 +523,7 @@ fn render_viewport(
         // merge colors if they overlap and only then draw it.
         // This way if cl and sv shapes overlap, they end up yellow (red + green).
         let mut shapes = shapes.borrow_mut();
-        let mut lines = Lines::new();
+        let mut lines = UniqueLines::default();
         for shape in shapes.iter_mut() {
             if cvars.d_draw {
                 shape.to_lines(cvars, &mut lines);
