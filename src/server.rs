@@ -148,9 +148,7 @@ impl Server {
     }
 
     fn gamelogic(&mut self, cvars: &Cvars, dt_update: f64) {
-        // LATER prevent death spirals
-        // LATER impl the other modes
-        // LATER allow switching at runtime
+        // LATER Slow down time to prevent death spirals.
         match cvars.sv_tickrate_mode {
             TickrateMode::Variable => {
                 let game_time_target = self.gs.game_time + dt_update;

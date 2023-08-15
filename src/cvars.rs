@@ -951,6 +951,7 @@ impl From<Color> for CVec3 {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, EnumString, Display)]
+#[strum(ascii_case_insensitive)]
 pub enum Hardpoint {
     Chassis,
     Turret,
@@ -958,6 +959,7 @@ pub enum Hardpoint {
 
 /// Various options how to handle different physics/gamelogic and rendering framerates.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, EnumString, Display)]
+#[strum(ascii_case_insensitive)]
 pub enum TickrateMode {
     /// Same FPS as rendering - runs one tick with variable timestep before rendering.
     /// This means simulation always catches up to rendering (wall-clock time) exactly.
