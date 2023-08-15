@@ -148,11 +148,11 @@ impl Server {
     }
 
     fn gamelogic(&mut self, cvars: &Cvars, dt_update: f64) {
-        // TODO prevent death spirals
+        // LATER prevent death spirals
         // LATER impl the other modes
-        // TODO allow switching at runtime
+        // LATER allow switching at runtime
         match cvars.sv_tickrate_mode {
-            TickrateMode::Synchronized => {
+            TickrateMode::Variable => {
                 let game_time_target = self.gs.game_time + dt_update;
                 self.gamelogic_tick(cvars, game_time_target);
             }
@@ -172,10 +172,10 @@ impl Server {
                     self.gamelogic_tick(cvars, self.gs.game_time + dt);
                 }
             }
-            TickrateMode::FixedOrSmaller => {
-                // TODO Input is ignored or duplicated depending on fixed FPS
+            TickrateMode::FixedWithExtrapolation => {
+                // LATER Input is ignored or duplicated depending on fixed FPS
                 // http://localhost:8000/web/?map=Atrium&bots_max=5&sv_gamelogic_mode=2&sv_gamelogic_fixed_fps=90
-                // TODO Related: gs_fixed should only be used here, the rest of the code shouldn't know about it.
+                // LATER Related: gs_fixed should only be used here, the rest of the code shouldn't know about it.
 
                 let dt_fixed = self.gs.game_time - self.gs_fixed.game_time;
                 let game_time_target = self.gs_fixed.game_time + dt_fixed + dt_update;
@@ -195,7 +195,7 @@ impl Server {
                     dbg_logf!("Remaining time: {}", remaining);
                 }
                 self.gamelogic_tick(cvars, self.gs.game_time + remaining);
-                // TODO skip too small steps?
+                // LATER skip too small steps?
             }
         }
         // TODO don't use game_time here?

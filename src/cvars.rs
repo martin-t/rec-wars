@@ -459,8 +459,8 @@ cvars! {
     /// LATER fix - Does not work in MQ: https://github.com/not-fl3/macroquad/issues/264
     sv_auto_unpause_on_restore: bool = false,
 
-    sv_tickrate_fixed_fps: f64 = 150.0,
-    sv_tickrate_mode: TickrateMode = TickrateMode::Synchronized,
+    sv_tickrate_fixed_fps: f64 = 60.0,
+    sv_tickrate_mode: TickrateMode = TickrateMode::Variable,
 }
 
 impl Cvars {
@@ -961,7 +961,7 @@ pub enum Hardpoint {
 pub enum TickrateMode {
     /// Same FPS as rendering - runs one tick with variable timestep before rendering.
     /// This means simulation always catches up to rendering (wall-clock time) exactly.
-    Synchronized,
+    Variable,
     /// Fixed FPS - always the same timestep, leftover time carries over to the next render frame.
     /// This means simulation can be only very slightly or up to almost a full frame
     /// behind what should be rendered *and* this delay varries.
@@ -971,7 +971,7 @@ pub enum TickrateMode {
     /// to catch up to rendering exactly. Next frame, the smaller step is thrown away and simulation
     /// resumes from the last full step so it's deterministic. Too small steps are skipped.
     /// This is described by Jonathan Blow here: https://youtu.be/fdAOPHgW7qM?t=7149
-    FixedOrSmaller,
+    FixedWithExtrapolation,
     // There is another option - FixedWithInterpolation:
     // Instead of running with shorter dt to create the intermediate frame which is thrown away,
     // we'd wait till the next full simulation frame and interpolate to get the intermediate render frame.
