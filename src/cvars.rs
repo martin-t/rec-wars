@@ -106,7 +106,7 @@ cvars! {
     d_seed: u64 = 0,
     /// Change speed of everything in the game
     d_speed: f64 = 1.0,
-    d_tickrate_remaining: bool = false,
+    d_tickrate_fixed_carry: bool = false,
     d_timing_samples: usize = 60,
     d_tracing: bool = false,
 
@@ -459,7 +459,11 @@ cvars! {
     /// LATER fix - Does not work in MQ: https://github.com/not-fl3/macroquad/issues/264
     sv_auto_unpause_on_restore: bool = false,
 
-    sv_tickrate_fixed_fps: f64 = 60.0,
+    /// LATER Without extrapolation, this needs to be significantly higher than framerate to avoid judder.
+    ///     Assuming rendering at 60 fps:
+    ///     With 30 updated, it's easily visible on vehicle movement.
+    ///     With 60, it's sometimes still noticeable on vehicles but mostly on moving text (names) being less readable.
+    sv_tickrate_fixed_fps: f64 = 150.0,
     sv_tickrate_mode: TickrateMode = TickrateMode::Variable,
 }
 
@@ -969,11 +973,11 @@ pub enum TickrateMode {
     /// behind what should be rendered *and* this delay varries.
     /// As I understand, this can cause a specific kind of stutter called judder.
     Fixed,
-    /// Simulation runs in fixed steps as long as it can, the last step is smaller
-    /// to catch up to rendering exactly. Next frame, the smaller step is thrown away and simulation
-    /// resumes from the last full step so it's deterministic. Too small steps are skipped.
-    /// This is described by Jonathan Blow here: https://youtu.be/fdAOPHgW7qM?t=7149
-    FixedWithExtrapolation,
+    // /// Simulation runs in fixed steps as long as it can, the last step is smaller
+    // /// to catch up to rendering exactly. Next frame, the smaller step is thrown away and simulation
+    // /// resumes from the last full step so it's deterministic. Too small steps are skipped.
+    // /// This is described by Jonathan Blow here: https://youtu.be/fdAOPHgW7qM?t=7149
+    // FixedWithExtrapolation,
     // There is another option - FixedWithInterpolation:
     // Instead of running with shorter dt to create the intermediate frame which is thrown away,
     // we'd wait till the next full simulation frame and interpolate to get the intermediate render frame.
