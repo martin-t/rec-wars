@@ -10,11 +10,11 @@
 #[macro_use]
 pub mod debug; // keep first so the macros are available everywhere
 
+pub mod client;
 pub mod cvars;
 pub mod entities;
 pub mod game_state;
 pub mod map;
-pub mod mq;
 pub mod prelude;
 pub mod rendering;
 pub mod server;
@@ -24,7 +24,7 @@ pub mod timing;
 
 use macroquad::prelude::*;
 
-use crate::{mq::MacroquadClient, prelude::*, server::Server};
+use crate::{client::MacroquadClient, prelude::*, server::Server};
 
 // LATER server/client/local mode
 #[derive(Debug)]

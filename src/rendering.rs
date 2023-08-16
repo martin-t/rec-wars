@@ -5,9 +5,9 @@ use std::{cmp::Reverse, str};
 use macroquad::prelude::*;
 
 use crate::{
+    client::{ClientMode, MacroquadClient},
     debug::{details::UniqueLines, DEBUG_SHAPES, DEBUG_TEXTS, DEBUG_TEXTS_WORLD},
     map::{Kind, TILE_SIZE},
-    mq::{ClientMode, MacroquadClient},
     prelude::*,
     server::Server,
 };

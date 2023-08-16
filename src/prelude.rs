@@ -40,12 +40,12 @@ pub use thunderdome::{Arena, Index};
 pub use vek::{Clamp, Lerp, Slerp, Wrap};
 
 pub use crate::{
+    client::Assets,
     cvars::{CVec3, Cvars},
     debug::{DbgIterator, SoftUnwrap},
     entities::*,
     game_state::*,
     map::Map,
-    mq::Assets,
 };
 
 // Visibility of macros by example works diffrently from normal items,
