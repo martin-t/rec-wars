@@ -135,8 +135,6 @@ async fn main() {
     loop {
         let real_time = get_time();
 
-        server.snapshot_inputs();
-
         client.process_input(&mut server);
 
         server.update(&cvars, real_time);

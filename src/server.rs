@@ -101,11 +101,7 @@ impl Server {
         player_handle
     }
 
-    pub fn snapshot_inputs(&mut self) {
-        self.gs.inputs_prev.snapshot(&self.gs.players);
-    }
-
-    pub fn input(&mut self, local_player_handle: Index, input: Input) {
+    pub fn receive_input(&mut self, local_player_handle: Index, input: Input) {
         // LATER Keep timestamps of input events. When splitting frame into multiple steps, update input each step.
         self.gs.players[local_player_handle].input = input;
     }
@@ -220,6 +216,8 @@ impl Server {
         dbg_textf!("vehicle count: {}", self.gs.vehicles.len());
         dbg_textf!("projectile count: {}", self.gs.projectiles.len());
         dbg_textf!("explosion count: {}", self.gs.explosions.len());
+
+        self.gs.inputs_prev.snapshot(&self.gs.players);
 
         let end = macroquad::time::get_time();
         self.gamelogic_durations

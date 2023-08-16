@@ -93,14 +93,14 @@ impl MacroquadClient {
         match self.client_mode {
             ClientMode::Singleplayer { player_handle } => {
                 let input = input1.merged(input2);
-                server.input(player_handle, input);
+                server.receive_input(player_handle, input);
             }
             ClientMode::Splitscreen {
                 render_targets: _,
                 player_handles: (player1_handle, player2_handle),
             } => {
-                server.input(player1_handle, input1);
-                server.input(player2_handle, input2);
+                server.receive_input(player1_handle, input1);
+                server.receive_input(player2_handle, input2);
             }
         }
 
