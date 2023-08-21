@@ -64,7 +64,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
     // If hand parsing gets too complex, might wanna consider one of the libs here:
     // https://github.com/rosetta-rs/argparse-rosetta-rs
     let mut args = env::args().skip(1).peekable(); // Skip path to self
-    let endpoint = match args.peek().map(String::as_str) {
+    #[allow(unused)] // WASM hack below
+    let mut endpoint = match args.peek().map(String::as_str) {
         Some("launcher") => {
             args.next();
             None
@@ -120,6 +121,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
     // because they know it's meant to be a cvar/command and not a malformed command line option.
     // We might wanna require that too but this is slightly less typing for now.
     let cvar_args = args.collect();
+
+    // Force local mode in WASM for now.
+    #[cfg(target_arch = "wasm32")]
+    {
+        endpoint = Some(Endpoint::Local);
+    }
 
     match endpoint {
         // LATER None should launch client and offer choice in menu
