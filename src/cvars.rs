@@ -85,6 +85,8 @@ cvars! {
     d_draw_texts_line_height: f64 = 14.0,
     d_draw_world_texts: bool = true,
     d_examples: bool = true,
+    /// During init. Set this first.
+    d_exit_on_unknown_cvar: bool = true,
     d_explosion_radius: bool = false,
     /// Draw FPS counter. Intentionally not in the d_draw_* group
     /// so I can easily check perf with and without the other debug output.
@@ -1000,3 +1002,5 @@ pub struct MovementStats {
     pub turn_rate_increase: f64,
     pub turn_rate_max: f64,
 }
+
+//pub fn load_cvars

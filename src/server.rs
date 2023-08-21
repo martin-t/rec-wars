@@ -4,7 +4,6 @@ use crate::{
     cvars::TickrateMode,
     debug,
     prelude::*,
-    sys_ai, systems,
     timing::{Durations, Fps},
 };
 
@@ -76,7 +75,8 @@ impl Server {
         }
 
         for handle in gs.players.iter_handles() {
-            systems::spawn_vehicle(cvars, &mut gs, &map, handle, false);
+            let mut ctx = FrameCtx::new(cvars, &mut gs, &map);
+            ctx.spawn_vehicle(handle, false);
         }
 
         Self {
@@ -97,7 +97,10 @@ impl Server {
     pub fn connect(&mut self, cvars: &Cvars, name: &str) -> Index {
         let player = Player::new(name.to_owned());
         let player_handle = self.gs.players.insert(player.clone());
-        systems::spawn_vehicle(cvars, &mut self.gs, &self.map, player_handle, true);
+
+        let mut ctx = FrameCtx::new(cvars, &mut self.gs, &self.map);
+        ctx.spawn_vehicle(player_handle, true);
+
         player_handle
     }
 
@@ -186,32 +189,34 @@ impl Server {
         dbg_textd!(self.gs.game_time);
         dbg_textd!(self.gs.game_time_prev);
 
-        systems::cleanup(cvars, &mut self.gs);
+        let mut ctx = FrameCtx::new(cvars, &mut self.gs, &self.map);
 
-        sys_ai::ai(cvars, &mut self.gs);
+        ctx.cleanup();
 
-        systems::respawning(cvars, &mut self.gs, &self.map);
+        ctx.ai();
 
-        systems::player_logic(&mut self.gs);
+        ctx.respawning();
 
-        systems::vehicle_logic(cvars, &mut self.gs);
+        ctx.player_logic();
+
+        ctx.vehicle_logic();
 
         // It's probably a good idea to shoot before movement so that when turning
         // the shot angle corresponds to the vehicle angle the player saw last frame.
-        systems::shooting(cvars, &mut self.gs);
+        ctx.shooting();
 
-        systems::vehicle_movement(cvars, &mut self.gs, &self.map);
+        ctx.vehicle_movement();
 
-        systems::hm_turning(cvars, &mut self.gs, &self.map);
-        systems::gm_turning(cvars, &mut self.gs);
+        ctx.hm_turning();
+        ctx.gm_turning();
 
-        systems::projectiles(cvars, &mut self.gs, &self.map);
+        ctx.projectiles();
 
-        systems::projectiles_timeout(cvars, &mut self.gs);
+        ctx.projectiles_timeout();
 
-        systems::self_destruct(cvars, &mut self.gs);
+        ctx.self_destruct();
 
-        systems::debug_examples(cvars);
+        ctx.debug_examples();
 
         dbg_textf!("vehicle count: {}", self.gs.vehicles.len());
         dbg_textf!("projectile count: {}", self.gs.projectiles.len());

@@ -41,11 +41,13 @@ panic = "abort"
 web_splitscreen = []
 
 [dependencies]
+bincode = "1.3.3"
 cvars = "0.4.2"
 cvars-console-macroquad = "0.3.0"
 fnv = "1.0.7"
 inline_tweak = "1.0.9"
 macroquad = "=0.4.2" # Exact version because of the image crate https://github.com/not-fl3/macroquad/issues/494
+serde = { version = "=1.0.171", features = ["derive"] } # https://github.com/serde-rs/serde/issues/2538
 strum = "0.25.0"
 strum_macros = "0.25.2"
 thunderdome = "0.6.1"

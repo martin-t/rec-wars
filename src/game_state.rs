@@ -1,16 +1,12 @@
 use std::fmt::{self, Debug, Formatter};
 
 use rand_distr::Uniform;
+use serde::{Deserialize, Serialize};
 
 use crate::prelude::*;
 
 /// Things that change during the game
 /// and might need to be taken back during frame interpolation / reconciliation.
-///
-/// TODO How to do frame interpolation / server reconcilliation?
-/// Ralith (hecs author) says to make all components a Vec if past positions
-/// but that requires all code to be aware of interpolation.
-/// What does veloren do?
 #[derive(Debug, Clone)]
 pub struct GameState {
     /// The RNG for all gamelogic
@@ -135,7 +131,7 @@ impl InputsPrev {
     }
 }
 
-#[derive(Clone, Copy, Default)]
+#[derive(Clone, Copy, Default, Serialize, Deserialize)]
 pub struct Input {
     pub left: bool,
     pub right: bool,

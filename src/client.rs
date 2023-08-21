@@ -328,6 +328,38 @@ impl Assets {
             tex_explosion_cyan,
         }
     }
+
+    pub fn select_map<'a>(&'a self, cvars: &'a mut Cvars) -> &'a str {
+        if cvars.g_map.is_empty() {
+            // Pick a random map supported by bots.
+            let index = cvars.d_seed as usize % self.bot_map_paths.len();
+            let path = &self.bot_map_paths[index];
+            cvars.g_map = path.clone();
+            path
+        } else if cvars.g_map.starts_with("maps/") {
+            // Load the exact path.
+            &cvars.g_map
+        } else {
+            // Attempt to find a map whose name starts with the given string.
+            let mut matching = Vec::new();
+            for (name, path) in &self.map_names_to_paths {
+                if name.starts_with(&cvars.g_map) {
+                    matching.push(path);
+                }
+            }
+            if matching.is_empty() {
+                panic!("ERROR: No maps found matching {}", cvars.g_map);
+            } else if matching.len() > 1 {
+                dbg_logf!("WARNING: Multiple maps found matching {}:", cvars.g_map);
+                for path in &matching {
+                    dbg_logf!("    {}", path);
+                }
+                matching[0]
+            } else {
+                matching[0]
+            }
+        }
+    }
 }
 
 // Keys to avoid in defaults:

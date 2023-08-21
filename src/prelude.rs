@@ -46,6 +46,8 @@ pub use crate::{
     entities::*,
     game_state::*,
     map::Map,
+    systems::FrameCtx,
+    utils::lerp_ranges,
 };
 
 // Visibility of macros by example works diffrently from normal items,

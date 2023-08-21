@@ -4,6 +4,7 @@
 //! but in normal usage you should prefer the `dbg_*` macros
 //! and other items from the parent mod.
 
+use serde::{Deserialize, Serialize};
 use vek::Vec2;
 
 use crate::{debug::DEBUG_SHAPES, prelude::*};
@@ -20,7 +21,7 @@ macro_rules! __println {
 }
 
 /// Helper struct, use one of the `dbg_*!()` macros.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct WorldText {
     pub pos: Vec2f,
     pub msg: String,
@@ -33,21 +34,33 @@ impl WorldText {
 }
 
 /// Helper struct, use one of the `dbg_*!()` macros.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct DebugShape {
     pub shape: Shape,
     /// Time left (decreases every frame)
     pub time: f64,
+    #[serde(with = "ColorDef")]
     pub color: Color,
 }
 
 /// Helper enum, use one of the `dbg_*!()` macros.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub enum Shape {
     Line { begin: Vec2f, end: Vec2f },
     Arrow { begin: Vec2f, dir: Vec2f },
     Cross { point: Vec2f },
     Rot { point: Vec2f, rot: f64, scale: f64 },
+}
+
+/// Macroquad's Color doesn't impl serde traits
+/// so we do this: https://serde.rs/remote-derive.html
+#[derive(Debug, Clone, Deserialize, Serialize)]
+#[serde(remote = "Color")]
+pub struct ColorDef {
+    pub r: f32,
+    pub g: f32,
+    pub b: f32,
+    pub a: f32,
 }
 
 /// Helper function, prefer `dbg_line!()` instead.
