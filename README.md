@@ -2,7 +2,7 @@
     <h1>RecWars</h1>
     <i>Recreational Warfare .rs</i>
     <br />
-    A multiplayer top-down tank shooter - Rust/WASM port of an old Windows game called RecWar.
+    A multiplayer top-down tank shooter - a FOSS port of an old Windows game called RecWar to Rust/WASM.
 </div>
 <br />
 
@@ -22,21 +22,24 @@
 
 _**[Play in the Browser](https://martin-t.gitlab.io/gitlab-pages/rec-wars/macroquad.html) | [Play splitscreen in the Browser](https://martin-t.gitlab.io/gitlab-pages/rec-wars/macroquad-splitscreen.html) | [Join our Discord](https://discord.gg/9BQVVgV)**_
 
-RecWars is a free and open source clone of [RecWar](#the-original-game) - you control a vehicle and fight other vehicles in a variety of game modes using an arsenal of several distinct weapons. You can play against bots, in splitscreen and over the network.
+RecWars is a free and open source clone of [RecWar](#the-original-game), a singleplayer and multiplayer tank shooter. You control a tank, hovercraft or hummer and fight other vehicles in one of three game modes using an arsenal of eight distinct weapons. You can play against bots, in splitscreen and over the network.
 
-RecWars aims to have gameplay similar, but not identical, to RecWar. I suspect RecWar was balanced for playing against bots and might result in annoying strats being the most effective when people start [playing to win](http://www.sirlin.net/articles/playing-to-win). However, almost everything in RecWars is [configurable](#cvars) and you can switch to the original RecWar balance to [compare](#recwars-vs-recwar-differences).
+RecWars aims to have gameplay similar, but not identical, to RecWar. RecWar was balanced for playing against bots and might result in annoying strats being the most effective when people start [playing to win](http://www.sirlin.net/articles/playing-to-win), RecWars will make changes where needed to provide a more enjoyable multiplayer experience. However, almost everything in RecWars is [configurable](#cvars) and you can switch to the original RecWar balance to [compare](#recwars-vs-recwar-differences).
 
 **Currently this is very much a work-in-progress**: the driving physics don't feel right, there are no collisions between vehicles, bots move randomly ...
 
-The ultimate goal is to create a moddable multiplayer game playable in the browser and natively on Linux, Windows and macOS. RecWars is built in the spirit of [everlasting games](https://spicylobster.itch.io/jumpy/devlog/337996/everlasting-games).
+RecWars is developed in lockstep with [RustCycles](https://github.com/rustcycles/rustcycles). Even though they are very different, built on different engines, they share the general architecture. Ideas are tested in one game, then ported to the other.
+
+The ultimate goal is to create a fully moddable multiplayer game playable in the browser and natively on Linux, Windows and macOS. RecWars is built in the spirit of [everlasting games](https://spicylobster.itch.io/jumpy/devlog/337996/everlasting-games).
 
 Features
 --------
 
 - [x] Singleplayer
-- [ ] Multiplayer
+- [x] Multiplayer
     - [x] Splitscreen
-    - [ ] Network
+    - [x] Network (native client only, no browser support yet)
+	- [ ] Splitscreen and network at the same time
 - [ ] Bot AI
 - [x] [Browser client](https://martin-t.gitlab.io/gitlab-pages/rec-wars/macroquad.html)
 - [x] Native client (Linux, Windows, macOS)
@@ -46,7 +49,7 @@ Features
     - [ ] Capture The Cow
 - [x] [Highly configurable](#cvars)
 
-See [TODO.md](TODO.md) for details.
+See [Todo.md](Todo.md) for details.
 
 How to Play
 -----------

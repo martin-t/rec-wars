@@ -1,4 +1,4 @@
-# Master TODO list
+# Master Todo List
 
 ## 0.2 - MVP
 
@@ -200,7 +200,7 @@
 - [ ] GM - presing fire again switches back to tank
 - [ ] replays (also easier debugging)
     - [ ] record seed+input (WASM should be reproducible when avoiding NaNs)
-    - [ ] SmallRng depends on platform and rand version: https://docs.rs/rand/*/rand/rngs/struct.SmallRng.html
+    - [x] SmallRng depends on platform and rand version: https://docs.rs/rand/*/rand/rngs/struct.SmallRng.html
 - [ ] allow MG to shoot down missiles
 - [ ] lateral friction
 - [ ] announcer
