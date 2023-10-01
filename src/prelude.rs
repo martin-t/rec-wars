@@ -230,7 +230,7 @@ mod tests {
 
         // Negative numbers separated by spaces are parsed correctly by rustc
         // but rustfmt formats them as subtraction.
-        assert_eq!(v!(-1 - 2), Vec3::new(-1.0, -2.0));
+        assert_eq!(v!(-1 - 2), Vec2f::new(-1.0, -2.0));
 
         struct S {
             x: i32,
