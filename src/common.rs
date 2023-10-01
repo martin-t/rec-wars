@@ -108,7 +108,8 @@ impl FrameCtx<'_> {
             return;
         }
 
-        dbg_world_textd!(v!(offset.x, offset.y), self.cvars.d_examples);
+        dbg_world_textf!(offset, "ft: {}", self.gs.frame_num);
+        dbg_world_textf!(offset + v!(0 15), "gt: {:.03}", self.gs.game_time);
 
         dbg_line!(
             v!(offset.x, offset.y + 25.0),

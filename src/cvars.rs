@@ -105,6 +105,7 @@ cvars! {
     /// Display the last pressed key. Useful for debugging MQ's issues with keyboard layouts.
     d_last_key: bool = false,
     d_log_kills: bool = true,
+    d_log_updates_cl: bool = false,
     d_projectiles: bool = false,
     /// The seed to initialize the RNG.
     ///

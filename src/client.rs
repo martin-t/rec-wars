@@ -230,6 +230,10 @@ impl Client {
         let start = macroquad::time::get_time();
         self.gamelogic_fps.tick(cvars.d_fps_period, self.real_time);
 
+        if cvars.d_log_updates_cl {
+            dbg_logf!("gamelogic_tick: {}", game_time);
+        }
+
         // Update time tracking variables (in seconds)
         assert!(
             game_time >= self.gs.game_time,
@@ -378,7 +382,7 @@ impl ClientFrameCtx<'_> {
         // Using destructuring here so we get an error if a field is added but not read.
         let Update {
             frame_num: _,      // LATER
-            game_time: _,      // LATER
+            game_time,         // LATER
             game_time_prev: _, // LATER
             dt: _,             // LATER
             player_inputs,
@@ -389,6 +393,14 @@ impl ClientFrameCtx<'_> {
             debug_shapes,
             server_timings,
         } = update;
+
+        if self.cvars.d_log_updates_cl {
+            dbg_logf!(
+                "handle_update: {} / server time: {}",
+                self.gs.game_time,
+                game_time
+            );
+        }
 
         for InputUpdate { index, net_input } in player_inputs {
             let (_handle, player) = self.gs.players.get_by_slot_mut(index).unwrap();
