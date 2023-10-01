@@ -2,7 +2,6 @@
 
 use std::ops::Index;
 
-use strum_macros::FromRepr;
 use vek::approx::AbsDiffEq;
 
 use crate::prelude::*;
@@ -12,6 +11,7 @@ pub const TILE_SIZE: f64 = 64.0;
 /// A rectangular tile based map with origin in the top-left corner.
 #[derive(Debug, Clone)]
 pub struct Map {
+    pub path: String,
     surfaces: Vec<Surface>,
     tiles: Vec<Vec<Tile>>,
     spawns: Vec<Vec2u>,
@@ -19,20 +19,22 @@ pub struct Map {
 }
 
 impl Map {
-    fn new(tiles: Vec<Vec<Tile>>, surfaces: Vec<Surface>) -> Self {
+    /// The path is only used as an identifier.
+    fn new(tiles: Vec<Vec<Tile>>, surfaces: Vec<Surface>, path: &str) -> Self {
         let mut spawns = Vec::new();
         let mut bases = Vec::new();
         for (r, row) in tiles.iter().enumerate() {
             for (c, tile) in row.iter().enumerate() {
                 let kind = surfaces[tile.surface_index].kind;
-                if kind == Kind::Spawn {
+                if kind == SurfaceKind::Spawn {
                     spawns.push(Vec2u::new(c, r));
-                } else if kind == Kind::Base {
+                } else if kind == SurfaceKind::Base {
                     bases.push(Vec2u::new(c, r));
                 }
             }
         }
         Map {
+            path: path.to_owned(),
             surfaces,
             tiles,
             spawns,
@@ -48,7 +50,7 @@ impl Map {
         self.tiles[0].len()
     }
 
-    /// Returns (width, height) / (cols, rows) / (x, y)
+    /// Returns (width, height) which is (cols, rows) which is (x, y)
     pub fn size(&self) -> Vec2u {
         Vec2u::new(self.width(), self.height())
     }
@@ -120,7 +122,7 @@ impl Map {
         }
 
         let kind = self.surface_at_pos(pos).kind;
-        if kind == Kind::Wall {
+        if kind == SurfaceKind::Wall {
             return true;
         }
 
@@ -205,9 +207,31 @@ impl Map {
         &self.bases
     }
 
+    pub fn count_tiles(&self) -> usize {
+        self.width() * self.height()
+    }
+
+    #[allow(dead_code)]
+    pub fn count_nonwalls(&self) -> usize {
+        let mut cnt = 0;
+        for c in 0..self.width() {
+            for r in 0..self.height() {
+                let index = Vec2u::new(c, r);
+                if self.surface_at_index(index).kind != SurfaceKind::Wall {
+                    cnt += 1;
+                }
+            }
+        }
+        cnt
+    }
+
     /// Returns (pos, angle).
-    pub fn random_spawn(&self, rng: &mut SmallRng) -> (Vec2f, f64) {
-        // TODO maps with no spawns (or even all walls)
+    pub fn random_spawn(&self, rng: &mut Xoshiro256PlusPlus) -> (Vec2f, f64) {
+        if self.spawns().is_empty() {
+            dbg_logf!("WARNING: no spawns in map, using a random nonwall");
+            return self.random_nonwall(rng);
+        }
+
         let i = rng.gen_range(0..self.spawns().len());
         let index = self.spawns()[i];
         let pos = self.tile_center(index);
@@ -216,12 +240,12 @@ impl Map {
     }
 
     /// Returns (pos, angle).
-    pub fn random_nonwall(&self, rng: &mut SmallRng) -> (Vec2f, f64) {
+    pub fn random_nonwall(&self, rng: &mut Xoshiro256PlusPlus) -> (Vec2f, f64) {
         loop {
             let c = rng.gen_range(0..self.width());
             let r = rng.gen_range(0..self.height());
             let index = Vec2u::new(c, r);
-            if self.surface_at_index(index).kind != Kind::Wall {
+            if self.surface_at_index(index).kind != SurfaceKind::Wall {
                 let pos = self.tile_center(index);
                 let angle = self[index].angle;
                 return (pos, angle);
@@ -256,7 +280,7 @@ pub struct Tile {
 #[derive(Debug, Clone)]
 pub struct Surface {
     pub name: String,
-    pub kind: Kind,
+    pub kind: SurfaceKind,
     /// Seems to affect both turning and acceleration
     pub friction: f32,
     /// Maybe a multiplier for speed
@@ -264,7 +288,7 @@ pub struct Surface {
 }
 
 impl Surface {
-    fn new(name: String, kind: Kind, friction: f32, speed: f32) -> Self {
+    fn new(name: String, kind: SurfaceKind, friction: f32, speed: f32) -> Self {
         Self {
             name,
             kind,
@@ -274,11 +298,11 @@ impl Surface {
     }
 }
 
-/// Special behavior of some tiles.
+/// Special behavior of some surfaces.
 ///
 /// Reverse engineered by modifying RecWar's TextureList.txt and seeing what happens.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, FromRepr)]
-pub enum Kind {
+pub enum SurfaceKind {
     /// No special behavior beyond the normal surface properties
     Normal = 0,
     /// Vehicles spawn on it
@@ -293,11 +317,11 @@ pub enum Kind {
     Base = 5,
 }
 
-pub fn parse_map(text: &str, surfaces: Vec<Surface>) -> Map {
-    // TODO handle both CRLF and LF properly
-    // TODO move to Map::new()?
+/// The path is only used as an identifier.
+pub fn parse_map(text: &str, surfaces: Vec<Surface>, path: &str) -> Map {
     let tiles = text
-        .split_terminator("\r\n")
+        .replace("\r\n", "\n")
+        .split_terminator("\n")
         .map(|line| {
             line.split(' ')
                 .map(|tile| {
@@ -318,13 +342,13 @@ pub fn parse_map(text: &str, surfaces: Vec<Surface>) -> Map {
                 .collect()
         })
         .collect();
-    Map::new(tiles, surfaces)
+    Map::new(tiles, surfaces, path)
 }
 
 pub fn parse_texture_list(text: &str) -> Vec<Surface> {
-    // TODO handle both CRLF and LF properly OR use cvars instead
-    // if using cvars, update load_map docs
-    text.split_terminator("\r\n")
+    // LATER Load texture_list.txt into cvars to allow editing at runtime.
+    text.replace("\r\n", "\n")
+        .split_terminator("\n")
         .map(|line| {
             let mut parts = line.split(' ');
             let name = parts.next().unwrap();
@@ -332,7 +356,7 @@ pub fn parse_texture_list(text: &str) -> Vec<Surface> {
             let friction = parts.next().unwrap().parse().unwrap();
             let speed = parts.next().unwrap().parse().unwrap();
 
-            let kind = Kind::from_repr(kind_num).unwrap();
+            let kind = SurfaceKind::from_repr(kind_num).unwrap();
             Surface::new(name.to_owned(), kind, friction, speed)
         })
         .collect()
@@ -368,7 +392,7 @@ mod tests {
 
             dbg!(entry.file_name());
             let map_text = fs::read_to_string(entry.path()).unwrap();
-            let map = parse_map(&map_text, surfaces.clone());
+            let map = parse_map(&map_text, surfaces.clone(), "");
             assert_ne!(map.width(), 0);
             assert_ne!(map.height(), 0);
             cnt += 1;
@@ -381,7 +405,7 @@ mod tests {
         let tex_list_text = fs::read_to_string("data/texture_list.txt").unwrap();
         let surfaces = parse_texture_list(&tex_list_text);
         let map_text = fs::read_to_string("maps/A simple plan (2).map").unwrap();
-        let map = parse_map(&map_text, surfaces);
+        let map = parse_map(&map_text, surfaces, "");
         assert_eq!(map.width(), 55);
         assert_eq!(map.height(), 23);
         assert_eq!(map.size(), Vec2u::new(55, 23));
@@ -396,6 +420,8 @@ mod tests {
         assert_eq!(map.spawns()[0], Vec2u::new(9, 3));
         assert_eq!(map.bases().len(), 2);
         assert_eq!(map.bases()[0], Vec2u::new(10, 11));
+
+        assert_eq!(map.count_nonwalls(), map.count_tiles() - 51);
     }
 
     #[test]
@@ -403,7 +429,7 @@ mod tests {
         let tex_list_text = fs::read_to_string("data/texture_list.txt").unwrap();
         let surfaces = parse_texture_list(&tex_list_text);
         let map_text = fs::read_to_string("maps/Corners (4).map").unwrap();
-        let map = parse_map(&map_text, surfaces);
+        let map = parse_map(&map_text, surfaces, "");
 
         let outside = Vec2f::new(-50.0, -50.0);
 

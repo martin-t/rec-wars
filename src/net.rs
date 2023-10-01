@@ -6,17 +6,23 @@
 //! The common wisdom to never use TCP for games doesn't seem to apply on modern networks.
 //! Veloren has been using TCP for years and nobody complains because nobody even notices.
 
+// This file is shared between RecWars and RustCycles
+// to keep their networking APIs the same
+// and as an experiment to see how much code is shareable
+// between significantly different multiplayer games.
+
 use std::{
-    collections::VecDeque,
     io::{self, ErrorKind, Read, Write},
     iter, mem,
     net::{SocketAddr, TcpListener, TcpStream},
     sync::mpsc::{Receiver, Sender, TryRecvError},
+    thread,
+    time::Duration,
 };
 
-use serde::{de::DeserializeOwned, Serialize};
+use serde::de::DeserializeOwned;
 
-use crate::net_messages::{ClientMessage, ServerMessage};
+use crate::prelude::*;
 
 pub trait Listener {
     fn accept_conn(&mut self) -> io::Result<Box<dyn Connection>>;
@@ -79,7 +85,7 @@ pub struct NetworkMessage {
 /// ```
 /// but generic methods are not object safe so we wouldn't be able to use dynamic dispatch.
 pub trait Connection {
-    fn send(&mut self, network_msg: &NetworkMessage) -> Result<(), io::Error>;
+    fn send(&mut self, net_msg: &NetworkMessage) -> Result<(), io::Error>;
 
     // `#[must_use]` only does something in the trait definition,
     // no need to repeat it in the impls:
@@ -156,8 +162,8 @@ impl LocalConnection {
 }
 
 impl Connection for LocalConnection {
-    fn send(&mut self, network_msg: &NetworkMessage) -> Result<(), io::Error> {
-        self.sender.send(network_msg.clone()).unwrap();
+    fn send(&mut self, net_msg: &NetworkMessage) -> Result<(), io::Error> {
+        self.sender.send(net_msg.clone()).unwrap();
         Ok(())
     }
 
@@ -225,15 +231,15 @@ impl TcpConnection {
 }
 
 impl Connection for TcpConnection {
-    fn send(&mut self, network_msg: &NetworkMessage) -> Result<(), io::Error> {
+    fn send(&mut self, net_msg: &NetworkMessage) -> Result<(), io::Error> {
         // LATER Measure network usage.
         // LATER Try to minimize network usage.
         //       General purpose compression could help a bit,
         //       but using what we know about the data should give much better results.
 
         // Prefix data by length so it's easy to parse on the other side.
-        self.stream.write_all(&network_msg.content_len)?;
-        self.stream.write_all(&network_msg.buf)?;
+        self.stream.write_all(&net_msg.content_len)?;
+        self.stream.write_all(&net_msg.buf)?;
         self.stream.flush()?; // LATER No idea if necessary or how it interacts with set_nodelay
 
         Ok(())
@@ -258,6 +264,29 @@ impl Connection for TcpConnection {
     fn addr(&self) -> String {
         self.addr.to_string()
     }
+}
+
+pub fn tcp_connect(cvars: &Cvars, addr: &str) -> TcpConnection {
+    let addr = SocketAddr::from_str(addr).unwrap();
+
+    let mut connect_attempts = 0;
+    let stream = loop {
+        connect_attempts += 1;
+        // LATER Don't block the main thread - async? just try again next iteration of the main/game loop?
+        // LATER Limit the number of attempts.
+        if let Ok(stream) = TcpStream::connect(addr) {
+            dbg_logf!("connect attempts: {}", connect_attempts);
+            break stream;
+        }
+        if connect_attempts % cvars.cl_net_connect_retry_print_every_n == 0 {
+            dbg_logf!("connect attempts: {}", connect_attempts);
+        }
+        thread::sleep(Duration::from_millis(cvars.cl_net_connect_retry_delay_ms));
+    };
+    stream.set_nodelay(true).unwrap();
+    stream.set_nonblocking(true).unwrap();
+
+    TcpConnection::new(stream, addr)
 }
 
 pub fn serialize<M>(msg: M) -> NetworkMessage

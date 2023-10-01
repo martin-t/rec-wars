@@ -1,6 +1,6 @@
 //! Rudimentary FPS counter and performance tracker.
 
-use std::{collections::VecDeque, fmt::Debug};
+use crate::prelude::*;
 
 /// Saves frame times over some period of time to measure FPS.
 #[derive(Debug, Clone, Default)]

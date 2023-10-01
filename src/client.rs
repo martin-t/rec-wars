@@ -1,26 +1,70 @@
 //! Native and WASM versions using the macroquad engine.
 
-use std::path::Path;
-
 use cvars_console_macroquad::MacroquadConsole;
 use macroquad::prelude::*;
 
 use crate::{
+    common::ServerTimings,
+    debug::{self, DEBUG_SHAPES, DEBUG_TEXTS, DEBUG_TEXTS_WORLD},
+    net::{self, Connection},
     prelude::*,
-    server::Server,
     timing::{Durations, Fps},
 };
 
-#[derive(Debug)]
-pub struct MacroquadClient {
+pub struct Client {
     pub assets: Assets,
+
+    pub map: Map,
+
+    pub gs: GameState,
+
+    pub cg: ClientGame,
+
+    /// Game time left over from previous update.
+    pub dt_carry: f64,
+
+    /// Time since the process started in seconds. Increases at wall clock speed even when paused.
+    ///
+    /// This is not meant to be used for anything that affects gameplay - use `gs.game_time` instead.
+    pub real_time: f64,
+    pub real_time_prev: f64,
+    pub real_time_delta: f64,
+
+    pub update_fps: Fps,
+    pub update_durations: Durations,
+    pub gamelogic_fps: Fps,
+    pub gamelogic_durations: Durations,
+    /// Rendering consists of 2 steps:
+    /// - Calling macroquad's draw functions
+    /// - Calling next_frame() to actually render the frame
     pub render_fps: Fps,
-    pub render_cmds_durations: Durations,
-    pub rest_durations: Durations,
+    pub draw_calls_durations: Durations,
+    pub engine_durations: Durations,
+
+    /// Size of one player's view - either the whole screen or (a bit less than) half of it.
     pub viewport_size: Vec2f,
     pub client_mode: ClientMode,
     pub last_key: Option<KeyCode>,
     pub console: MacroquadConsole,
+}
+
+pub struct ClientGame {
+    pub input1: ClientInput,
+    pub input1_prev: ClientInput,
+    pub input2: ClientInput,
+    pub input2_prev: ClientInput,
+    pub conn: Box<dyn Connection>,
+
+    pub paused: bool,
+
+    pub rail_beams: Vec<RailBeam>,
+    pub explosions: Vec<Explosion>,
+
+    pub notifications: Vec<Notification>,
+    pub tmp_local_player_handle: Index, // LATER Proper splitscreen mode
+
+    /// Last received server fps and durations info. Might be a few frames old.
+    pub server_timings: ServerTimings,
 }
 
 #[derive(Debug)]
@@ -34,18 +78,33 @@ pub enum ClientMode {
     },
 }
 
-impl MacroquadClient {
+impl Client {
     pub fn new(
         cvars: &Cvars,
         assets: Assets,
+        map: Map,
+        gs: GameState,
+        conn: Box<dyn Connection>,
         player1_handle: Index,
         player2_handle: Option<Index>,
     ) -> Self {
-        // LATER use r_smoothing (currently unused)
-        // LATER smoothing optional and configurable per image
-        // LATER allow changing smoothing at runtime
-        assets.tex_explosion.set_filter(FilterMode::Nearest);
-        assets.tex_explosion_cyan.set_filter(FilterMode::Nearest);
+        let cg = ClientGame {
+            input1: ClientInput::empty(),
+            input1_prev: ClientInput::empty(),
+            input2: ClientInput::empty(),
+            input2_prev: ClientInput::empty(),
+            conn,
+
+            paused: false,
+
+            rail_beams: Vec::new(),
+            explosions: Vec::new(),
+
+            notifications: Vec::new(),
+            tmp_local_player_handle: player1_handle,
+
+            server_timings: ServerTimings::default(),
+        };
 
         dbg_logf!("Window inner size: {}x{}", screen_width(), screen_height());
         let (viewport_size, client_mode) = if let Some(player2_handle) = player2_handle {
@@ -72,9 +131,26 @@ impl MacroquadClient {
 
         Self {
             assets,
+
+            map,
+
+            gs,
+
+            cg,
+
+            dt_carry: 0.0,
+            real_time: 0.0,
+            real_time_prev: 0.0,
+            real_time_delta: 0.0,
+
+            update_fps: Fps::new(),
+            update_durations: Durations::new(),
+            gamelogic_fps: Fps::new(),
+            gamelogic_durations: Durations::new(),
             render_fps: Fps::new(),
-            render_cmds_durations: Durations::new(),
-            rest_durations: Durations::new(),
+            draw_calls_durations: Durations::new(),
+            engine_durations: Durations::new(),
+
             viewport_size,
             client_mode,
             last_key: None,
@@ -82,399 +158,338 @@ impl MacroquadClient {
         }
     }
 
-    pub fn process_input(&mut self, server: &mut Server) {
-        if self.console.is_open() {
-            return;
+    pub fn ctx<'a>(&'a mut self, cvars: &'a Cvars) -> ClientFrameCtx<'a> {
+        ClientFrameCtx::new(cvars, &self.map, &mut self.gs, &mut self.cg)
+    }
+
+    // LATER Stuff below is copied from server - merge?
+
+    /// Run gamelogic frame(s) up to current time (in seconds).
+    pub fn update(&mut self, cvars: &Cvars, real_time: f64) {
+        // Recommended reading:
+        // https://gafferongames.com/post/fix_your_timestep/
+        // https://medium.com/@tglaiel/how-to-make-your-game-run-at-60fps-24c61210fe75
+
+        self.update_fps.tick(cvars.d_fps_period, self.real_time);
+        let start = macroquad::time::get_time();
+
+        // Update time tracking variables
+        self.real_time_prev = self.real_time;
+        self.real_time = real_time;
+        self.real_time_delta = self.real_time - self.real_time_prev;
+
+        // We have to also send and receive outside gamelogic so pausing and unpausing works.
+        let mut ctx = self.ctx(cvars);
+        ctx.sys_net_send();
+        ctx.sys_net_receive();
+        if !self.cg.paused {
+            let dt_update = self.real_time_delta * cvars.d_speed;
+            self.gamelogic(cvars, dt_update);
         }
 
-        let input1 = get_input1();
-        let input2 = get_input2();
+        let end = macroquad::time::get_time();
+        self.update_durations
+            .add(cvars.d_timing_samples, end - start);
+    }
 
-        match self.client_mode {
-            ClientMode::Singleplayer { player_handle } => {
-                let input = input1.merged(input2);
-                server.receive_input(player_handle, input);
+    /// The main game loop.
+    fn gamelogic(&mut self, cvars: &Cvars, dt_update: f64) {
+        // LATER Slow down time to prevent death spirals.
+        // LATER Extrapolation (after client / server split).
+        //  Gamecode should not know about it.
+        //  Construct FrameData with the throwaway gs, gamelogic_tick_movement that only calls the movement systems?
+        //  Don't accidentally call functions which modify state outside gs.
+
+        if dt_update > 5.0 {
+            dbg_logf!("WARNING: large dt_update: {dt_update}");
+        }
+
+        match cvars.sys_tickrate_mode {
+            TickrateMode::Variable => {
+                let game_time_target = self.gs.game_time + dt_update;
+                self.gamelogic_tick(cvars, game_time_target);
             }
-            ClientMode::Splitscreen {
-                render_targets: _,
-                player_handles: (player1_handle, player2_handle),
-            } => {
-                server.receive_input(player1_handle, input1);
-                server.receive_input(player2_handle, input2);
+            TickrateMode::Fixed => {
+                let dt = 1.0 / cvars.sys_tickrate_fixed_fps;
+                let game_time_target = self.gs.game_time + self.dt_carry + dt_update;
+
+                while self.gs.game_time + dt < game_time_target {
+                    self.gamelogic_tick(cvars, self.gs.game_time + dt);
+                }
+
+                self.dt_carry = game_time_target - self.gs.game_time;
+                if cvars.d_tickrate_fixed_carry {
+                    dbg_logf!("Remaining time: {}", self.dt_carry);
+                }
             }
+        }
+    }
+
+    /// Run one frame of gamelogic.
+    fn gamelogic_tick(&mut self, cvars: &Cvars, game_time: f64) {
+        let start = macroquad::time::get_time();
+        self.gamelogic_fps.tick(cvars.d_fps_period, self.real_time);
+
+        // Update time tracking variables (in seconds)
+        assert!(
+            game_time >= self.gs.game_time,
+            "game_time didn't increase: prev {}, current {}",
+            self.gs.game_time,
+            game_time,
+        );
+        self.gs.frame_num += 1;
+        self.gs.game_time_prev = self.gs.game_time;
+        self.gs.game_time = game_time;
+        self.gs.dt = self.gs.game_time - self.gs.game_time_prev;
+        debug::set_game_time(self.gs.game_time);
+
+        debug::clear_expired();
+
+        dbg_textf!("{}", env!("GIT_VERSION"));
+        dbg_textd!(self.gs.game_time);
+        dbg_textd!(self.gs.game_time_prev);
+
+        let mut ctx = self.ctx(cvars);
+
+        ctx.sys_cleanup();
+
+        ctx.sys_net_send();
+        ctx.sys_net_receive();
+
+        ctx.sys_debug_examples(v!(25 300));
+
+        dbg_textf!("vehicle count: {}", self.gs.vehicles.len());
+        dbg_textf!("projectile count: {}", self.gs.projectiles.len());
+        dbg_textf!("explosion count: {}", self.cg.explosions.len());
+
+        let end = macroquad::time::get_time();
+        self.gamelogic_durations
+            .add(cvars.d_timing_samples, end - start);
+    }
+
+    pub fn cl_input(&mut self, cvars: &Cvars) {
+        if self.console.is_open() {
+            // LATER Optionally set input to empty here.
+            return;
         }
 
         if let Some(key_code) = get_last_key_pressed() {
             self.last_key = Some(key_code);
         }
+
+        self.cg.input1_prev = self.cg.input1;
+        self.cg.input1 = get_input1();
+        self.cg.input2_prev = self.cg.input2;
+        self.cg.input2 = get_input2();
+
+        if !self.cg.input1_prev.pause && self.cg.input1.pause {
+            let msg = ClientMessage::Pause;
+            self.ctx(cvars).net_send(msg);
+        }
     }
 }
 
-#[derive(Debug)]
-pub struct Assets {
-    /// This is called texture list because the original ReCwar called it that.
-    /// It's actually just a list of map surfaces, not all images/textures.
-    pub texture_list: String,
-    /// List of paths to maps supported by bots.
-    pub bot_map_paths: Vec<String>,
-    /// Map path -> map data as a string.
-    pub maps: FnvHashMap<String, String>,
-    /// Map name -> path.
-    pub map_names_to_paths: FnvHashMap<String, String>,
-    pub texs_tiles: Vec<Texture2D>,
-    pub texs_vehicles: Vec<Texture2D>,
-    pub texs_wrecks: Vec<Texture2D>,
-    pub texs_weapon_icons: Vec<Texture2D>,
-    pub tex_rocket: Texture2D,
-    pub tex_hm: Texture2D,
-    pub tex_gm: Texture2D,
-    pub tex_explosion: Texture2D,
-    pub tex_explosion_cyan: Texture2D,
-}
+impl ClientFrameCtx<'_> {
+    pub fn sys_cleanup(&mut self) {
+        self.cg.rail_beams.retain(|beam| {
+            beam.start_time + self.cvars.cl_railgun_trail_duration > self.gs.game_time
+        });
+        self.cg.explosions.retain(|explosion| {
+            let age = self.gs.game_time - explosion.start_time;
+            let progress = age / self.cvars.r_explosion_duration;
+            progress <= 1.0
+        });
+        self.cg.notifications.retain(|notification| {
+            self.gs.game_time - notification.start_time < self.cvars.hud_notifications_duration
+        });
+    }
 
-impl Assets {
-    pub async fn load_all() -> Self {
-        let loading_started = get_time();
+    pub fn sys_net_send(&mut self) {
+        // LATER Separate players
 
-        let mut cnt_bundled = 0;
-        #[allow(unused_mut)] // Unused on WASM
-        let mut cnt_loaded = 0;
+        let input = self.cg.input1.merged(self.cg.input2);
 
-        macro_rules! asset {
-            ($path:expr $(,)?) => {{
-                let bundled = include_bytes!(concat!("../", $path)).to_vec();
+        let net_input = input.to_net_input();
+        let msg = ClientMessage::Input(net_input);
+        self.net_send(msg);
+    }
 
-                // WASM:
-                // Loading assets one by one is too slow in the browser because each is a separate request.
-                // We can't use future::try_join_all because it crashes when compiled to WASM with the newest futures crate.
-                // Might be because macroquad has its own special way of doing web-related things.
-                // So just bundle the assets into the binary.
-                #[cfg(target_arch = "wasm32")]
-                {
-                    cnt_bundled += 1;
-                    bundled
-                }
-
-                // Desktop:
-                // Load assets from disk so we can change them without recompiling.
-                // Fall back to bundled assets if it fails.
-                // This makes it possible to install the game from crates.io because it doesn't allow installing assets.
-                #[cfg(not(target_arch = "wasm32"))]
-                {
-                    let loaded = macroquad::file::load_file($path).await;
-                    match loaded {
-                        Ok(loaded) => {
-                            cnt_loaded += 1;
-                            loaded
-                        }
-                        Err(_) => {
-                            cnt_bundled += 1;
-                            bundled
-                        }
-                    }
-                }
-            }};
-        }
-
-        let texture_list = String::from_utf8(asset!("data/texture_list.txt")).unwrap();
-
-        let mut bot_map_paths = Vec::new();
-        let mut maps = FnvHashMap::default();
-        let mut map_names_to_paths = FnvHashMap::default();
-        macro_rules! add_map {
-            ($path:expr) => {{
-                add_map_hidden!($path);
-
-                bot_map_paths.push($path.to_owned());
-            }};
-        }
-        macro_rules! add_map_hidden {
-            ($path:expr) => {{
-                let data = String::from_utf8(asset!($path)).unwrap();
-                maps.insert($path.to_owned(), data);
-
-                let name = Path::new($path).file_name().unwrap().to_str().unwrap();
-                map_names_to_paths.insert(name.to_owned(), $path.to_owned());
-            }};
-        }
-        // This is a subset of maps that are not blatantly broken with the current bots.
-        // LATER Autodiscover maps without hardcoding.
-        add_map_hidden!("maps/Arena.map");
-        add_map_hidden!("maps/A simple plan (2).map");
-        add_map!("maps/Atrium.map");
-        add_map!("maps/Bunkers (2).map");
-        add_map!("maps/Castle Islands (2).map");
-        add_map!("maps/Castle Islands (4).map");
-        add_map_hidden!("maps/Corners (4).map");
-        add_map!("maps/Delta.map");
-        add_map!("maps/Desert Eagle.map");
-        add_map_hidden!("maps/Joust (2).map"); // Small map (narrow)
-        add_map_hidden!("maps/Large front (2).map");
-        add_map_hidden!("maps/Oases (4).map");
-        add_map!("maps/Park.map");
-        add_map!("maps/Roads.map");
-        add_map!("maps/Snow.map");
-        add_map!("maps/Spots (8).map");
-        add_map_hidden!("maps/Vast Arena.map");
-        add_map_hidden!("maps/extra/6 terrains (2).map");
-        add_map_hidden!("maps/extra/A Cow Too Far.map");
-        add_map_hidden!("maps/extra/All Water.map");
-        add_map_hidden!("maps/extra/Battlegrounds (2).map");
-        add_map_hidden!("maps/extra/Crossing.map"); // No spawns
-        add_map!("maps/extra/Damned Rockets (2).map"); // Asymmetric CTF, left half like Castle Islands (2), right half has 2 bases
-        add_map_hidden!("maps/extra/doom.map");
-        add_map_hidden!("maps/extra/elements.map");
-        add_map_hidden!("maps/extra/Exile (4).map"); // Small, many spawns
-        add_map_hidden!("maps/extra/football.map");
-        add_map!("maps/extra/Ice ring.map");
-        add_map_hidden!("maps/extra/ice skating ring (2).map");
-        add_map!("maps/extra/IceWorld.map");
-        add_map!("maps/extra/I see you (2).map"); // Like Large Front (2) but without any cover
-        add_map_hidden!("maps/extra/Knifflig (2).map");
-        add_map_hidden!("maps/extra/Large.map");
-        add_map_hidden!("maps/extra/Neutral.map");
-        add_map!("maps/extra/Nile.map");
-        add_map_hidden!("maps/extra/OK Corral (2).map"); // Tiny, not symmetric (upper spawn is closer)
-        add_map_hidden!("maps/extra/Peninsulae (3).map");
-        add_map_hidden!("maps/extra/River Crossings.map");
-        add_map_hidden!("maps/extra/Road To Hell (2).map"); // Only 4 spawns in a tiny area
-        add_map_hidden!("maps/extra/THE Crossing.map");
-        add_map_hidden!("maps/extra/Thomap1 (4).map");
-        add_map_hidden!("maps/extra/Town on Fire.map");
-        add_map!("maps/extra/twisted (2).map");
-        add_map_hidden!("maps/extra/winterhardcore.map");
-        add_map!("maps/extra/Yellow and Green.map");
-        add_map!("maps/extra2/Mini Islands (4).map");
-        add_map_hidden!("maps/extra2/Symmetric.map");
-        add_map_hidden!("maps/extra2/Training room.map");
-        add_map_hidden!("maps/extra2/Winter (4).map");
-        add_map_hidden!("maps/extra2/World War (2).map");
-
-        macro_rules! tex {
-            ($path:expr $(,)?) => {
-                Texture2D::from_file_with_format(&asset!($path), None)
-            };
-        }
-        let texs_tiles = vec![
-            tex!("data/tiles/g1.bmp"),
-            tex!("data/tiles/g2.bmp"),
-            tex!("data/tiles/g3.bmp"),
-            tex!("data/tiles/g_stripes.bmp"),
-            tex!("data/tiles/bunker1.bmp"),
-            tex!("data/tiles/ice1.bmp"),
-            tex!("data/tiles/ice.bmp"),
-            tex!("data/tiles/ice_side.bmp"),
-            tex!("data/tiles/ice_corner.bmp"),
-            tex!("data/tiles/g_spawn.bmp"),
-            tex!("data/tiles/road.bmp"),
-            tex!("data/tiles/water.bmp"),
-            tex!("data/tiles/snow.bmp"),
-            tex!("data/tiles/snow2.bmp"),
-            tex!("data/tiles/bunker2.bmp"),
-            tex!("data/tiles/base.bmp"),
-            tex!("data/tiles/water_side.bmp"),
-            tex!("data/tiles/water_corner.bmp"),
-            tex!("data/tiles/desert.bmp"),
-            tex!("data/tiles/d_rock.bmp"),
-            tex!("data/tiles/g2d.bmp"),
-            tex!("data/tiles/water_middle.bmp"),
-        ];
-        let texs_vehicles = vec![
-            tex!("data/vehicles/tank_chassis_flames.png"),
-            tex!("data/vehicles/tank_turret_flames.png"),
-            tex!("data/vehicles/hovercraft_chassis_flames.png"),
-            tex!("data/vehicles/hovercraft_turret_flames.png"),
-            tex!("data/vehicles/hummer_chassis_flames.png"),
-            tex!("data/vehicles/hummer_turret_flames.png"),
-        ];
-        let texs_wrecks = vec![
-            tex!("data/wrecks/tank.png"),
-            tex!("data/wrecks/hovercraft.png"),
-            tex!("data/wrecks/hummer.png"),
-        ];
-        let texs_weapon_icons = vec![
-            tex!("data/weapon_icons/mg.png"),
-            tex!("data/weapon_icons/rail.png"),
-            tex!("data/weapon_icons/cb.png"),
-            tex!("data/weapon_icons/rockets.png"),
-            tex!("data/weapon_icons/hm.png"),
-            tex!("data/weapon_icons/gm.png"),
-            tex!("data/weapon_icons/bfg.png"),
-        ];
-        let tex_rocket = tex!("data/weapons/rocket.png");
-        let tex_hm = tex!("data/weapons/hm.png");
-        let tex_gm = tex!("data/weapons/gm.png");
-        let tex_explosion = tex!("data/explosion.png");
-        let tex_explosion_cyan = tex!("data/explosion_cyan.png");
-
-        let loading_done = get_time();
-        let loading_duration = loading_done - loading_started;
-        dbg_logf!("Loaded {} assets in {:.2} s", cnt_loaded, loading_duration);
-        dbg_logf!("Using {} bundled assets as fallback", cnt_bundled);
-
-        Self {
-            texture_list,
-            bot_map_paths,
-            maps,
-            map_names_to_paths,
-            texs_tiles,
-            texs_vehicles,
-            texs_wrecks,
-            texs_weapon_icons,
-            tex_rocket,
-            tex_hm,
-            tex_gm,
-            tex_explosion,
-            tex_explosion_cyan,
+    pub fn net_send(&mut self, msg: ClientMessage) {
+        let net_msg = net::serialize(msg);
+        let res = self.cg.conn.send(&net_msg);
+        if let Err(e) = res {
+            // LATER Not warning, don't exit, return to menu
+            dbg_logf!("WARNING: Server disconnected: {}", e);
+            std::process::exit(1);
         }
     }
 
-    pub fn select_map<'a>(&'a self, cvars: &'a mut Cvars) -> &'a str {
-        if cvars.g_map.is_empty() {
-            // Pick a random map supported by bots.
-            let index = cvars.d_seed as usize % self.bot_map_paths.len();
-            let path = &self.bot_map_paths[index];
-            cvars.g_map = path.clone();
-            path
-        } else if cvars.g_map.starts_with("maps/") {
-            // Load the exact path.
-            &cvars.g_map
-        } else {
-            // Attempt to find a map whose name starts with the given string.
-            let mut matching = Vec::new();
-            for (name, path) in &self.map_names_to_paths {
-                if name.starts_with(&cvars.g_map) {
-                    matching.push(path);
+    pub fn sys_net_receive(&mut self) {
+        let (msgs, closed) = self.cg.conn.receive_sm();
+        for msg in msgs {
+            match msg {
+                ServerMessage::Init(_) => {
+                    dbg_logf!("WARNING: Server sent redundant init, ignoring")
                 }
+                ServerMessage::Update(update) => self.handle_update(update),
+
+                ServerMessage::Paused(paused) => self.cg.paused = paused,
+
+                ServerMessage::AddPlayer(init) => self.init_player(init),
+                ServerMessage::SpawnVehicle(init) => self.init_vehicle(init),
+                ServerMessage::SpawnProjectile(init) => self.init_projectile(init),
+                ServerMessage::SpawnExplosion(init) => self.init_explosion(init),
+
+                ServerMessage::RailBeam(mut beam) => {
+                    beam.start_time = self.gs.game_time; // LATER don't sent start_time from server
+                    self.cg.rail_beams.push(beam);
+                }
+
+                ServerMessage::RemovePlayer { index } => {
+                    let player_handle = self.gs.players.slot_to_index(index).unwrap();
+                    let name = self.gs.players[player_handle].name.clone();
+                    self.remove_player(player_handle);
+                    dbg_logf!("Player {name:?} removed");
+                    // LATER Chat notification
+                }
+                ServerMessage::DestroyProjectile { index } => {
+                    // LATER Explosion here instead of SpawnExplosion?
+                    let old = self.gs.projectiles.remove_by_slot(index);
+                    soft_assert!(old.is_some());
+                }
+                ServerMessage::Kill(kill) => self.handle_kill(kill),
             }
-            if matching.is_empty() {
-                panic!("ERROR: No maps found matching {}", cvars.g_map);
-            } else if matching.len() > 1 {
-                dbg_logf!("WARNING: Multiple maps found matching {}:", cvars.g_map);
-                for path in &matching {
-                    dbg_logf!("    {}", path);
-                }
-                matching[0]
+        }
+
+        if closed {
+            dbg_logf!("Server closed the connection, exiting");
+        }
+    }
+
+    fn init_explosion(&mut self, init: ExplosionInit) {
+        let ExplosionInit { pos, scale, bfg } = init;
+        // LATER Setting start_time to client game_time means the animation plays from the start
+        // but also that the explosion is delayed compared to the server. Is this what we want?
+        let explosion = Explosion::new(pos, scale, self.gs.game_time, bfg);
+        self.cg.explosions.push(explosion);
+    }
+
+    pub fn handle_update(&mut self, update: Update) {
+        // Using destructuring here so we get an error if a field is added but not read.
+        let Update {
+            frame_num: _,      // LATER
+            game_time: _,      // LATER
+            game_time_prev: _, // LATER
+            dt: _,             // LATER
+            player_inputs,
+            vehicles,
+            projectiles,
+            debug_texts,
+            debug_texts_world,
+            debug_shapes,
+            server_timings,
+        } = update;
+
+        for InputUpdate { index, net_input } in player_inputs {
+            let (_handle, player) = self.gs.players.get_by_slot_mut(index).unwrap();
+            player.input_prev = player.input;
+            player.input = net_input;
+        }
+
+        for VehicleUpdate {
+            index,
+            physics:
+                EntityPhysics {
+                    pos,
+                    vel,
+                    angle,
+                    turn_rate,
+                },
+            turret_angle_current,
+            turret_angle_wanted,
+        } in vehicles
+        {
+            let (_handle, vehicle) = self.gs.vehicles.get_by_slot_mut(index).unwrap();
+            vehicle.pos = pos;
+            vehicle.vel = vel;
+            vehicle.angle = angle;
+            vehicle.turn_rate = turn_rate;
+            vehicle.turret_angle_current = turret_angle_current;
+            vehicle.turret_angle_wanted = turret_angle_wanted;
+        }
+
+        for ProjectileUpdate {
+            index,
+            physics:
+                EntityPhysics {
+                    pos,
+                    vel,
+                    angle,
+                    turn_rate,
+                },
+        } in projectiles
+        {
+            let (_handle, projectile) = self.gs.projectiles.get_by_slot_mut(index).unwrap();
+            projectile.pos = pos;
+            projectile.vel = vel;
+            projectile.angle = angle;
+            projectile.turn_rate = turn_rate;
+        }
+
+        DEBUG_TEXTS.with(|texts| {
+            let mut texts = texts.borrow_mut();
+            texts.extend(debug_texts);
+        });
+        DEBUG_TEXTS_WORLD.with(|texts| {
+            let mut texts = texts.borrow_mut();
+            texts.extend(debug_texts_world);
+        });
+        DEBUG_SHAPES.with(|shapes| {
+            let mut shapes = shapes.borrow_mut();
+            shapes.extend(debug_shapes);
+        });
+
+        self.cg.server_timings = server_timings;
+    }
+
+    pub fn handle_kill(&mut self, kill: Kill) {
+        let Kill { attacker, victim } = kill;
+
+        // LATER Check client and server scores are the same at the end of match
+        // LATER Merge with DestroyVehicle?
+
+        let attacker_handle = self.gs.players.slot_to_index(attacker).unwrap();
+        let victim_handle = self.gs.players.slot_to_index(victim).unwrap();
+
+        let attacker = &mut self.gs.players[attacker_handle];
+        if victim_handle == self.cg.tmp_local_player_handle && attacker_handle != victim_handle {
+            self.cg.notifications.push(Notification::new(
+                format!("You were killed by {}", attacker.name),
+                self.cvars.hud_notifications_color_death,
+                self.gs.game_time,
+            ));
+        }
+
+        let victim = &mut self.gs.players[victim_handle];
+        if attacker_handle == self.cg.tmp_local_player_handle {
+            if attacker_handle == victim_handle {
+                self.cg.notifications.push(Notification::new(
+                    "You committed suicide".to_owned(),
+                    self.cvars.hud_notifications_color_death,
+                    self.gs.game_time,
+                ));
             } else {
-                matching[0]
+                self.cg.notifications.push(Notification::new(
+                    format!("You killed {}", victim.name),
+                    self.cvars.hud_notifications_color_kill,
+                    self.gs.game_time,
+                ));
             }
         }
-    }
-}
 
-// Keys to avoid in defaults:
-//  - Ctrl - ctrl+W closes the browser tab
-//  - Alt - shows/hides the firefox menu bar on linux
-//  - Numpad - Some keyboards might not have it
-//  - Keys that often depend on layout - https://github.com/not-fl3/macroquad/issues/260
-// LATER Configurable input
+        let vehicle = &mut self.gs.vehicles[victim.vehicle.unwrap()];
+        vehicle.hp_fraction = 0.0;
 
-fn get_input1() -> Input {
-    let mut input = Input::new();
-    if was_input_pressed(&[KeyCode::A]) {
-        input.left = true;
+        self.update_score_kill(attacker_handle, victim_handle);
     }
-    if was_input_pressed(&[KeyCode::D]) {
-        input.right = true;
-    }
-    if was_input_pressed(&[KeyCode::W]) {
-        input.up = true;
-    }
-    if was_input_pressed(&[KeyCode::S]) {
-        input.down = true;
-    }
-    if was_input_pressed(&[KeyCode::Q]) {
-        input.turret_left = true;
-    }
-    if was_input_pressed(&[KeyCode::E]) {
-        input.turret_right = true;
-    }
-    if was_input_pressed(&[KeyCode::V]) {
-        input.prev_weapon = true;
-    }
-    if was_input_pressed(&[KeyCode::LeftShift, KeyCode::C]) {
-        input.next_weapon = true;
-    }
-    if was_input_pressed(&[KeyCode::Space]) {
-        input.fire = true;
-    }
-    if was_input_pressed(&[KeyCode::X]) {
-        input.mine = true;
-    }
-    if was_input_pressed(&[KeyCode::G]) {
-        input.self_destruct = true;
-    }
-    if was_input_pressed(&[KeyCode::R]) {
-        input.horn = true;
-    }
-
-    // The rest are shared actions defined on is player 1 only
-
-    if was_input_pressed(&[KeyCode::Enter, KeyCode::T]) {
-        input.chat = true;
-    }
-    if was_input_pressed(&[KeyCode::Pause, KeyCode::P]) {
-        input.pause = true;
-    }
-
-    input
-}
-
-fn get_input2() -> Input {
-    let mut input = Input::new();
-    if was_input_pressed(&[KeyCode::Left]) {
-        input.left = true;
-    }
-    if was_input_pressed(&[KeyCode::Right]) {
-        input.right = true;
-    }
-    if was_input_pressed(&[KeyCode::Up]) {
-        input.up = true;
-    }
-    if was_input_pressed(&[KeyCode::Down]) {
-        input.down = true;
-    }
-    if was_input_pressed(&[KeyCode::Comma]) {
-        input.turret_left = true;
-    }
-    if was_input_pressed(&[KeyCode::Period]) {
-        input.turret_right = true;
-    }
-    if was_input_pressed(&[KeyCode::L]) {
-        input.prev_weapon = true;
-    }
-    if was_input_pressed(&[
-        KeyCode::Slash, // US layout
-        KeyCode::Minus, // Same key, CZ layout
-        KeyCode::Kp0,
-    ]) {
-        input.next_weapon = true;
-    }
-    if was_input_pressed(&[KeyCode::RightShift]) {
-        input.fire = true;
-    }
-    if was_input_pressed(&[KeyCode::M]) {
-        input.mine = true;
-    }
-    if was_input_pressed(&[KeyCode::J]) {
-        input.self_destruct = true;
-    }
-    if was_input_pressed(&[KeyCode::K]) {
-        input.horn = true;
-    }
-
-    // No binds for shared actions like chat, pause, console and esc.
-    // They're defined on player 1.
-
-    input
-}
-
-fn was_input_pressed(key_codes: &[KeyCode]) -> bool {
-    for &key_code in key_codes {
-        // Check both to avoid skipping input if it's pressed and released within one frame.
-        if is_key_pressed(key_code) || is_key_down(key_code) {
-            return true;
-        }
-    }
-    false
 }

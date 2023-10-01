@@ -2,8 +2,8 @@
 
 use crate::prelude::*;
 
-impl FrameCtx<'_> {
-    pub fn ai(&mut self) {
+impl ServerFrameCtx<'_> {
+    pub fn sys_ai(&mut self) {
         if !self.cvars.ai {
             return;
         }
@@ -16,8 +16,8 @@ impl FrameCtx<'_> {
             let age = self.gs.game_time - vehicle.spawn_time;
             if age < 0.5 {
                 ai.movement = 1;
-            } else if self.gs.rng.gen_bool(0.01) {
-                let r: f64 = self.gs.rng.gen();
+            } else if self.sg.rng.gen_bool(0.01) {
+                let r: f64 = self.sg.rng.gen();
                 if r < 0.5 {
                     ai.movement = 1;
                 } else if r < 0.65 {
@@ -27,31 +27,29 @@ impl FrameCtx<'_> {
                 }
             }
 
-            if self.gs.rng.gen_bool(0.03) {
-                ai.turning = self.gs.rng.gen_range(-1..=1);
+            if self.sg.rng.gen_bool(0.03) {
+                ai.turning = self.sg.rng.gen_range(-1..=1);
             }
 
-            if !ai.firing && self.gs.rng.gen_bool(0.01) {
+            if !ai.firing && self.sg.rng.gen_bool(0.01) {
                 ai.firing = true;
-            } else if ai.firing && self.gs.rng.gen_bool(0.03) {
+            } else if ai.firing && self.sg.rng.gen_bool(0.03) {
                 ai.firing = false;
             }
 
-            player.input = Input {
+            player.input = NetInput {
                 up: ai.movement == 1,
                 down: ai.movement == -1,
                 left: ai.turning == -1,
                 right: ai.turning == 1,
-                turret_left: self.gs.rng.gen_bool(0.01),
-                turret_right: self.gs.rng.gen_bool(0.01),
-                prev_weapon: self.gs.rng.gen_bool(0.02),
-                next_weapon: self.gs.rng.gen_bool(0.01),
+                turret_left: self.sg.rng.gen_bool(0.01),
+                turret_right: self.sg.rng.gen_bool(0.01),
+                prev_weapon: self.sg.rng.gen_bool(0.02),
+                next_weapon: self.sg.rng.gen_bool(0.01),
                 fire: ai.firing,
-                mine: self.gs.rng.gen_bool(0.001),
-                self_destruct: self.gs.rng.gen_bool(0.0001),
-                horn: self.gs.rng.gen_bool(0.0001),
-                chat: false,
-                pause: false, // :)
+                mine: self.sg.rng.gen_bool(0.001),
+                self_destruct: self.sg.rng.gen_bool(0.0001),
+                horn: self.sg.rng.gen_bool(0.0001),
             }
         }
     }

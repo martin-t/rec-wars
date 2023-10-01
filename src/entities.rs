@@ -8,43 +8,66 @@
 //! This is not a violation of the ECS pattern,
 //! because they don't modify game state - they're not behavior.
 
-use strum_macros::{EnumCount, FromRepr};
-
 use crate::prelude::*;
 
 #[derive(Debug, Clone)]
 pub struct Player {
     pub name: String,
+    pub client: ClientType,
+    pub state: PlayerState,
     /// NOTE about potential bugs when refactoring:
     /// - vehicle can move while dead (this is a classic at this point)
     /// - can guide missile while dead
     /// - can guide multiple missiles (LATER optionally allow by cvar)
     /// - missile input is not reset after death / launching another (results in flying in circles)
     /// - missile stops after player dies / launches another
-    pub input: Input,
+    pub input: NetInput,
+    pub input_prev: NetInput,
     pub respawn: Respawn,
     pub death_time: f64,
     pub vehicle: Option<Index>,
     pub guided_missile: Option<Index>,
     pub cur_weapon: Weapon,
     pub score: Score,
-    pub notifications: Vec<Notification>,
 }
 
 impl Player {
-    pub fn new(name: String) -> Self {
+    pub fn new(name: String, client: ClientType) -> Self {
         Self {
             name,
-            input: Input::new(),
+            client,
+            state: PlayerState::Playing,
+            input: NetInput::empty(),
+            input_prev: NetInput::empty(),
             respawn: Respawn::No,
             death_time: 0.0,
             vehicle: None,
             guided_missile: None,
             cur_weapon: Weapon::Mg,
             score: Score::default(),
-            notifications: Vec::new(),
         }
     }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ClientType {
+    /// Handle to RemoteClient
+    Remote(Index),
+    Local,
+    /// Handle to Ai
+    Ai(Index),
+}
+
+/// How the player is participating in the game.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum PlayerState {
+    /// The player is a freely floating camera observing the game.
+    Observing,
+    /// The player is watching another player's POV - handle to player.
+    #[allow(dead_code)] // LATER
+    Spectating { spectatee_handle: Index },
+    /// The player is playing
+    Playing,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -54,7 +77,7 @@ pub enum Respawn {
     Scheduled,
 }
 
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Default, Deserialize, Serialize)]
 pub struct Score {
     pub kills: i32,
     pub deaths: i32,
@@ -93,9 +116,9 @@ pub struct Ai {
 }
 
 impl Ai {
-    pub fn new(player: Index) -> Self {
+    pub fn new(player_index: Index) -> Self {
         Self {
-            player,
+            player: player_index,
             movement: 0,
             turning: 0,
             firing: false,
@@ -119,7 +142,9 @@ pub struct Vehicle {
     /// Each weapon has a separate reload status even if they all reload at the same time.
     /// I plan to generalize this and have a cvar to choose between multiple reload mechanisms.
     pub ammos: Vec<Ammo>,
+    /// Game time when this vehicle was spawned.
     pub spawn_time: f64,
+    /// Index of the player who owns this vehicle.
     pub owner: Index,
     /// Indices of homing missiles targeting this vehicle.
     pub hms: Vec<Index>,
@@ -168,7 +193,7 @@ impl Vehicle {
     }
 }
 
-#[derive(Debug, Clone, Copy, FromRepr)]
+#[derive(Debug, Clone, Copy, FromRepr, Deserialize, Serialize)]
 pub enum VehicleType {
     Tank,
     Hovercraft,
@@ -197,13 +222,16 @@ pub struct Projectile {
     pub vel: Vec2f,
     pub angle: f64,
     pub turn_rate: f64,
+    /// Game time when this projectile will explode
     pub explode_time: f64,
+    /// Handle of the player who owns this projectile.
     pub owner: Index,
+    /// If this is a homing projectile, this is the handle of the target vehicle.
     pub target: Option<Index>,
 }
 
 /// Weapon type - currently hardcoded.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumCount, FromRepr)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumCount, FromRepr, Deserialize, Serialize)]
 pub enum Weapon {
     Mg,
     Rail,

@@ -4,7 +4,6 @@
 //! but in normal usage you should prefer the `dbg_*` macros
 //! and other items from the parent mod.
 
-use serde::{Deserialize, Serialize};
 use vek::Vec2;
 
 use crate::{debug::DEBUG_SHAPES, prelude::*};
@@ -38,6 +37,9 @@ impl WorldText {
 pub struct DebugShape {
     pub shape: Shape,
     /// Time left (decreases every frame)
+    ///
+    /// LATER This should be spawn time instead?
+    /// Game time was not available globally when this was written.
     pub time: f64,
     #[serde(with = "ColorDef")]
     pub color: Color,

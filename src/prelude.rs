@@ -16,11 +16,16 @@ use vek::{Mat2, Vec2};
 // Make the most commonly used types available without importing manually.
 // Criteria for inclusion: used often and unlikely to collide.
 
-pub use std::f64::consts::PI;
+pub use std::{
+    collections::VecDeque,
+    f64::consts::PI,
+    fmt::{self, Debug, Display, Formatter},
+    str::FromStr,
+};
 
 pub use fnv::{FnvHashMap, FnvHashSet};
 
-// This doesn't increase compile times in any measureble way.
+// This doesn't increase incremental compile times in any measureble way.
 // Keep it here so it can be used immediately without adding to Cargo.toml or importing first.
 pub use inline_tweak::tweak;
 
@@ -34,20 +39,32 @@ pub use rand::prelude::*;
 // `rng.sample(Normal::new(mean, std_dev))` gives exactly the same results as
 // `rng.sample(StandardNormal) * std_dev + mean`.
 // The latter sometimes requires type annotations.
-pub use rand_distr::{Normal, StandardNormal};
+pub use rand_distr::{Normal, StandardNormal, Uniform};
+pub use rand_xoshiro::Xoshiro256PlusPlus;
+
+pub use serde::{Deserialize, Serialize};
+
+pub use strum::EnumCount;
+pub use strum_macros::{EnumCount, FromRepr};
 
 pub use thunderdome::{Arena, Index};
+
 pub use vek::{Clamp, Lerp, Slerp, Wrap};
 
 pub use crate::{
-    client::Assets,
-    cvars::{CVec3, Cvars},
+    assets::Assets,
+    client::{Client, ClientGame},
+    context::{ClientFrameCtx, FrameCtx, ServerFrameCtx},
+    cvars::*,
     debug::{DbgIterator, SoftUnwrap},
     entities::*,
     game_state::*,
+    input::*,
     map::Map,
-    systems::FrameCtx,
+    net_messages::*,
+    server::{Server, ServerGame},
     utils::lerp_ranges,
+    weapons,
 };
 
 // Visibility of macros by example works diffrently from normal items,
@@ -146,15 +163,37 @@ impl F64Ext for f64 {
 pub trait ArenaExt {
     /// Collect the handles (`thunderdome::Index`) into a `Vec`.
     ///
-    /// This is borrowck dance to allow iterating through the collection without keeping the arena borrowed.
+    /// This is a workaround for borrowck limitations so we can
+    /// iterate over the pool without keeping it borrowed.
     /// You can reborrow each iteration of the loop by indexing the arena using the handle
-    /// and release the borrow if you need to pass the arena (or usually whole `GameState`) into another function.
-    fn iter_handles(&self) -> Vec<Index>;
+    /// and release the borrow if you need to pass the arena (or usually the whole frame context)
+    /// into another function.
+    ///
+    /// This is inefficient and ideally should be avoided
+    /// but contrary to everyone in Rust gamedev circles talking about performance,
+    /// most games are not limited by how fast their gamelogic runs.
+    /// When/if we have perf issues and profiling says this is the cause,
+    /// then we can restructure the code to avoid it.
+    /// Until then writing code faster is more important than writing faster code.
+    fn collect_handles(&self) -> Vec<Index>;
+
+    fn collect_indices(&self) -> Vec<u32>;
+
+    /// Converts an index (slot in thunderdome) to a handle (index in thunderdome).
+    fn slot_to_index(&self, slot: u32) -> Option<Index>;
 }
 
 impl<T> ArenaExt for Arena<T> {
-    fn iter_handles(&self) -> Vec<Index> {
+    fn collect_handles(&self) -> Vec<Index> {
         self.iter().map(|(handle, _)| handle).collect()
+    }
+
+    fn collect_indices(&self) -> Vec<u32> {
+        self.iter().map(|(handle, _)| handle.slot()).collect()
+    }
+
+    fn slot_to_index(&self, slot: u32) -> Option<Index> {
+        self.contains_slot(slot)
     }
 }
 
@@ -188,6 +227,10 @@ mod tests {
     #[test]
     fn test_v() {
         assert_eq!(v!(-42 420.69), Vec2f::new(-42.0, 420.69));
+
+        // Negative numbers separated by spaces are parsed correctly by rustc
+        // but rustfmt formats them as subtraction.
+        assert_eq!(v!(-1 - 2), Vec3::new(-1.0, -2.0));
 
         struct S {
             x: i32,

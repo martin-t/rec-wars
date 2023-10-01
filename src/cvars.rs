@@ -1,10 +1,6 @@
 //! Console variables - configuration options for anything and everything.
 
-use std::{
-    fmt::{self, Display, Formatter},
-    num::ParseFloatError,
-    str::FromStr,
-};
+use std::num::ParseFloatError;
 
 use cvars::cvars;
 use macroquad::prelude::Color;
@@ -18,24 +14,35 @@ cvars! {
     //! Console variables - configuration options for anything and everything.
     //!
     //! Prefix meanings:
-    //! cl_ is client
-    //! d_ is debug
-    //! g_ is gameplay
-    //! hud_ is the heads-up display
-    //! r_ is rendering
-    //! sv_ is server administration + performance
-
-    // Would be nice to keep alphabetically.
+    //! cl_     client
+    //! d_      debugging
+    //! g_      gameplay (some of it runs only on the server but this can change with better clientside prediction)
+    //! hud_    heads-up display
+    //! r_      rendering
+    //! sv_     server administration + performance (not gameplay even if it only runs on the server)
+    //! sys_    low level / "engine"
 
     /// Master switch for AI - disable if you want stationary targets
     ai: bool = true,
 
+    /// Final override for the max number of bots
     bots_max: usize = 20,
+    /// Desired number of bots based on the number of spawns
+    bots_spawns_per_bot: f32 = 1.0,
+    /// Desired number of bots based on the number of tiles (map size)
+    bots_tiles_per_bot: f32 = 100.0,
 
     cl_cluster_bomb_size: f64 = 1.5,
 
     cl_machine_gun_trail_length: f64 = 10.0,
     cl_machine_gun_trail_thickness: f64 = 1.5,
+
+    cl_name1: String = "Player 1".to_owned(),
+    cl_name2: String = "Player 2".to_owned(),
+
+    cl_net_connect_retry_delay_ms: u64 = 10,
+    cl_net_connect_retry_print_every_n: u64 = 100,
+    cl_net_server_addr: String = "127.0.0.1:26000".to_owned(),
 
     cl_railgun_trail_duration: f64 = 0.05,
     cl_railgun_trail_thickness: f64 = 1.5,
@@ -78,7 +85,8 @@ cvars! {
     d_draw_lines: bool = true,
     /// This sometimes makes it easier to see the lines if they're very short.
     d_draw_lines_ends_half_length: f64 = 5.0,
-    d_draw_perf: bool = true,
+    d_draw_perf_client: bool = true,
+    d_draw_perf_server: bool = true,
     d_draw_rots: bool = true,
     d_draw_rots_size: f64 = 16.0,
     d_draw_texts: bool = true,
@@ -92,10 +100,11 @@ cvars! {
     /// so I can easily check perf with and without the other debug output.
     d_fps: bool = true,
     d_fps_period: f64 = 1.0,
-    d_fps_x: f64 = -300.0,
+    d_fps_x: f64 = -350.0,
     d_fps_y: f64 = -15.0,
     /// Display the last pressed key. Useful for debugging MQ's issues with keyboard layouts.
     d_last_key: bool = false,
+    d_log_kills: bool = true,
     d_projectiles: bool = false,
     /// The seed to initialize the RNG.
     ///
@@ -237,10 +246,10 @@ cvars! {
     g_hardpoint_tank_rockets_x: f64 = 35.0,
     g_hardpoint_tank_rockets_y: f64 = 0.0,
 
-    g_hitcircle_radius: f64 = 24.0, // TODO proper hitbox
+    g_hitcircle_radius: f64 = 24.0, // LATER proper hitbox
 
     g_homing_missile_accel_forward: f64 = 2000.0,
-    g_homing_missile_angle_detect: f64 = 40.0f64.to_radians(), // TODO (also other places) use Deg
+    g_homing_missile_angle_detect: f64 = 40.0f64.to_radians(), // LATER (also other places) use Deg
     g_homing_missile_angle_forget: f64 = 50.0f64.to_radians(),
     g_homing_missile_damage_direct: f64 = 0.0,
     g_homing_missile_explosion_damage: f64 = 56.0, // assumed same as GM
@@ -312,6 +321,9 @@ cvars! {
     /// The map to play on. Set to empty string for random.
     g_map: String = "".to_owned(),
 
+    g_players_max: usize = 64,
+    g_players_min: usize = 4,
+
     g_railgun_damage: f64 = 47.0, // exact from orig RW
     g_railgun_push: f64 = 300.0,
     g_railgun_reload_ammo: u32 = 1,
@@ -333,7 +345,7 @@ cvars! {
 
     g_self_destruct_damage_center: f64 = 150.0,
     g_self_destruct_damage_edge: f64 = 0.0,
-    g_self_destruct_explosion_scale: f64 = 2.0, // TODO radius
+    g_self_destruct_explosion_scale: f64 = 2.0, // LATER radius
     g_self_destruct_radius: f64 = 175.0,
 
     g_tank_accel_backward: f64 = 550.0,
@@ -405,6 +417,11 @@ cvars! {
     hud_pause_shadow_x: f32 = 2.0,
     hud_pause_shadow_y: f32 = 2.0,
 
+    hud_perf_client_x: f64 = -250.0,
+    hud_perf_client_y: f64 = -105.0,
+    hud_perf_server_x: f64 = -500.0,
+    hud_perf_server_y: f64 = -105.0,
+
     hud_ranking_font_size: f64 = 16.0,
     /// Original RW uses 1
     hud_ranking_shadow_x: f32 = 1.0,
@@ -461,12 +478,14 @@ cvars! {
     /// LATER fix - Does not work in MQ: https://github.com/not-fl3/macroquad/issues/264
     sv_auto_unpause_on_restore: bool = false,
 
+    sv_net_listen_addr: String = "127.0.0.1:26000".to_owned(),
+
     /// LATER Without extrapolation, this needs to be significantly higher than framerate to avoid judder.
     ///     Assuming rendering at 60 fps:
     ///     With 30 updated, it's easily visible on vehicle movement.
     ///     With 60, it's sometimes still noticeable on vehicles but mostly on moving text (names) being less readable.
-    sv_tickrate_fixed_fps: f64 = 150.0,
-    sv_tickrate_mode: TickrateMode = TickrateMode::Variable,
+    sys_tickrate_fixed_fps: f64 = 150.0,
+    sys_tickrate_mode: TickrateMode = TickrateMode::Variable,
 }
 
 impl Cvars {

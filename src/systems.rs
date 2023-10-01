@@ -4,57 +4,23 @@
 //! just without the ECS data structure (we use generational arenas instead).
 //! Most game behavior (code that changes state) goes here.
 
-use rand::Rng;
-use rand_distr::StandardNormal;
-use strum::EnumCount;
 use vek::LineSegment2;
 
-use crate::{
-    cvars::{Hardpoint, MovementStats},
-    prelude::*,
-};
+use crate::prelude::*;
 
-pub struct FrameCtx<'a> {
-    pub cvars: &'a Cvars,
-    pub gs: &'a mut GameState,
-    pub map: &'a Map,
-}
-
-impl<'a> FrameCtx<'a> {
-    pub fn new(cvars: &'a Cvars, gs: &'a mut GameState, map: &'a Map) -> FrameCtx<'a> {
-        FrameCtx { cvars, gs, map }
-    }
-}
-
-impl FrameCtx<'_> {
+impl ServerFrameCtx<'_> {
     /// Delete data from previous frames that's no longer needed.
-    pub fn cleanup(&mut self) {
-        let game_time = self.gs.game_time; // borrowck
-        self.gs
-            .rail_beams
-            .retain(|beam| beam.start_time + self.cvars.cl_railgun_trail_duration > game_time);
-        self.gs.bfg_beams.clear();
-        self.gs.explosions.retain(|explosion| {
-            let progress = (game_time - explosion.start_time) / self.cvars.r_explosion_duration;
-            progress <= 1.0
-        });
-
-        for (_, player) in self.gs.players.iter_mut() {
-            player.notifications.retain(|notification| {
-                game_time - notification.start_time < self.cvars.hud_notifications_duration
-            });
-        }
+    pub fn sys_cleanup(&mut self) {
+        // LATER Remove this if it remain unused
     }
 
-    pub fn respawning(&mut self) {
-        for player_handle in self.gs.players.iter_handles() {
+    pub fn sys_respawning(&mut self) {
+        for player_handle in self.gs.players.collect_handles() {
             let player = &mut self.gs.players[player_handle];
             let vehicle_handle = player.vehicle.unwrap();
             if !self.gs.vehicles[vehicle_handle].destroyed() {
                 continue;
             }
-
-            let input_prev = self.gs.inputs_prev.get(player_handle);
 
             // Respawn on release so the vehicle doesn't immediately shoot.
             // Require the whole press and release cycle to happen while dead
@@ -62,11 +28,11 @@ impl FrameCtx<'_> {
             // even if respawn delay is 0.
             // LATER Allow press and release in one frame.
 
-            if !input_prev.fire && player.input.fire {
+            if !player.input_prev.fire && player.input.fire {
                 player.respawn = Respawn::Pressed;
             }
 
-            if player.respawn == Respawn::Pressed && input_prev.fire && !player.input.fire {
+            if player.respawn == Respawn::Pressed && player.input_prev.fire && !player.input.fire {
                 player.respawn = Respawn::Scheduled;
             }
 
@@ -81,14 +47,14 @@ impl FrameCtx<'_> {
     }
 
     pub fn spawn_vehicle(&mut self, player_handle: Index, use_spawns: bool) {
-        let veh_type = VehicleType::from_repr(self.gs.rng.gen_range(0..3)).unwrap();
+        let veh_type = VehicleType::from_repr(self.sg.rng.gen_range(0..3)).unwrap();
         let (spawn_pos, spawn_angle) = if use_spawns {
-            self.map.random_spawn(&mut self.gs.rng)
+            self.map.random_spawn(&mut self.sg.rng)
         } else {
-            let (pos, _angle) = self.map.random_nonwall(&mut self.gs.rng);
+            let (pos, _angle) = self.map.random_nonwall(&mut self.sg.rng);
             // Most grass tiles have no rotation so everyone ends up facing right which looks bad.
             // Throw away their angle and use a random one.
-            let angle = self.gs.rng.gen_range(0.0..2.0 * PI);
+            let angle = self.sg.rng.gen_range(0.0..2.0 * PI);
             (pos, angle)
         };
 
@@ -103,10 +69,28 @@ impl FrameCtx<'_> {
 
         let player = &mut self.gs.players[player_handle];
         player.vehicle = Some(vehicle_handle);
+
+        let vehicle = &self.gs.vehicles[vehicle_handle];
+        let init = VehicleInit {
+            index: vehicle_handle.slot(),
+            physics: EntityPhysics {
+                pos: vehicle.pos,
+                vel: vehicle.vel,
+                angle: vehicle.angle,
+                turn_rate: vehicle.turn_rate,
+            },
+            veh_type,
+            turret_angle_current: vehicle.turret_angle_current,
+            turret_angle_wanted: vehicle.turret_angle_wanted,
+            spawn_time: vehicle.spawn_time,
+            owner: vehicle.owner.slot(),
+        };
+        let msg = ServerMessage::SpawnVehicle(init);
+        self.net_send_all(msg);
     }
 
     pub fn self_destruct(&mut self) {
-        for vehicle_handle in self.gs.vehicles.iter_handles() {
+        for vehicle_handle in self.gs.vehicles.collect_handles() {
             let vehicle = &self.gs.vehicles[vehicle_handle];
             let pos = vehicle.pos;
             let owner = vehicle.owner;
@@ -116,12 +100,7 @@ impl FrameCtx<'_> {
             }
 
             // 1) the big explosion
-            self.gs.explosions.push(Explosion::new(
-                pos,
-                self.cvars.g_self_destruct_explosion_scale,
-                self.gs.game_time,
-                false,
-            ));
+            self.spawn_explosion(pos, self.cvars.g_self_destruct_explosion_scale, false);
 
             // 2) all vehicles in range
             self.explosion_damage(
@@ -140,13 +119,13 @@ impl FrameCtx<'_> {
         }
     }
 
-    pub fn vehicle_movement(&mut self) {
+    pub fn sys_vehicle_movement(&mut self) {
         for (_, vehicle) in self.gs.vehicles.iter_mut() {
             let stats = self.cvars.g_vehicle_movement_stats(vehicle.veh_type);
 
             // No movement after death or when guiding
             let input = if vehicle.destroyed() {
-                Input::new()
+                NetInput::empty()
             } else {
                 let player = &self.gs.players[vehicle.owner];
                 if player.guided_missile.is_some() {
@@ -203,7 +182,7 @@ impl FrameCtx<'_> {
         vel: &mut Vec2f,
         angle: &f64,
         turn_rate: &mut f64,
-        input: Input,
+        input: NetInput,
         dt: f64,
     ) -> f64 {
         let tr_change = input.right_left() * stats.turn_rate_increase * dt;
@@ -242,7 +221,13 @@ impl FrameCtx<'_> {
         (angle + turn).rem_euclid(2.0 * PI)
     }
 
-    fn accel_decel(stats: &MovementStats, vel: &mut Vec2f, angle: &mut f64, input: Input, dt: f64) {
+    fn accel_decel(
+        stats: &MovementStats,
+        vel: &mut Vec2f,
+        angle: &mut f64,
+        input: NetInput,
+        dt: f64,
+    ) {
         let vel_change =
             (input.up() * stats.accel_forward - input.down() * stats.accel_backward) * dt;
         *vel += angle.to_vec2f() * vel_change;
@@ -259,35 +244,32 @@ impl FrameCtx<'_> {
         }
     }
 
-    pub fn player_logic(&mut self) {
-        for (player_handle, player) in self.gs.players.iter_mut() {
-            let input_prev = self.gs.inputs_prev.get(player_handle);
-
+    pub fn sys_player_weapon(&mut self) {
+        for (_, player) in self.gs.players.iter_mut() {
             // Change weapon
-            if !input_prev.prev_weapon && player.input.prev_weapon {
+            if !player.input_prev.prev_weapon && player.input.prev_weapon {
                 let prev = (player.cur_weapon as usize + Weapon::COUNT - 1) % Weapon::COUNT;
                 player.cur_weapon = Weapon::from_repr(prev).unwrap();
             }
-            if !input_prev.next_weapon && player.input.next_weapon {
+            if !player.input_prev.next_weapon && player.input.next_weapon {
                 let next = (player.cur_weapon as usize + 1) % Weapon::COUNT;
                 player.cur_weapon = Weapon::from_repr(next).unwrap();
             }
         }
     }
 
-    pub fn vehicle_logic(&mut self) {
+    pub fn sys_vehicle_logic(&mut self) {
         for (_, vehicle) in self.gs.vehicles.iter_mut() {
             // This should run even while dead, otherwise the ammo indicator will be buggy.
             // Original RW also reloaded while dead.
 
             let player = &self.gs.players[vehicle.owner];
-            let input_prev = self.gs.inputs_prev.get(vehicle.owner);
 
             // Turret turning
-            if !input_prev.turret_left && player.input.turret_left {
+            if !player.input_prev.turret_left && player.input.turret_left {
                 vehicle.turret_angle_wanted -= self.cvars.g_turret_turn_step_angle_deg.to_radians();
             }
-            if !input_prev.turret_right && player.input.turret_right {
+            if !player.input_prev.turret_right && player.input.turret_right {
                 vehicle.turret_angle_wanted += self.cvars.g_turret_turn_step_angle_deg.to_radians();
             }
             vehicle.turret_angle_wanted = vehicle.turret_angle_wanted.rem_euclid(2.0 * PI);
@@ -314,7 +296,8 @@ impl FrameCtx<'_> {
         }
     }
 
-    pub fn shooting(&mut self) {
+    pub fn sys_shooting(&mut self) {
+        let mut new_projectiles = Vec::new();
         for (_, vehicle) in self.gs.vehicles.iter_mut() {
             let player = &mut self.gs.players[vehicle.owner];
             // Note: vehicles can shoot while controlling a missile
@@ -357,9 +340,9 @@ impl FrameCtx<'_> {
                 let mut projectile = Projectile {
                     weapon: Weapon::Mg,
                     pos: shot_origin,
-                    vel: Vec2f::zero(),
+                    vel: Vec2f::zero(), // LATER hardpoint vel? -> more vel if vehicle is turning?
                     angle: shot_angle,
-                    turn_rate: 0.0,
+                    turn_rate: 0.0, // LATER vehicle turn angle?
                     explode_time: f64::MAX,
                     owner: vehicle.owner,
                     target: None,
@@ -367,21 +350,23 @@ impl FrameCtx<'_> {
 
                 match player.cur_weapon {
                     Weapon::Mg => {
-                        let r: f64 = self.gs.rng.sample(StandardNormal);
+                        let r: f64 = self.sg.rng.sample(StandardNormal);
                         let spread = self.cvars.g_machine_gun_angle_spread * r;
                         // Using spread as shot_vel.y would mean the resulting spread depends on speed
                         // so it's better to use spread on angle.
                         projectile.vel = Vec2f::new(self.cvars.g_machine_gun_speed, 0.0)
                             .rotated_z(shot_angle + spread)
                             + self.cvars.g_machine_gun_vehicle_velocity_factor * vehicle.vel;
-                        self.gs.projectiles.insert(projectile);
+                        let handle = self.gs.projectiles.insert(projectile);
+                        new_projectiles.push(handle);
                     }
                     Weapon::Rail => {
                         projectile.weapon = Weapon::Rail;
                         projectile.vel = Vec2f::new(self.cvars.g_railgun_speed, 0.0)
                             .rotated_z(shot_angle)
                             + self.cvars.g_railgun_vehicle_velocity_factor * vehicle.vel;
-                        self.gs.projectiles.insert(projectile);
+                        let handle = self.gs.projectiles.insert(projectile);
+                        new_projectiles.push(handle);
                     }
                     Weapon::Cb => {
                         projectile.weapon = Weapon::Cb;
@@ -390,15 +375,15 @@ impl FrameCtx<'_> {
                             let spread_forward;
                             let spread_sideways;
                             if self.cvars.g_cluster_bomb_speed_spread_gaussian {
-                                let r: f64 = self.gs.rng.sample(StandardNormal);
+                                let r: f64 = self.sg.rng.sample(StandardNormal);
                                 spread_forward = self.cvars.g_cluster_bomb_speed_spread_forward * r;
-                                let r: f64 = self.gs.rng.sample(StandardNormal);
+                                let r: f64 = self.sg.rng.sample(StandardNormal);
                                 spread_sideways =
                                     self.cvars.g_cluster_bomb_speed_spread_sideways * r;
                             } else {
-                                let r = self.gs.rng.sample(self.gs.range_uniform11);
+                                let r = self.sg.rng.sample(self.gs.range_uniform11);
                                 spread_forward = self.cvars.g_cluster_bomb_speed_spread_forward * r;
-                                let r = self.gs.rng.sample(self.gs.range_uniform11);
+                                let r = self.sg.rng.sample(self.gs.range_uniform11);
                                 spread_sideways =
                                     self.cvars.g_cluster_bomb_speed_spread_sideways * r;
                             }
@@ -407,9 +392,10 @@ impl FrameCtx<'_> {
                                 + self.cvars.g_cluster_bomb_vehicle_velocity_factor * vehicle.vel;
                             projectile.explode_time = self.gs.game_time
                                 + self.cvars.g_cluster_bomb_time
-                                + self.gs.rng.sample(self.gs.range_uniform11)
+                                + self.sg.rng.sample(self.gs.range_uniform11)
                                     * self.cvars.g_cluster_bomb_time_spread;
-                            self.gs.projectiles.insert(projectile.clone());
+                            let handle = self.gs.projectiles.insert(projectile.clone());
+                            new_projectiles.push(handle);
                         }
                     }
                     Weapon::Rockets => {
@@ -417,22 +403,25 @@ impl FrameCtx<'_> {
                         projectile.vel = Vec2f::new(self.cvars.g_rockets_speed, 0.0)
                             .rotated_z(shot_angle)
                             + self.cvars.g_rockets_vehicle_velocity_factor * vehicle.vel;
-                        self.gs.projectiles.insert(projectile);
+                        let handle = self.gs.projectiles.insert(projectile);
+                        new_projectiles.push(handle);
                     }
                     Weapon::Hm => {
                         projectile.weapon = Weapon::Hm;
                         projectile.vel = Vec2f::new(self.cvars.g_homing_missile_speed_initial, 0.0)
                             .rotated_z(shot_angle)
                             + self.cvars.g_homing_missile_vehicle_velocity_factor * vehicle.vel;
-                        self.gs.projectiles.insert(projectile);
+                        let handle = self.gs.projectiles.insert(projectile);
+                        new_projectiles.push(handle);
                     }
                     Weapon::Gm => {
                         projectile.weapon = Weapon::Gm;
                         projectile.vel = Vec2f::new(self.cvars.g_guided_missile_speed_initial, 0.0)
                             .rotated_z(shot_angle)
                             + self.cvars.g_guided_missile_vehicle_velocity_factor * vehicle.vel;
-                        // TODO angle (maybe also HM)
+                        // LATER Set angle according to vehicle angle (also some other weaps)
                         let handle = self.gs.projectiles.insert(projectile);
+                        new_projectiles.push(handle);
                         player.guided_missile = Some(handle);
                     }
                     Weapon::Bfg => {
@@ -440,10 +429,29 @@ impl FrameCtx<'_> {
                         projectile.vel = Vec2f::new(self.cvars.g_bfg_speed, 0.0)
                             .rotated_z(shot_angle)
                             + self.cvars.g_bfg_vehicle_velocity_factor * vehicle.vel;
-                        self.gs.projectiles.insert(projectile);
+                        let handle = self.gs.projectiles.insert(projectile);
+                        new_projectiles.push(handle);
                     }
                 }
             }
+        }
+
+        for handle in new_projectiles {
+            let projectile = &self.gs.projectiles[handle];
+            let spawn = ProjectileInit {
+                index: handle.slot(),
+                weapon: projectile.weapon,
+                physics: EntityPhysics {
+                    pos: projectile.pos,
+                    vel: projectile.vel,
+                    angle: projectile.angle,
+                    turn_rate: projectile.turn_rate,
+                },
+                explode_time: projectile.explode_time,
+                owner: projectile.owner.slot(),
+            };
+            let msg = ServerMessage::SpawnProjectile(spawn);
+            self.net_send_all(msg);
         }
     }
 
@@ -454,7 +462,7 @@ impl FrameCtx<'_> {
     }
 
     /// The *homing* part of homing missile
-    pub fn hm_turning(&mut self) {
+    pub fn sys_hm_turning(&mut self) {
         for (hm_handle, hm) in self
             .gs
             .projectiles
@@ -521,7 +529,7 @@ impl FrameCtx<'_> {
             }
 
             // Determine direction
-            let mut input = Input::new_up();
+            let mut input = NetInput::new_up();
             if let Some(target_handle) = hm.target {
                 let target = &self.gs.vehicles[target_handle];
                 let target_dir = (target.pos - hm.pos).normalized();
@@ -552,7 +560,7 @@ impl FrameCtx<'_> {
     }
 
     /// The *guided* part of guided missile
-    pub fn gm_turning(&mut self) {
+    pub fn sys_gm_turning(&mut self) {
         for (gm_handle, gm) in self
             .gs
             .projectiles
@@ -566,7 +574,7 @@ impl FrameCtx<'_> {
             let input = if player.guided_missile == Some(gm_handle) {
                 player.input.missile_while_guiding()
             } else {
-                Input::new_up()
+                NetInput::new_up()
             };
 
             gm.angle = Self::turning(
@@ -584,8 +592,8 @@ impl FrameCtx<'_> {
 
     /// Projectile movement and collisions / hit detection.
     /// Traces the projectile's path between positions to avoid passing through thin objects.
-    pub fn projectiles(&mut self) {
-        for proj_handle in self.gs.projectiles.iter_handles() {
+    pub fn sys_projectiles(&mut self) {
+        for proj_handle in self.gs.projectiles.collect_handles() {
             let projectile = &mut self.gs.projectiles[proj_handle];
             let max_new_pos = projectile.pos + projectile.vel * self.gs.dt;
 
@@ -618,10 +626,11 @@ impl FrameCtx<'_> {
             let is_rail = projectile.weapon == Weapon::Rail;
             if is_rail {
                 let beam = RailBeam::new(step.start, step.end, self.gs.game_time);
-                self.gs.rail_beams.push(beam);
+                let msg = ServerMessage::RailBeam(beam);
+                self.net_send_all(msg);
             }
 
-            for vehicle_handle in self.gs.vehicles.iter_handles() {
+            for vehicle_handle in self.gs.vehicles.collect_handles() {
                 // LATER immediately killing vehicles here means 2 players can't share a kill
                 let vehicle = &mut self.gs.vehicles[vehicle_handle];
 
@@ -653,17 +662,12 @@ impl FrameCtx<'_> {
                     self.damage(attacker_handle, vehicle_handle, dmg);
                     if !is_rail {
                         self.projectile_impact(proj_handle, nearest_point);
-                        break; // TODO actually ... what if the segment is long and 2 vehicles are in the path
+                        break; // LATER actually ... what if the segment is long and 2 vehicles are in the path
                     }
                 } else if projectile.weapon == Weapon::Bfg
-                    && dist2 <= self.cvars.g_bfg_beam_range * self.cvars.g_bfg_beam_range
-                    && self
-                        .map
-                        .is_wall_trace(projectile.pos, vehicle.pos)
-                        .is_none()
+                    && weapons::bfg_beam_hit(&self.cvars, &self.map, projectile.pos, vehicle.pos)
                 {
                     let dmg = self.cvars.g_bfg_beam_damage_per_sec * self.gs.dt;
-                    self.gs.bfg_beams.push((projectile.pos, vehicle.pos));
                     let attacker_handle = projectile.owner;
                     self.damage(attacker_handle, vehicle_handle, dmg);
                 }
@@ -699,48 +703,36 @@ impl FrameCtx<'_> {
         // Vehicle got killed
 
         vehicle.hp_fraction = 0.0;
-        self.gs
-            .explosions
-            .push(Explosion::new(vehicle.pos, 1.0, self.gs.game_time, false));
-        self.gs.players[vehicle.owner].guided_missile = None; // No guiding after death
+        let veh_owner = vehicle.owner; // Borrowck
+        let veh_pos = vehicle.pos; // Borrowck
+        self.spawn_explosion(veh_pos, 1.0, false);
+        self.gs.players[veh_owner].guided_missile = None; // No guiding after death
 
-        let attacker_name = &self.gs.players[attacker_handle].name.clone();
-        let victim_name = &self.gs.players[vehicle.owner].name.clone();
-        dbg_logf!("{:?} was killed by {:?}", victim_name, attacker_name);
-
-        let attacker = &mut self.gs.players[attacker_handle];
-        if attacker_handle == vehicle.owner {
-            attacker.score.suicides += 1;
-            attacker.notifications.push(Notification::new(
-                "You committed suicide".to_owned(),
-                self.cvars.hud_notifications_color_death,
-                self.gs.game_time,
-            ));
-        } else {
-            attacker.score.kills += 1;
-            attacker.notifications.push(Notification::new(
-                format!("You killed {victim_name}"),
-                self.cvars.hud_notifications_color_kill,
-                self.gs.game_time,
-            ));
-        }
-        let victim = &mut self.gs.players[vehicle.owner];
-        victim.score.deaths += 1; // All deaths, including suicides
-        if attacker_handle != vehicle.owner {
-            victim.notifications.push(Notification::new(
-                format!("You were killed by {attacker_name}"),
-                self.cvars.hud_notifications_color_death,
-                self.gs.game_time,
-            ));
+        if self.cvars.d_log_kills {
+            // Indent kill msgs because there's a lot of them so others stand out.
+            // LATER configurable indent
+            let attacker_name = &self.gs.players[attacker_handle].name.clone();
+            let victim_name = &self.gs.players[veh_owner].name.clone();
+            dbg_logf!("    {victim_name:?} was killed by {attacker_name:?}");
         }
 
+        let victim = &mut self.gs.players[veh_owner];
         victim.death_time = self.gs.game_time;
+
+        self.update_score_kill(attacker_handle, veh_owner);
+
+        let kill = Kill {
+            attacker: attacker_handle.slot(),
+            victim: veh_owner.slot(),
+        };
+        let msg = ServerMessage::Kill(kill);
+        self.net_send_all(msg);
     }
 
     /// Right now, CBs are the only timed projectiles, long term, might wanna add timeouts to more
     /// to avoid too many entities on huge maps.
-    pub fn projectiles_timeout(&mut self) {
-        for handle in self.gs.projectiles.iter_handles() {
+    pub fn sys_projectiles_timeout(&mut self) {
+        for handle in self.gs.projectiles.collect_handles() {
             let projectile = &self.gs.projectiles[handle];
             if self.gs.game_time > projectile.explode_time {
                 let hit_pos = projectile.pos; // borrowck dance
@@ -749,6 +741,17 @@ impl FrameCtx<'_> {
         }
     }
 
+    pub fn spawn_explosion(&mut self, pos: Vec2f, scale: f64, bfg: bool) {
+        if scale == 0.0 {
+            return;
+        }
+
+        let init = ExplosionInit { pos, scale, bfg };
+        let msg = ServerMessage::SpawnExplosion(init);
+        self.net_send_all(msg);
+    }
+
+    // LATER This shouldn't need to take hit_pos
     fn projectile_impact(&mut self, projectile_handle: Index, hit_pos: Vec2f) {
         let projectile = &mut self.gs.projectiles[projectile_handle];
 
@@ -759,14 +762,8 @@ impl FrameCtx<'_> {
 
         // Vehicle explosion first so it's below projectile explosion because it looks better.
         let expl_scale = self.cvars.g_weapon_explosion_scale(weapon);
-        if expl_scale > 0.0 {
-            self.gs.explosions.push(Explosion::new(
-                hit_pos,
-                expl_scale,
-                self.gs.game_time,
-                weapon == Weapon::Bfg,
-            ));
-        }
+        let expl_bfg = weapon == Weapon::Bfg;
+        self.spawn_explosion(hit_pos, expl_scale, expl_bfg);
 
         let expl_damage = expl_scale * self.cvars.g_weapon_explosion_damage(weapon);
         let expl_radius = expl_scale * self.cvars.g_weapon_explosion_radius(weapon);
@@ -795,6 +792,11 @@ impl FrameCtx<'_> {
                 player.guided_missile = None;
             }
         }
+
+        let msg = ServerMessage::DestroyProjectile {
+            index: projectile_handle.slot(),
+        };
+        self.net_send_all(msg);
         self.gs.projectiles.remove(projectile_handle).unwrap();
     }
 
@@ -811,7 +813,7 @@ impl FrameCtx<'_> {
             dbg_line!(expl_pos, expl_pos + Vec2f::new(radius, 0.0), 5.0);
         }
 
-        for vehicle_handle in self.gs.vehicles.iter_handles() {
+        for vehicle_handle in self.gs.vehicles.collect_handles() {
             if let Some(ignore) = ignore {
                 if vehicle_handle == ignore {
                     continue;
@@ -830,23 +832,5 @@ impl FrameCtx<'_> {
                 self.damage(owner, vehicle_handle, expl_damage);
             }
         }
-    }
-
-    pub fn debug_examples(&mut self) {
-        if !self.cvars.d_examples {
-            return;
-        }
-
-        dbg_world_textd!(v!(25 200), self.cvars.d_examples);
-
-        dbg_line!(v!(25 225), v!(75 225));
-
-        dbg_arrow!(v!(25 250), v!(50 0));
-        dbg_arrow!(v!(25 275), v!(25, -10));
-
-        dbg_cross!(v!(25 300));
-
-        dbg_rot!(v!(25 325), 0.0);
-        dbg_rot!(v!(25 350), 30.0_f64.to_radians());
     }
 }

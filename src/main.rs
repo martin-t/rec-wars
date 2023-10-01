@@ -10,10 +10,14 @@
 #[macro_use]
 pub mod debug; // keep first so the macros are available everywhere
 
+pub mod assets;
 pub mod client;
+pub mod common;
+pub mod context;
 pub mod cvars;
 pub mod entities;
 pub mod game_state;
+pub mod input;
 pub mod map;
 pub mod net;
 pub mod net_messages;
@@ -24,12 +28,36 @@ pub mod sys_ai;
 pub mod systems;
 pub mod timing;
 pub mod utils;
+pub mod weapons;
 
 use std::{env, error::Error, panic, process::Command};
 
 use macroquad::prelude::*;
 
-use crate::{client::MacroquadClient, prelude::*, server::Server};
+use crate::{net::Connection, prelude::*};
+
+const BOT_NAMES: [&str; 20] = [
+    "Dr. Dead",
+    "Sir Hurt",
+    "Mr. Pain",
+    "PhD. Torture",
+    "Mrs. Chestwound",
+    "Ms. Dismember",
+    "Don Lobotomy",
+    "Lt. Dead",
+    "Sgt. Dead",
+    "Private Dead",
+    "Colonel Dead",
+    "Captain Dead",
+    "Major Dead",
+    "Commander Dead",
+    "Díotóir",
+    "Fireman",
+    "Goldfinger",
+    "Silverfinger",
+    "Bronzefinger",
+    "President Dead",
+];
 
 #[derive(Debug)]
 enum Endpoint {
@@ -42,13 +70,27 @@ enum Endpoint {
 }
 
 fn window_conf() -> Conf {
+    // This is a hack because macroquad doesn't really allow modifying the window later.
+    // LATER Find out what #[macroquad] expands to, do it manually
+    //  but only if on client so server doesn't depend on macroquad.
+    let arg = env::args().skip(1).next();
+    let title = match arg.as_deref() {
+        Some("server") => "RecWars Server",
+        Some("client") => "RecWars Client",
+        Some("local") => "RecWars Local",
+        _ => "RecWars Launcher",
+    };
+    let (width, height) = match arg.as_deref() {
+        Some("client" | "local") => (1600, 900),
+        _ => (400, 200),
+    };
     Conf {
-        window_title: "RecWars".to_owned(),
+        window_title: title.to_owned(),
         // In older macroquad, setting width and height to the size of the screen or larger
         // created a maximized window. This no longer works and the bottom OS panel covers
         // the window so this is an ugly compromise that should be good enough for most people.
-        window_width: 1600,
-        window_height: 900,
+        window_width: width,
+        window_height: height,
         // LATER Allow resizing - AFAICT there was an issue with infinite memory growth when resizing the render target.
         // Can't use `fullscreen: true` because of https://github.com/not-fl3/macroquad/issues/237.
         window_resizable: false,
@@ -132,7 +174,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         // LATER None should launch client and offer choice in menu
         None => {
             init_global_state("launcher");
-            client_server_main(cvar_args);
+            client_server_main(cvar_args).await;
         }
         Some(Endpoint::Local) => {
             init_global_state("lo");
@@ -147,7 +189,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         Some(Endpoint::Server) => {
             init_global_state("sv");
             let cvars = args_to_cvars(&cvar_args)?;
-            server_main(cvars);
+            server_main(cvars).await;
         }
     }
 
@@ -213,7 +255,10 @@ fn args_to_cvars(cvar_args: &[String]) -> Result<Cvars, String> {
 ///
 /// LATER It should do that explicitly, right now it only kills the server
 /// because client quits without a server anyway.
-fn client_server_main(cvar_args: Vec<String>) {
+async fn client_server_main(cvar_args: Vec<String>) {
+    draw_text("launcher", 10.0, 20.0, 16.0, RED);
+    next_frame().await;
+
     let path = env::args().next().unwrap();
 
     let mut server_cmd = Command::new(&path);
@@ -240,52 +285,198 @@ fn client_server_main(cvar_args: Vec<String>) {
 
 /// LATER Do we want a shared game state or just running both
 /// client and server in one thread? Update docs on Endpoint or wherever.
-async fn client_main(mut cvars: Cvars, _local_server: bool) {
+async fn client_main(mut cvars: Cvars, local_game: bool) {
+    dbg_logd!(local_game); // LATER Actually use
+
     show_mouse(false);
 
-    if cvars.d_seed == 0 {
-        let time_seed = macroquad::miniquad::date::now();
-        cvars.d_seed = time_seed.to_bits();
-    }
-    dbg_logf!("Seed: {}", cvars.d_seed);
-
-    // LATER This doesn't display in native, what about web?
-    draw_text("Loading...", 400.0, 400.0, 32.0, RED);
     let assets = Assets::load_all().await;
-    let map_path = assets.select_map(&mut cvars);
-    dbg_logf!("Map: {}", map_path);
 
-    let map_text = assets.maps.get(map_path).unwrap();
-    let surfaces = map::parse_texture_list(&assets.texture_list);
-    let map = map::parse_map(map_text, surfaces);
+    // LATER Maybe extract connect/init into a function?
+    //  Depends on how UI will work. Ideally calls to next_frame would all be in one place.
+    //  Option 1: state machine: menu, connecting, playing - one main loop for all.
+    //  Option 2: separate "main" loops, after game loop ends, return back into menu loop.
+    // LATER Also should call next_frame() in all waiting loops so the window is not stuck after being minimized.
 
-    let mut server = Server::new(&cvars, map);
+    draw_text(
+        &format!("Connecting to {}...", &cvars.cl_net_server_addr),
+        200.0,
+        200.0,
+        32.0,
+        RED,
+    );
+    next_frame().await;
+    let mut conn: Box<dyn Connection> =
+        Box::new(net::tcp_connect(&cvars, &cvars.cl_net_server_addr));
 
-    let player1_handle = server.connect(&cvars, "Player 1");
-    let player2_handle = if cvars.cl_splitscreen {
-        Some(server.connect(&cvars, "Player 2"))
-    } else {
-        None
+    // LATER(splitscreen) handle 2 networked players on 1 connection (need to tell server how many players to spawn)
+    let connect = Connect {
+        cl_version: env!("GIT_VERSION").to_owned(),
+        name1: cvars.cl_name1.clone(),
+        name2: None,
     };
-    let mut client = MacroquadClient::new(&cvars, assets, player1_handle, player2_handle);
+    let msg = ClientMessage::Connect(connect);
+    let net_msg = net::serialize(msg);
+    let res = conn.send(&net_msg);
+    res.unwrap(); // LATER
+
+    draw_text("Waiting for initial data...", 200.0, 200.0, 32.0, RED);
+    next_frame().await;
+    let init = loop {
+        let (msg, closed) = conn.receive_one_sm();
+        if closed {
+            dbg_logf!("Server disconnected");
+            return;
+        }
+
+        if let Some(msg) = msg {
+            match msg {
+                ServerMessage::Init(init) => break init,
+                msg => dbg_logf!("WARNING: Unexpected message type: {:?}", msg),
+            }
+        }
+
+        next_frame().await;
+    };
+
+    // Using destructuring here so we get an error if a field is added but not read.
+
+    let Init {
+        sv_version,
+        map_path,
+        frame_num,
+        game_time,
+        game_time_prev,
+        dt,
+        players,
+        local_player1_index,
+        local_player2_index,
+        vehicles,
+        projectiles,
+    } = init;
+    assert!(local_player2_index.is_none()); // LATER
+
+    let cl_version = env!("GIT_VERSION");
+    dbg_logf!("Server version: {}", sv_version);
+    dbg_logf!("Client version: {}", cl_version);
+    if sv_version == cl_version {
+        dbg_logf!("Versions match");
+    } else {
+        dbg_logf!("WARNING: Client and server versions don't match");
+    }
+
+    let map = load_map(&assets, &map_path);
+    let mut gs = GameState::new();
+    gs.frame_num = frame_num;
+    gs.game_time = game_time;
+    gs.game_time_prev = game_time_prev;
+    gs.dt = dt;
+
+    let mut ctx = FrameCtx::new(&cvars, &map, &mut gs);
+    for player in players {
+        ctx.init_player(player);
+    }
+    for vehicle in vehicles {
+        ctx.init_vehicle(vehicle);
+    }
+    for projectile in projectiles {
+        ctx.init_projectile(projectile);
+    }
+
+    let player1_handle = gs.players.slot_to_index(local_player1_index).unwrap();
+    let mut client = Client::new(&cvars, assets, map, gs, conn, player1_handle, None);
 
     loop {
-        let real_time = get_time();
+        // Input is outside the game loop because
+        // - It needs access to the console and ClientCtx doesn't have it.
+        // - Macroquad only updates input once per frame anyway.
+        client.cl_input(&cvars);
 
-        client.process_input(&mut server);
+        client.update(&cvars, get_time());
 
-        server.update(&cvars, real_time);
+        client.render(&cvars);
 
-        rendering::render(&cvars, &mut client, &server);
         client.console.update(&mut cvars);
 
         let before = get_time();
         next_frame().await;
         let after = get_time();
-        client
-            .rest_durations
-            .add(cvars.d_timing_samples, after - before);
+        let samples_max = cvars.d_timing_samples;
+        client.engine_durations.add(samples_max, after - before);
     }
 }
 
-fn server_main(_cvars: Cvars) {}
+async fn server_main(mut cvars: Cvars) {
+    init_seed(&mut cvars);
+    let assets = Assets::load_all().await;
+
+    let map_path = select_map(&mut cvars, &assets).to_owned();
+    let map = load_map(&assets, &map_path);
+    let mut server = Server::new(&cvars, map);
+
+    loop {
+        server.update(&cvars, get_time());
+
+        // Draw something ever frame so we know the server is not stuck.
+        clear_background(BLACK);
+        draw_text(
+            &format!("engine time {:.04}", get_time()),
+            10.0,
+            20.0,
+            16.0,
+            RED,
+        );
+
+        next_frame().await;
+    }
+}
+
+fn init_seed(cvars: &mut Cvars) {
+    if cvars.d_seed == 0 {
+        let time_seed = macroquad::miniquad::date::now();
+        cvars.d_seed = time_seed.to_bits();
+    }
+    dbg_logf!("Seed: {}", cvars.d_seed);
+}
+
+fn select_map<'a>(cvars: &'a mut Cvars, assets: &'a Assets) -> &'a str {
+    let map_path = if cvars.g_map.is_empty() {
+        // Pick a random map supported by bots.
+        let index = cvars.d_seed as usize % assets.bot_map_paths.len();
+        let path = &assets.bot_map_paths[index];
+        cvars.g_map = path.clone();
+        path
+    } else if cvars.g_map.starts_with("maps/") {
+        // Load the exact path.
+        &cvars.g_map
+    } else {
+        // Attempt to find a map whose name starts with the given string.
+        let mut matching = Vec::new();
+        for (name, path) in &assets.map_names_to_paths {
+            if name.starts_with(&cvars.g_map) {
+                matching.push(path);
+            }
+        }
+
+        if matching.is_empty() {
+            panic!("ERROR: No maps found matching {}", cvars.g_map);
+        } else if matching.len() > 1 {
+            dbg_logf!("WARNING: Multiple maps found matching {}:", cvars.g_map);
+            for path in &matching {
+                dbg_logf!("    {}", path);
+            }
+            matching[0]
+        } else {
+            matching[0]
+        }
+    };
+
+    dbg_logf!("Map: {}", map_path);
+    map_path
+}
+
+fn load_map(assets: &Assets, map_path: &str) -> Map {
+    let map_text = assets.maps.get(map_path).unwrap();
+    let surfaces = map::parse_texture_list(&assets.texture_list);
+    map::parse_map(map_text, surfaces, map_path)
+}

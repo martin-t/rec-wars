@@ -46,8 +46,9 @@ cvars = "0.4.2"
 cvars-console-macroquad = "0.3.0"
 fnv = "1.0.7"
 inline_tweak = "1.0.9"
-macroquad = "=0.4.2" # Exact version because of the image crate https://github.com/not-fl3/macroquad/issues/494
-serde = { version = "1.0.185", features = ["derive"] }
+macroquad = "=0.4.4" # Exact version because of the image crate https://github.com/not-fl3/macroquad/issues/494
+rand_xoshiro = "0.6.0"
+serde = { version = "1.0.188", features = ["derive"] }
 strum = "0.25.0"
 strum_macros = "0.25.2"
 thunderdome = "0.6.1"
@@ -70,7 +71,7 @@ version = "0.4.0"
 default-features = false
 
 [dev-dependencies]
-walkdir = "2.3.3"
+walkdir = "2.4.0"
 
 # Note: sometimes it's necessary to run cargo update after patching a dependency.
 [patch.crates-io]
