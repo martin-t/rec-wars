@@ -4,8 +4,10 @@
 #![warn(unreachable_pub)]
 #![warn(unused)]
 #![warn(clippy::all)]
+#![allow(clippy::comparison_chain)] // Ifs are often cleaner with fewer indents
+#![allow(clippy::iter_skip_next)] // Skip makes intent clearer sometimes
 #![allow(clippy::needless_range_loop)] // False positives
-#![allow(clippy::too_many_arguments)]
+#![allow(clippy::too_many_arguments)] // I decide what's too many
 
 #[macro_use]
 pub mod debug; // keep first so the macros are available everywhere

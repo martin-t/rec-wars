@@ -57,6 +57,12 @@ impl GameState {
     }
 }
 
+impl Default for GameState {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct RailBeam {
     pub begin: Vec2f,

@@ -154,13 +154,7 @@ impl ServerFrameCtx<'_> {
                 vehicle.angle = new_angle;
             }
 
-            Self::accel_decel(
-                &stats,
-                &mut vehicle.vel,
-                &mut vehicle.angle,
-                input,
-                self.gs.dt,
-            );
+            Self::accel_decel(&stats, &mut vehicle.vel, vehicle.angle, input, self.gs.dt);
 
             let new_pos = vehicle.pos + vehicle.vel * self.gs.dt;
             if vehicle
@@ -221,13 +215,7 @@ impl ServerFrameCtx<'_> {
         (angle + turn).rem_euclid(2.0 * PI)
     }
 
-    fn accel_decel(
-        stats: &MovementStats,
-        vel: &mut Vec2f,
-        angle: &mut f64,
-        input: NetInput,
-        dt: f64,
-    ) {
+    fn accel_decel(stats: &MovementStats, vel: &mut Vec2f, angle: f64, input: NetInput, dt: f64) {
         let vel_change =
             (input.up() * stats.accel_forward - input.down() * stats.accel_backward) * dt;
         *vel += angle.to_vec2f() * vel_change;
@@ -555,7 +543,7 @@ impl ServerFrameCtx<'_> {
                 input,
                 self.gs.dt,
             );
-            Self::accel_decel(&stats, &mut hm.vel, &mut hm.angle, input, self.gs.dt);
+            Self::accel_decel(&stats, &mut hm.vel, hm.angle, input, self.gs.dt);
         }
     }
 
@@ -586,7 +574,7 @@ impl ServerFrameCtx<'_> {
                 self.gs.dt,
             );
 
-            Self::accel_decel(&stats, &mut gm.vel, &mut gm.angle, input, self.gs.dt);
+            Self::accel_decel(&stats, &mut gm.vel, gm.angle, input, self.gs.dt);
         }
     }
 
@@ -665,7 +653,7 @@ impl ServerFrameCtx<'_> {
                         break; // LATER actually ... what if the segment is long and 2 vehicles are in the path
                     }
                 } else if projectile.weapon == Weapon::Bfg
-                    && weapons::bfg_beam_hit(&self.cvars, &self.map, projectile.pos, vehicle.pos)
+                    && weapons::bfg_beam_hit(self.cvars, self.map, projectile.pos, vehicle.pos)
                 {
                     let dmg = self.cvars.g_bfg_beam_damage_per_sec * self.gs.dt;
                     let attacker_handle = projectile.owner;

@@ -256,7 +256,7 @@ impl ServerFrameCtx<'_> {
                 &net_msg,
                 client_handle,
                 client,
-                &self.gs,
+                self.gs,
                 &mut self.sg.disconnected,
             );
         }
@@ -272,7 +272,7 @@ impl ServerFrameCtx<'_> {
                 &net_msg,
                 client_handle,
                 client,
-                &self.gs,
+                self.gs,
                 &mut self.sg.disconnected,
             );
         }
@@ -285,7 +285,7 @@ impl ServerFrameCtx<'_> {
             &net_msg,
             client_handle,
             client,
-            &self.gs,
+            self.gs,
             &mut self.sg.disconnected,
         );
     }

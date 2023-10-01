@@ -321,7 +321,7 @@ pub enum SurfaceKind {
 pub fn parse_map(text: &str, surfaces: Vec<Surface>, path: &str) -> Map {
     let tiles = text
         .replace("\r\n", "\n")
-        .split_terminator("\n")
+        .split_terminator('\n')
         .map(|line| {
             line.split(' ')
                 .map(|tile| {
@@ -348,7 +348,7 @@ pub fn parse_map(text: &str, surfaces: Vec<Surface>, path: &str) -> Map {
 pub fn parse_texture_list(text: &str) -> Vec<Surface> {
     // LATER Load texture_list.txt into cvars to allow editing at runtime.
     text.replace("\r\n", "\n")
-        .split_terminator("\n")
+        .split_terminator('\n')
         .map(|line| {
             let mut parts = line.split(' ');
             let name = parts.next().unwrap();
