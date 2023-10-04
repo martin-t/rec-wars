@@ -82,7 +82,8 @@ jobs:
       # Find all files that contain frame context methods.
       # In them, find all methods (except new/ctx/update),
       # count them and print those that are present on multiple contexts.
-      # The goal is to prevent accidentally calling a method on a client/server context
+      # The goal is to prevent accidentally shadowing a common method
+      # or calling a method on a client/server context
       # and have it autoderef to the common context.
       # Inheritance is nice but some things are better explicit.
       - run: '! ( grep --extended-regexp --no-filename --only-matching "pub fn +[a-z_]+" $(grep --recursive --files-with-matches "impl [A-Za-z]*FrameCtx" src) | grep --extended-regexp --invert-match "pub fn (new|ctx|update)$" | sort | uniq --count | grep --invert-match " *1 " && echo "Frame context methods present on multiple contexts should have different names to prevent confusion between client/server/common." )'
