@@ -333,7 +333,7 @@ impl Client {
         let dir = Path::new(&path).parent().unwrap();
         // It takes 0.3 ms to create the directory on my machine,
         // after that it takes just 0.01 ms so it's ok to do every frame.
-        std::fs::create_dir_all(&dir).unwrap();
+        std::fs::create_dir_all(dir).unwrap();
 
         // get_screen_data() takes between 10 and 20 ms at 1600x900,
         // so it's not fast enough to record while playing
