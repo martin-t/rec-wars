@@ -490,7 +490,7 @@ cvars! {
     ///     With 30 updates, it's easily visible on vehicle movement.
     ///     With 60, it's sometimes still noticeable on vehicles but mostly on moving text (names) being less readable.
     sys_tickrate_fixed_fps: f64 = 150.0,
-    sys_tickrate_mode: TickrateMode = TickrateMode::Variable,
+    sys_tickrate_mode: TickrateMode = TickrateMode::Fixed,
 }
 
 impl Cvars {
