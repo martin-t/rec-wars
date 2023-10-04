@@ -400,6 +400,8 @@ async fn client_main(mut cvars: Cvars, local_game: bool) {
 
         client.console.update(&mut cvars);
 
+        client.post_render(&cvars);
+
         let before = get_time();
         next_frame().await;
         let after = get_time();

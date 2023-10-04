@@ -1,7 +1,10 @@
 //! Native and WASM versions using the macroquad engine.
 
+use std::path::Path;
+
 use cvars_console_macroquad::MacroquadConsole;
 use macroquad::prelude::*;
+use time::{format_description, OffsetDateTime};
 
 use crate::{
     common::ServerTimings,
@@ -30,10 +33,11 @@ pub struct Client {
     pub real_time_prev: f64,
     pub real_time_delta: f64,
 
-    pub update_fps: Fps,
+    pub update_fps: Fps, // TODO remove?
     pub update_durations: Durations,
     pub gamelogic_fps: Fps,
     pub gamelogic_durations: Durations,
+    pub screenshot_durations: Durations,
     /// Rendering consists of 2 steps:
     /// - Calling macroquad's draw functions
     /// - Calling next_frame() to actually render the frame
@@ -147,6 +151,7 @@ impl Client {
             update_durations: Durations::new(),
             gamelogic_fps: Fps::new(),
             gamelogic_durations: Durations::new(),
+            screenshot_durations: Durations::new(),
             render_fps: Fps::new(),
             draw_calls_durations: Durations::new(),
             engine_durations: Durations::new(),
@@ -230,10 +235,6 @@ impl Client {
         let start = macroquad::time::get_time();
         self.gamelogic_fps.tick(cvars.d_fps_period, self.real_time);
 
-        if cvars.d_log_updates_cl {
-            dbg_logf!("gamelogic_tick: {}", game_time);
-        }
-
         // Update time tracking variables (in seconds)
         assert!(
             game_time >= self.gs.game_time,
@@ -246,6 +247,14 @@ impl Client {
         self.gs.game_time = game_time;
         self.gs.dt = self.gs.game_time - self.gs.game_time_prev;
         debug::set_game_time(self.gs.game_time);
+
+        if cvars.d_log_updates_cl {
+            dbg_logf!(
+                "gamelogic_tick f: {} gt: {:.03}",
+                self.gs.frame_num,
+                self.gs.game_time
+            );
+        }
 
         debug::clear_expired();
 
@@ -290,6 +299,71 @@ impl Client {
             let msg = ClientMessage::Pause;
             self.ctx(cvars).net_send(msg);
         }
+    }
+
+    pub fn post_render(&mut self, cvars: &Cvars) {
+        if cvars.cl_screenshots {
+            self.save_screenshot(cvars);
+        }
+    }
+
+    fn save_screenshot(&mut self, cvars: &Cvars) {
+        // Use tmpfs to avoid writing to disk:
+        // sudo mount -o size=2G -t tmpfs none screenshots
+        // Not sure if it's faster though.
+
+        // get_screen_data leaks memory and is not released when quitting.
+        // Use this to clear it:
+        // sudo zsh -c 'echo 3 >| /proc/sys/vm/drop_caches'
+        // https://github.com/not-fl3/macroquad/issues/655
+
+        let t1 = get_time();
+
+        let format =
+            format_description::parse("[year]-[month]-[day]--[hour]-[minute]-[second]").unwrap();
+        let dt = OffsetDateTime::now_utc().format(&format).unwrap();
+
+        let path = cvars
+            .cl_screenshot_path
+            .replace("{date_time}", &dt)
+            .replace("{frame_num}", &format!("{:06}", self.gs.frame_num))
+            .replace("{game_time}", &format!("{:.03}", self.gs.game_time));
+
+        let dir = Path::new(&path).parent().unwrap();
+        // It takes 0.3 ms to create the directory on my machine,
+        // after that it takes just 0.01 ms so it's ok to do every frame.
+        std::fs::create_dir_all(&dir).unwrap();
+
+        // get_screen_data() takes between 10 and 20 ms at 1600x900,
+        // so it's not fast enough to record while playing
+        // no matter how well we optimize the rest.
+        let img = get_screen_data();
+
+        // Macroquad offers `export_png` which is misnamed
+        // because it supports any format based on suffix.
+        // It flips the image upside down so it saves correctly
+        // which costs another ~10 ms.
+        // It also unconditionally panicks on failure.
+        //
+        // Encoding to TGA is the fastest but still costs another ~20 ms together with saving.
+
+        image::save_buffer(
+            &path,
+            &img.bytes,
+            screen_width() as u32,
+            screen_height() as u32,
+            image::ColorType::Rgba8,
+        )
+        .soft_unwrap();
+
+        // LATER Render to render target instead of screen,
+        //  save that to avoid get_screen_data().
+        // LATER Consider 1) saving the raw data
+        //  2) on another thread 3) without alpha channel.
+
+        let t2 = get_time();
+        self.screenshot_durations
+            .add(cvars.d_timing_samples, t2 - t1);
     }
 }
 
@@ -381,8 +455,8 @@ impl ClientFrameCtx<'_> {
     pub fn handle_update(&mut self, update: Update) {
         // Using destructuring here so we get an error if a field is added but not read.
         let Update {
-            frame_num: _,      // LATER
-            game_time,         // LATER
+            frame_num,
+            game_time,
             game_time_prev: _, // LATER
             dt: _,             // LATER
             player_inputs,
@@ -395,11 +469,7 @@ impl ClientFrameCtx<'_> {
         } = update;
 
         if self.cvars.d_log_updates_cl {
-            dbg_logf!(
-                "handle_update: {} / server time: {}",
-                self.gs.game_time,
-                game_time
-            );
+            dbg_logf!("handle_update f: {} gt: {:.03}", frame_num, game_time);
         }
 
         for InputUpdate { index, net_input } in player_inputs {

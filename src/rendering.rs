@@ -638,7 +638,7 @@ impl Client {
             cvars.hud_hp_height as f32,
             rgb,
         );
-        if cvars.d_draw_hud {
+        if cvars.d_draw_texts && cvars.d_draw_hud {
             let hp_number =
                 player_vehicle.hp_fraction * cvars.g_vehicle_hp(player_vehicle.veh_type);
             let hp_text = format!("{}", hp_number);
@@ -651,7 +651,7 @@ impl Client {
                 RED,
                 1.0,
                 1.0,
-                0.5,
+                cvars.d_draw_text_shadow_alpha,
             );
         }
 
@@ -676,7 +676,7 @@ impl Client {
             cvars.hud_ammo_height as f32,
             YELLOW,
         );
-        if cvars.d_draw_texts {
+        if cvars.d_draw_texts && cvars.d_draw_hud {
             let ammo_number = match ammo {
                 Ammo::Loaded(_ready_time, count) => count,
                 Ammo::Reloading(_start, _end) => 0,
@@ -690,7 +690,7 @@ impl Client {
                 RED,
                 1.0,
                 1.0,
-                0.5,
+                cvars.d_draw_text_shadow_alpha,
             );
         }
 
@@ -733,7 +733,7 @@ impl Client {
                 } else {
                     time_remaining / cvars.hud_notifications_duration_fade_out
                 }
-            };
+            } as f32;
             // The most recent "event" (sometimes multiple messages) should be fully visible,
             // the rest should be faded out a little.
             if notification.start_time != notification_most_recent {
@@ -743,7 +743,7 @@ impl Client {
                 notification.color.x,
                 notification.color.y,
                 notification.color.z,
-                alpha as f32,
+                alpha,
             );
 
             let font_size = if age_current < age_grow {
@@ -912,7 +912,7 @@ impl Client {
                         RED,
                         1.0,
                         1.0,
-                        0.5,
+                        cvars.d_draw_text_shadow_alpha,
                     );
                 }
             }
@@ -939,7 +939,7 @@ impl Client {
                 RED,
                 1.0,
                 1.0,
-                0.5,
+                cvars.d_draw_text_shadow_alpha,
             );
         }
 
@@ -960,7 +960,7 @@ impl Client {
                 RED,
                 1.0,
                 1.0,
-                0.5,
+                cvars.d_draw_text_shadow_alpha,
             );
             perf_pos.y += 15.0;
             let text = format!(
@@ -969,7 +969,15 @@ impl Client {
                 self.cg.server_timings.update_durations_max * 1000.0
             );
             render_text_with_shadow(
-                cvars, &text, perf_pos.x, perf_pos.y, 16.0, RED, 1.0, 1.0, 0.5,
+                cvars,
+                &text,
+                perf_pos.x,
+                perf_pos.y,
+                16.0,
+                RED,
+                1.0,
+                1.0,
+                cvars.d_draw_text_shadow_alpha,
             );
             perf_pos.y += 15.0;
             let text = format!(
@@ -978,17 +986,41 @@ impl Client {
                 self.cg.server_timings.gamelogic_durations_max * 1000.0
             );
             render_text_with_shadow(
-                cvars, &text, perf_pos.x, perf_pos.y, 16.0, RED, 1.0, 1.0, 0.5,
+                cvars,
+                &text,
+                perf_pos.x,
+                perf_pos.y,
+                16.0,
+                RED,
+                1.0,
+                1.0,
+                cvars.d_draw_text_shadow_alpha,
             );
             perf_pos.y += 15.0;
             let text = format!("update FPS: {:.1}", self.cg.server_timings.update_fps);
             render_text_with_shadow(
-                cvars, &text, perf_pos.x, perf_pos.y, 16.0, RED, 1.0, 1.0, 0.5,
+                cvars,
+                &text,
+                perf_pos.x,
+                perf_pos.y,
+                16.0,
+                RED,
+                1.0,
+                1.0,
+                cvars.d_draw_text_shadow_alpha,
             );
             perf_pos.y += 15.0;
             let text = format!("gamelogic FPS: {:.1}", self.cg.server_timings.gamelogic_fps);
             render_text_with_shadow(
-                cvars, &text, perf_pos.x, perf_pos.y, 16.0, RED, 1.0, 1.0, 0.5,
+                cvars,
+                &text,
+                perf_pos.x,
+                perf_pos.y,
+                16.0,
+                RED,
+                1.0,
+                1.0,
+                cvars.d_draw_text_shadow_alpha,
             );
         }
 
@@ -1009,13 +1041,21 @@ impl Client {
                 RED,
                 1.0,
                 1.0,
-                0.5,
+                cvars.d_draw_text_shadow_alpha,
             );
             perf_pos.y += 15.0;
             if let Some((avg, max)) = self.update_durations.get_stats() {
                 let text = format!("update avg: {:.1}, max: {:.1}", avg * 1000.0, max * 1000.0);
                 render_text_with_shadow(
-                    cvars, &text, perf_pos.x, perf_pos.y, 16.0, RED, 1.0, 1.0, 0.5,
+                    cvars,
+                    &text,
+                    perf_pos.x,
+                    perf_pos.y,
+                    16.0,
+                    RED,
+                    1.0,
+                    1.0,
+                    cvars.d_draw_text_shadow_alpha,
                 );
                 perf_pos.y += 15.0;
             }
@@ -1026,7 +1066,15 @@ impl Client {
                     max * 1000.0
                 );
                 render_text_with_shadow(
-                    cvars, &text, perf_pos.x, perf_pos.y, 16.0, RED, 1.0, 1.0, 0.5,
+                    cvars,
+                    &text,
+                    perf_pos.x,
+                    perf_pos.y,
+                    16.0,
+                    RED,
+                    1.0,
+                    1.0,
+                    cvars.d_draw_text_shadow_alpha,
                 );
                 perf_pos.y += 15.0;
             }
@@ -1037,14 +1085,49 @@ impl Client {
                     max * 1000.0
                 );
                 render_text_with_shadow(
-                    cvars, &text, perf_pos.x, perf_pos.y, 16.0, RED, 1.0, 1.0, 0.5,
+                    cvars,
+                    &text,
+                    perf_pos.x,
+                    perf_pos.y,
+                    16.0,
+                    RED,
+                    1.0,
+                    1.0,
+                    cvars.d_draw_text_shadow_alpha,
+                );
+                perf_pos.y += 15.0;
+            }
+            if let Some((avg, max)) = self.screenshot_durations.get_stats() {
+                let text = format!(
+                    "screenshot avg: {:.1}, max: {:.1}",
+                    avg * 1000.0,
+                    max * 1000.0
+                );
+                render_text_with_shadow(
+                    cvars,
+                    &text,
+                    perf_pos.x,
+                    perf_pos.y,
+                    16.0,
+                    RED,
+                    1.0,
+                    1.0,
+                    cvars.d_draw_text_shadow_alpha,
                 );
                 perf_pos.y += 15.0;
             }
             if let Some((avg, max)) = self.engine_durations.get_stats() {
                 let text = format!("engine avg: {:.1}, max: {:.1}", avg * 1000.0, max * 1000.0);
                 render_text_with_shadow(
-                    cvars, &text, perf_pos.x, perf_pos.y, 16.0, RED, 1.0, 1.0, 0.5,
+                    cvars,
+                    &text,
+                    perf_pos.x,
+                    perf_pos.y,
+                    16.0,
+                    RED,
+                    1.0,
+                    1.0,
+                    cvars.d_draw_text_shadow_alpha,
                 );
             }
         }
@@ -1061,7 +1144,7 @@ impl Client {
                     RED,
                     1.0,
                     1.0,
-                    0.5,
+                    cvars.d_draw_text_shadow_alpha,
                 );
             }
         }
@@ -1072,7 +1155,17 @@ impl Client {
             let texts = texts.borrow();
             if cvars.d_draw && cvars.d_draw_texts {
                 for text in texts.iter() {
-                    render_text_with_shadow(cvars, text, 20.0, y as f32, 16.0, RED, 1.0, 1.0, 0.5);
+                    render_text_with_shadow(
+                        cvars,
+                        text,
+                        20.0,
+                        y as f32,
+                        16.0,
+                        RED,
+                        1.0,
+                        1.0,
+                        cvars.d_draw_text_shadow_alpha,
+                    );
                     y += cvars.d_draw_texts_line_height;
                 }
             }
@@ -1151,7 +1244,7 @@ fn render_text_with_shadow(
     color: Color,
     shadow_offset_x: f32,
     shadow_offset_y: f32,
-    shadow_alpha: f64,
+    shadow_alpha: f32,
 ) {
     if cvars.r_align_to_pixels_text {
         x = x.floor();
@@ -1163,7 +1256,7 @@ fn render_text_with_shadow(
             x + shadow_offset_x,
             y + shadow_offset_y,
             font_size as f32,
-            Color::new(0.0, 0.0, 0.0, shadow_alpha as f32),
+            Color::new(0.0, 0.0, 0.0, shadow_alpha),
         );
     }
     draw_text(text, x, y, font_size as f32, color);

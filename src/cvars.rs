@@ -47,6 +47,9 @@ cvars! {
     cl_railgun_trail_duration: f64 = 0.05,
     cl_railgun_trail_thickness: f64 = 1.5,
 
+    cl_screenshot_path: String = "screenshots/{date_time}--f{frame_num}-gt{game_time}.tga".to_owned(),
+    cl_screenshots: bool = false,
+
     cl_spawn_indicator_animation_time: f64 = 0.3,
     cl_spawn_indicator_blinking_period: f64 = 0.3,
     cl_spawn_indicator_duration: f64 = 1.5,
@@ -89,6 +92,7 @@ cvars! {
     d_draw_perf_server: bool = true,
     d_draw_rots: bool = true,
     d_draw_rots_size: f64 = 16.0,
+    d_draw_text_shadow_alpha: f32 = 0.7,
     d_draw_texts: bool = true,
     d_draw_texts_line_height: f64 = 14.0,
     d_draw_world_texts: bool = true,
@@ -394,13 +398,13 @@ cvars! {
     hud_names_alpha: f64 = 1.0,
     hud_names_brightness: f64 = 255.0,
     hud_names_font_size: f64 = 16.0,
-    hud_names_shadow_alpha: f64 = 1.0,
+    hud_names_shadow_alpha: f32 = 1.0,
     hud_names_shadow_x: f32 = 1.0,
     hud_names_shadow_y: f32 = 1.0,
     hud_names_x: f64 = -20.0,
     hud_names_y: f64 = 30.0,
 
-    hud_notifications_alpha_old: f64 = 0.5,
+    hud_notifications_alpha_old: f32 = 0.5,
     hud_notifications_color_death: CVec3 = CVec3::RED,
     hud_notifications_color_kill: CVec3 = CVec3::BLUE2,
     hud_notifications_duration: f64 = 3.0,
@@ -483,7 +487,7 @@ cvars! {
 
     /// LATER Without extrapolation, this needs to be significantly higher than framerate to avoid judder.
     ///     Assuming rendering at 60 fps:
-    ///     With 30 updated, it's easily visible on vehicle movement.
+    ///     With 30 updates, it's easily visible on vehicle movement.
     ///     With 60, it's sometimes still noticeable on vehicles but mostly on moving text (names) being less readable.
     sys_tickrate_fixed_fps: f64 = 150.0,
     sys_tickrate_mode: TickrateMode = TickrateMode::Variable,

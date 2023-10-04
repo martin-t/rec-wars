@@ -1,3 +1,5 @@
+/screenshots/
+
 /.gdb_history*
 
 # Macroquad compiled to WASM (copy here from target)
