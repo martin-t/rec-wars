@@ -54,6 +54,7 @@ impl Durations {
         self.0.push_back(duration);
     }
 
+    /// Returns `(average, max)`.
     pub fn get_stats(&self) -> Option<(f64, f64)> {
         if self.0.is_empty() {
             return None;
