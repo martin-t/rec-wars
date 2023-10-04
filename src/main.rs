@@ -308,7 +308,7 @@ async fn client_main(mut cvars: Cvars, local_game: bool) {
         RED,
     );
     next_frame().await;
-    let mut conn: Box<dyn Connection> =
+    let mut conn: Box<dyn Connection<ServerMessage>> =
         Box::new(net::tcp_connect(&cvars, &cvars.cl_net_server_addr));
 
     // LATER(splitscreen) handle 2 networked players on 1 connection (need to tell server how many players to spawn)
@@ -325,7 +325,7 @@ async fn client_main(mut cvars: Cvars, local_game: bool) {
     draw_text("Waiting for initial data...", 200.0, 200.0, 32.0, RED);
     next_frame().await;
     let init = loop {
-        let (msg, closed) = conn.receive_one_sm();
+        let (msg, closed) = conn.receive_one();
         if closed {
             dbg_logf!("Server disconnected");
             return;

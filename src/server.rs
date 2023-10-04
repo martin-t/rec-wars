@@ -32,7 +32,7 @@ pub struct Server {
 }
 
 pub struct ServerGame {
-    pub listener: Box<dyn Listener>,
+    pub listener: Box<dyn Listener<ClientMessage>>,
     pub clients: Arena<RemoteClient>,
     /// Handles to remote clients that have disconnected.
     pub disconnected: FnvHashSet<Index>,
@@ -56,12 +56,12 @@ pub enum SendDest {
 }
 
 pub struct RemoteClient {
-    conn: Box<dyn Connection>,
+    conn: Box<dyn Connection<ClientMessage>>,
     player_handle: Index,
 }
 
 impl RemoteClient {
-    fn new(conn: Box<dyn Connection>, player_handle: Index) -> Self {
+    fn new(conn: Box<dyn Connection<ClientMessage>>, player_handle: Index) -> Self {
         Self {
             conn,
             player_handle,
@@ -512,7 +512,7 @@ impl ServerFrameCtx<'_> {
     fn sys_net_receive(&mut self) {
         let mut reply_msgs = Vec::new();
         for (client_handle, client) in self.sg.clients.iter_mut() {
-            let (msgs, closed) = client.conn.receive_cm();
+            let (msgs, closed) = client.conn.receive();
 
             for msg in msgs {
                 match msg {

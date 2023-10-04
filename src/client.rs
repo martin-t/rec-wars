@@ -58,7 +58,7 @@ pub struct ClientGame {
     pub input1_prev: ClientInput,
     pub input2: ClientInput,
     pub input2_prev: ClientInput,
-    pub conn: Box<dyn Connection>,
+    pub conn: Box<dyn Connection<ServerMessage>>,
 
     pub paused: bool,
 
@@ -89,7 +89,7 @@ impl Client {
         assets: Assets,
         map: Map,
         gs: GameState,
-        conn: Box<dyn Connection>,
+        conn: Box<dyn Connection<ServerMessage>>,
         player1_handle: Index,
         player2_handle: Option<Index>,
     ) -> Self {
@@ -404,7 +404,7 @@ impl ClientFrameCtx<'_> {
     }
 
     pub fn sys_net_receive(&mut self) {
-        let (msgs, closed) = self.cg.conn.receive_sm();
+        let (msgs, closed) = self.cg.conn.receive();
         for msg in msgs {
             match msg {
                 ServerMessage::Init(_) => {
