@@ -33,7 +33,8 @@ pub struct Client {
     pub real_time_prev: f64,
     pub real_time_delta: f64,
 
-    pub update_fps: Fps, // TODO remove?
+    /// Update and render FPS should be the same.
+    pub update_fps: Fps,
     pub update_durations: Durations,
     pub gamelogic_fps: Fps,
     pub gamelogic_durations: Durations,

@@ -981,7 +981,7 @@ impl Client {
             );
             perf_pos.y += 15.0;
             let text = format!(
-                "gamelogic avg: {:.1}, max: {:.1}",
+                "  gamelogic avg: {:.1}, max: {:.1}",
                 self.cg.server_timings.gamelogic_durations_avg * 1000.0,
                 self.cg.server_timings.gamelogic_durations_max * 1000.0
             );
@@ -1061,7 +1061,7 @@ impl Client {
             }
             if let Some((avg, max)) = self.gamelogic_durations.get_stats() {
                 let text = format!(
-                    "gamelogic avg: {:.1}, max: {:.1}",
+                    "  gamelogic avg: {:.1}, max: {:.1}",
                     avg * 1000.0,
                     max * 1000.0
                 );
@@ -1117,7 +1117,11 @@ impl Client {
                 perf_pos.y += 15.0;
             }
             if let Some((avg, max)) = self.engine_durations.get_stats() {
-                let text = format!("engine avg: {:.1}, max: {:.1}", avg * 1000.0, max * 1000.0);
+                let text = format!(
+                    "engine+rest avg: {:.1}, max: {:.1}",
+                    avg * 1000.0,
+                    max * 1000.0
+                );
                 render_text_with_shadow(
                     cvars,
                     &text,
