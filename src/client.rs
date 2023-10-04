@@ -265,7 +265,7 @@ impl Client {
 
         let mut ctx = self.ctx(cvars);
 
-        ctx.sys_cleanup();
+        ctx.sys_cl_cleanup();
 
         ctx.sys_net_send();
         ctx.sys_net_receive();
@@ -369,7 +369,7 @@ impl Client {
 }
 
 impl ClientFrameCtx<'_> {
-    pub fn sys_cleanup(&mut self) {
+    pub fn sys_cl_cleanup(&mut self) {
         self.cg.rail_beams.retain(|beam| {
             beam.start_time + self.cvars.cl_railgun_trail_duration > self.gs.game_time
         });

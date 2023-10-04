@@ -9,11 +9,6 @@ use vek::LineSegment2;
 use crate::prelude::*;
 
 impl ServerFrameCtx<'_> {
-    /// Delete data from previous frames that's no longer needed.
-    pub fn sys_cleanup(&mut self) {
-        // LATER Remove this if it remain unused
-    }
-
     pub fn sys_respawning(&mut self) {
         for player_handle in self.gs.players.collect_handles() {
             let player = &mut self.gs.players[player_handle];

@@ -197,8 +197,6 @@ impl Server {
 
         let mut ctx = ServerFrameCtx::new(cvars, &self.map, &mut self.gs, &mut self.sg);
 
-        ctx.sys_cleanup();
-
         ctx.sys_net_accept();
         ctx.sys_connect_bots();
         ctx.sys_net_receive();
