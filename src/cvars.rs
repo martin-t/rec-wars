@@ -71,14 +71,6 @@ cvars! {
     con_prompt_label_x: f32 = 8.0,
     con_prompt_label_y_offset: f32 = 22.0,
 
-    /// A "temporary" cvar for quick testing. Normally unused but kept here
-    /// so I don't have to add a cvar each time I want a quick toggle.
-    d_dbg: bool = false,
-    /// Same as d_dbg but for floats.
-    d_dbgf: f32 = 0.0,
-    /// Same as d_dbg but for ints.
-    d_dbgi: i32 = 0,
-
     /// Master switch for debug output - the d_draw_* group.
     d_draw: bool = true,
     d_draw_arrows: bool = true,
@@ -129,6 +121,14 @@ cvars! {
     d_tickrate_fixed_carry: bool = false,
     d_timing_samples: usize = 60,
     d_tracing: bool = false,
+
+    /// A "temporary" cvar for quick testing. Normally unused but kept here
+    /// so I don't have to add a cvar each time I want a quick toggle.
+    dbg: bool = false,
+    /// Same as d_dbg but for floats.
+    dbgf: f32 = 0.0,
+    /// Same as d_dbg but for ints.
+    dbgi: i32 = 0,
 
     /// Hit points. Recommended values are between 1 and 500, original RecWar used 100 as default.
     ///
