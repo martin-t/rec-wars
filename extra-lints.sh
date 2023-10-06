@@ -33,7 +33,7 @@ The goal is to prevent accidentally shadowing a common method or calling a metho
     RET=1
 fi
 
-if find data | grep [A-Z] ; then
+if find data ! -name README.md | grep --color=auto [A-Z] ; then
     echo "Asset names/paths must be all lowercase or we might have issues when switching between case-sensitive and case-insensitive filesystems."
     RET=1
 fi
