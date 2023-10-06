@@ -261,7 +261,6 @@ impl Client {
 
         dbg_textf!("{}", env!("GIT_VERSION"));
         dbg_textd!(self.gs.game_time);
-        dbg_textd!(self.gs.game_time_prev);
 
         let mut ctx = self.ctx(cvars);
 

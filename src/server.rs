@@ -191,9 +191,9 @@ impl Server {
 
         debug::clear_expired();
 
-        dbg_textf!("{}", env!("GIT_VERSION"));
-        dbg_textd!(self.gs.game_time);
-        dbg_textd!(self.gs.game_time_prev);
+        // LATER Uncomment after making server debug msgs stay until next update.
+        // dbg_textf!("{}", env!("GIT_VERSION"));
+        // dbg_textd!(self.gs.game_time);
 
         let mut ctx = ServerFrameCtx::new(cvars, &self.map, &mut self.gs, &mut self.sg);
 
@@ -230,8 +230,9 @@ impl Server {
         ctx.sys_net_send_updates();
         ctx.sys_net_disconnect();
 
-        dbg_textf!("vehicle count: {}", self.gs.vehicles.len());
-        dbg_textf!("projectile count: {}", self.gs.projectiles.len());
+        // LATER Uncomment after making server debug msgs stay until next update.
+        // dbg_textf!("vehicle count: {}", self.gs.vehicles.len());
+        // dbg_textf!("projectile count: {}", self.gs.projectiles.len());
 
         // LATER Remove prev, use state+events
         for (_, player) in self.gs.players.iter_mut() {
