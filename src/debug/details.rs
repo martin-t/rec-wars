@@ -91,9 +91,9 @@ pub fn debug_rot(point: Vec2f, rot: f64, time: f64, scale: f64) {
 }
 
 fn debug_shape(shape: Shape, time: f64, color: Color) {
-    DEBUG_SHAPES.with(|shapes| {
+    DEBUG_SHAPES.with_borrow_mut(|shapes| {
         let shape = DebugShape { shape, time, color };
-        shapes.borrow_mut().push(shape);
+        shapes.push(shape);
     });
 }
 

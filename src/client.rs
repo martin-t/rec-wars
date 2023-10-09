@@ -518,16 +518,13 @@ impl ClientFrameCtx<'_> {
             projectile.turn_rate = turn_rate;
         }
 
-        DEBUG_TEXTS.with(|texts| {
-            let mut texts = texts.borrow_mut();
+        DEBUG_TEXTS.with_borrow_mut(|texts| {
             texts.extend(debug_texts);
         });
-        DEBUG_TEXTS_WORLD.with(|texts| {
-            let mut texts = texts.borrow_mut();
+        DEBUG_TEXTS_WORLD.with_borrow_mut(|texts| {
             texts.extend(debug_texts_world);
         });
-        DEBUG_SHAPES.with(|shapes| {
-            let mut shapes = shapes.borrow_mut();
+        DEBUG_SHAPES.with_borrow_mut(|shapes| {
             shapes.extend(debug_shapes);
         });
 

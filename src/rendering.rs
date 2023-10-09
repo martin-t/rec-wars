@@ -521,18 +521,19 @@ impl Client {
         }
 
         // Deduplicate and draw debug shapes
-        DEBUG_SHAPES.with(|shapes| {
+        DEBUG_SHAPES.with_borrow_mut(|shapes| {
             // Sometimes debug shapes overlap and only the last one gets drawn.
             // This is especially common when both client and server wanna draw.
             // So instead, we convert everything to lines,
             // merge colors if they overlap and only then draw it.
             // This way if cl and sv shapes overlap, they end up yellow (red + green).
-            let mut shapes = shapes.borrow_mut();
             let mut lines = UniqueLines::default();
             for shape in shapes.iter_mut() {
                 if cvars.d_draw {
                     shape.to_lines(cvars, &mut lines);
                 }
+                // LATER This means debug shapes don't stay on during pause.
+                //  Use spawn time like everything else.
                 shape.time -= gs.dt;
             }
             for (_, line) in lines.0 {
@@ -892,8 +893,7 @@ impl Client {
         }
 
         // Draw world debug text
-        DEBUG_TEXTS_WORLD.with(|texts| {
-            let texts = texts.borrow();
+        DEBUG_TEXTS_WORLD.with_borrow(|texts| {
             if cvars.d_draw && cvars.d_draw_world_texts {
                 for text in texts.iter() {
                     let scr_pos = text.pos + camera_offset;
@@ -1155,8 +1155,7 @@ impl Client {
 
         // Draw debug text
         let mut y = 25.0;
-        DEBUG_TEXTS.with(|texts| {
-            let texts = texts.borrow();
+        DEBUG_TEXTS.with_borrow(|texts| {
             if cvars.d_draw && cvars.d_draw_texts {
                 for text in texts.iter() {
                     render_text_with_shadow(
