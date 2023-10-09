@@ -1,4 +1,7 @@
 {
     "rust-analyzer.cargo.allFeatures": true,
     "rust-analyzer.imports.prefix": "crate",
+    "rust-analyzer.linkedProjects": [
+        "./friction/Cargo.toml"
+    ],
 }
