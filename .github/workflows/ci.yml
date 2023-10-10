@@ -43,12 +43,12 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install --no-install-recommends -y pkg-config libx11-dev libxi-dev libgl1-mesa-dev libasound2-dev
-      - run: rustup target add wasm32-unknown-unknown
 
       - uses: actions/checkout@v3
       - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: ${{ matrix.rust }}
+          targets: wasm32-unknown-unknown
       - uses: Swatinem/rust-cache@b8a6852b4f997182bdea832df3f9e153038b5191
 
       - name: Print versions
