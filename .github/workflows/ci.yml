@@ -49,6 +49,7 @@ jobs:
         with:
           toolchain: ${{ matrix.rust }}
           targets: wasm32-unknown-unknown
+      # Caching must be after toolchain selection
       - uses: Swatinem/rust-cache@v2
 
       - name: Print versions
@@ -85,7 +86,9 @@ jobs:
       - uses: actions/checkout@v3
       # Use rust-toolchain because GHA tends to still have an old version for a few days after a new Rust release.
       - uses: dtolnay/rust-toolchain@stable
+      # Caching must be after toolchain selection
       - uses: Swatinem/rust-cache@v2
+
       - run: cargo clippy --version
 
       # Use --all-targets to also check tests.
