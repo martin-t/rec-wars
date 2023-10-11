@@ -294,11 +294,12 @@ async fn client_main(mut cvars: Cvars, local_game: bool) {
 
     let assets = Assets::load_all().await;
 
-    // LATER Maybe extract connect/init into a function?
+    // TODO Maybe extract connect/init into a function?
     //  Depends on how UI will work. Ideally calls to next_frame would all be in one place.
+    //  Use https://github.com/optozorax/egui-macroquad when it supports macroquad 0.4,
+    //  waiting on https://github.com/not-fl3/egui-miniquad/pull/63.
     //  Option 1: state machine: menu, connecting, playing - one main loop for all.
     //  Option 2: separate "main" loops, after game loop ends, return back into menu loop.
-    // LATER Also should call next_frame() in all waiting loops so the window is not stuck after being minimized.
 
     draw_text(
         &format!("Connecting to {}...", &cvars.cl_net_server_addr),
@@ -308,8 +309,9 @@ async fn client_main(mut cvars: Cvars, local_game: bool) {
         RED,
     );
     next_frame().await;
+
     let mut conn: Box<dyn Connection<ServerMessage>> =
-        Box::new(net::tcp_connect(&cvars, &cvars.cl_net_server_addr));
+        Box::new(net::tcp_connect_blocking(&cvars, &cvars.cl_net_server_addr));
 
     // LATER(splitscreen) handle 2 networked players on 1 connection (need to tell server how many players to spawn)
     let connect = Connect {
@@ -324,6 +326,7 @@ async fn client_main(mut cvars: Cvars, local_game: bool) {
 
     draw_text("Waiting for initial data...", 200.0, 200.0, 32.0, RED);
     next_frame().await;
+
     let init = loop {
         let (msg, closed) = conn.receive_one();
         if closed {

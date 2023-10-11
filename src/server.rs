@@ -21,7 +21,7 @@ pub struct Server {
     pub sg: ServerGame,
 
     /// Game time left over from previous update.
-    pub dt_carry: f64,
+    pub game_time_carry: f64,
 
     /// Time since the process started in seconds. Increases at wall clock speed even when paused.
     ///
@@ -95,7 +95,7 @@ impl Server {
             gs: GameState::new(),
             sg,
 
-            dt_carry: 0.0,
+            game_time_carry: 0.0,
             real_time: 0.0,
             real_time_prev: 0.0,
             real_time_delta: 0.0,
@@ -155,15 +155,15 @@ impl Server {
             }
             TickrateMode::Fixed => {
                 let dt = 1.0 / cvars.sys_tickrate_fixed_fps;
-                let game_time_target = self.gs.game_time + self.dt_carry + dt_update;
+                let game_time_target = self.gs.game_time + self.game_time_carry + dt_update;
 
                 while self.gs.game_time + dt < game_time_target {
                     self.gamelogic_tick(cvars, self.gs.game_time + dt);
                 }
 
-                self.dt_carry = game_time_target - self.gs.game_time;
+                self.game_time_carry = game_time_target - self.gs.game_time;
                 if cvars.d_tickrate_fixed_carry {
-                    dbg_logf!("Remaining time: {}", self.dt_carry);
+                    dbg_logf!("Remaining time: {}", self.game_time_carry);
                 }
             }
         }
@@ -515,6 +515,7 @@ impl ServerFrameCtx<'_> {
 
             for msg in msgs {
                 match msg {
+                    ClientMessage::Version(_) => todo!(),
                     ClientMessage::Connect(connect) => {
                         let Connect {
                             cl_version,

@@ -15,6 +15,7 @@ use crate::{
 
 #[derive(Debug, Deserialize, Serialize)]
 pub enum ClientMessage {
+    Version(Version),
     Connect(Connect),
     Input(NetInput),
     Chat(String), // LATER Allow sending this
@@ -23,9 +24,33 @@ pub enum ClientMessage {
     Observe,
 }
 
+/// Description of the client or server version to determine compatibility.
+///
+/// This struct must remain stable across all versions
+/// so old versions can parse the message from new versions.
+#[derive(Debug, Deserialize, Serialize)]
+pub struct Version {
+    /// The name of the game, for example "RecWars" or "RustCycles".
+    /// Used to detect we're accidentally connecting to the wrong game's server
+    /// and save headaches debugging. Yes, this happened.
+    pub game: String,
+
+    pub major: u32,
+    pub minor: u32,
+    pub patch: u32,
+
+    pub pre: Option<String>,
+    pub commits: Option<u32>,
+    pub hash: Option<String>,
+    pub dirty: Option<bool>,
+
+    /// Any extra unstructured information.
+    pub extra: Option<String>,
+}
+
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Connect {
-    pub cl_version: String,
+    pub cl_version: String, // TODO remove
     pub name1: String,
     pub name2: Option<String>,
 }
@@ -50,6 +75,8 @@ pub struct Connect {
 /// The recommended usage when receiving is to destructure the data so you notice when new fields are added.
 #[derive(Debug, Deserialize, Serialize)]
 pub enum ServerMessage {
+    Version(Version),
+
     /// Initial game state that is sent to a new player upon connecting.
     ///
     /// This is intentionally separate from messages such as AddPlayer or SpawnVehicle

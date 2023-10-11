@@ -233,7 +233,8 @@ where
     }
 }
 
-pub fn tcp_connect(cvars: &Cvars, addr: &str) -> TcpConnection {
+/// LATER This blocks, fix or remove entirely.
+pub fn tcp_connect_blocking(cvars: &Cvars, addr: &str) -> TcpConnection {
     let addr = SocketAddr::from_str(addr).unwrap();
 
     let mut connect_attempts = 0;
