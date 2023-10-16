@@ -19,6 +19,10 @@ pub struct GameState {
     /// Delta time since last gamelogic frame in seconds.
     pub dt: f64,
 
+    /// Game time after which the match ends
+    pub time_limit: f64,
+    pub game_mode: GameMode,
+
     pub ais: Arena<Ai>,
     pub players: Arena<Player>,
     pub vehicles: Arena<Vehicle>,
@@ -47,6 +51,9 @@ impl GameState {
             game_time_prev: 0.0,
             dt: 0.0,
 
+            time_limit: 10.0 * 60.0,
+            game_mode: GameMode::Ffa(Ffa { kill_limit: 20 }),
+
             ais: Arena::new(),
             players: Arena::new(),
             vehicles: Arena::new(),
@@ -61,6 +68,31 @@ impl Default for GameState {
     fn default() -> Self {
         Self::new()
     }
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub enum GameMode {
+    Ffa(Ffa),
+    Tw(Tw),
+    Ctc(Ctc),
+}
+
+/// Free For All
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct Ffa {
+    pub kill_limit: i32,
+}
+
+/// Team War
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct Tw {
+    pub kill_limit: i32,
+}
+
+/// Capture The Cow
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct Ctc {
+    pub capture_limit: i32,
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]

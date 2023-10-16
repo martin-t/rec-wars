@@ -58,7 +58,9 @@ pub struct ClientGame {
     pub input1_prev: ClientInput,
     pub input2: ClientInput,
     pub input2_prev: ClientInput,
+
     pub conn: Box<dyn Connection<ServerMessage>>,
+    pub tmp_local_player_handle: Index, // LATER Proper splitscreen mode
 
     pub paused: bool,
 
@@ -66,7 +68,6 @@ pub struct ClientGame {
     pub explosions: Vec<Explosion>,
 
     pub notifications: Vec<Notification>,
-    pub tmp_local_player_handle: Index, // LATER Proper splitscreen mode
 
     /// Last received server fps and durations info. Might be a few frames old.
     pub server_timings: ServerTimings,
@@ -98,7 +99,9 @@ impl Client {
             input1_prev: ClientInput::empty(),
             input2: ClientInput::empty(),
             input2_prev: ClientInput::empty(),
+
             conn,
+            tmp_local_player_handle: player1_handle,
 
             paused: false,
 
@@ -106,7 +109,6 @@ impl Client {
             explosions: Vec::new(),
 
             notifications: Vec::new(),
-            tmp_local_player_handle: player1_handle,
 
             server_timings: ServerTimings::default(),
         };
