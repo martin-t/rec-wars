@@ -33,7 +33,7 @@ pub struct Version {
     /// The name of the game, for example "RecWars" or "RustCycles".
     /// Since they use very similar protocols, this is used to make sure
     /// we're not accidentally connecting to the wrong game's server
-    /// to save headaches debugging. Yes, this happened.
+    /// and therefore save headaches debugging. Yes, this happened.
     pub game: String,
 
     pub major: u32,
