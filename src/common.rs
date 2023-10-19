@@ -1,16 +1,5 @@
 use crate::prelude::*;
 
-#[derive(Debug, Default, Deserialize, Serialize)]
-pub struct ServerTimings {
-    pub update_durations_avg: f64,
-    pub update_durations_max: f64,
-    pub gamelogic_durations_avg: f64,
-    pub gamelogic_durations_max: f64,
-
-    pub update_fps: f64,
-    pub gamelogic_fps: f64,
-}
-
 impl FrameCtx<'_> {
     // LATER Init fns are here because we need them before a ClientCtx can be created.
     // They are not common code though, move them somewhere else.

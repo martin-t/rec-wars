@@ -8,7 +8,6 @@
 //! LATER These will form the basis of demo recording and replay.
 
 use crate::{
-    common::ServerTimings,
     debug::details::{DebugShape, WorldText},
     prelude::*,
 };
@@ -179,7 +178,7 @@ pub struct Update {
     pub debug_texts: Vec<String>,
     pub debug_texts_world: Vec<WorldText>,
     pub debug_shapes: Vec<DebugShape>,
-    pub server_timings: ServerTimings,
+    pub server_timings: CommonTimings,
 }
 
 #[derive(Debug, Deserialize, Serialize)]

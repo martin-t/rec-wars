@@ -5,11 +5,9 @@
 use std::{io::ErrorKind, mem, net::TcpListener};
 
 use crate::{
-    common::ServerTimings,
     debug::{self, DEBUG_SHAPES, DEBUG_TEXTS, DEBUG_TEXTS_WORLD},
     net::{self, Connection, Listener, NetworkMessage},
     prelude::*,
-    timing::{Durations, Fps},
     BOT_NAMES,
 };
 
@@ -612,7 +610,7 @@ impl ServerFrameCtx<'_> {
 
         let update_stats = self.sg.update_durations.get_stats().unwrap_or_default();
         let gamelogic_stats = self.sg.gamelogic_durations.get_stats().unwrap_or_default();
-        let server_timings = ServerTimings {
+        let server_timings = CommonTimings {
             update_durations_avg: update_stats.0,
             update_durations_max: update_stats.1,
             gamelogic_durations_avg: gamelogic_stats.0,

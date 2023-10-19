@@ -7,11 +7,9 @@ use macroquad::prelude::*;
 use time::{format_description, OffsetDateTime};
 
 use crate::{
-    common::ServerTimings,
     debug::{self, DEBUG_SHAPES, DEBUG_TEXTS, DEBUG_TEXTS_WORLD},
     net::{self, Connection},
     prelude::*,
-    timing::{Durations, Fps},
 };
 
 pub struct Client {
@@ -70,7 +68,7 @@ pub struct ClientGame {
     pub notifications: Vec<Notification>,
 
     /// Last received server fps and durations info. Might be a few frames old.
-    pub server_timings: ServerTimings,
+    pub server_timings: CommonTimings,
 }
 
 #[derive(Debug)]
@@ -110,7 +108,7 @@ impl Client {
 
             notifications: Vec::new(),
 
-            server_timings: ServerTimings::default(),
+            server_timings: CommonTimings::default(),
         };
 
         dbg_logf!("Window inner size: {}x{}", screen_width(), screen_height());

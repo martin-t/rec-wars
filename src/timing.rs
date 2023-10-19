@@ -2,6 +2,17 @@
 
 use crate::prelude::*;
 
+#[derive(Debug, Default, Deserialize, Serialize)]
+pub struct CommonTimings {
+    pub update_durations_avg: f64,
+    pub update_durations_max: f64,
+    pub gamelogic_durations_avg: f64,
+    pub gamelogic_durations_max: f64,
+
+    pub update_fps: f64,
+    pub gamelogic_fps: f64,
+}
+
 /// Saves frame times over some period of time to measure FPS.
 #[derive(Debug, Clone, Default)]
 pub struct Fps(VecDeque<f64>);
