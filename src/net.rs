@@ -235,6 +235,8 @@ where
 }
 
 /// LATER This blocks, fix or remove entirely.
+///  Currently there's no way to connect using TCP without blocking in std.
+///  Probably best to keep this as is until we move to another protocol.
 pub fn tcp_connect_blocking(cvars: &Cvars, addr: &str) -> TcpConnection {
     let addr = SocketAddr::from_str(addr).unwrap();
 

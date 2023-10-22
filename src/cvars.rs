@@ -41,7 +41,7 @@ cvars! {
     cl_name2: String = "Player 2".to_owned(),
 
     cl_net_connect_retry_delay_ms: u64 = 10,
-    cl_net_connect_retry_print_every_n: u64 = 100,
+    cl_net_connect_retry_print_every_n: u32 = 100,
     cl_net_server_addr: String = "127.0.0.1:26000".to_owned(),
 
     cl_railgun_trail_duration: f64 = 0.05,

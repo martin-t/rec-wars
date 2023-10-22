@@ -295,7 +295,8 @@ async fn client_main(mut cvars: Cvars, local_game: bool) {
     let assets = Assets::load_all().await;
 
     // TODO Maybe extract connect/init into a function?
-    //  Depends on how UI will work. Ideally calls to next_frame would all be in one place.
+    //  Depends on how UI will work. Ideally calls to next_frame would all be in one place
+    //  to make sure we're not accidentally skipping part of some logic every other frame.
     //  Use https://github.com/optozorax/egui-macroquad when it supports macroquad 0.4,
     //  waiting on https://github.com/not-fl3/egui-miniquad/pull/63.
     //  Option 1: state machine: menu, connecting, playing - one main loop for all.
@@ -389,6 +390,8 @@ async fn client_main(mut cvars: Cvars, local_game: bool) {
     }
 
     let player1_handle = gs.players.slot_to_index(local_player1_index).unwrap();
+    // LATER After RustCycles has editor integration and has separate matches,
+    // consider moving cvars into Client or Process.
     let mut client = Client::new(&cvars, assets, map, gs, conn, player1_handle, None);
 
     loop {
