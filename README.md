@@ -82,11 +82,11 @@ You can set [cvars](#cvars) on the command line - e.g.:
 Contributing
 ------------
 
-You can always find me on the [RecWars Discord server](https://discord.gg/9BQVVgV) if you have any questions or suggestions or if you just wanna see a game slowly develop from a small prototype to being playable and enjoyable by real people.
+You can always find me on the [Rusty Games Discord server](https://discord.gg/9BQVVgV) if you have any questions or suggestions or if you just wanna see a game slowly develop from a small prototype to being playable and enjoyable by real people.
 
 [Issues](https://github.com/martin-t/rec-wars/issues/new) and [Pull Requests](https://github.com/martin-t/rec-wars/pulls) are welcome, I will try to look at them as soon as possible.
 
-I want to make RecWars highly configurable with many different gamemodes and balance settings votable by players and anybody will be able to host their own server. RecWars aims to blur the line between a game and a genre-specific game engine. Vehicles, weapons, AI, game modes, etc. will be completely configurable. If you have a gameplay idea and don't suffer from the NIH syndrome, I'd be very happy to help you test it in RecWars.
+I want to make RecWars highly configurable with many different gamemodes and balance settings votable by players and anybody will be able to host their own server. RecWars aims to blur the line between a game and a genre-specific game engine. Vehicles, weapons, AI, game modes, etc. will be completely configurable. If you have a gameplay idea and don't suffer from the NIH syndrome, I'd be very happy to work together and test it in RecWars.
 
 ### Tips (Optional)
 
@@ -97,7 +97,7 @@ Enable fast builds - see [.cargo/config-example.toml](.cargo/config-example.toml
 Architecture Overview
 ---------------------
 
-Most of the code is commented to be understandable to anyone with a basic understanding of how a game works (there's a main loop, gamelogic and rendering run is steps called frames). If it's not clear why a particular piece of code exists or why it needs to be written the way it is, I consider that a bug which should be fixed by either rewriting the code more clearly or adding comments explaining it.
+Most of the code is commented to be understandable by anyone with a basic understanding of how a game works (there's a main loop, gamelogic and rendering run is steps called frames). If it's not clear why a particular piece of code exists or why it needs to be written the way it is, I consider that a bug which should be fixed by either rewriting the code more clearly or adding comments explaining it.
 
 Currently, most game state is managed by generational arenas from the [thunderdome](https://github.com/LPGhatguy/thunderdome) crate to make the code type-safe and readable. Previously, RecWars used the [legion](https://github.com/amethyst/legion) ECS. However it was cumbersome to use and WASM didn't get any benefits from parallelism. The only reason I was using ECS was so I could have references between entities and for this I was paying by having all entities dynamicly typed which lead to bugs. It's a Rust tradition to start writing a game and end up writing a game engine or ECS so I am considering creating an ECS crate that would satisfy my standards of clean API and static typing. For now arenas seem to be close enough.
 
@@ -113,7 +113,7 @@ They use the [cvars](https://crates.io/crates/cvars) crate - an alternative to `
 ### Changing cvars
 
 - Press ";" or "\`" to open the console
-- Type the cvar's name and new value - e.g. `g_bfg_beam_range 250`
+- Type the cvar's name and new value, then enter - e.g. `g_bfg_beam_range 250`
 
 The desktop version also accepts them on the command line. Some cvars like `g_map` or `d_seed` currently only take effect this way because they need to be set before match start.
 
@@ -128,7 +128,7 @@ RecWar by Willem Janssen:
 - archive.org download: https://archive.org/details/recwar_201903
 - archive.org download with extra maps: https://archive.org/details/RecWar
 
-The original RecWar only contains a Windows .exe but runs ok-ish wine (sometimes freezes on map load). It includes a map editor. The binaries in both archive.org links are identical to what I got on an old CD so should be safe.
+The original RecWar only contains a Windows .exe but runs ok-ish under wine on Linux (sometimes freezes on map load). It includes a map editor. The binaries in both archive.org links are identical to what I got on an old CD so should be safe.
 
 ### RecWars vs RecWar differences
 
@@ -167,12 +167,12 @@ Read this to learn from other people's mistakes and save yourself some time.
 - RecWars originally drew to an HTML canvas directly without an engine. It turned out to provide no benefits over just using an engine and the raw canvas version has since been removed. The current version uses macroquad, which takes care of building WASM and talking to the browser. The raw canvas version has, however, taught me a bit about compiling Rust to WASM and the `wasm-pack` tooling:
     - It's possible and advisable to use WASM without NPM. The official [Rust+WASM book](https://rustwasm.github.io/docs/book/) heavily pushes people towards NPM and the whole thing feels like "just download this big template, don't try to understand it and only touch the parts we tell you to". Honestly how do you even statically host the thing on GH/GL pages without `npm run`?. If you're not planning to use other NPM packages, all you need is a few lines of JS glue to run your WASM. Use the [Without a Bundler](https://rustwasm.github.io/docs/wasm-bindgen/examples/without-a-bundler.html) example as your "template" and host it with `python3 -m http.server`. You'll understand exactly what is going on and you'll avoid the whole JS ecosystem.
 - ~~The canvas 2D API is too slow for a game which needs to redraw the entire screen each frame, especially in firefox.~~ ~~UPDATE 2021-02-16: HTML canvas in firefox on linux is too slow. Probably nothing I can do about it until [this bug](https://bugzilla.mozilla.org/show_bug.cgi?id=1010527#c0) is resolved. Quote: "AFAIK Chrome does use it, but they also maintain a long list of driver bug workarounds - too much to handle for the FF team.". In short, again, blame incompetent driver devs - C(++) rockstars like them can't be bothered with stuff like tests, [basic](https://gitlab.freedesktop.org/mesa/mesa/-/commit/69e6eab6533ff48f72223cd21ef640242c52598b) static analysis or sanitizers - they killed [glium](https://users.rust-lang.org/t/glium-post-mortem/7063), they're killing firefox on linux.~~ UPDATE 2023-07-11: Performance in Firefox is now OK. People who don't use readily available tools for checking correctness still shouldn't call themselves engineers.
-- ECS is overhyped. It will make all your game entities dynamicly typed but with much more boilerplate than a dynlang and will predictably lead to bugs. If you don't need to add/remove components at runtime, the only reason you're using it is probably so you can have references between entities - just use generational arenas. Appeal to authority: [rg3d](https://rg3d.rs/) is written by an experienced game engine dev and avoids ECS for much the same reason.
+- ECS is overhyped. It will make all your game entities dynamicly typed but with much more boilerplate than a dynlang and will predictably lead to bugs. If you don't need to add/remove components at runtime, the only reason you're using it is probably so you can have references between entities - just use generational arenas. Appeal to authority: [Fyrox](https://fyrox.rs/) is written by an experienced game engine dev and avoids ECS for much the same reason.
 - Generational arenas will lead to slightly more borrowck errors. ECS either avoided them implicitly by borrowing only parts of the gamestate (runtime borrowchecking) or resolved them explicitly by postponing mutation (e.g. legion's [`CommandBuffer`](https://docs.rs/legion/*/legion/systems/struct.CommandBuffer.html)). With arenas, you have to deal with them explicitly more often:
     - You can't add to / remove from an arena while iterating through it
         - Use specialized methods like `retain` if available
         - Avoid borrowing the whole arena in a loop - instead, collect handles into a vector, iterate through that vector and borrow only for parts of the loop body
-        - Collect entities to add / handles to remove into a vector, add / remove after the loop is done
+        - Collect entities to add or handles to remove into a vector, add / remove them after the loop is done
     - Subfunctions need mutable game state while you're iterating through one of the arenas
         - Be more granular - don't pass them the entire game state, just the arenas it needs
         - Again, collect handles, iterate through them, reborrow each iteration, end borrow before calling subfunctions
