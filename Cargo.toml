@@ -49,8 +49,8 @@ inline_tweak = "1.1.0"
 macroquad = "=0.4.4" # Exact version because of the image crate https://github.com/not-fl3/macroquad/issues/494
 rand_xoshiro = "0.6.0"
 serde = { version = "1.0.196", features = ["derive"] }
-strum = "0.25.0"
-strum_macros = "0.25.3"
+strum = "0.26.1"
+strum_macros = "0.26.1"
 thunderdome = "0.6.1"
 time = { version = "0.3.31", features = ["formatting"] }
 vek = "0.16.1"
