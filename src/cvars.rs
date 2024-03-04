@@ -3,7 +3,6 @@
 use std::num::ParseFloatError;
 
 use cvars::cvars;
-use macroquad::prelude::Color;
 use strum_macros::{Display, EnumString};
 
 use crate::prelude::*;
