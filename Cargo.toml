@@ -72,7 +72,7 @@ version = "0.4.0"
 default-features = false
 
 [dev-dependencies]
-walkdir = "2.4.0"
+walkdir = "2.5.0"
 
 # Note: sometimes it's necessary to run cargo update after patching a dependency.
 [patch.crates-io]
