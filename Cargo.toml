@@ -46,7 +46,7 @@ cvars = "0.4.2"
 cvars-console-macroquad = "0.3.0"
 fnv = "1.0.7"
 inline_tweak = "1.1.1"
-macroquad = "=0.4.4" # Exact version because of the image crate https://github.com/not-fl3/macroquad/issues/494
+macroquad = "=0.4.5" # Exact version because of the image crate https://github.com/not-fl3/macroquad/issues/494
 rand_xoshiro = "0.6.0"
 serde = { version = "1.0.197", features = ["derive"] }
 strum = "0.26.1"
@@ -58,7 +58,7 @@ vek = "0.16.1"
 [dependencies.image]
 # Dependency of macroquad with added "bmp" feature so we can load RecWar's original assets.
 # Must be the same version as macroquad, even if that means it's outdated.
-version = "0.24.8"
+version = "0.24.9"
 default-features = false
 features = ["png", "tga", "bmp"]
 
