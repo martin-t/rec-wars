@@ -208,6 +208,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "image"
+version = "0.25.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a9b4f005360d32e9325029b38ba47ebd7a56f3316df09249368939562d518645"
+dependencies = [
+ "bytemuck",
+ "byteorder",
+ "num-traits",
+ "png",
+]
+
+[[package]]
 name = "inline_tweak"
 version = "1.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -250,7 +262,7 @@ dependencies = [
  "bumpalo",
  "fontdue",
  "glam",
- "image",
+ "image 0.24.9",
  "macroquad_macro",
  "miniquad",
  "quad-rand",
@@ -425,7 +437,7 @@ dependencies = [
  "cvars",
  "cvars-console-macroquad",
  "fnv",
- "image",
+ "image 0.25.0",
  "inline_tweak",
  "macroquad",
  "rand",
