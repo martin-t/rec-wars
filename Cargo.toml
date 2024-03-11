@@ -58,7 +58,7 @@ vek = "0.16.1"
 [dependencies.image]
 # Dependency of macroquad with added "bmp" feature so we can load RecWar's original assets.
 # Must be the same version as macroquad, even if that means it's outdated.
-version = "0.24.9"
+version = "0.25.0"
 default-features = false
 features = ["png", "tga", "bmp"]
 
