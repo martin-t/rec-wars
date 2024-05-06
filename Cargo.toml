@@ -46,19 +46,19 @@ cvars = "0.4.2"
 cvars-console-macroquad = "0.3.0"
 fnv = "1.0.7"
 inline_tweak = "1.1.1"
-macroquad = "=0.4.4" # Exact version because of the image crate https://github.com/not-fl3/macroquad/issues/494
+macroquad = "=0.4.5" # Exact version because of the image crate https://github.com/not-fl3/macroquad/issues/494
 rand_xoshiro = "0.6.0"
-serde = { version = "1.0.196", features = ["derive"] }
+serde = { version = "1.0.200", features = ["derive"] }
 strum = "0.26.1"
 strum_macros = "0.26.1"
 thunderdome = "0.6.1"
-time = { version = "0.3.34", features = ["formatting"] }
+time = { version = "0.3.36", features = ["formatting"] }
 vek = "0.16.1"
 
 [dependencies.image]
 # Dependency of macroquad with added "bmp" feature so we can load RecWar's original assets.
 # Must be the same version as macroquad, even if that means it's outdated.
-version = "0.24.8"
+version = "0.24.9"
 default-features = false
 features = ["png", "tga", "bmp"]
 
@@ -72,7 +72,7 @@ version = "0.4.0"
 default-features = false
 
 [dev-dependencies]
-walkdir = "2.4.0"
+walkdir = "2.5.0"
 
 # Note: sometimes it's necessary to run cargo update after patching a dependency.
 [patch.crates-io]
