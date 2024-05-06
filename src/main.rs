@@ -454,7 +454,7 @@ fn select_map<'a>(cvars: &'a mut Cvars, assets: &'a Assets) -> &'a str {
         // Pick a random map supported by bots.
         let index = cvars.d_seed as usize % assets.bot_map_paths.len();
         let path = &assets.bot_map_paths[index];
-        cvars.g_map = path.clone();
+        cvars.g_map.clone_from(path);
         path
     } else if cvars.g_map.starts_with("maps/") {
         // Load the exact path.
