@@ -53,7 +53,7 @@ strum = "0.26.2"
 strum_macros = "0.26.2"
 thunderdome = "0.6.1"
 time = { version = "0.3.36", features = ["formatting"] }
-vek = "0.16.1"
+vek = "0.17.0"
 
 [dependencies.image]
 # Dependency of macroquad with added "bmp" feature so we can load RecWar's original assets.
