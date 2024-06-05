@@ -50,7 +50,7 @@ macroquad = "=0.4.7" # Exact version because of the image crate https://github.c
 rand_xoshiro = "0.6.0"
 serde = { version = "1.0.203", features = ["derive"] }
 strum = "0.26.2"
-strum_macros = "0.26.2"
+strum_macros = "0.26.4"
 thunderdome = "0.6.1"
 time = { version = "0.3.36", features = ["formatting"] }
 vek = "0.17.0"
