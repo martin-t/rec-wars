@@ -243,9 +243,9 @@ checksum = "4ec2a862134d2a7d32d7983ddcdd1c4923530833c9f2ea1a44fc5fa473989058"
 
 [[package]]
 name = "macroquad"
-version = "0.4.7"
+version = "0.4.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d7007a706b920b69dc57ee73c15370e417cfc5be12abd5f5f3d3adca9571ad97"
+checksum = "a5e38150ee8116e349074252a59db0d85160cb1dbe3b8e3005c59c2e943a4f0f"
 dependencies = [
  "bumpalo",
  "fontdue",
