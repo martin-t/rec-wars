@@ -52,7 +52,7 @@ serde = { version = "1.0.215", features = ["derive"] }
 strum = "0.26.3"
 strum_macros = "0.26.4"
 thunderdome = "0.6.1"
-time = { version = "0.3.36", features = ["formatting"] }
+time = { version = "0.3.37", features = ["formatting"] }
 vek = { version = "0.17.1", default-features = false, features = ["std"] }
 
 [dependencies.image]
