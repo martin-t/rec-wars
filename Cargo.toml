@@ -68,7 +68,7 @@ default-features = false
 features = ["small_rng"]
 
 [dependencies.rand_distr]
-version = "0.4.0"
+version = "0.5.0"
 default-features = false
 
 [dev-dependencies]
